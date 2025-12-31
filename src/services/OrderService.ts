@@ -1,11 +1,15 @@
 import { fetchAllData, fetchDataById, addData, updateData, deleteData } from 'apiConfig'; // Funciones auxiliares para Firestore
-import OrderItem from 'interfaces/OrderItem';
+import {OrderItem} from 'interfaces/OrderItem';
 
 const OrderService = {
     getAll: (searchFields?: string[], searchTerm?: string[]) => new Promise<OrderItem[]>(
         async (resolve, reject) => {
             try {
-                const data = await fetchAllData('Orders', { searchFields, searchTerm });
+                const upperSearchTerm = searchTerm
+                    ?.map(t => t?.trim())
+                    ?.filter(Boolean)
+                    ?.map(t => t!.toUpperCase());
+                const data = await fetchAllData('Orders', { searchFields, searchTerm: upperSearchTerm });
                 resolve(data as OrderItem[]);
             } catch (err) {
                 reject(err);
@@ -22,7 +26,7 @@ const OrderService = {
             }
         }
     ),
-    create: (newOrder: OrderItem) => new Promise<any>(
+    create: (newOrder: Omit<OrderItem, 'id'>) => new Promise<{ id: string }>(
         async (resolve, reject) => {
             try {
                 const data = await addData('Orders', newOrder);

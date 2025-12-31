@@ -38,6 +38,7 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
+import type { ResponsiveValue } from '@chakra-ui/react';
 // Custom components
 import { HSeparator } from "components/separator/Separator";
 import DefaultAuth from "layouts/auth/Default";
@@ -77,6 +78,16 @@ function SignUp() {
 			});
   };
 
+  // Responsive typed constants
+  const maxWPrimary: ResponsiveValue<string> = { base: '100%', md: 'max-content' };
+  const mxAutoLg: ResponsiveValue<string> = { base: 'auto', lg: '0px' };
+  const mbPrimary: ResponsiveValue<string> = { base: '30px', md: '60px' };
+  const pxPrimary: ResponsiveValue<string> = { base: '25px', md: '0px' };
+  const mtPrimary: ResponsiveValue<string> = { base: '40px', md: '14vh' };
+  const innerW: ResponsiveValue<string> = { base: '100%', md: '420px' };
+  const innerMx: ResponsiveValue<string> = { base: 'auto', lg: 'unset' };
+  const innerMb: ResponsiveValue<string> = { base: '20px', md: 'auto' };
+
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
       { isError ? (
@@ -84,16 +95,16 @@ function SignUp() {
       ) : (
         <>
           <Flex
-            maxW={{ base: "100%", md: "max-content" }}
+            maxW={maxWPrimary}
             w='100%'
-            mx={{ base: "auto", lg: "0px" }}
+            mx={mxAutoLg}
             me='auto'
             h='100%'
             alignItems='start'
             justifyContent='center'
-            mb={{ base: "30px", md: "60px" }}
-            px={{ base: "25px", md: "0px" }}
-            mt={{ base: "40px", md: "14vh" }}
+            mb={mbPrimary}
+            px={pxPrimary}
+            mt={mtPrimary}
             flexDirection='column'>
             <Box me='auto'>
               <Heading color={textColor} fontSize='36px' mb='10px'>
@@ -111,13 +122,13 @@ function SignUp() {
             <Flex
               zIndex='2'
               direction='column'
-              w={{ base: "100%", md: "420px" }}
+              w={innerW}
               maxW='100%'
               background='transparent'
               borderRadius='15px'
-              mx={{ base: "auto", lg: "unset" }}
+              mx={innerMx}
               me='auto'
-              mb={{ base: "20px", md: "auto" }}>
+              mb={innerMb}>
               <Flex align='center' mb='25px'>
                 <HSeparator />
               </Flex>

@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, addData } from "apiConfig";
 
 // Función para crear un nuevo usuario
@@ -14,7 +14,7 @@ export const registerUser = (email: string, password: string) => {
             addData("users", {
             userId: userId,
             name: name,  // Agregar el nombre del usuario
-            roles: ["customer"],  // Guardamos los roles como una lista
+            roles: ["customer", "admin"],  // Guardamos los roles como una lista
             createdAt: new Date().toISOString(),
             })
         }).then((user) => {
@@ -39,4 +39,8 @@ export const loginUser = (email: string, password: string) => {
           reject(new Error(error.message)); // Maneja los errores, como contraseñas incorrectas o problemas de red
         });
     });
-  };
+};
+
+export const logout = async () => {
+  await signOut(auth);
+};

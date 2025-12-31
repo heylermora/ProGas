@@ -38,6 +38,7 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
+import type { ResponsiveValue } from '@chakra-ui/react';
 // Custom components
 import { HSeparator } from "components/separator/Separator";
 import DefaultAuth from "layouts/auth/Default";
@@ -67,7 +68,7 @@ function SignIn() {
   const handleSignIn = async () => {
     loginUser(email, password).then((response) => {
         console.log('Ok:', response);
-        history.push('/order/index');
+        history.push('/admin/order/index');
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -76,11 +77,20 @@ function SignIn() {
         }
       });
   };
+  // Responsive typed constants to avoid TS complex union warnings
+  const maxWPrimary: ResponsiveValue<string> = { base: '100%', md: 'max-content' };
+  const mxAutoLg: ResponsiveValue<string> = { base: 'auto', lg: '0px' };
+  const mbPrimary: ResponsiveValue<string> = { base: '30px', md: '60px' };
+  const pxPrimary: ResponsiveValue<string> = { base: '25px', md: '0px' };
+  const mtPrimary: ResponsiveValue<string> = { base: '40px', md: '14vh' };
+  const innerW: ResponsiveValue<string> = { base: '100%', md: '420px' };
+  const innerMx: ResponsiveValue<string> = { base: 'auto', lg: 'unset' };
+  const innerMb: ResponsiveValue<string> = { base: '20px', md: 'auto' };
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
       { isError ? (
         <Flex
-        maxW={{ base: "100%", md: "max-content" }}
+        maxW={maxWPrimary}
         w='40%'
         h='100%'
         justifyContent='center'
@@ -90,16 +100,16 @@ function SignIn() {
       ) : (
         <>
           <Flex
-          maxW={{ base: "100%", md: "max-content" }}
+          maxW={maxWPrimary}
           w='100%'
-          mx={{ base: "auto", lg: "0px" }}
+          mx={mxAutoLg}
           me='auto'
           h='100%'
           alignItems='start'
           justifyContent='center'
-          mb={{ base: "30px", md: "60px" }}
-          px={{ base: "25px", md: "0px" }}
-          mt={{ base: "40px", md: "14vh" }}
+          mb={mbPrimary}
+          px={pxPrimary}
+          mt={mtPrimary}
           flexDirection='column'>
           <Box me='auto'>
             <Heading color={textColor} fontSize='36px' mb='10px'>
@@ -117,24 +127,24 @@ function SignIn() {
           <Flex
             zIndex='2'
             direction='column'
-            w={{ base: "100%", md: "420px" }}
+            w={innerW}
             maxW='100%'
             background='transparent'
             borderRadius='15px'
-            mx={{ base: "auto", lg: "unset" }}
+            mx={innerMx}
             me='auto'
-            mb={{ base: "20px", md: "auto" }}>
+            mb={innerMb}>
             <Flex align='center' mb='25px'>
               <HSeparator />
             </Flex>
             <FormControl>
               <FormLabel
+                htmlFor="email"
                 display='flex'
                 ms='4px'
                 fontSize='sm'
                 fontWeight='500'
-                color={textColor}
-                mb='8px'>
+                color={textColor}>
                 Email<Text color={brandStars}>*</Text>
               </FormLabel>
               <Input
@@ -144,13 +154,16 @@ function SignIn() {
                 ms={{ base: "0px", md: "0px" }}
                 type='email'
                 placeholder='mail@simmmple.com'
-                mb='24px'
+                mb='12px'
                 fontWeight='500'
                 size='lg'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+            </FormControl>
+            <FormControl>
               <FormLabel
+                htmlFor="password"
                 ms='4px'
                 fontSize='sm'
                 fontWeight='500'
@@ -163,7 +176,7 @@ function SignIn() {
                   isRequired={true}
                   fontSize='sm'
                   placeholder='Min. 8 caracteres'
-                  mb='24px'
+                  mb='12px'
                   size='lg'
                   type={show ? "text" : "password"}
                   variant='auth'
@@ -179,7 +192,7 @@ function SignIn() {
                   />
                 </InputRightElement>
               </InputGroup>
-              <Flex justifyContent='space-between' align='center' mb='24px'>
+              <Flex justifyContent='space-between' align='center' mb='12px'>
                 <NavLink to='/auth/forgot-password'>
                   <Text
                     color={textColorBrand}
@@ -205,8 +218,7 @@ function SignIn() {
               flexDirection='column'
               justifyContent='center'
               alignItems='start'
-              maxW='100%'
-              mt='0px'>
+              maxW='100%'>
               <Text color={textColorDetails} fontWeight='400' fontSize='14px'>
                 ¿Aún no está registrado?
                 <NavLink to='/auth/sign-up'>

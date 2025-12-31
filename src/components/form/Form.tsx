@@ -17,20 +17,21 @@ import { formatValue } from 'utils/formatValue';
 import { convertValue } from 'utils/convertValue';
 import FieldInput from './FieldInput';
 
-
 const Form = (props:{
   title: string; 
   button?:string; 
   fields: FormField[];
   isDisabled?: boolean;
   back: string;
-  onSubmit: (fieldValues: {[key: string]: string}) => void;
+  onSubmit: (fieldValues: {[key: string]: any}) => void;
   }) => {
     const { title, button, fields, isDisabled, back } = props;
     const textColor = useColorModeValue('navy.700', 'white');
     const textColorSecondary = 'gray.400';
     const brandStars = useColorModeValue('brand.500', 'brand.400');
-    const [fieldValues, setFieldValues] = useState<{ [key: string]: string }>(
+
+    // ahora any, porque products es un objeto
+    const [fieldValues, setFieldValues] = useState<{ [key: string]: any }>(
       props.fields.reduce((acc, field) => {
         let fieldValue = field.value;
         if (Array.isArray(field.value) && field.value.length > 0) {
@@ -40,7 +41,7 @@ const Form = (props:{
           ...acc,
           [field.name]: fieldValue,
         };
-      }, {} )
+      }, {} as { [key: string]: any })
     );
     
     const [fieldErrors, setFieldErrors] = useState<{ [key: string]: { isError: boolean; message: string } }>(
@@ -52,12 +53,11 @@ const Form = (props:{
             message: '',
           }
         };
-      }, {} )
-      
+      }, {} as { [key: string]: { isError: boolean; message: string } })
     );
 
     useEffect(() => {
-      const propFieldValues: { [key: string]: string } = props.fields.reduce((acc, field) => {
+      const propFieldValues: { [key: string]: any } = props.fields.reduce((acc, field) => {
         let fieldValue = field.value;
         if (Array.isArray(field.value) && field.value.length > 0) {
           fieldValue = field.value[0].toString();
@@ -66,17 +66,17 @@ const Form = (props:{
           ...acc,
           [field.name]: fieldValue,
         };
-      }, {} as { [key: string]: string });
+      }, {} as { [key: string]: any });
 
       setFieldValues(prevFieldValues => {
-        const fieldsToUpdate: { [key: string]: string } = {};
+        const fieldsToUpdate: { [key: string]: any } = {};
         let updateNecessary = false;
 
         props.fields.forEach(field => {
           const propValue = propFieldValues[field.name];
           const currentValue = prevFieldValues[field.name];
 
-          if (field.isDisabled || field.name === 'clientName') {    
+          if (field.isDisabled || field.name === 'clientName') {    
             if (propValue !== currentValue) {
               fieldsToUpdate[field.name] = propValue;
               updateNecessary = true;
@@ -94,7 +94,7 @@ const Form = (props:{
       });
     }, [props.fields]);
 
-    const handleInputChange = async (fieldName: string, value: string, type: string) => {
+    const handleInputChange = async (fieldName: string, value: any, type: string) => {
       const fieldConfig = props.fields.find(field => field.name === fieldName);
 
       if (fieldConfig && fieldConfig.onChange) {
@@ -111,13 +111,13 @@ const Form = (props:{
       }
 
       if (fieldName === 'salary'){
-        const hours = parseFloat(fieldValues['workedHours']);
+        const hours = parseFloat((fieldValues['workedHours'] || '0').replaceAll(',', ''));
         const salary = value.replaceAll(',', '');
 
         const socialChangesFloat = parseFloat((parseFloat(salary) * 1.51).toFixed(2));
         const hourlySalaryFloat = parseFloat((socialChangesFloat / 192).toFixed(2));
         const expenseSalaryFloat = parseFloat((hours * hourlySalaryFloat).toFixed(2));
-        const expenseOvertimeFloat = parseFloat(parseFloat(fieldValues['expenseOvertime'].replaceAll(',', '')).toFixed(2));
+        const expenseOvertimeFloat = parseFloat(parseFloat((fieldValues['expenseOvertime'] || '0').replaceAll(',', '')).toFixed(2));
         const totalFloat = expenseSalaryFloat + expenseOvertimeFloat;
         
         const socialChangesValue = formatValue(socialChangesFloat.toString());
@@ -137,9 +137,9 @@ const Form = (props:{
 
       if (fieldName === 'workedHours'){
         const hours = parseFloat(value.replaceAll(',', ''));
-        const hourlySalary = parseFloat(fieldValues['hourlySalary'].replaceAll(',', ''));
+        const hourlySalary = parseFloat((fieldValues['hourlySalary'] || '0').replaceAll(',', ''));
         const expenseSalaryFloat = parseFloat((hours * hourlySalary).toFixed(2));
-        const expenseOvertimeFloat = parseFloat(parseFloat(fieldValues['expenseOvertime'].replaceAll(',', '')).toFixed(2));
+        const expenseOvertimeFloat = parseFloat(parseFloat((fieldValues['expenseOvertime'] || '0').replaceAll(',', '')).toFixed(2));
         const totalFloat = expenseSalaryFloat + expenseOvertimeFloat;
 
         const expenseSalaryValue = formatValue(expenseSalaryFloat.toString());
@@ -155,10 +155,10 @@ const Form = (props:{
       if (fieldName === 'overtimeHours' || fieldName === 'overtimeSalary'){
         const val1 = parseFloat(value.replaceAll(',', ''));
         const name2 = fieldName ==='overtimeSalary' ? 'overtimeHours' : 'overtimeSalary';
-        const val2 = parseFloat(fieldValues[name2].replaceAll(',', ''));
+        const val2 = parseFloat((fieldValues[name2] || '0').replaceAll(',', ''));
 
         const expenseOvertimeFloat = parseFloat((val1 * val2).toFixed(2));
-        const expenseSalaryFloat = parseFloat(parseFloat(fieldValues['expenseSalary'].replaceAll(',', '')).toFixed(2));
+        const expenseSalaryFloat = parseFloat(parseFloat((fieldValues['expenseSalary'] || '0').replaceAll(',', '')).toFixed(2));
 
         const totalFloat = expenseSalaryFloat + expenseOvertimeFloat;
 
@@ -180,12 +180,14 @@ const Form = (props:{
     };
 
     const validateForm = () => {
-
       let hasErrors = false; 
-      for (const fieldName in fieldValues) {
+
+      // recorrer solo los campos definidos, no todas las keys de fieldValues
+      for (const field of fields) {
+        const fieldName = field.name;
         const value = fieldValues[fieldName];
         validateInput(fieldName, value);
-        if (fieldErrors[fieldName].isError) {
+        if (fieldErrors[fieldName]?.isError) {
           hasErrors = true;
         }
       }  
@@ -195,11 +197,11 @@ const Form = (props:{
     const handleSubmit = () => {
       const isFormValid = validateForm();
       if (isFormValid) {
-        const modifiedFieldValues = { ...fieldValues };
+        const modifiedFieldValues: { [key: string]: any } = { ...fieldValues };
         for (const key in modifiedFieldValues) {
           const field = fields.find((field) => field.name === key);
           if (field) {
-            if (field.type === 'money') {
+            if (field.type === 'money' && typeof modifiedFieldValues[key] === 'string') {
               modifiedFieldValues[key] = modifiedFieldValues[key].replace(/,/g, "");
             }
           }
@@ -209,24 +211,25 @@ const Form = (props:{
     };
 
     const validateInput = (fieldName: string, value: any) => {
-      value = value.trim();
       const fieldConfig = fields.find(field => field.name === fieldName);
-    
       if (!fieldConfig || !fieldConfig.validation) return;
-    
+
+      const stringValue = typeof value === 'string' ? value.trim() : '';
+
       const { validation } = fieldConfig;
       const { required, maxLength, regex } = validation;
+
       const isError =
-        (required && value === '') ||
-        (maxLength && value.length > maxLength) ||
-        (regex && !regex.test(value));
+        (required && stringValue === '') ||
+        (maxLength && stringValue.length > maxLength) ||
+        (regex && !regex.test(stringValue));
     
       const message =
-        (required && value === '') ?
+        (required && stringValue === '') ?
           'El campo es requerido.' :
-          (maxLength && value.length > maxLength) ?
+          (maxLength && stringValue.length > maxLength) ?
             `El campo debe tener como máximo ${maxLength} caracteres.` :
-            (regex && !regex.test(value)) ?
+            (regex && !regex.test(stringValue)) ?
               'El formato no es válido' :
               '';
     
@@ -241,7 +244,7 @@ const Form = (props:{
     };
 
     const renderFields = () => {
-      return fields.map((field, index) => (
+      return fields.map((field) => (
         <FieldInput
           key={field.name}
           field={field}

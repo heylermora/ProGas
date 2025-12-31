@@ -1,5 +1,4 @@
 import { Flex } from '@chakra-ui/react';
-import React from 'react';
 
 const HSeparator = (props: { variant?: string; [x: string]: any }) => {
 	const { variant, ...rest } = props;

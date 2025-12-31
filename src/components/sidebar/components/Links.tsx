@@ -18,7 +18,7 @@ export function SidebarLinks(props: {
 
 	// verifies if routeName is the one active (in browser input)
 	const activeRoute = (routeName: string) => {
-		routeName = routeName.replace('?', '');
+		routeName = routeName.replace(/\/:.*/, "");
 		return location.pathname.includes(routeName);
 	};
 
@@ -31,7 +31,7 @@ export function SidebarLinks(props: {
 				route: RoutesType,
 				index: number
 			) => {
-				if (route.layout === '/order' || route.layout === '/auth' || route.layout === '/dashboard') {
+				if (route.layout === '/admin' || route.layout === '/auth') {
 					return (
 						<NavLink key={index} to={route.layout + route.path}>
 							{route.icon ? (
@@ -70,7 +70,6 @@ export function SidebarLinks(props: {
 			}
 		);
 	};
-	//  BRAND
 	return <>{createLinks(routes)}</>
 }
 

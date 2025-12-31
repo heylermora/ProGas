@@ -23,7 +23,7 @@ export function SearchBar(props: {
 	const history = useHistory();
 
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-		history.push(`/project/index/${event.target.value}`);
+		history.push(`/admin/order/index/${event.target.value}`);
 	};
 
 	return (

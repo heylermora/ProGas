@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "tsc: noEmit",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"tsc",
+				"--noEmit"
+			],
+			"group": "build",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"presentation": {
+				"reveal": "silent"
+			}
+		}
+	]
+}

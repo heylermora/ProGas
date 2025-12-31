@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   FormControl,
   FormLabel,
@@ -12,68 +12,120 @@ import {
 
 import FormField from 'interfaces/FormField';
 import Map from './Map';
+import ItemsFieldControl from './ItemsFieldControl';
 
+type FieldInputProps = {
+  field: FormField;
+  fieldValues: { [key: string]: any };
+  isDisabled?: boolean;
+  handleInputChange: (fieldName: string, value: any, type: string) => void;
+  fieldErrors: { [key: string]: { isError: boolean; message: string } };
+};
 
-const FieldInput = (props: { 
-    field: FormField;
-    fieldValues: {[key: string]: string};
-    isDisabled: boolean;
-    handleInputChange:  (fieldName: string, value: string, type: string) => void;
-    fieldErrors: {[key: string]: { isError: boolean; message: string }};
-}) => {
-    const { field, fieldValues, isDisabled, handleInputChange, fieldErrors} = props;
-    const textColor = useColorModeValue('navy.700', 'white');
-    const brandStars = useColorModeValue('brand.500', 'brand.400');
-    return (
-        <FormControl key={field.name} isDisabled={isDisabled} isInvalid={fieldErrors[field.name].isError}>    
-            <FormLabel
-              display="flex"
-              ms="4px"
-              fontSize="sm"
-              fontWeight="500"
-              color={textColor}
-              mt="16px"
-            >
-              {field.label}
-              <Text color={brandStars}>*</Text>
-            </FormLabel>
-            {field.helper !== undefined && (
-              <FormHelperText ml="4px" mt="0px" pb="12px">{field.helper}</FormHelperText>
+const FieldInput = ({
+  field,
+  fieldValues,
+  isDisabled = false,
+  handleInputChange,
+  fieldErrors,
+}: FieldInputProps) => {
+  const textColor = useColorModeValue('navy.700', 'white');
+  const brandStars = useColorModeValue('brand.500', 'brand.400');
+
+  const errorInfo = fieldErrors[field.name] || { isError: false, message: '' };
+  const isInvalid = errorInfo.isError;
+
+  const handleChange =
+    (type: string) =>
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >
+    ) => {
+      handleInputChange(field.name, e.target.value, type);
+    };
+
+  const renderInput = () => {
+    switch (field.type) {
+      case 'select':
+        return (
+          <Select
+            isRequired
+            variant="auth"
+            fontSize="sm"
+            ms={{ base: '0px', md: '0px' }}
+            size="md"
+            value={fieldValues[field.name] ?? ''}
+            onChange={handleChange(field.type)}
+          >
+            {(Array.isArray(field.value) ? field.value : []).map(
+              (option: any) => (
+                <option key={String(option)} value={option}>
+                  {String(option)}
+                </option>
+              ),
             )}
-            {field.type === 'select' ? (
-              <Select
-                isRequired={true}
-                variant="auth"
-                fontSize="sm"
-                ms={{ base: '0px', md: '0px' }}
-                value={fieldValues[field.name]}
-                onChange={(e) => handleInputChange(field.name, e.target.value, field.type)}
-              >
-                {field.value.map((option: string) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </Select>
-            ) : field.type === 'location' ? (
-                <Map/>
-            ) : (
-              <Input
-                isRequired={true}
-                isDisabled={field.isDisabled || false}
-                variant="auth"
-                fontSize="sm"
-                ms={{ base: '0px', md: '0px' }}
-                type={field.type}
-                fontWeight="500"
-                size="md"
-                value={fieldValues[field.name]}
-                onChange={(e) => handleInputChange(field.name, e.target.value, field.type)}
-              />
-            )}
-            <FormErrorMessage ml="12px">{fieldErrors[field.name].message}</FormErrorMessage>
-        </FormControl>
-    );
+          </Select>
+        );
+
+      case 'location':
+        return <Map
+          value={fieldValues[field.name]}
+          onChange={(value) =>
+            handleInputChange(field.name, value, field.type)
+          }
+        />
+
+      case 'items':
+        return <ItemsFieldControl {...field.value} />;
+
+      default:
+        return (
+          <Input
+            isRequired
+            isDisabled={field.isDisabled ?? false}
+            variant="auth"
+            fontSize="sm"
+            ms={{ base: '0px', md: '0px' }}
+            type={field.type}
+            fontWeight="500"
+            size="md"
+            value={fieldValues[field.name] ?? ''}
+            onChange={handleChange(field.type)}
+          />
+        );
+    }
+  };
+
+  return (
+    <FormControl isDisabled={isDisabled} isInvalid={isInvalid}>
+      <FormLabel
+        display="flex"
+        ms="4px"
+        fontSize="sm"
+        fontWeight="500"
+        color={textColor}
+        mt="16px"
+      >
+        {field.label}
+        <Text as="span" color={brandStars} ml="2px">
+          *
+        </Text>
+      </FormLabel>
+
+      {field.helper !== undefined && (
+        <FormHelperText ml="4px" mt="0px" pb="12px">
+          {field.helper}
+        </FormHelperText>
+      )}
+
+      {renderInput()}
+
+      <FormErrorMessage ml="12px">
+        {errorInfo.message}
+      </FormErrorMessage>
+    </FormControl>
+  );
 };
 
 export default FieldInput;

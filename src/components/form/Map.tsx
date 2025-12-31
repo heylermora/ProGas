@@ -1,104 +1,113 @@
+// Map.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, VStack, Input, FormLabel } from '@chakra-ui/react';
-import mapboxgl, { Map as MapboxMap, Marker as MapboxMarker } from 'mapbox-gl';
+import { Box, VStack, Input, FormLabel, Checkbox } from '@chakra-ui/react';
+import MapService, { mapboxgl, MapboxMap, MapboxMarker } from 'services/MapService';
+import { LngLatTuple } from 'interfaces/ReverseGeocodeItem';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-// ⚠️ Usa tu token desde una env var si es posible
-mapboxgl.accessToken =
-  process.env.NEXT_PUBLIC_MAPBOX_TOKEN ??
-  'pk.eyJ1Ijoiam9oZWxtb3JhIiwiYSI6ImNtNXJ0NjN3ZTAwZ2sybXB1cWwzc2JzeW4ifQ.orciFl97k7aSe8xg-N4Ttw';
+type MapValue = {
+  coords: LngLatTuple | null;
+  address: string;
+  isManualAddress: boolean;
+};
 
-const DEFAULT_LNG_LAT: [number, number] = [-83.753428, 9.748917]; // [lng, lat] Costa Rica
+type MapProps = {
+  value?: MapValue;
+  onChange?: (value: MapValue) => void;
+};
 
-const Map: React.FC = () => {
+const isValidCoords = (coords: any): coords is LngLatTuple => {
+  return (
+    Array.isArray(coords) &&
+    coords.length === 2 &&
+    typeof coords[0] === "number" &&
+    typeof coords[1] === "number" &&
+    coords[0] !== 0 &&
+    coords[1] !== 0
+  );
+};
+
+const Map: React.FC<MapProps> = ({ value, onChange }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  // Guardar instancia del mapa y marcador para evitar re-inicialización (React 18 StrictMode)
   const mapRef = useRef<MapboxMap | null>(null);
   const markerRef = useRef<MapboxMarker | null>(null);
 
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [markerCoords, setMarkerCoords] = useState<[number, number] | null>(null);
+  const [mapCenter, setMapCenter] = useState<LngLatTuple | null>(null);
+  const [markerCoords, setMarkerCoords] = useState<LngLatTuple | null>(
+    isValidCoords(value?.coords) ? value!.coords : null
+  );
+  const [address, setAddress] = useState<string>(value?.address ?? '');
+  const [isManualAddress, setIsManualAddress] = useState<boolean>(value?.isManualAddress ?? false);
 
-  // 1) Obtener ubicación del usuario (una sola vez)
-  useEffect(() => {
-    // Evitar ejecutar en SSR
-    if (typeof window === 'undefined') {
-      setUserLocation(DEFAULT_LNG_LAT);
-      setMarkerCoords(DEFAULT_LNG_LAT);
-      return;
-    }
-
-    const setDefault = () => {
-      setUserLocation(DEFAULT_LNG_LAT);
-      setMarkerCoords(DEFAULT_LNG_LAT);
+  const emitChange = (partial: Partial<MapValue> = {}) => {
+    const next: MapValue = {
+      coords: partial.coords ?? markerCoords ?? null,
+      address: partial.address ?? address ?? '',
+      isManualAddress: partial.isManualAddress ?? isManualAddress ?? false,
     };
+    onChange?.(next);
+  };
 
-    if (!('geolocation' in navigator)) {
-      console.warn('Geolocalización no soportada. Usando ubicación por defecto.');
-      setDefault();
-      return;
-    }
+  // Ubicación inicial
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      const initial = await MapService.getInitialLocation();
+      if (!isMounted) return;
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const lngLat: [number, number] = [longitude, latitude];
-        setUserLocation(lngLat);
-        setMarkerCoords(lngLat);
-      },
-      (error) => {
-        console.error('Error al obtener la ubicación:', error);
-        setDefault();
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 8000,
-        maximumAge: 0,
-      }
-    );
+      const initialCoords =
+        isValidCoords(value?.coords) ? value!.coords : initial.marker ?? initial.center;
+      
+      setMapCenter(initial.center);
+      setMarkerCoords(initialCoords);
+      emitChange({
+          coords: initialCoords,
+          address: value?.address ?? "",
+          isManualAddress: value?.isManualAddress ?? false,
+        });
+      })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // 2) Inicializar mapa cuando tengamos userLocation y el contenedor
+  // Crear mapa + marker
   useEffect(() => {
-    if (!userLocation || !containerRef.current) return;
-    if (mapRef.current) return; // Ya se inicializó (evita doble creación en StrictMode)
+    if (!mapCenter || !containerRef.current) return;
+    if (mapRef.current) return;
 
-    // Opcional: verificar soporte WebGL de Mapbox
     if (!mapboxgl.supported()) {
-      console.error('Mapbox GL no es soportado por este navegador.');
+      console.error('[Map] Mapbox GL no es soportado por este navegador.');
       return;
     }
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: userLocation,
-      zoom: 17,
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      center: mapCenter,
+      zoom: 18,
       attributionControl: true,
     });
     mapRef.current = map;
 
-    // Controles de navegación (zoom/rotación)
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
+    const markerInitial: LngLatTuple = markerCoords ?? mapCenter;
 
-    // Crear marcador arrastrable
     const marker = new mapboxgl.Marker({ draggable: true })
-      .setLngLat(userLocation)
+      .setLngLat(markerInitial)
       .addTo(map);
 
     markerRef.current = marker;
 
     const onDragEnd = () => {
       const pos = marker.getLngLat();
-      const lngLat: [number, number] = [pos.lng, pos.lat];
+      const lngLat: LngLatTuple = [pos.lng, pos.lat];
       setMarkerCoords(lngLat);
-      // console.log(`Lat: ${lngLat[1]}, Lng: ${lngLat[0]}`);
+      emitChange({ coords: lngLat });
     };
 
     marker.on('dragend', onDragEnd);
 
-    // Limpieza al desmontar
     return () => {
       marker.off('dragend', onDragEnd);
       marker.remove();
@@ -106,30 +115,97 @@ const Map: React.FC = () => {
       markerRef.current = null;
       mapRef.current = null;
     };
-  }, [userLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapCenter]);
+
+  // Reverse geocode si NO es manual
+  useEffect(() => {
+    if (!markerCoords) return;
+    if (isManualAddress) return;
+
+    (async () => {
+      const text = await MapService.getAddressFromCoords(markerCoords, {
+        language: 'es',
+        country: 'cr',
+      });
+      setAddress(text);
+      emitChange({ coords: markerCoords, address: text });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markerCoords, isManualAddress]);
+
+  // Si se desactiva manual, refrescar dirección
+  useEffect(() => {
+    if (!isManualAddress && markerCoords) {
+      (async () => {
+        const text = await MapService.getAddressFromCoords(markerCoords, {
+          language: 'es',
+          country: 'cr',
+        });
+        setAddress(text);
+        emitChange({ address: text, coords: markerCoords });
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isManualAddress]);
 
   return (
     <Box height="auto">
       <VStack spacing={4} align="stretch" mb="16px">
-        <Box mt="16px" borderRadius="md" overflow="hidden" boxShadow="sm">
-          <div
-            ref={containerRef}
-            style={{ height: '300px', width: '100%' }}
-            aria-label="Mapa interactivo con marcador arrastrable"
+        {!isManualAddress && (
+          <>
+            <Box mt="16px" borderRadius="md" overflow="hidden" boxShadow="sm">
+              <div
+                ref={containerRef}
+                style={{ height: '200px', width: '100%' }}
+                aria-label="Mapa interactivo con marcador arrastrable"
+              />
+            </Box>
+
+            <Box>
+              <FormLabel>Coordenadas</FormLabel>
+              <Input
+                value={MapService.formatCoordsLabel(markerCoords)}
+                isReadOnly
+                variant="auth"
+              />
+            </Box>
+          </>
+        )}
+
+        <Box>
+          <FormLabel>Dirección</FormLabel>
+          <Input
+            value={
+              address || (!isManualAddress ? 'Obteniendo dirección...' : '')
+            }
+            isReadOnly={!isManualAddress}
+            onChange={
+              isManualAddress
+                ? (e) => {
+                    setAddress(e.target.value);
+                    emitChange({ address: e.target.value });
+                  }
+                : undefined
+            }
+            placeholder={
+              isManualAddress ? 'Digite la dirección manualmente' : ''
+            }
+            variant="auth"
           />
         </Box>
 
         <Box>
-          <FormLabel>Coordenadas</FormLabel>
-          <Input
-            value={
-              markerCoords
-                ? `Lat: ${markerCoords[1].toFixed(6)}, Lng: ${markerCoords[0].toFixed(6)}`
-                : 'Obteniendo coordenadas...'
-            }
-            isReadOnly
-            variant="filled" // evita usar una variante personalizada inexistente ("auth")
-          />
+          <Checkbox
+            isChecked={isManualAddress}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setIsManualAddress(checked);
+              emitChange({ isManualAddress: checked });
+            }}
+          >
+            Ingresar dirección manualmente
+          </Checkbox>
         </Box>
       </VStack>
     </Box>

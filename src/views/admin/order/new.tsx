@@ -316,7 +316,7 @@ const handleAddProduct = () => {
 
   const closeModalAndRedirect = () => {
     setShowModal(false);
-    history.push("/order/index");
+    history.push("/admin/order/index");
   };
 
   if (isError) return <Error />;
@@ -326,7 +326,7 @@ const handleAddProduct = () => {
       <Form
         title="Nuevo Pedido de Gas"
         button="Crear Pedido"
-        back="/order/index"
+        back="/admin/order/index"
         fields={fields}
         onSubmit={handleFormSubmit}
       />
