@@ -1,5 +1,5 @@
 // Map.tsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, VStack, Input, FormLabel, Checkbox } from '@chakra-ui/react';
 import MapService, { mapboxgl, MapboxMap, MapboxMarker } from 'services/MapService';
 import { LngLatTuple } from 'interfaces/ReverseGeocodeItem';
@@ -20,8 +20,8 @@ const isValidCoords = (coords: any): coords is LngLatTuple => {
   return (
     Array.isArray(coords) &&
     coords.length === 2 &&
-    typeof coords[0] === "number" &&
-    typeof coords[1] === "number" &&
+    typeof coords[0] === 'number' &&
+    typeof coords[1] === 'number' &&
     coords[0] !== 0 &&
     coords[1] !== 0
   );
@@ -37,42 +37,81 @@ const Map: React.FC<MapProps> = ({ value, onChange }) => {
     isValidCoords(value?.coords) ? value!.coords : null
   );
   const [address, setAddress] = useState<string>(value?.address ?? '');
-  const [isManualAddress, setIsManualAddress] = useState<boolean>(value?.isManualAddress ?? false);
+  const [isManualAddress, setIsManualAddress] = useState<boolean>(
+    value?.isManualAddress ?? false
+  );
 
-  const emitChange = (partial: Partial<MapValue> = {}) => {
-    const next: MapValue = {
-      coords: partial.coords ?? markerCoords ?? null,
-      address: partial.address ?? address ?? '',
-      isManualAddress: partial.isManualAddress ?? isManualAddress ?? false,
-    };
-    onChange?.(next);
-  };
+  /* ------------------------------------------------------------------ */
+  /* Refs para evitar deps inestables                                    */
+  /* ------------------------------------------------------------------ */
+  const markerCoordsRef = useRef<LngLatTuple | null>(markerCoords);
+  const addressRef = useRef<string>(address);
+  const isManualAddressRef = useRef<boolean>(isManualAddress);
 
-  // Ubicación inicial
+  useEffect(() => {
+    markerCoordsRef.current = markerCoords;
+  }, [markerCoords]);
+
+  useEffect(() => {
+    addressRef.current = address;
+  }, [address]);
+
+  useEffect(() => {
+    isManualAddressRef.current = isManualAddress;
+  }, [isManualAddress]);
+
+  /* ------------------------------------------------------------------ */
+  /* Emit change estable                                                 */
+  /* ------------------------------------------------------------------ */
+  const emitChange = useCallback(
+    (partial: Partial<MapValue> = {}) => {
+      const next: MapValue = {
+        coords: partial.coords ?? markerCoordsRef.current ?? null,
+        address: partial.address ?? addressRef.current ?? '',
+        isManualAddress:
+          partial.isManualAddress ?? isManualAddressRef.current ?? false,
+      };
+      onChange?.(next);
+    },
+    [onChange]
+  );
+
+  /* ------------------------------------------------------------------ */
+  /* Ubicación inicial                                                   */
+  /* ------------------------------------------------------------------ */
+  const valueCoords = value?.coords;
+  const valueAddress = value?.address;
+  const valueIsManual = value?.isManualAddress;
+
   useEffect(() => {
     let isMounted = true;
+
     (async () => {
       const initial = await MapService.getInitialLocation();
       if (!isMounted) return;
 
-      const initialCoords =
-        isValidCoords(value?.coords) ? value!.coords : initial.marker ?? initial.center;
-      
+      const initialCoords = isValidCoords(valueCoords)
+        ? valueCoords
+        : initial.marker ?? initial.center;
+
       setMapCenter(initial.center);
       setMarkerCoords(initialCoords);
+
       emitChange({
-          coords: initialCoords,
-          address: value?.address ?? "",
-          isManualAddress: value?.isManualAddress ?? false,
-        });
-      })();
+        coords: initialCoords,
+        address: valueAddress ?? '',
+        isManualAddress: valueIsManual ?? false,
+      });
+    })();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [emitChange, valueCoords, valueAddress, valueIsManual]);
 
-  // Crear mapa + marker
+  /* ------------------------------------------------------------------ */
+  /* Crear mapa + marcador                                               */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
     if (!mapCenter || !containerRef.current) return;
     if (mapRef.current) return;
@@ -91,7 +130,7 @@ const Map: React.FC<MapProps> = ({ value, onChange }) => {
     });
     mapRef.current = map;
 
-    const markerInitial: LngLatTuple = markerCoords ?? mapCenter;
+    const markerInitial: LngLatTuple = markerCoordsRef.current ?? mapCenter;
 
     const marker = new mapboxgl.Marker({ draggable: true })
       .setLngLat(markerInitial)
@@ -115,10 +154,11 @@ const Map: React.FC<MapProps> = ({ value, onChange }) => {
       markerRef.current = null;
       mapRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapCenter]);
+  }, [mapCenter, emitChange]);
 
-  // Reverse geocode si NO es manual
+  /* ------------------------------------------------------------------ */
+  /* Reverse geocode (automático)                                        */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
     if (!markerCoords) return;
     if (isManualAddress) return;
@@ -131,10 +171,11 @@ const Map: React.FC<MapProps> = ({ value, onChange }) => {
       setAddress(text);
       emitChange({ coords: markerCoords, address: text });
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markerCoords, isManualAddress]);
+  }, [markerCoords, isManualAddress, emitChange]);
 
-  // Si se desactiva manual, refrescar dirección
+  /* ------------------------------------------------------------------ */
+  /* Si se desactiva manual, refrescar dirección                         */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
     if (!isManualAddress && markerCoords) {
       (async () => {
@@ -146,8 +187,7 @@ const Map: React.FC<MapProps> = ({ value, onChange }) => {
         emitChange({ address: text, coords: markerCoords });
       })();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isManualAddress]);
+  }, [isManualAddress, markerCoords, emitChange]);
 
   return (
     <Box height="auto">
@@ -176,21 +216,18 @@ const Map: React.FC<MapProps> = ({ value, onChange }) => {
         <Box>
           <FormLabel>Dirección</FormLabel>
           <Input
-            value={
-              address || (!isManualAddress ? 'Obteniendo dirección...' : '')
-            }
+            value={address || (!isManualAddress ? 'Obteniendo dirección...' : '')}
             isReadOnly={!isManualAddress}
             onChange={
               isManualAddress
                 ? (e) => {
-                    setAddress(e.target.value);
-                    emitChange({ address: e.target.value });
+                    const v = e.target.value;
+                    setAddress(v);
+                    emitChange({ address: v });
                   }
                 : undefined
             }
-            placeholder={
-              isManualAddress ? 'Digite la dirección manualmente' : ''
-            }
+            placeholder={isManualAddress ? 'Digite la dirección manualmente' : ''}
             variant="auth"
           />
         </Box>

@@ -136,17 +136,16 @@ export default function Edit() {
       .finally(() => setIsLoading(false));
   }, [id]);
 
-  // 3) normalizar items viejos: intentar setear productId por match con description
+  // 3) normalizar items viejos: setear productId por match con description
   useEffect(() => {
-    if (!catalog.length || !products.length) return;
+    if (!catalog.length) return;
 
     setProducts((prev) =>
       prev.map((it) => {
         if (it.productId) return it;
 
         const match = catalog.find(
-          (p) =>
-            (p.description ?? "").toUpperCase() === (it.gasType ?? "").toUpperCase()
+          (p) => (p.description ?? "").toUpperCase() === (it.gasType ?? "").toUpperCase()
         );
 
         if (!match) return it;
@@ -159,32 +158,32 @@ export default function Edit() {
         };
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [catalog.length]);
+  }, [catalog]);
 
-  const handleProductFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
+  const handleProductFormChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
 
-    setProductForm((prev) => {
-      if (name === "productId") {
-        const p = catalog.find((x) => x.id === value);
+      setProductForm((prev) => {
+        if (name === "productId") {
+          const p = catalog.find((x) => x.id === value);
+          return {
+            ...prev,
+            productId: value,
+            price: Number(p?.price ?? 0),
+          };
+        }
+
         return {
           ...prev,
-          productId: value,
-          price: Number(p?.price ?? 0),
+          [name]: name === "quantity" || name === "price" ? Number(value) : value,
         };
-      }
+      });
+    },
+    [catalog]
+  );
 
-      return {
-        ...prev,
-        [name]: name === "quantity" || name === "price" ? Number(value) : value,
-      };
-    });
-  };
-
-  const handleAddProduct = () => {
+  const handleAddProduct = useCallback(() => {
     const p = catalog.find((x) => x.id === productForm.productId);
     if (!p) return;
 
@@ -227,104 +226,107 @@ export default function Edit() {
       price: Number(first?.price ?? 0),
       comment: "",
     });
-  };
+  }, [catalog, productForm]);
 
-  const handleRemoveProduct = (item: ProductItem) => {
+  const handleRemoveProduct = useCallback((item: ProductItem) => {
     setProducts((prev) =>
       prev.filter((p) =>
         item.productId ? p.productId !== item.productId : p.gasType !== item.gasType
       )
     );
-  };
+  }, []);
 
-  const renderProductFormFields = (
-    form: typeof productForm,
-    onChange: (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) => void
-  ) => (
-    <Flex gap={3} wrap="wrap">
-      <Box>
-        <Text fontSize="xs" mb={1}>
-          Producto
-        </Text>
-        <Select
-          isRequired
-          variant="auth"
-          fontSize="sm"
-          name="productId"
-          value={form.productId}
-          onChange={onChange}
-          size="md"
-          maxW="260px"
-          isDisabled={isCatalogLoading || catalog.length === 0}
-        >
-          {catalog.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.description}
-            </option>
-          ))}
-        </Select>
-
-        {selectedProduct && (
-          <Text fontSize="xs" color="gray.500" mt={1}>
-            Precio actual: ₡{Number(selectedProduct.price ?? 0)}
+  const renderProductFormFields = useCallback(
+    (
+      form: typeof productForm,
+      onChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+      ) => void
+    ) => (
+      <Flex gap={3} wrap="wrap">
+        <Box>
+          <Text fontSize="xs" mb={1}>
+            Producto
           </Text>
-        )}
-      </Box>
+          <Select
+            isRequired
+            variant="auth"
+            fontSize="sm"
+            name="productId"
+            value={form.productId}
+            onChange={onChange}
+            size="md"
+            maxW="260px"
+            isDisabled={isCatalogLoading || catalog.length === 0}
+          >
+            {catalog.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.description}
+              </option>
+            ))}
+          </Select>
 
-      <Box>
-        <Text fontSize="xs" mb={1}>
-          Cantidad
-        </Text>
-        <Input
-          isRequired
-          variant="auth"
-          fontSize="sm"
-          type="number"
-          size="md"
-          name="quantity"
-          min={1}
-          maxW="80px"
-          value={form.quantity}
-          onChange={onChange}
-        />
-      </Box>
+          {selectedProduct && (
+            <Text fontSize="xs" color="gray.500" mt={1}>
+              Precio actual: ₡{Number(selectedProduct.price ?? 0)}
+            </Text>
+          )}
+        </Box>
 
-      <Box>
-        <Text fontSize="xs" mb={1}>
-          Precio
-        </Text>
-        <Input
-          isRequired
-          variant="auth"
-          fontSize="sm"
-          type="number"
-          size="md"
-          name="price"
-          min={1}
-          maxW="160px"
-          value={form.price}
-          isDisabled
-        />
-      </Box>
+        <Box>
+          <Text fontSize="xs" mb={1}>
+            Cantidad
+          </Text>
+          <Input
+            isRequired
+            variant="auth"
+            fontSize="sm"
+            type="number"
+            size="md"
+            name="quantity"
+            min={1}
+            maxW="80px"
+            value={form.quantity}
+            onChange={onChange}
+          />
+        </Box>
 
-      <Box>
-        <Text fontSize="xs" mb={1}>
-          Comentario
-        </Text>
-        <Input
-          variant="auth"
-          fontSize="sm"
-          type="text"
-          size="md"
-          name="comment"
-          value={form.comment}
-          onChange={onChange}
-          placeholder="Comentario (opcional)"
-        />
-      </Box>
-    </Flex>
+        <Box>
+          <Text fontSize="xs" mb={1}>
+            Precio
+          </Text>
+          <Input
+            isRequired
+            variant="auth"
+            fontSize="sm"
+            type="number"
+            size="md"
+            name="price"
+            min={1}
+            maxW="160px"
+            value={form.price}
+            isDisabled
+          />
+        </Box>
+
+        <Box>
+          <Text fontSize="xs" mb={1}>
+            Comentario
+          </Text>
+          <Input
+            variant="auth"
+            fontSize="sm"
+            type="text"
+            size="md"
+            name="comment"
+            value={form.comment}
+            onChange={onChange}
+            placeholder="Comentario (opcional)"
+          />
+        </Box>
+      </Flex>
+    ),
+    [catalog, isCatalogLoading, selectedProduct]
   );
 
   const fields: FormField[] = useMemo(() => {
@@ -409,6 +411,10 @@ export default function Edit() {
     isCatalogLoading,
     catalog.length,
     handleNationalIdChange,
+    handleAddProduct,
+    handleProductFormChange,
+    handleRemoveProduct,
+    renderProductFormFields,
   ]);
 
   const handleFormSubmit = async (fieldValues: { [key: string]: any }) => {
@@ -424,10 +430,7 @@ export default function Edit() {
       location: fieldValues.location ?? existingOrderData.location,
       comment: fieldValues.comment ?? existingOrderData.comment,
       items: products,
-      totalAmount: products.reduce(
-        (sum, it) => sum + (it.price || 0) * (it.quantity || 0),
-        0
-      ),
+      totalAmount: products.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 0), 0),
     };
 
     OrderService.edit(existingOrderData.id, editedOrder)

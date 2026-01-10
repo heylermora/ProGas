@@ -22,8 +22,6 @@ import Card from 'components/card/Card';
 import Menu from 'components/menu/MainMenu';
 import { formatValue } from 'utils/formatValue';
 import OrderService from 'services/OrderService';
-import { OrderItem } from 'interfaces/OrderItem';
-
 import PaymentModal from 'components/modal/PaymentModal';
 
 type OrderStatus = 'Nuevo' | 'En proceso' | 'Completado';
@@ -57,8 +55,18 @@ function formatCRDate(value?: string | Date | null) {
   return d.toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-export default function ItemCard(props: any /* OrderItem */) {
-  const { id, client, clientId, orderCode, status, requestDate, totalAmount, location, onStatusChange } = props;
+export default function ItemCard(props: any) {
+  const {
+    id,
+    client,
+    clientId,
+    orderCode,
+    status,
+    requestDate,
+    totalAmount,
+    location,
+    onStatusChange,
+  } = props;
 
   const [localStatus, setLocalStatus] = useState<OrderStatus>(() => normalizeStatus(status));
   const [isSavingStatus, setIsSavingStatus] = useState(false);
@@ -85,12 +93,15 @@ export default function ItemCard(props: any /* OrderItem */) {
   const formattedDate = formatCRDate(requestDate);
   const formattedTotal = `₡ ${formatValue(String(totalAmount ?? 0))}`;
 
+  // ✅ FIX ESLINT: no usar location directamente en useMemo
+  const lat = location?.lat;
+  const lng = location?.lng;
+
   const mapsUrl = useMemo(() => {
-    const { lat, lng } = location ?? {};
     return typeof lat === 'number' && typeof lng === 'number'
       ? `https://www.google.com/maps?q=${lat},${lng}`
       : null;
-  }, [location?.lat, location?.lng]);
+  }, [lat, lng]);
 
   const message = useMemo(() => {
     const lines = [
@@ -100,13 +111,14 @@ export default function ItemCard(props: any /* OrderItem */) {
       `👤 Cliente: ${client || '-'}`,
       `🪪 Cédula: ${clientId || '-'}`,
     ];
+
     if (location?.address) lines.push(`📍 Dirección: ${location.address}`);
     if (mapsUrl) lines.push(`🗺️ Google Maps:\n${mapsUrl}`);
+
     lines.push('', `💵 Total a cobrar: ${formattedTotal}`, '', 'Por favor entregar y confirmar 👍');
     return lines.join('\n');
   }, [client, clientId, location?.address, mapsUrl, formattedTotal]);
 
-  // ✅ Guarda status + (opcional) pagos
   const updateOrder = async (next: OrderStatus, paymentPayload?: any) => {
     if (next === localStatus && !paymentPayload) return;
 
@@ -117,10 +129,10 @@ export default function ItemCard(props: any /* OrderItem */) {
     try {
       const { onStatusChange: _cb, ...orderPayload } = props;
 
-      // payments actuales de la orden (si existen)
-      const currentPayments = Array.isArray(orderPayload.payments) ? orderPayload.payments : [];
+      const currentPayments = Array.isArray(orderPayload.payments)
+        ? orderPayload.payments
+        : [];
 
-      // payments del modal
       const newPayments = paymentPayload?.payments ?? [];
 
       const editedOrder: any = {
@@ -161,14 +173,13 @@ export default function ItemCard(props: any /* OrderItem */) {
     updateOrder(next);
   };
 
-  // ✅ ahora recibe payload del modal
   const handlePaymentSaved = async (paymentPayload: any) => {
     onPayClose();
 
     if (pendingStatus) {
       const toApply = pendingStatus;
       setPendingStatus(null);
-      await updateOrder(toApply, paymentPayload); // 👈 guarda pagos en la orden
+      await updateOrder(toApply, paymentPayload);
     }
   };
 
@@ -196,7 +207,14 @@ export default function ItemCard(props: any /* OrderItem */) {
         <Flex direction="column" h="100%" gap={3}>
           <Flex justify="space-between" align="center" gap={3}>
             <Flex align="center" gap={2} minW={0}>
-              <Tag size="sm" borderRadius="full" colorScheme={statusMeta.colorScheme} fontWeight="800" px={2.5} flexShrink={0}>
+              <Tag
+                size="sm"
+                borderRadius="full"
+                colorScheme={statusMeta.colorScheme}
+                fontWeight="800"
+                px={2.5}
+                flexShrink={0}
+              >
                 <Box as="span" mr={1}>{statusMeta.icon}</Box>
                 {localStatus}
               </Tag>
@@ -211,7 +229,13 @@ export default function ItemCard(props: any /* OrderItem */) {
 
           <Box minW={0}>
             <Tooltip label={client} hasArrow>
-              <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight="500" color={textColor} isTruncated lineHeight="1.15">
+              <Text
+                fontSize={{ base: 'md', md: 'xl' }}
+                fontWeight="500"
+                color={textColor}
+                isTruncated
+                lineHeight="1.15"
+              >
                 {client}
               </Text>
             </Tooltip>
@@ -219,28 +243,78 @@ export default function ItemCard(props: any /* OrderItem */) {
 
           <Flex direction="column" gap={2}>
             <Flex wrap="wrap" gap={2} align="center">
-              <Tag size="sm" borderRadius="full" bg={chipBg} borderWidth="1px" borderColor={chipBorder} px={3} py={1} fontWeight="900" color={highlightColor} maxW="180px">
+              <Tag
+                size="sm"
+                borderRadius="full"
+                bg={chipBg}
+                borderWidth="1px"
+                borderColor={chipBorder}
+                px={3}
+                py={1}
+                fontWeight="900"
+                color={highlightColor}
+                maxW="180px"
+              >
                 <Text isTruncated w="100%">{orderCode}</Text>
               </Tag>
 
-              <Tag size="sm" borderRadius="full" bg={chipBg} borderWidth="1px" borderColor={chipBorder} px={3} py={1} fontWeight="800" color={textColor}>
+              <Tag
+                size="sm"
+                borderRadius="full"
+                bg={chipBg}
+                borderWidth="1px"
+                borderColor={chipBorder}
+                px={3}
+                py={1}
+                fontWeight="800"
+                color={textColor}
+              >
                 <Box as="span" color={secondaryText} fontWeight="700">Cédula:</Box>
                 <Box as="span" ml={2}>{clientId || '-'}</Box>
               </Tag>
             </Flex>
 
             {!!location?.address && (
-              <Flex align="flex-start" gap={2} px={3} py={2} bg={chipBg} borderWidth="1px" borderColor={chipBorder} borderRadius="xl" color={secondaryText}>
-                <Text fontSize="xs" noOfLines={2} lineHeight="1.3">📍 {location.address}</Text>
+              <Flex
+                align="flex-start"
+                gap={2}
+                px={3}
+                py={2}
+                bg={chipBg}
+                borderWidth="1px"
+                borderColor={chipBorder}
+                borderRadius="xl"
+                color={secondaryText}
+              >
+                <Text fontSize="xs" noOfLines={2} lineHeight="1.3">
+                  📍 {location.address}
+                </Text>
               </Flex>
             )}
           </Flex>
 
           <Flex align="center" justify="space-between" mt={1}>
-            <Text fontSize="xs" color={secondaryText} fontWeight="700">Total</Text>
+            <Text fontSize="xs" color={secondaryText} fontWeight="700">
+              Total
+            </Text>
 
-            <Box bg={totalBg} borderRadius="full" px={4} py={2} borderWidth="1px" borderColor={chipBorder} maxW="70%">
-              <Text color={totalColor} fontSize={{ base: 'xl', md: '2xl' }} fontWeight="900" lineHeight="1" noOfLines={1} textAlign="right">
+            <Box
+              bg={totalBg}
+              borderRadius="full"
+              px={4}
+              py={2}
+              borderWidth="1px"
+              borderColor={chipBorder}
+              maxW="70%"
+            >
+              <Text
+                color={totalColor}
+                fontSize={{ base: 'xl', md: '2xl' }}
+                fontWeight="900"
+                lineHeight="1"
+                noOfLines={1}
+                textAlign="right"
+              >
                 {formattedTotal}
               </Text>
             </Box>
@@ -288,7 +362,16 @@ export default function ItemCard(props: any /* OrderItem */) {
 
           <Box mt="auto">
             <Link to={`/admin/order/details/${id}`}>
-              <Button variant="darkBrand" w="100%" h="36px" borderRadius="full" px={6} fontSize="sm" fontWeight="900" color="white">
+              <Button
+                variant="darkBrand"
+                w="100%"
+                h="36px"
+                borderRadius="full"
+                px={6}
+                fontSize="sm"
+                fontWeight="900"
+                color="white"
+              >
                 Ver detalles
               </Button>
             </Link>
@@ -302,7 +385,7 @@ export default function ItemCard(props: any /* OrderItem */) {
         totalToPay={totalAmount}
         isOpen={isPayOpen}
         onClose={handlePaymentClose}
-        onSaved={handlePaymentSaved} // 👈 ahora recibe payload
+        onSaved={handlePaymentSaved}
       />
     </>
   );

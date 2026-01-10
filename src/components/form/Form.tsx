@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -30,8 +30,8 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
   const textColorSecondary = 'gray.400';
   const brandStars = useColorModeValue('brand.500', 'brand.400');
 
-  const buildInitialValues = () =>
-    fields.reduce((acc, field) => {
+  const buildInitialValues = useCallback(() => {
+    return fields.reduce((acc, field) => {
       let value = field.value;
       if (Array.isArray(value) && value.length > 0) {
         value = value[0].toString();
@@ -39,12 +39,13 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
       acc[field.name] = value;
       return acc;
     }, {} as { [key: string]: any });
+  }, [fields]);
 
-  const [fieldValues, setFieldValues] = useState(buildInitialValues);
+  const [fieldValues, setFieldValues] = useState<{ [key: string]: any }>(() => buildInitialValues());
 
   const [fieldErrors, setFieldErrors] = useState<
     { [key: string]: { isError: boolean; message: string } }
-  >(
+  >(() =>
     fields.reduce((acc, field) => {
       acc[field.name] = { isError: false, message: '' };
       return acc;
@@ -69,7 +70,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
 
       return shouldUpdate ? { ...prev, ...updates } : prev;
     });
-  }, [fields]);
+  }, [fields, buildInitialValues]);
 
   const validateInput = (fieldName: string, value: any) => {
     const field = fields.find(f => f.name === fieldName);

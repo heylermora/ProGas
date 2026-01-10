@@ -45,7 +45,6 @@ const ItemsFieldControl = <TItem, TForm>({
 }: ItemsFieldControlProps<TItem, TForm>) => {
   const bg = useColorModeValue("white", "navy.800");
   const border = useColorModeValue("gray.200", "whiteAlpha.200");
-  const text = useColorModeValue("navy.700", "white");
   const muted = useColorModeValue("gray.500", "gray.400");
 
   return (
