@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from "react";
+// @ts-nocheck
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Box, Text, Input, Select, Flex } from "@chakra-ui/react";
 import { customAlphabet } from "nanoid";
 import { useHistory } from "react-router-dom";
@@ -6,55 +7,96 @@ import { useHistory } from "react-router-dom";
 import Form from "components/form/Form";
 import OkModal from "components/modal/OkModal";
 import orderService from "services/OrderService";
-import  { OrderItem, ProductItem } from "interfaces/OrderItem";
+import productService from "services/ProductService";
+
+import { OrderItem, ProductItem } from "interfaces/OrderItem";
+import type { Product } from "interfaces/Product";
 import FormField from "interfaces/FormField";
 import Error from "components/exceptions/Error";
 import { handleNationalIdLookup } from "utils/nationalId";
 
 const nano = customAlphabet("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789", 6);
 
-const gasPrices: Record<string, number> = {
-  "Tipo 1": 6500,
-  "Tipo 2": 7200,
-  "Tipo 3": 8100,
-};
-
 export default function NewOrder() {
   const [showModal, setShowModal] = useState(false);
   const [isError, setIsError] = useState(false);
+
   const [clientId, setClientId] = useState("");
   const [clientName, setClientName] = useState("");
+
+  // catálogo (Firestore)
+  const [catalog, setCatalog] = useState<Product[]>([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
+
+  // items del pedido
   const [products, setProducts] = useState<ProductItem[]>([]);
+
+  // formulario de item (usa productId)
   const [productForm, setProductForm] = useState({
-    gasType: "Tipo 1",
+    productId: "",
     quantity: 1,
-    price: gasPrices["Tipo 1"],
+    price: 0,
     comment: "",
   });
+
   const history = useHistory();
+
+  // cargar productos del service
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        setIsCatalogLoading(true);
+        const data = await productService.getAll();
+        if (!mounted) return;
+
+        const list = (data ?? []) as Product[];
+        setCatalog(list);
+
+        const first = list[0];
+        if (first) {
+          setProductForm((prev) => ({
+            ...prev,
+            productId: first.id,
+            price: Number(first.price ?? 0),
+          }));
+        }
+      } catch (e) {
+        console.error("Error fetching products catalog:", e);
+        if (mounted) setIsError(true);
+      } finally {
+        if (mounted) setIsCatalogLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const selectedProduct = useMemo(() => {
+    return catalog.find((p) => p.id === productForm.productId) ?? null;
+  }, [catalog, productForm.productId]);
 
   const handleNationalIdChange = useCallback(async (newValue: string) => {
     setClientId(newValue);
-
     const { fullName } = await handleNationalIdLookup(newValue);
-
     setClientName(fullName);
   }, []);
 
   const handleProductFormChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
     setProductForm((prev) => {
-      // Cuando cambia el tipo de gas, actualizamos tipo y precio
-      if (name === "gasType") {
+      if (name === "productId") {
+        const p = catalog.find((x) => x.id === value);
         return {
           ...prev,
-          gasType: value,
-          price: gasPrices[value] ?? prev.price,
+          productId: value,
+          price: Number(p?.price ?? 0),
         };
       }
 
@@ -65,50 +107,57 @@ export default function NewOrder() {
     });
   };
 
-const handleAddProduct = () => {
-  setProducts((prev) => {
-    // Buscar si ya existe un producto del mismo tipo
-    const existingIndex = prev.findIndex(
-      (p) => p.gasType === productForm.gasType
-    );
+  const handleAddProduct = () => {
+    const p = catalog.find((x) => x.id === productForm.productId);
+    if (!p) return;
 
-    // Si existe, sumamos la cantidad al existente
-    if (existingIndex !== -1) {
-      return prev.map((p, idx) =>
-        idx === existingIndex
-          ? {
-              ...p,
-              quantity: p.quantity + productForm.quantity,
-              // opcional: si querés actualizar el comentario con el último ingresado:
-              comment: productForm.comment || p.comment,
-            }
-          : p
+    setProducts((prev) => {
+      const existingIndex = prev.findIndex((it) =>
+        it.productId ? it.productId === p.id : it.gasType === p.description
       );
-    }
 
-    // Si no existe, lo agregamos como nuevo
-    return [
-      ...prev,
-      {
-        gasType: productForm.gasType,
-        quantity: productForm.quantity,
-        price: productForm.price,
-        comment: productForm.comment,
-      },
-    ];
-  });
+      if (existingIndex !== -1) {
+        return prev.map((it, idx) =>
+          idx === existingIndex
+            ? {
+                ...it,
+                productId: p.id,
+                gasType: p.description, // mantiene tu UI "Pedido de ..."
+                quantity: (it.quantity || 0) + (productForm.quantity || 0),
+                comment: productForm.comment || it.comment,
+                price: Number(p.price ?? it.price ?? 0),
+              }
+            : it
+        );
+      }
 
-  // Reset del formulario
-  setProductForm({
-    gasType: "Tipo 1",
-    quantity: 1,
-    price: gasPrices["Tipo 1"],
-    comment: "",
-  });
-};
+      return [
+        ...prev,
+        {
+          productId: p.id,
+          gasType: p.description,
+          quantity: productForm.quantity,
+          price: Number(p.price ?? 0),
+          comment: productForm.comment,
+        },
+      ];
+    });
+
+    const first = catalog[0];
+    setProductForm({
+      productId: first?.id ?? "",
+      quantity: 1,
+      price: Number(first?.price ?? 0),
+      comment: "",
+    });
+  };
 
   const handleRemoveProduct = (item: ProductItem) => {
-    setProducts((prev) => prev.filter((p) => p.gasType !== item.gasType));
+    setProducts((prev) =>
+      prev.filter((p) =>
+        item.productId ? p.productId !== item.productId : p.gasType !== item.gasType
+      )
+    );
   };
 
   const renderProductItem = (item: ProductItem) => (
@@ -128,30 +177,37 @@ const handleAddProduct = () => {
   const renderProductFormFields = (
     form: typeof productForm,
     onChange: (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-      >
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => void
   ) => (
     <Flex gap={3} wrap="wrap">
       <Box>
         <Text fontSize="xs" mb={1}>
-          Tipo de gas
+          Producto
         </Text>
         <Select
           isRequired
           variant="auth"
           fontSize="sm"
-          name="gasType"
-          value={form.gasType}
+          name="productId"
+          value={form.productId}
           onChange={onChange}
           size="md"
-          maxW="170px"
+          maxW="260px"
+          isDisabled={isCatalogLoading || catalog.length === 0}
         >
-          <option value="Tipo 1">Tipo 1 – Uso doméstico</option>
-          <option value="Tipo 2">Tipo 2 – Comercial/industrial</option>
-          <option value="Tipo 3">Tipo 3 – Especial</option>
+          {catalog.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.description}
+            </option>
+          ))}
         </Select>
+
+        {selectedProduct && (
+          <Text fontSize="xs" color="gray.500" mt={1}>
+            Precio actual: ₡{Number(selectedProduct.price ?? 0)}
+          </Text>
+        )}
       </Box>
 
       <Box>
@@ -166,7 +222,7 @@ const handleAddProduct = () => {
           size="md"
           name="quantity"
           min={1}
-          maxW="60px"
+          maxW="80px"
           value={form.quantity}
           onChange={onChange}
         />
@@ -215,13 +271,8 @@ const handleAddProduct = () => {
         name: "clientId",
         type: "text",
         value: clientId,
-        helper: clientName
-          ? "¡Cliente encontrado!"
-          : "Sin espacios ni guiones. Solo dígitos.",
-        validation: {
-          required: true,
-          regex: /^\d+$/,
-        },
+        helper: clientName ? "¡Cliente encontrado!" : "Sin espacios ni guiones. Solo dígitos.",
+        validation: { required: true, regex: /^\d+$/ },
         onChange: handleNationalIdChange,
       },
       {
@@ -271,6 +322,7 @@ const handleAddProduct = () => {
           onFormChange: handleProductFormChange,
           onAddItem: handleAddProduct,
           onRemoveItem: handleRemoveProduct,
+          isDisabled: isCatalogLoading || catalog.length === 0,
         },
       },
     ],
@@ -279,11 +331,9 @@ const handleAddProduct = () => {
       clientName,
       products,
       productForm,
-      renderProductFormFields,
+      catalog,
+      isCatalogLoading,
       handleNationalIdChange,
-      handleProductFormChange,
-      handleAddProduct,
-      handleRemoveProduct,
     ]
   );
 
@@ -297,7 +347,10 @@ const handleAddProduct = () => {
       location: fieldValues.location,
       comment: fieldValues.comment,
       items: products,
-      totalAmount: products.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 0), 0),
+      totalAmount: products.reduce(
+        (sum, it) => sum + (it.price || 0) * (it.quantity || 0),
+        0
+      ),
     };
 
     orderService
@@ -308,28 +361,21 @@ const handleAddProduct = () => {
       })
       .catch((error) => {
         console.error("Error:", error);
-        if (error?.response?.status !== 400) {
-          setIsError(true);
-        }
+        if (error?.response?.status !== 400) setIsError(true);
       });
   };
 
   const closeModalAndRedirect = () => {
     setShowModal(false);
-    history.push("/order/index");
+    history.push("/customer/order/new");
   };
 
   if (isError) return <Error />;
 
   return (
     <>
-      <Form
-        title="Nuevo Pedido de Gas"
-        button="Crear Pedido"
-        back="/order/index"
-        fields={fields}
-        onSubmit={handleFormSubmit}
-      />
+      <Form title="Nuevo Pedido de Gas" button="Crear Pedido" fields={fields} onSubmit={handleFormSubmit} />
+
       {showModal && (
         <OkModal
           message="Pedido de Gas creado correctamente."

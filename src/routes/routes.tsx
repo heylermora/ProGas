@@ -1,5 +1,5 @@
 import { Icon } from '@chakra-ui/react';
-import { MdHome, MdAssessment } from 'react-icons/md';
+import { MdHome, MdAssessment, MdInventory } from 'react-icons/md';
 
 // Order Imports
 import Orders from 'views/admin/order';
@@ -8,6 +8,11 @@ import NewAdminOrder from 'views/admin/order/new';
 import NewCustomerOrder from 'views/customer/order/new';
 import EditOrder from 'views/admin/order/edit';
 import Balance from 'views/admin/order/balance';
+
+// Product Imports
+import Product from 'views/admin/product';
+import NewProduct from 'views/admin/product/new';
+import EditProduct from 'views/admin/product/edit';
 
 // Dashboard Imports
 import Dashboard from 'views/admin/dashboard';
@@ -51,6 +56,28 @@ const routes: RoutesType[] = [
     path: '/order/balance',
     icon: <Icon as={MdAssessment} width="20px" height="20px" />,
     component: Balance,
+  },
+  // PRODUCTS
+  {
+    name: 'Productos',
+    layout: '/admin',
+    path: '/product/index/:search?',
+    icon: <Icon as={MdInventory} width="20px" height="20px" />,
+    component: Product,
+  },
+  {
+    name: 'Nuevo Producto',
+    layout: '/admin',
+    path: '/product/new',
+    component: NewProduct,
+    secondary: true,
+  },
+  {
+    name: 'Editar Producto',
+    layout: '/admin',
+    path: '/product/edit/:id',
+    component: EditProduct,
+    secondary: true,
   },
   {
     name: 'Nuevo Pedido',

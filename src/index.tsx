@@ -19,6 +19,8 @@ ReactDOM.render(
 						<Switch>
 							<Route path={`/auth`} component={AuthLayout} />
 							<PrivateRoute path={`/admin/order`} component={AdminLayout} />
+							<PrivateRoute path={`/admin/product`} component={AdminLayout} />
+							<Route path={`/customer/order`} component={AdminLayout} />
 							<Redirect from='/' to='/auth' />
 						</Switch>
 					</HashRouter>

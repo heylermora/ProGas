@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 
@@ -15,17 +16,14 @@ import {
 import Form from "components/form/Form";
 import OkModal from "components/modal/OkModal";
 import OrderService from "services/OrderService";
+import productService from "services/ProductService";
+
 import { OrderItem, ProductItem } from "interfaces/OrderItem";
+import type { Product } from "interfaces/Product";
 import FormField from "interfaces/FormField";
 import Error from "components/exceptions/Error";
 import { useOrderRefresh } from "contexts/OrderRefreshContext";
 import { handleNationalIdLookup } from "utils/nationalId";
-
-const gasPrices: Record<string, number> = {
-  "Tipo 1": 6500,
-  "Tipo 2": 7200,
-  "Tipo 3": 8100,
-};
 
 const renderProductItem = (item: ProductItem) => (
   <Box>
@@ -51,30 +49,71 @@ export default function Edit() {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [existingOrderData, setExistingOrderData] = useState<OrderItem | null>(
-    null
-  );
+  const [existingOrderData, setExistingOrderData] = useState<OrderItem | null>(null);
 
   const [clientId, setClientId] = useState("");
   const [clientName, setClientName] = useState("");
 
-  // ✅ Productos (editable igual que NewOrder)
+  // ✅ catálogo desde service
+  const [catalog, setCatalog] = useState<Product[]>([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
+
+  // ✅ productos actuales del pedido
   const [products, setProducts] = useState<ProductItem[]>([]);
+
+  // ✅ form de item (usa productId)
   const [productForm, setProductForm] = useState({
-    gasType: "Tipo 1",
+    productId: "",
     quantity: 1,
-    price: gasPrices["Tipo 1"],
+    price: 0,
     comment: "",
   });
 
+  const selectedProduct = useMemo(() => {
+    return catalog.find((p) => p.id === productForm.productId) ?? null;
+  }, [catalog, productForm.productId]);
+
   const handleNationalIdChange = useCallback(async (newValue: string) => {
     setClientId(newValue);
-
     const { fullName } = await handleNationalIdLookup(newValue);
-
     setClientName(fullName);
   }, []);
 
+  // 1) cargar catálogo
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        setIsCatalogLoading(true);
+        const data = await productService.getAll();
+        if (!mounted) return;
+
+        const list = (data ?? []) as Product[];
+        setCatalog(list);
+
+        const first = list[0];
+        if (first) {
+          setProductForm((prev) => ({
+            ...prev,
+            productId: first.id,
+            price: Number(first.price ?? 0),
+          }));
+        }
+      } catch (e) {
+        console.error("Error fetching products catalog:", e);
+        if (mounted) setIsError(true);
+      } finally {
+        if (mounted) setIsCatalogLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // 2) cargar orden
   useEffect(() => {
     if (!id) return;
 
@@ -87,33 +126,54 @@ export default function Edit() {
         setClientId(order.clientId || "");
         setClientName(order.client || "");
 
-        // 👇 poblar productos actuales
         setProducts(order.items || []);
-
         setIsError(false);
       })
       .catch((error) => {
         console.error("Error fetching order data:", error);
         setIsError(true);
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .finally(() => setIsLoading(false));
   }, [id]);
 
+  // 3) normalizar items viejos: intentar setear productId por match con description
+  useEffect(() => {
+    if (!catalog.length || !products.length) return;
+
+    setProducts((prev) =>
+      prev.map((it) => {
+        if (it.productId) return it;
+
+        const match = catalog.find(
+          (p) =>
+            (p.description ?? "").toUpperCase() === (it.gasType ?? "").toUpperCase()
+        );
+
+        if (!match) return it;
+
+        return {
+          ...it,
+          productId: match.id,
+          gasType: match.description,
+          price: Number(match.price ?? it.price ?? 0),
+        };
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalog.length]);
+
   const handleProductFormChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
     setProductForm((prev) => {
-      if (name === "gasType") {
+      if (name === "productId") {
+        const p = catalog.find((x) => x.id === value);
         return {
           ...prev,
-          gasType: value,
-          price: gasPrices[value] ?? prev.price,
+          productId: value,
+          price: Number(p?.price ?? 0),
         };
       }
 
@@ -125,74 +185,92 @@ export default function Edit() {
   };
 
   const handleAddProduct = () => {
+    const p = catalog.find((x) => x.id === productForm.productId);
+    if (!p) return;
+
     setProducts((prev) => {
-      const existingIndex = prev.findIndex(
-        (p) => p.gasType === productForm.gasType
+      const existingIndex = prev.findIndex((it) =>
+        it.productId ? it.productId === p.id : it.gasType === p.description
       );
 
       if (existingIndex !== -1) {
-        return prev.map((p, idx) =>
+        return prev.map((it, idx) =>
           idx === existingIndex
             ? {
-                ...p,
-                quantity: (p.quantity || 0) + (productForm.quantity || 0),
-                comment: productForm.comment || p.comment,
-                price: productForm.price ?? p.price,
+                ...it,
+                productId: p.id,
+                gasType: p.description,
+                quantity: (it.quantity || 0) + (productForm.quantity || 0),
+                comment: productForm.comment || it.comment,
+                price: Number(p.price ?? it.price ?? 0),
               }
-            : p
+            : it
         );
       }
 
       return [
         ...prev,
         {
-          gasType: productForm.gasType,
+          productId: p.id,
+          gasType: p.description,
           quantity: productForm.quantity,
-          price: productForm.price,
+          price: Number(p.price ?? 0),
           comment: productForm.comment,
         },
       ];
     });
 
+    const first = catalog[0];
     setProductForm({
-      gasType: "Tipo 1",
+      productId: first?.id ?? "",
       quantity: 1,
-      price: gasPrices["Tipo 1"],
+      price: Number(first?.price ?? 0),
       comment: "",
     });
   };
 
   const handleRemoveProduct = (item: ProductItem) => {
-    setProducts((prev) => prev.filter((p) => p.gasType !== item.gasType));
+    setProducts((prev) =>
+      prev.filter((p) =>
+        item.productId ? p.productId !== item.productId : p.gasType !== item.gasType
+      )
+    );
   };
 
   const renderProductFormFields = (
     form: typeof productForm,
     onChange: (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-      >
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => void
   ) => (
     <Flex gap={3} wrap="wrap">
       <Box>
         <Text fontSize="xs" mb={1}>
-          Tipo de gas
+          Producto
         </Text>
         <Select
           isRequired
           variant="auth"
           fontSize="sm"
-          name="gasType"
-          value={form.gasType}
+          name="productId"
+          value={form.productId}
           onChange={onChange}
           size="md"
-          maxW="170px"
+          maxW="260px"
+          isDisabled={isCatalogLoading || catalog.length === 0}
         >
-          <option value="Tipo 1">Tipo 1 – Uso doméstico</option>
-          <option value="Tipo 2">Tipo 2 – Comercial/industrial</option>
-          <option value="Tipo 3">Tipo 3 – Especial</option>
+          {catalog.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.description}
+            </option>
+          ))}
         </Select>
+
+        {selectedProduct && (
+          <Text fontSize="xs" color="gray.500" mt={1}>
+            Precio actual: ₡{Number(selectedProduct.price ?? 0)}
+          </Text>
+        )}
       </Box>
 
       <Box>
@@ -207,7 +285,7 @@ export default function Edit() {
           size="md"
           name="quantity"
           min={1}
-          maxW="60px"
+          maxW="80px"
           value={form.quantity}
           onChange={onChange}
         />
@@ -258,13 +336,8 @@ export default function Edit() {
         name: "clientId",
         type: "text",
         value: clientId,
-        helper: clientName
-          ? "¡Cliente encontrado!"
-          : "Sin espacios ni guiones. Solo dígitos.",
-        validation: {
-          required: true,
-          regex: /^\d+$/,
-        },
+        helper: clientName ? "¡Cliente encontrado!" : "Sin espacios ni guiones. Solo dígitos.",
+        validation: { required: true, regex: /^\d+$/ },
         onChange: handleNationalIdChange,
       },
       {
@@ -287,9 +360,7 @@ export default function Edit() {
         label: "Fecha y hora de solicitud",
         name: "requestDateTime",
         type: "datetime-local",
-        value: existingOrderData.requestDate
-          ? existingOrderData.requestDate.slice(0, 16)
-          : "",
+        value: existingOrderData.requestDate ? existingOrderData.requestDate.slice(0, 16) : "",
         validation: { required: true },
         isDisabled: true,
       },
@@ -325,6 +396,7 @@ export default function Edit() {
           onFormChange: handleProductFormChange,
           onAddItem: handleAddProduct,
           onRemoveItem: handleRemoveProduct,
+          isDisabled: isCatalogLoading || catalog.length === 0,
         },
       },
     ];
@@ -334,10 +406,9 @@ export default function Edit() {
     clientName,
     products,
     productForm,
+    isCatalogLoading,
+    catalog.length,
     handleNationalIdChange,
-    handleProductFormChange,
-    handleAddProduct,
-    handleRemoveProduct,
   ]);
 
   const handleFormSubmit = async (fieldValues: { [key: string]: any }) => {

@@ -32,7 +32,7 @@ export default function Dashboard(props: { [x: string]: any }) {
   };
 
   const getRoutes = (routes: RoutesType[]): JSX.Element[] => {
-    const validLayouts = ['/admin'];
+    const validLayouts = ['/admin', '/customer'];
     return routes.map((route: RoutesType, key: any) => {
       if (validLayouts.includes(route.layout)) {
         return <Route path={route.layout + route.path} component={route.component} key={key} />;
@@ -42,7 +42,7 @@ export default function Dashboard(props: { [x: string]: any }) {
     });
   };
 
-  const shouldShowBox = currentPath.includes('/order/index') ||  currentPath.includes('/order/balance') ||  currentPath.includes('/dashboard/index');
+  const shouldShowBox = currentPath.includes('/order/index') || currentPath.includes('/product/index') || currentPath.includes('/order/balance') ||  currentPath.includes('/dashboard/index');
   const size = currentPath.includes('/expense/index') ? '4xl' : 'lg';
   const adminPadding: ResponsiveValue<string> = { base: '20px', md: '30px' };
 

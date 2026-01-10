@@ -108,9 +108,11 @@ const FieldInput = ({
         mt="16px"
       >
         {field.label}
-        <Text as="span" color={brandStars} ml="2px">
-          *
-        </Text>
+        {field.validation?.required && (
+          <Text as="span" color={brandStars} ml="2px">
+            *
+          </Text>
+        )}
       </FormLabel>
 
       {field.helper !== undefined && (

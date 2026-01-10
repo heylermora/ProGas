@@ -68,7 +68,7 @@ function SignUp() {
   const handleSignUp = async () => {
     registerUser(email, password).then((response) => {
 				console.log('Ok:', response);
-        history.push('/order/index');
+        history.push('/admin/order/index');
 			})
 			.catch((error) => {
 				console.error('Error:', error);
