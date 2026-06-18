@@ -42,7 +42,7 @@ export default function Dashboard(props: { [x: string]: any }) {
     });
   };
 
-  const shouldShowBox = currentPath.includes('/order/index') || currentPath.includes('/product/index') || currentPath.includes('/order/balance') ||  currentPath.includes('/dashboard/index');
+  const shouldShowBox = currentPath.includes('/order/index') || currentPath.includes('/product/index') || currentPath.includes('/sponsor/index') || currentPath.includes('/order/balance') ||  currentPath.includes('/dashboard/index');
   const size = currentPath.includes('/expense/index') ? '4xl' : 'lg';
   const adminPadding: ResponsiveValue<string> = { base: '20px', md: '30px' };
 
