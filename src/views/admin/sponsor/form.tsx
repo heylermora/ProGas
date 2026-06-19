@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { Box, Button, FormControl, FormLabel, Heading, HStack, Input, Select, SimpleGrid, Stack, Switch, Textarea } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Heading, Input, Select, SimpleGrid, Stack, Switch, Textarea } from '@chakra-ui/react';
 import { useHistory, useParams } from 'react-router-dom';
 import SponsorService from 'services/SponsorService';
 import SponsorStrip from 'views/public/SponsorStrip';
@@ -29,9 +29,9 @@ export default function SponsorForm() {
   };
 
   return (
-    <Box pt={{ base: '80px', md: '40px' }}>
-      <Heading mb="20px">{id ? 'Editar' : 'Nuevo'} patrocinador</Heading>
-      <Stack bg="white" p="24px" borderRadius="24px" boxShadow="md" spacing="16px">
+    <Box pt={{ base: '40px', md: '40px' }} px={{ base: '0px', md: '0px' }}>
+      <Heading mb="20px" fontSize={{ base: '28px', md: '36px' }}>{id ? 'Editar' : 'Nuevo'} patrocinador</Heading>
+      <Stack bg="white" p={{ base: '16px', md: '24px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" spacing="16px" overflow="hidden">
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
           <FormControl isRequired><FormLabel>Nombre</FormLabel><Input value={sponsor.name} onChange={(e) => set('name', e.target.value)} /></FormControl>
           <FormControl><FormLabel>Tipo</FormLabel><Select value={sponsor.type} onChange={(e) => set('type', e.target.value)}><option>VIP</option><option>Premium</option><option>General</option></Select></FormControl>
@@ -44,7 +44,7 @@ export default function SponsorForm() {
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
           {sponsor.links.map((link, i) => <FormControl key={i} isDisabled={sponsor.type === 'General' && i > 0}><FormLabel>Link {i + 1}</FormLabel><Input value={link} onChange={(e) => set('links', sponsor.links.map((l, idx) => idx === i ? e.target.value : l))} /></FormControl>)}
         </SimpleGrid>
-        <HStack><Button colorScheme="brand" onClick={save}>Guardar</Button><Button variant="outline" onClick={() => history.push('/admin/sponsor/index')}>Cancelar</Button></HStack>
+        <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px"><Button colorScheme="brand" onClick={save} w={{ base: '100%', sm: 'auto' }}>Guardar</Button><Button variant="outline" onClick={() => history.push('/admin/sponsor/index')} w={{ base: '100%', sm: 'auto' }}>Cancelar</Button></Stack>
       </Stack>
       <Box mt="32px"><SponsorStrip type={sponsor.type} max={sponsor.type === 'VIP' ? 4 : sponsor.type === 'Premium' ? 8 : 12} title="Previsualización pública" /></Box>
     </Box>
