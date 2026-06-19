@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
+import ClientService from 'services/ClientService';
 import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import { getCustomerDraft, saveCustomerDraft } from './customerDraft';
@@ -64,19 +65,36 @@ export default function CustomerInfo() {
   const neighborhoods = locationOptions[form.province]?.[form.canton]?.[form.district] || [];
   const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  const saveAndContinue = () => {
+  const saveAndContinue = async () => {
+    const address = {
+      province: form.province,
+      canton: form.canton,
+      district: form.district,
+      neighborhood: form.neighborhood,
+      details: form.details,
+      coordinates: form.coordinates,
+      locationUrl: form.locationUrl,
+    };
+
+    let clientRecordId = draft.clientRecordId;
+    if (!draft.isExistingClient && draft.nationalId) {
+      const created = await ClientService.create({
+        nationalId: draft.nationalId,
+        phone: draft.phone || '',
+        name: form.name,
+        nickname: form.nickname,
+        active: true,
+        address,
+      });
+      clientRecordId = created.id;
+    }
+
     saveCustomerDraft({
+      clientRecordId,
+      isExistingClient: true,
       name: form.name,
       nickname: form.nickname,
-      address: {
-        province: form.province,
-        canton: form.canton,
-        district: form.district,
-        neighborhood: form.neighborhood,
-        details: form.details,
-        coordinates: form.coordinates,
-        locationUrl: form.locationUrl,
-      },
+      address,
     });
     history.push('/customer/products');
   };

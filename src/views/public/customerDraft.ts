@@ -11,6 +11,8 @@ export type CustomerDraftAddress = {
 export type CustomerDraft = {
   nationalId?: string;
   phone?: string;
+  clientRecordId?: string;
+  isExistingClient?: boolean;
   name?: string;
   nickname?: string;
   address?: CustomerDraftAddress;

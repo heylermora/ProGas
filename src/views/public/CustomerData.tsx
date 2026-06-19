@@ -4,9 +4,13 @@ import { Alert, AlertIcon } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
 import Form from 'components/form/Form';
 import type FormField from 'interfaces/FormField';
+import ClientService from 'services/ClientService';
+import { fetchClientNameByCedula } from 'services/CedulaService';
 import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import { saveCustomerDraft } from './customerDraft';
+
+const onlyDigits = (value: string) => String(value || '').replace(/\D/g, '');
 
 export default function CustomerData() {
   const history = useHistory();
@@ -20,21 +24,55 @@ export default function CustomerData() {
     []
   );
 
-  const handleSubmit = (values: { [key: string]: any }) => {
-    const phoneDigits = String(values.phone || '').replace(/\D/g, '');
+  const handleSubmit = async (values: { [key: string]: any }) => {
+    const nationalId = onlyDigits(values.nationalId);
+    const phoneDigits = onlyDigits(values.phone);
+
     if (phoneDigits.length < 8) {
       setMessage('El número de teléfono no es válido. Debe tener al menos 8 dígitos.');
       return;
     }
 
-    saveCustomerDraft({ nationalId: values.nationalId, phone: values.phone });
-    history.push('/customer/info');
+    try {
+      const existingClient = await ClientService.getByNationalId(nationalId);
+
+      if (existingClient) {
+        const savedPhone = onlyDigits(existingClient.phone || existingClient.telefono);
+        if (savedPhone && savedPhone !== phoneDigits) {
+          setMessage('El teléfono no coincide con el registrado para esta cédula.');
+          return;
+        }
+
+        saveCustomerDraft({
+          nationalId,
+          phone: existingClient.phone || existingClient.telefono || values.phone,
+          clientRecordId: existingClient.id,
+          isExistingClient: true,
+          name: existingClient.name,
+          nickname: existingClient.nickname,
+          address: existingClient.address,
+        });
+        history.push('/customer/info');
+        return;
+      }
+
+      const apiName = await fetchClientNameByCedula(nationalId);
+      saveCustomerDraft({
+        nationalId,
+        phone: values.phone,
+        isExistingClient: false,
+        name: apiName || '',
+      });
+      history.push('/customer/info');
+    } catch (error) {
+      setMessage('No se pudo verificar el cliente. Intente nuevamente.');
+    }
   };
 
   return (
     <PublicPage
       title="Verificación del cliente"
-      description="Primero solicitamos únicamente cédula y teléfono para validar si el cliente existe, si debe crearse o si el número no es válido."
+      description="Primero consultamos nuestros registros por cédula. Solo si el cliente no existe usamos la API externa para sugerir el nombre."
       maxW="900px"
     >
       <PublicCard>
