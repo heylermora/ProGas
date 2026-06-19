@@ -13,6 +13,7 @@ import CustomerData from './views/public/CustomerData';
 import CustomerInfo from './views/public/CustomerInfo';
 import PublicProducts from './views/public/Products';
 import ViewOrder from './views/public/ViewOrder';
+import SponsorshipPackages from './views/public/SponsorshipPackages';
 import { AuthProvider } from './contexts/AuthContext';
 
 ReactDOM.render(
@@ -27,6 +28,7 @@ ReactDOM.render(
 							<Route path={`/customer/info`} component={CustomerInfo} />
 							<Route path={`/customer/products`} component={PublicProducts} />
 							<Route path={`/customer/view-order`} component={ViewOrder} />
+							<Route path={`/sponsors/packages`} component={SponsorshipPackages} />
 							<Route path={`/auth`} component={AuthLayout} />
 							<PrivateRoute path={`/admin/order`} component={AdminLayout} />
 							<PrivateRoute path={`/admin/product`} component={AdminLayout} />

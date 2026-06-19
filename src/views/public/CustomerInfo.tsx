@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
-import { Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
 import Map from 'components/form/Map';
 import ClientService from 'services/ClientService';
@@ -123,6 +123,8 @@ export default function CustomerInfo() {
 
   return (
     <PublicPage title="Información del cliente" description="Complete la información del cliente y su dirección. De momento se limita a Acosta y cantones vecinos." maxW="1000px">
+      <SponsorStrip type="Premium" max={4} title="Patrocinadores Premium" />
+      <Box h={{ base: '20px', md: '28px' }} />
       <PublicCard>
         <Stack spacing="16px">
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
@@ -140,7 +142,7 @@ export default function CustomerInfo() {
           <Button colorScheme="brand" onClick={saveAndContinue}>Continuar al pedido</Button>
         </Stack>
       </PublicCard>
-      <SponsorStrip type="Premium" max={8} title="Patrocinadores Premium" />
+      <SponsorStrip type="Premium" max={4} offset={4} title="Más patrocinadores Premium" />
     </PublicPage>
   );
 }

@@ -117,6 +117,8 @@ export default function Products() {
 
   return (
     <PublicPage title="Productos y pedido" description="Confirme productos, pago y ubicación. La dirección viene por defecto desde el cliente, pero puede ajustarse para este pedido.">
+      <SponsorStrip type="General" max={4} title="Patrocinadores General" />
+      <Box h={{ base: '20px', md: '28px' }} />
       <PublicCard>
         <Stack spacing="16px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
@@ -141,7 +143,7 @@ export default function Products() {
           <Button colorScheme="brand" onClick={submitOrder}>Confirmar pedido</Button>
         </Stack>
       </PublicCard>
-      <SponsorStrip type="General" max={12} title="Patrocinadores General" />
+      <SponsorStrip type="General" max={8} offset={4} title="Más patrocinadores General" />
       {showModal && <OkModal message="Pedido creado correctamente." isOpen={showModal} onClose={() => setShowModal(false)} />}
     </PublicPage>
   );

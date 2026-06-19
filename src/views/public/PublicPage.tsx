@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Container, Stack, Text, Heading, useColorModeValue } from '@chakra-ui/react';
 import Card from 'components/card/Card';
+import PublicFooter from './PublicFooter';
 
 type PublicPageProps = {
   title?: string;
@@ -22,6 +23,7 @@ export function PublicPage({ title, description, maxW = '1200px', children }: Pu
           </Stack>
         )}
         {children}
+        <PublicFooter />
       </Container>
     </Box>
   );

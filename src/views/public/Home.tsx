@@ -8,7 +8,8 @@ import { PublicPage } from './PublicPage';
 export default function Home() {
   return (
     <PublicPage maxW="1200px">
-      <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} mb={{ base: '28px', md: '40px' }}>
+      <SponsorStrip type="VIP" max={2} title="Patrocinadores VIP" />
+      <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '28px', md: '40px' }}>
         <Stack spacing={{ base: '10px', md: '12px' }} maxW={{ base: '100%', lg: '680px' }}>
           <Text color="brand.500" fontWeight="900" letterSpacing="wide">GAS MEMO</Text>
           <Heading fontSize={{ base: '34px', md: '48px', xl: '56px' }} lineHeight="1.05">Gas rápido, pedidos simples y patrocinadores locales.</Heading>
@@ -29,7 +30,7 @@ export default function Home() {
         <Link color="brand.500" href="https://instagram.com" isExternal>Instagram</Link>
         <Link color="brand.500" href="https://wa.me/50600000000" isExternal>WhatsApp</Link>
       </HStack>
-      <SponsorStrip type="VIP" max={4} title="Patrocinadores VIP" />
+      <SponsorStrip type="VIP" max={2} offset={2} title="Más patrocinadores VIP" />
     </PublicPage>
   );
 }

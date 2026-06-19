@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
-import { Alert, AlertIcon } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
 import Form from 'components/form/Form';
 import type FormField from 'interfaces/FormField';
@@ -75,11 +75,13 @@ export default function CustomerData() {
       description="Primero consultamos nuestros registros por cédula. Solo si el cliente no existe usamos la API externa para sugerir el nombre."
       maxW="900px"
     >
+      <SponsorStrip type="Premium" max={4} title="Patrocinadores Premium" />
+      <Box h={{ base: '20px', md: '28px' }} />
       <PublicCard>
         {message && <Alert status="warning" mb="18px" borderRadius="12px"><AlertIcon />{message}</Alert>}
         <Form title="Datos de verificación" button="Verificar y continuar" fields={fields} onSubmit={handleSubmit} />
       </PublicCard>
-      <SponsorStrip type="Premium" max={8} title="Patrocinadores Premium" />
+      <SponsorStrip type="Premium" max={4} offset={4} title="Más patrocinadores Premium" />
     </PublicPage>
   );
 }

@@ -9,7 +9,7 @@ const fallbackSponsors = {
   General: [1, 2, 3, 4].map((n) => ({ id: `general-${n}`, name: `General ${n}`, type: 'General', active: true, order: n, logoUrl: '', links: [], description: 'Espacio disponible' })),
 };
 
-export default function SponsorStrip({ type, max, title }) {
+export default function SponsorStrip({ type, max, title, offset = 0 }) {
   const [sponsors, setSponsors] = useState([]);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.400');
@@ -26,7 +26,7 @@ export default function SponsorStrip({ type, max, title }) {
     <Box w="100%">
       <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="800" mb={{ base: '14px', md: '18px' }}>{title}</Text>
       <SimpleGrid columns={columns} spacing={{ base: '12px', md: '16px' }}>
-        {sponsors.slice(0, max).map((sponsor) => (
+        {sponsors.slice(offset, offset + max).map((sponsor) => (
           <Box key={sponsor.id} bg={cardBg} p={{ base: '14px', md: '18px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" border="1px solid" borderColor={borderColor} minW="0">
             <Stack spacing="12px" h="100%">
               <Badge w="fit-content" colorScheme={type === 'VIP' ? 'yellow' : type === 'Premium' ? 'purple' : 'green'}>{type}</Badge>

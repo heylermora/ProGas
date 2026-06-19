@@ -31,6 +31,7 @@ import CustomerData from 'views/public/CustomerData';
 import CustomerInfo from 'views/public/CustomerInfo';
 import PublicProducts from 'views/public/Products';
 import ViewOrder from 'views/public/ViewOrder';
+import SponsorshipPackages from 'views/public/SponsorshipPackages';
 
 const routes: RoutesType[] = [
   {
@@ -66,6 +67,15 @@ const routes: RoutesType[] = [
     layout: '/customer',
     path: '/view-order',
     component: ViewOrder,
+    secondary: true,
+  },
+
+
+  {
+    name: 'Paquetes de patrocinadores',
+    layout: '/sponsors',
+    path: '/packages',
+    component: SponsorshipPackages,
     secondary: true,
   },
 
