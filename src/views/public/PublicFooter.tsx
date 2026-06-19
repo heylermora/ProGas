@@ -1,5 +1,4 @@
-import React from 'react';
-import { Box, Button, Flex, HStack, Link, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Button, Flex, HStack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 
 export default function PublicFooter() {
