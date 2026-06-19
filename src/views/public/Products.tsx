@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, AlertIcon, Box, Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import { customAlphabet } from 'nanoid';
+import Map from 'components/form/Map';
 import OkModal from 'components/modal/OkModal';
 import orderService from 'services/OrderService';
 import productService from 'services/ProductService';
@@ -12,6 +13,13 @@ import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDr
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 6);
 
+const parseCoordinates = (value?: string) => {
+  const [lat, lng] = String(value || '').split(',').map((part) => Number(part.trim()));
+  return Number.isFinite(lat) && Number.isFinite(lng) ? [lng, lat] : null;
+};
+
+const coordsToText = (coords?: number[] | null) => Array.isArray(coords) ? `${coords[1]},${coords[0]}` : '';
+
 export default function Products() {
   const draft = getCustomerDraft();
   const defaultAddress = addressToText(draft.address);
@@ -19,6 +27,11 @@ export default function Products() {
   const [items, setItems] = useState<ProductItem[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState('');
+  const [locationMap, setLocationMap] = useState({
+    coords: parseCoordinates(draft.address?.coordinates),
+    address: defaultAddress,
+    isManualAddress: false,
+  });
   const [orderForm, setOrderForm] = useState({
     productId: '',
     quantity: 1,
@@ -41,6 +54,15 @@ export default function Products() {
 
   const selectedProduct = useMemo(() => catalog.find((product) => product.id === orderForm.productId), [catalog, orderForm.productId]);
   const set = (key, value) => setOrderForm((prev) => ({ ...prev, [key]: value }));
+  const handleMapChange = (nextLocation) => {
+    const coordinates = coordsToText(nextLocation.coords);
+    setLocationMap(nextLocation);
+    setOrderForm((prev) => ({
+      ...prev,
+      address: nextLocation.address || prev.address,
+      coordinates: coordinates || prev.coordinates,
+    }));
+  };
 
   const addItem = () => {
     if (!selectedProduct) return;
@@ -107,10 +129,11 @@ export default function Products() {
           <Stack spacing="8px">
             {items.map((item, index) => <Box key={`${item.productId}-${index}`} p="12px" borderWidth="1px" borderRadius="12px"><Text fontWeight="700">{item.gasType}</Text><Text fontSize="sm">Cantidad: {item.quantity} • ₡{item.price}</Text></Box>)}
           </Stack>
+          <FormControl isRequired><FormLabel>Ubicación con mapa</FormLabel><Map value={locationMap} onChange={handleMapChange} /></FormControl>
           <FormControl isRequired><FormLabel>Dirección del pedido</FormLabel><Textarea value={orderForm.address} onChange={(e) => set('address', e.target.value)} /></FormControl>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormControl><FormLabel>Coordenadas exactas</FormLabel><Input value={orderForm.coordinates} onChange={(e) => set('coordinates', e.target.value)} placeholder="Ej. 9.8000,-84.1600" /></FormControl>
-            <FormControl><FormLabel>Link de ubicación (plan B)</FormLabel><Input value={orderForm.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /></FormControl>
+            <FormControl><FormLabel>Link de ubicación (plan B si el mapa falla)</FormLabel><Input value={orderForm.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /></FormControl>
             <FormControl><FormLabel>Transporte</FormLabel><Input value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Si aplica" /></FormControl>
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option>Efectivo</option><option>SINPE</option><option>Otro</option></Select></FormControl>
           </SimpleGrid>

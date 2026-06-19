@@ -2,10 +2,18 @@
 import React, { useMemo, useState } from 'react';
 import { Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
+import Map from 'components/form/Map';
 import ClientService from 'services/ClientService';
 import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import { getCustomerDraft, saveCustomerDraft } from './customerDraft';
+
+const parseCoordinates = (value?: string) => {
+  const [lat, lng] = String(value || '').split(',').map((part) => Number(part.trim()));
+  return Number.isFinite(lat) && Number.isFinite(lng) ? [lng, lat] : null;
+};
+
+const coordsToText = (coords?: number[] | null) => Array.isArray(coords) ? `${coords[1]},${coords[0]}` : '';
 
 const locationOptions = {
   'San José': {
@@ -48,6 +56,11 @@ const locationOptions = {
 export default function CustomerInfo() {
   const history = useHistory();
   const draft = getCustomerDraft();
+  const [locationMap, setLocationMap] = useState({
+    coords: parseCoordinates(draft.address?.coordinates),
+    address: draft.address?.details || '',
+    isManualAddress: false,
+  });
   const [form, setForm] = useState({
     name: draft.name || '',
     nickname: draft.nickname || '',
@@ -64,6 +77,15 @@ export default function CustomerInfo() {
   const districts = useMemo(() => Object.keys(locationOptions[form.province]?.[form.canton] || {}), [form.province, form.canton]);
   const neighborhoods = locationOptions[form.province]?.[form.canton]?.[form.district] || [];
   const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const handleMapChange = (nextLocation) => {
+    const coordinates = coordsToText(nextLocation.coords);
+    setLocationMap(nextLocation);
+    setForm((prev) => ({
+      ...prev,
+      coordinates: coordinates || prev.coordinates,
+      details: nextLocation.address || prev.details,
+    }));
+  };
 
   const saveAndContinue = async () => {
     const address = {
@@ -111,8 +133,9 @@ export default function CustomerInfo() {
             <FormControl isRequired><FormLabel>Distrito</FormLabel><Select value={form.district} onChange={(e) => { const nextDistrict = e.target.value; setForm((prev) => ({ ...prev, district: nextDistrict, neighborhood: (locationOptions[form.province]?.[form.canton]?.[nextDistrict] || [''])[0] })); }}>{districts.map((district) => <option key={district}>{district}</option>)}</Select></FormControl>
             <FormControl isRequired><FormLabel>Barrio</FormLabel><Select value={form.neighborhood} onChange={(e) => set('neighborhood', e.target.value)}>{neighborhoods.map((neighborhood) => <option key={neighborhood}>{neighborhood}</option>)}</Select></FormControl>
             <FormControl><FormLabel>Coordenadas</FormLabel><Input value={form.coordinates} onChange={(e) => set('coordinates', e.target.value)} placeholder="Ej. 9.8000,-84.1600" /></FormControl>
-            <FormControl><FormLabel>Link de ubicación (plan B)</FormLabel><Input value={form.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /></FormControl>
+            <FormControl><FormLabel>Link de ubicación (plan B si el mapa falla)</FormLabel><Input value={form.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /></FormControl>
           </SimpleGrid>
+          <FormControl><FormLabel>Mapa para coordenadas</FormLabel><Map value={locationMap} onChange={handleMapChange} /></FormControl>
           <FormControl isRequired><FormLabel>Otras señas</FormLabel><Input value={form.details} onChange={(e) => set('details', e.target.value)} /></FormControl>
           <Button colorScheme="brand" onClick={saveAndContinue}>Continuar al pedido</Button>
         </Stack>
