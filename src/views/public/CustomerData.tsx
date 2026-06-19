@@ -26,7 +26,7 @@ export default function CustomerData() {
       maxW="1100px"
     >
       <PublicCard>
-        <Form title="Validar cliente" button="Continuar a productos" fields={fields} onSubmit={() => history.push('/cliente/productos')} />
+        <Form title="Validar cliente" button="Continuar a productos" fields={fields} onSubmit={() => history.push('/customer/products')} />
       </PublicCard>
       <SponsorStrip type="Premium" max={8} title="Patrocinadores Premium" />
     </PublicPage>

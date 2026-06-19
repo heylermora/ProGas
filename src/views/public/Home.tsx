@@ -14,8 +14,8 @@ export default function Home() {
           <Heading fontSize={{ base: '34px', md: '48px', xl: '56px' }} lineHeight="1.05">Gas rápido, pedidos simples y patrocinadores locales.</Heading>
           <Text color={useColorModeValue('gray.600', 'gray.300')} fontSize={{ base: 'md', md: 'lg' }}>Solicite gas sin crear usuario y apoye negocios aliados de la zona.</Text>
           <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px" pt="12px" w={{ base: '100%', sm: 'auto' }}>
-            <Button as={RLink} to="/cliente/datos" colorScheme="brand" size="lg" w={{ base: '100%', sm: 'auto' }}>Hacer pedido</Button>
-            <Button as={RLink} to="/cliente/ver-pedido" variant="outline" size="lg" w={{ base: '100%', sm: 'auto' }}>Ver pedido</Button>
+            <Button as={RLink} to="/customer/data" colorScheme="brand" size="lg" w={{ base: '100%', sm: 'auto' }}>Hacer pedido</Button>
+            <Button as={RLink} to="/customer/view-order" variant="outline" size="lg" w={{ base: '100%', sm: 'auto' }}>Ver pedido</Button>
           </Stack>
         </Stack>
         <Box bg="brand.500" color="white" borderRadius={{ base: '22px', md: '32px' }} p={{ base: '24px', md: '34px' }} minW={{ base: '100%', lg: '320px' }} textAlign="center" boxShadow="xl">

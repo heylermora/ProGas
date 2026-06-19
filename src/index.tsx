@@ -22,9 +22,9 @@ ReactDOM.render(
 					<HashRouter>
 						<Switch>
 							<Route exact path={`/`} component={Home} />
-							<Route path={`/cliente/datos`} component={CustomerData} />
-							<Route path={`/cliente/productos`} component={PublicProducts} />
-							<Route path={`/cliente/ver-pedido`} component={ViewOrder} />
+							<Route path={`/customer/data`} component={CustomerData} />
+							<Route path={`/customer/products`} component={PublicProducts} />
+							<Route path={`/customer/view-order`} component={ViewOrder} />
 							<Route path={`/auth`} component={AuthLayout} />
 							<PrivateRoute path={`/admin/order`} component={AdminLayout} />
 							<PrivateRoute path={`/admin/product`} component={AdminLayout} />
