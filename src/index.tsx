@@ -10,6 +10,7 @@ import { OrderRefreshProvider } from './contexts/OrderRefreshContext';
 import PrivateRoute from './routes/PrivateRoute';
 import Home from './views/public/Home';
 import CustomerData from './views/public/CustomerData';
+import CustomerInfo from './views/public/CustomerInfo';
 import PublicProducts from './views/public/Products';
 import ViewOrder from './views/public/ViewOrder';
 import { AuthProvider } from './contexts/AuthContext';
@@ -23,6 +24,7 @@ ReactDOM.render(
 						<Switch>
 							<Route exact path={`/`} component={Home} />
 							<Route path={`/customer/data`} component={CustomerData} />
+							<Route path={`/customer/info`} component={CustomerInfo} />
 							<Route path={`/customer/products`} component={PublicProducts} />
 							<Route path={`/customer/view-order`} component={ViewOrder} />
 							<Route path={`/auth`} component={AuthLayout} />

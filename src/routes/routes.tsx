@@ -28,6 +28,7 @@ import SignUpCentered from 'views/auth/signUp';
 // Public Imports
 import Home from 'views/public/Home';
 import CustomerData from 'views/public/CustomerData';
+import CustomerInfo from 'views/public/CustomerInfo';
 import PublicProducts from 'views/public/Products';
 import ViewOrder from 'views/public/ViewOrder';
 
@@ -44,6 +45,13 @@ const routes: RoutesType[] = [
     layout: '/customer',
     path: '/data',
     component: CustomerData,
+    secondary: true,
+  },
+  {
+    name: 'Información del cliente',
+    layout: '/customer',
+    path: '/info',
+    component: CustomerInfo,
     secondary: true,
   },
   {
