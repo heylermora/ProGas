@@ -151,7 +151,7 @@ export default function Home() {
         </Stack>
         <SocialLogoHub />
       </Flex>
-      <SponsorStrip type="VIP" max={2} />
+      <SponsorStrip type="VIP" max={2} offset={2} />
     </PublicPage>
   );
 }

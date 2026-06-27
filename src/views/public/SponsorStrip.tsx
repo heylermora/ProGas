@@ -19,12 +19,6 @@ import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-i
 import { MdEmail, MdLink } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
-const fallbackSponsors = {
-  VIP: [1, 2, 3, 4].map((n) => ({ id: `vip-${n}`, name: `Espacio VIP ${n}`, type: 'VIP', active: true, order: n, logoUrl: '', links: [], description: 'Espacio disponible' })),
-  Premium: [1, 2, 3, 4].map((n) => ({ id: `premium-${n}`, name: `Espacio Premium ${n}`, type: 'Premium', active: true, order: n, logoUrl: '', links: [], description: 'Espacio disponible' })),
-  General: [1, 2, 3, 4].map((n) => ({ id: `general-${n}`, name: `Espacio General ${n}`, type: 'General', active: true, order: n, logoUrl: '', links: [], description: 'Espacio disponible' })),
-};
-
 const getLinkMeta = (url = '') => {
   const lower = url.toLowerCase();
   if (lower.includes('facebook.com')) return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
@@ -93,13 +87,10 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
 
     SponsorService.getPublicByType(type, max + offset)
       .then((data) => {
-        const visible = (data.length ? data : fallbackSponsors[type]).filter((sponsor) => sponsor.active !== false).slice(offset, offset + max);
+        const visible = data.filter((sponsor) => sponsor.active !== false).slice(offset, offset + max);
         setSponsors(visible);
       })
-      .catch(() => {
-        const fallback = fallbackSponsors[type].slice(offset, offset + max);
-        setSponsors(fallback);
-      });
+      .catch(() => setSponsors([]));
   }, [type, max, offset, injectedSponsors, previewSponsor]);
 
   const visibleSponsors = sponsors.filter((sponsor) => sponsor.active !== false);
