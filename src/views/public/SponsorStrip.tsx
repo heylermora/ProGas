@@ -30,15 +30,44 @@ const getLinkMeta = (url = '') => {
   return { label: 'Link', icon: MdLink, bg: '#64748B' };
 };
 
-function SponsorLinkBubbles({ links = [], max = 4 }) {
+function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
+  const [isOpen, setIsOpen] = useState(false);
   const cleanLinks = links.filter(Boolean).slice(0, max);
-  if (!cleanLinks.length) return null;
+  const hasLinks = cleanLinks.length > 0;
 
   return (
-    <HStack spacing="8px" flexWrap="wrap" justify={{ base: 'center', md: 'flex-start' }} pt="4px">
+    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? '18px' : '0px'}>
+      <Box
+        as={hasLinks ? 'button' : 'div'}
+        type={hasLinks ? 'button' : undefined}
+        aria-label={isOpen ? `Ocultar links de ${sponsor.name}` : `Mostrar links de ${sponsor.name}`}
+        aria-expanded={hasLinks ? isOpen : undefined}
+        onClick={hasLinks ? () => setIsOpen((current) => !current) : undefined}
+        position="relative"
+        borderRadius="22px"
+        p="8px"
+        transition="transform .2s ease, filter .2s ease"
+        cursor={hasLinks ? 'pointer' : 'default'}
+        _hover={hasLinks ? { transform: 'translateY(-2px) scale(1.01)', filter: 'drop-shadow(0 12px 20px rgba(15, 23, 42, .18))' } : undefined}
+        _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' }}
+      >
+        {sponsor.logoUrl ? (
+          <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '88px', md: '108px' }} objectFit="contain" pointerEvents="none" />
+        ) : (
+          <Box h={{ base: '88px', md: '108px' }} minW={{ base: '180px', md: '220px' }} borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
+        )}
+      </Box>
+
       {cleanLinks.map((link, index) => {
         const meta = getLinkMeta(link);
         const href = link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
+        const positions = [
+          { top: '0px', left: '8%' },
+          { top: '0px', right: '8%' },
+          { bottom: '0px', left: '12%' },
+          { bottom: '0px', right: '12%' },
+        ];
+
         return (
           <Tooltip key={`${link}-${index}`} label={meta.label} hasArrow placement="top">
             <IconButton
@@ -47,6 +76,8 @@ function SponsorLinkBubbles({ links = [], max = 4 }) {
               isExternal={!href.startsWith('mailto:')}
               aria-label={meta.label}
               icon={<Icon as={meta.icon} w="18px" h="18px" />}
+              position="absolute"
+              {...positions[index % positions.length]}
               sx={{ background: meta.bg }}
               color="white"
               borderRadius="full"
@@ -56,14 +87,23 @@ function SponsorLinkBubbles({ links = [], max = 4 }) {
               boxShadow="0 12px 22px rgba(15, 23, 42, .22)"
               border="2px solid"
               borderColor="white"
-              transition="transform .2s ease, filter .2s ease"
-              _hover={{ transform: 'translateY(-3px) scale(1.06)', filter: 'brightness(1.05)', textDecoration: 'none' }}
+              opacity={isOpen ? 1 : 0}
+              visibility={isOpen ? 'visible' : 'hidden'}
+              transform={isOpen ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 10px, 0) scale(.65)'}
+              transition={`all .25s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`}
+              _hover={{ transform: 'translate3d(0, -3px, 0) scale(1.07)', filter: 'brightness(1.05)', textDecoration: 'none' }}
               _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
             />
           </Tooltip>
         );
       })}
-    </HStack>
+
+      {hasLinks && (
+        <Text position="absolute" bottom="-2px" color={muted} fontSize="xs" fontWeight="700">
+          Tocá el logo para ver links
+        </Text>
+      )}
+    </Box>
   );
 }
 
@@ -109,14 +149,9 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
             <Badge w="fit-content" colorScheme={sponsor.type === 'VIP' ? 'yellow' : sponsor.type === 'Premium' ? 'purple' : 'green'}>
               {sponsor.type || type}
             </Badge>
-            {sponsor.logoUrl ? (
-              <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '88px', md: '108px' }} objectFit="contain" />
-            ) : (
-              <Box h={{ base: '88px', md: '108px' }} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
-            )}
+            <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} />
             <Text fontWeight="800" fontSize={{ base: 'lg', md: 'xl' }} noOfLines={2}>{sponsor.name}</Text>
             {sponsor.description && <Text color={muted} fontSize="sm" noOfLines={3}>{sponsor.description}</Text>}
-            <SponsorLinkBubbles links={sponsor.links} max={linkMax} />
           </Stack>
           {sponsor.type === 'VIP' && sponsor.videoUrl && (
             <AspectRatio ratio={16 / 9} w="100%">
