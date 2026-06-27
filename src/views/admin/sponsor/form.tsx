@@ -83,9 +83,9 @@ export default function SponsorForm() {
           {sponsor.type === 'VIP' && (
             <>
               <FormControl>
-                <FormLabel>Link de video VIP</FormLabel>
-                <Input value={sponsor.videoUrl?.startsWith('data:') ? '' : sponsor.videoUrl} placeholder="https://..." onChange={(e) => set('videoUrl', e.target.value)} />
-                <FormHelperText>Recomendado para demo: usá un link público para evitar límites de guardado.</FormHelperText>
+                <FormLabel>Link o iframe de video VIP</FormLabel>
+                <Input value={sponsor.videoUrl?.startsWith('data:') ? '' : sponsor.videoUrl} placeholder='<iframe src="https://..."></iframe> o https://...' onChange={(e) => set('videoUrl', e.target.value)} />
+                <FormHelperText>Recomendado para demo: pegá el iframe completo o un link embed público para evitar límites de guardado.</FormHelperText>
               </FormControl>
               <FormControl>
                 <FormLabel>O subir video pequeño VIP</FormLabel>

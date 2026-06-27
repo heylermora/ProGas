@@ -19,6 +19,18 @@ import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-i
 import { MdEmail, MdLink } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
+
+const getVideoEmbedSrc = (value = '') => {
+  if (!value) return '';
+  const iframeSrc = value.match(/src=["']([^"']+)["']/i)?.[1];
+  return iframeSrc || value;
+};
+
+const shouldRenderIframeVideo = (value = '') => {
+  const src = getVideoEmbedSrc(value).toLowerCase();
+  return value.toLowerCase().includes('<iframe') || src.includes('facebook.com/plugins/video') || src.includes('youtube.com/embed') || src.includes('player.vimeo.com');
+};
+
 const getLinkMeta = (url = '') => {
   const lower = url.toLowerCase();
   if (lower.includes('facebook.com')) return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
@@ -155,7 +167,19 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
           </Stack>
           {sponsor.type === 'VIP' && sponsor.videoUrl && (
             <AspectRatio ratio={16 / 9} w="100%">
-              <Box as="video" src={sponsor.videoUrl} controls borderRadius="18px" overflow="hidden" />
+              {shouldRenderIframeVideo(sponsor.videoUrl) ? (
+                <Box
+                  as="iframe"
+                  src={getVideoEmbedSrc(sponsor.videoUrl)}
+                  title={`Video de ${sponsor.name}`}
+                  border="0"
+                  borderRadius="18px"
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <Box as="video" src={sponsor.videoUrl} controls borderRadius="18px" overflow="hidden" />
+              )}
             </AspectRatio>
           )}
         </SimpleGrid>
