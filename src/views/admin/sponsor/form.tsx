@@ -46,7 +46,7 @@ export default function SponsorForm() {
         </SimpleGrid>
         <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px"><Button colorScheme="brand" onClick={save} w={{ base: '100%', sm: 'auto' }}>Guardar</Button><Button variant="outline" onClick={() => history.push('/admin/sponsor/index')} w={{ base: '100%', sm: 'auto' }}>Cancelar</Button></Stack>
       </Stack>
-      <Box mt="32px"><SponsorStrip type={sponsor.type} max={sponsor.type === 'VIP' ? 4 : sponsor.type === 'Premium' ? 8 : 12} title="Previsualización pública" /></Box>
+      <Box mt="32px"><SponsorStrip type={sponsor.type} max={1} title="Previsualización del patrocinador seleccionado" previewSponsor={{ ...sponsor, id: id || 'preview', active: true }} /></Box>
     </Box>
   );
 }

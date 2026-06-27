@@ -35,7 +35,7 @@ export default function SponsorsAdmin() {
           <Card key={s.id} p={{ base: '14px', md: '18px' }} minW="0">
             <Stack spacing="12px">
               {s.logoUrl ? <Image src={s.logoUrl} alt={s.name} h={{ base: '82px', md: '100px' }} objectFit="contain" /> : <Box h={{ base: '82px', md: '100px' }} bg="gray.100" borderRadius="16px" />}
-              <HStack flexWrap="wrap"><Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge><Badge>Orden {s.order}</Badge></HStack>
+              <HStack flexWrap="wrap"><Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge><Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Disponible en tabs' : 'Oculto'}</Badge></HStack>
               <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }} noOfLines={2}>{s.name}</Text>
               <Text color="gray.500" noOfLines={2} fontSize="sm">{s.description || 'Sin descripción'}</Text>
               <HStack justify="space-between"><Text>Activo</Text><Switch isChecked={s.active} onChange={() => toggleActive(s)} /></HStack>
