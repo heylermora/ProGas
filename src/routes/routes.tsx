@@ -121,6 +121,7 @@ const routes: RoutesType[] = [
     path: '/sponsor/index',
     icon: <Icon as={MdCampaign} width="20px" height="20px" />,
     component: SponsorsAdmin,
+    roles: ['admin'],
   },
   {
     name: 'Nuevo Patrocinador',
@@ -128,6 +129,7 @@ const routes: RoutesType[] = [
     path: '/sponsor/new',
     component: SponsorForm,
     secondary: true,
+    roles: ['admin'],
   },
   {
     name: 'Editar Patrocinador',
@@ -135,6 +137,7 @@ const routes: RoutesType[] = [
     path: '/sponsor/edit/:id',
     component: SponsorForm,
     secondary: true,
+    roles: ['admin'],
   },
   // PRODUCTS
   {

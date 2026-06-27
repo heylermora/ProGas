@@ -3,6 +3,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 // chakra imports
 import { Box, Flex, HStack, Text, useColorModeValue } from '@chakra-ui/react';
+import { useAuth } from 'contexts/AuthContext';
 
 export function SidebarLinks(props: {
 	routes: RoutesType[];
@@ -13,6 +14,7 @@ export function SidebarLinks(props: {
 	let activeIcon = useColorModeValue('brand.500', 'white');
 	let textColor = useColorModeValue('secondaryGray.500', 'white');
 	let brandColor = useColorModeValue('brand.500', 'brand.400');
+	const { hasRole } = useAuth();
 
 	const { routes } = props;
 
@@ -31,6 +33,7 @@ export function SidebarLinks(props: {
 				route: RoutesType,
 				index: number
 			) => {
+				if (route.roles && !hasRole(route.roles)) return null;
 				if (route.layout === '/admin' || route.layout === '/customer' || route.layout === '/auth') {
 					return (
 						<NavLink key={index} to={route.layout + route.path}>

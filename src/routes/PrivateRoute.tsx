@@ -1,17 +1,19 @@
 import React from "react";
 import { Route, RouteProps } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { AppRole, useAuth } from "../contexts/AuthContext";
 import Unauthorized from "components/exceptions/Unauthorized";
 
 interface PrivateRouteProps extends RouteProps {
   component: React.ComponentType<any>;
+  roles?: AppRole[];
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
   component: Component,
+  roles,
   ...rest
 }) => {
-  const { user, loading } = useAuth();   // ← usa Firebase
+  const { user, loading, hasRole } = useAuth();   // ← usa Firebase
 
   if (loading) return <div>Cargando...</div>;
 
@@ -19,7 +21,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
     <Route
       {...rest}
       render={(props) =>
-        user ? <Component {...props} /> : <Unauthorized />
+        user && hasRole(roles) ? <Component {...props} /> : <Unauthorized />
       }
     />
   );

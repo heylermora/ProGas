@@ -12,5 +12,6 @@ declare global {
 		icon?: JSX.Element | string | null;
 		path: string;
 		secondary?: boolean;
+		roles?: ('admin' | 'colaborador' | 'customer')[];
 	}
 }

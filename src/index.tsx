@@ -30,9 +30,9 @@ ReactDOM.render(
 							<Route path={`/customer/view-order`} component={ViewOrder} />
 							<Route path={`/sponsors/packages`} component={SponsorshipPackages} />
 							<Route path={`/auth`} component={AuthLayout} />
-							<PrivateRoute path={`/admin/order`} component={AdminLayout} />
-							<PrivateRoute path={`/admin/product`} component={AdminLayout} />
-							<PrivateRoute path={`/admin/sponsor`} component={AdminLayout} />
+							<PrivateRoute path={`/admin/order`} roles={['admin', 'colaborador']} component={AdminLayout} />
+							<PrivateRoute path={`/admin/product`} roles={['admin', 'colaborador']} component={AdminLayout} />
+							<PrivateRoute path={`/admin/sponsor`} roles={['admin']} component={AdminLayout} />
 							<Route path={`/customer/order`} component={AdminLayout} />
 							<Redirect to='/' />
 						</Switch>
