@@ -1,5 +1,6 @@
 import { Box, Button, Flex, HStack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
+import { MdHandshake, MdLogin } from 'react-icons/md';
 
 export default function PublicFooter() {
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
@@ -18,12 +19,17 @@ export default function PublicFooter() {
             <Text fontWeight="800">Johel Mora</Text>
           </Box>
         </HStack>
-        <Button as={RLink} to="/sponsors/packages" colorScheme="brand" size="sm">
-          Quiero ser patrocinador
-        </Button>
+        <HStack spacing="10px" flexWrap="wrap">
+          <Button as={RLink} to="/sponsors/packages" leftIcon={<MdHandshake />} colorScheme="brand" size="sm">
+            Quiero ser patrocinador
+          </Button>
+          <Button as={RLink} to="/auth/sign-in" leftIcon={<MdLogin />} variant="ghost" colorScheme="brand" size="sm">
+            Iniciar sesión
+          </Button>
+        </HStack>
       </Flex>
       <Text color={textColor} fontSize="xs" mt="14px">
-        ¿Desea anunciarse en Gas Memo? Consulte los paquetes disponibles para patrocinadores.
+        Gas Memo conecta clientes, pedidos y patrocinadores en una experiencia simple y rápida.
       </Text>
     </Box>
   );
