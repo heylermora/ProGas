@@ -1,5 +1,5 @@
 import { Icon } from '@chakra-ui/react';
-import { MdHome, MdAssessment, MdInventory } from 'react-icons/md';
+import { MdHome, MdAssessment, MdInventory, MdCampaign } from 'react-icons/md';
 
 // Order Imports
 import Orders from 'views/admin/order';
@@ -8,6 +8,10 @@ import NewAdminOrder from 'views/admin/order/new';
 import NewCustomerOrder from 'views/customer/order/new';
 import EditOrder from 'views/admin/order/edit';
 import Balance from 'views/admin/order/balance';
+
+// Sponsor Imports
+import SponsorsAdmin from 'views/admin/sponsor';
+import SponsorForm from 'views/admin/sponsor/form';
 
 // Product Imports
 import Product from 'views/admin/product';
@@ -21,7 +25,60 @@ import Dashboard from 'views/admin/dashboard';
 import SignInCentered from 'views/auth/signIn';
 import SignUpCentered from 'views/auth/signUp';
 
+// Public Imports
+import Home from 'views/public/Home';
+import CustomerData from 'views/public/CustomerData';
+import CustomerInfo from 'views/public/CustomerInfo';
+import PublicProducts from 'views/public/Products';
+import ViewOrder from 'views/public/ViewOrder';
+import SponsorshipPackages from 'views/public/SponsorshipPackages';
+
 const routes: RoutesType[] = [
+  {
+    name: 'Inicio',
+    layout: '',
+    path: '/',
+    component: Home,
+    secondary: true,
+  },
+  {
+    name: 'Datos del cliente',
+    layout: '/customer',
+    path: '/data',
+    component: CustomerData,
+    secondary: true,
+  },
+  {
+    name: 'Información del cliente',
+    layout: '/customer',
+    path: '/info',
+    component: CustomerInfo,
+    secondary: true,
+  },
+  {
+    name: 'Productos',
+    layout: '/customer',
+    path: '/products',
+    component: PublicProducts,
+    secondary: true,
+  },
+  {
+    name: 'Ver pedido',
+    layout: '/customer',
+    path: '/view-order',
+    component: ViewOrder,
+    secondary: true,
+  },
+
+
+  {
+    name: 'Paquetes de patrocinadores',
+    layout: '/sponsors',
+    path: '/packages',
+    component: SponsorshipPackages,
+    secondary: true,
+  },
+
   {
     name: 'Pedidos',
     layout: '/admin',
@@ -56,6 +113,28 @@ const routes: RoutesType[] = [
     path: '/order/balance',
     icon: <Icon as={MdAssessment} width="20px" height="20px" />,
     component: Balance,
+  },
+
+  {
+    name: 'Patrocinadores',
+    layout: '/admin',
+    path: '/sponsor/index',
+    icon: <Icon as={MdCampaign} width="20px" height="20px" />,
+    component: SponsorsAdmin,
+  },
+  {
+    name: 'Nuevo Patrocinador',
+    layout: '/admin',
+    path: '/sponsor/new',
+    component: SponsorForm,
+    secondary: true,
+  },
+  {
+    name: 'Editar Patrocinador',
+    layout: '/admin',
+    path: '/sponsor/edit/:id',
+    component: SponsorForm,
+    secondary: true,
   },
   // PRODUCTS
   {
