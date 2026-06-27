@@ -6,19 +6,19 @@ import { PublicCard, PublicPage } from './PublicPage';
 const packages = [
   {
     name: 'VIP',
-    price: '₡80.000 / mes',
+    price: '₡15.000 / mes',
     badge: 'Máximo 4 espacios',
     features: ['Página principal', '2 posiciones arriba y 2 abajo', 'Logo', 'Hasta 4 links', 'Video publicitario de hasta 30 segundos'],
   },
   {
     name: 'Premium',
-    price: '₡45.000 / mes',
+    price: '₡10.000 / mes',
     badge: 'Máximo 8 espacios',
     features: ['Página de datos del cliente', '4 posiciones arriba y 4 abajo', 'Logo', 'Hasta 4 links'],
   },
   {
     name: 'General',
-    price: '₡25.000 / mes',
+    price: '₡5.000 / mes',
     badge: 'Máximo 12 espacios',
     features: ['Página de productos', '4 posiciones arriba y 8 abajo', 'Logo', '1 link'],
   },
