@@ -49,8 +49,8 @@ export default function SponsorsAdmin() {
       <Card p={{ base: '14px', md: '18px' }} mb="20px" overflow="hidden">
         <Stack spacing="14px">
           <Box>
-            <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Tabs de patrocinadores disponibles</Text>
-            <Text color={muted} fontSize="sm">Solo aparecen patrocinadores activos. Al desactivar uno, desaparece de estos tabs pero permanece en la lista para poder reactivarlo.</Text>
+            <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Pestañas de patrocinadores disponibles</Text>
+            <Text color={muted} fontSize="sm">Solo aparecen patrocinadores activos. Al desactivar uno, desaparece de estas pestañas pero permanece en la lista para poder reactivarlo.</Text>
           </Box>
           {activeSponsors.length ? (
             <>
@@ -76,7 +76,7 @@ export default function SponsorsAdmin() {
               {selectedSponsor && <SponsorStrip type={selectedSponsor.type} max={1} title="Previsualización del patrocinador seleccionado" previewSponsor={{ ...selectedSponsor, active: true }} />}
             </>
           ) : (
-            <Text color={muted} fontSize="sm">No hay patrocinadores activos para mostrar como tabs.</Text>
+            <Text color={muted} fontSize="sm">No hay patrocinadores activos para mostrar como pestañas.</Text>
           )}
         </Stack>
       </Card>
@@ -86,7 +86,7 @@ export default function SponsorsAdmin() {
           <Card key={s.id} p={{ base: '14px', md: '18px' }} minW="0">
             <Stack spacing="12px">
               {s.logoUrl ? <Image src={s.logoUrl} alt={s.name} h={{ base: '82px', md: '100px' }} objectFit="contain" /> : <Box h={{ base: '82px', md: '100px' }} bg="gray.100" borderRadius="16px" />}
-              <HStack flexWrap="wrap"><Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge><Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Disponible en tabs' : 'Oculto'}</Badge></HStack>
+              <HStack flexWrap="wrap"><Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge><Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Disponible en pestañas' : 'Oculto'}</Badge></HStack>
               <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }} noOfLines={2}>{s.name}</Text>
               <Text color="gray.500" noOfLines={2} fontSize="sm">{s.description || 'Sin descripción'}</Text>
               <HStack justify="space-between"><Text>Activo</Text><Switch isChecked={s.active} onChange={() => toggleActive(s)} /></HStack>

@@ -97,7 +97,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
         setSponsors(visible);
       })
       .catch(() => {
-        const fallback = fallbackSponsors[type].slice(0, max);
+        const fallback = fallbackSponsors[type].slice(offset, offset + max);
         setSponsors(fallback);
       });
   }, [type, max, offset, injectedSponsors, previewSponsor]);

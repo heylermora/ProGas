@@ -35,7 +35,7 @@ export default function SponsorForm() {
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
           <FormControl isRequired><FormLabel>Nombre</FormLabel><Input value={sponsor.name} onChange={(e) => set('name', e.target.value)} /></FormControl>
           <FormControl><FormLabel>Tipo</FormLabel><Select value={sponsor.type} onChange={(e) => set('type', e.target.value)}><option>VIP</option><option>Premium</option><option>General</option></Select></FormControl>
-          <FormControl><FormLabel>Orden</FormLabel><Input type="number" value={sponsor.order} onChange={(e) => set('order', e.target.value)} /></FormControl>
+          <FormControl><FormLabel>Prioridad de aparición</FormLabel><Input type="number" min="1" value={sponsor.order} onChange={(e) => set('order', e.target.value)} /></FormControl>
           <FormControl display="flex" alignItems="center"><FormLabel mb="0">Activo</FormLabel><Switch isChecked={sponsor.active} onChange={(e) => set('active', e.target.checked)} /></FormControl>
           <FormControl><FormLabel>Subir logo</FormLabel><Input type="file" accept="image/*" onChange={(e) => readFile('logoUrl', e.target.files?.[0])} /></FormControl>
           {sponsor.type === 'VIP' && <FormControl><FormLabel>Subir video VIP (máx. 30 s)</FormLabel><Input type="file" accept="video/*" onChange={(e) => readFile('videoUrl', e.target.files?.[0])} /></FormControl>}
