@@ -4,7 +4,6 @@ import {
   AspectRatio,
   Badge,
   Box,
-  HStack,
   Icon,
   IconButton,
   Image,
@@ -109,12 +108,6 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
           </Tooltip>
         );
       })}
-
-      {hasLinks && (
-        <Text position="absolute" bottom="-2px" color={muted} fontSize="xs" fontWeight="700">
-          Tocá el logo para ver links
-        </Text>
-      )}
     </Box>
   );
 }

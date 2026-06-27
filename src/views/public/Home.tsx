@@ -62,7 +62,6 @@ const socialLinks = [
 
 function SocialLogoHub() {
   const [isOpen, setIsOpen] = useState(false);
-  const helpBg = useColorModeValue('whiteAlpha.900', 'blackAlpha.500');
 
   return (
     <Box
@@ -124,13 +123,6 @@ function SocialLogoHub() {
           />
         </Tooltip>
       ))}
-
-      <Text mt="12px" color="white" fontSize="sm" fontWeight="800">
-        Tocá el logo para ver nuestras redes
-      </Text>
-      <Text mt="6px" mx="auto" bg={helpBg} color="brand.500" fontSize="xs" fontWeight="800" borderRadius="full" px="12px" py="6px" display="inline-block">
-        Facebook · Instagram · WhatsApp · TikTok · Correo
-      </Text>
     </Box>
   );
 }
