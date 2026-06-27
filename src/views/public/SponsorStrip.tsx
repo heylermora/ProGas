@@ -1,10 +1,9 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AspectRatio,
   Badge,
   Box,
-  Button,
   HStack,
   Icon,
   IconButton,
@@ -76,24 +75,19 @@ function SponsorLinkBubbles({ links = [], max = 4 }) {
 
 export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
   const [sponsors, setSponsors] = useState([]);
-  const [selectedId, setSelectedId] = useState('');
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.400');
   const borderColor = useColorModeValue('gray.100', 'whiteAlpha.200');
-  const tabBg = useColorModeValue('gray.100', 'whiteAlpha.100');
-  const activeTabBg = useColorModeValue('brand.500', 'brand.300');
 
   useEffect(() => {
     if (previewSponsor) {
       setSponsors([previewSponsor]);
-      setSelectedId(previewSponsor.id || 'preview');
       return;
     }
 
     if (injectedSponsors) {
       const activeSponsors = injectedSponsors.filter((sponsor) => sponsor.active !== false).slice(offset, offset + max);
       setSponsors(activeSponsors);
-      setSelectedId(activeSponsors[0]?.id || '');
       return;
     }
 
@@ -101,70 +95,56 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       .then((data) => {
         const visible = (data.length ? data : fallbackSponsors[type]).filter((sponsor) => sponsor.active !== false).slice(offset, offset + max);
         setSponsors(visible);
-        setSelectedId(visible[0]?.id || '');
       })
       .catch(() => {
         const fallback = fallbackSponsors[type].slice(0, max);
         setSponsors(fallback);
-        setSelectedId(fallback[0]?.id || '');
       });
   }, [type, max, offset, injectedSponsors, previewSponsor]);
 
-  const visibleSponsors = useMemo(() => sponsors.filter((sponsor) => sponsor.active !== false), [sponsors]);
-  const selectedSponsor = visibleSponsors.find((sponsor) => sponsor.id === selectedId) || visibleSponsors[0];
-  const linkMax = selectedSponsor?.type === 'General' || type === 'General' ? 1 : 4;
-  const columns = { base: 1, md: selectedSponsor?.videoUrl && selectedSponsor?.type === 'VIP' ? 2 : 1 };
+  const visibleSponsors = sponsors.filter((sponsor) => sponsor.active !== false);
+  const columns = { base: 1, sm: Math.min(max, 2), lg: Math.min(max, 3), xl: Math.min(max, 4) };
 
-  if (!selectedSponsor) return null;
+  if (!visibleSponsors.length) return null;
 
-  return (
-    <Box w="100%">
-      {title && <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="800" mb={{ base: '14px', md: '18px' }}>{title}</Text>}
+  const renderSponsorCard = (sponsor) => {
+    const linkMax = sponsor?.type === 'General' || type === 'General' ? 1 : 4;
+    const videoColumns = { base: 1, md: sponsor?.videoUrl && sponsor?.type === 'VIP' ? 2 : 1 };
 
-      {visibleSponsors.length > 1 && (
-        <HStack spacing="10px" overflowX="auto" pb="10px" mb="14px" align="center">
-          {visibleSponsors.map((sponsor) => {
-            const isSelected = sponsor.id === selectedSponsor.id;
-            return (
-              <Button
-                key={sponsor.id}
-                onClick={() => setSelectedId(sponsor.id)}
-                size="sm"
-                borderRadius="full"
-                flexShrink={0}
-                bg={isSelected ? activeTabBg : tabBg}
-                color={isSelected ? 'white' : muted}
-                _hover={{ bg: isSelected ? activeTabBg : 'gray.200' }}
-              >
-                {sponsor.name}
-              </Button>
-            );
-          })}
-        </HStack>
-      )}
-
-      <Box bg={cardBg} p={{ base: '14px', md: '18px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" border="1px solid" borderColor={borderColor} minW="0">
-        <SimpleGrid columns={columns} spacing={{ base: '14px', md: '18px' }} alignItems="center">
+    return (
+      <Box key={sponsor.id} bg={cardBg} p={{ base: '14px', md: '18px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" border="1px solid" borderColor={borderColor} minW="0">
+        <SimpleGrid columns={videoColumns} spacing={{ base: '14px', md: '18px' }} alignItems="center">
           <Stack spacing="12px" h="100%" align={{ base: 'center', md: 'flex-start' }} textAlign={{ base: 'center', md: 'left' }}>
-            <Badge w="fit-content" colorScheme={selectedSponsor.type === 'VIP' ? 'yellow' : selectedSponsor.type === 'Premium' ? 'purple' : 'green'}>
-              {selectedSponsor.type || type}
+            <Badge w="fit-content" colorScheme={sponsor.type === 'VIP' ? 'yellow' : sponsor.type === 'Premium' ? 'purple' : 'green'}>
+              {sponsor.type || type}
             </Badge>
-            {selectedSponsor.logoUrl ? (
-              <Image src={selectedSponsor.logoUrl} alt={selectedSponsor.name} h={{ base: '88px', md: '108px' }} objectFit="contain" />
+            {sponsor.logoUrl ? (
+              <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '88px', md: '108px' }} objectFit="contain" />
             ) : (
               <Box h={{ base: '88px', md: '108px' }} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
             )}
-            <Text fontWeight="800" fontSize={{ base: 'lg', md: 'xl' }} noOfLines={2}>{selectedSponsor.name}</Text>
-            {selectedSponsor.description && <Text color={muted} fontSize="sm" noOfLines={3}>{selectedSponsor.description}</Text>}
-            <SponsorLinkBubbles links={selectedSponsor.links} max={linkMax} />
+            <Text fontWeight="800" fontSize={{ base: 'lg', md: 'xl' }} noOfLines={2}>{sponsor.name}</Text>
+            {sponsor.description && <Text color={muted} fontSize="sm" noOfLines={3}>{sponsor.description}</Text>}
+            <SponsorLinkBubbles links={sponsor.links} max={linkMax} />
           </Stack>
-          {selectedSponsor.type === 'VIP' && selectedSponsor.videoUrl && (
+          {sponsor.type === 'VIP' && sponsor.videoUrl && (
             <AspectRatio ratio={16 / 9} w="100%">
-              <Box as="video" src={selectedSponsor.videoUrl} controls borderRadius="18px" overflow="hidden" />
+              <Box as="video" src={sponsor.videoUrl} controls borderRadius="18px" overflow="hidden" />
             </AspectRatio>
           )}
         </SimpleGrid>
       </Box>
+    );
+  };
+
+  return (
+    <Box w="100%">
+      {title && <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="800" mb={{ base: '14px', md: '18px' }}>{title}</Text>}
+      {previewSponsor ? renderSponsorCard(visibleSponsors[0]) : (
+        <SimpleGrid columns={columns} spacing={{ base: '12px', md: '16px' }}>
+          {visibleSponsors.map(renderSponsorCard)}
+        </SimpleGrid>
+      )}
     </Box>
   );
 }
