@@ -1,17 +1,34 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { ChakraProvider } from '@chakra-ui/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import MiniCalendar from './MiniCalendar';
-import { MemoryRouter } from 'react-router-dom';
+import theme from 'theme/theme';
 
-describe( 'Test MiniCalendar component', () => {
-	it('MiniCalendar renders with default values', () => {
-		const { getByTestId } = render(
-			<MemoryRouter>
-				<MiniCalendar selectRange={false} />
-			</MemoryRouter>
-		);
+const renderCalendar = (selectRange = false) => render(
+  <ChakraProvider theme={theme}>
+    <MiniCalendar selectRange={selectRange} data-testid="mini-calendar-card" />
+  </ChakraProvider>
+);
 
-		const currentMonthLabel = screen.getByText('January 2023');
-		expect(currentMonthLabel).toBeTruthy();
-	});
+describe('MiniCalendar component', () => {
+  it('renders with the current year default range', () => {
+    renderCalendar();
+
+    expect(screen.getByText(`January ${new Date().getFullYear()}`)).toBeTruthy();
+    expect(screen.getByTestId('mini-calendar-card')).toBeTruthy();
+  });
+
+  it('supports month navigation controls', () => {
+    renderCalendar();
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    expect(screen.getByText(`February ${new Date().getFullYear()}`)).toBeTruthy();
+  });
+
+  it('renders a range-enabled calendar when requested', () => {
+    const { container } = renderCalendar(true);
+
+    expect(container.querySelector('.react-calendar--selectRange')).toBeTruthy();
+  });
 });
