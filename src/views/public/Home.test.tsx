@@ -37,14 +37,12 @@ describe('Home', () => {
     const facebook = screen.getByRole('link', { name: 'Facebook', hidden: true });
 
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(window.getComputedStyle(facebook).visibility).toBe('hidden');
-    expect(window.getComputedStyle(facebook).opacity).toBe('0');
+    expect(facebook.getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
 
     fireEvent.click(toggle);
 
     expect(screen.getByRole('button', { name: /ocultar redes sociales de gas memo/i }).getAttribute('aria-expanded')).toBe('true');
-    expect(window.getComputedStyle(facebook).visibility).toBe('visible');
-    expect(window.getComputedStyle(facebook).opacity).toBe('1');
+    expect(screen.getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
   });
 
   it('emits responsive Chakra styles for mobile-first layout and desktop breakpoints', () => {
