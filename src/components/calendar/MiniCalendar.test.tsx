@@ -21,7 +21,7 @@ describe('MiniCalendar component', () => {
   it('supports month navigation controls', () => {
     renderCalendar();
 
-    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next month/i }));
 
     expect(screen.getByText(`February ${new Date().getFullYear()}`)).toBeTruthy();
   });
