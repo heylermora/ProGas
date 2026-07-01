@@ -1,6 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import AddButton from './AddButton';
 
@@ -10,7 +9,7 @@ function CurrentPath() {
 }
 
 describe('AddButton component', () => {
-  it('renders an accessible add button and navigates to the provided redirect', async () => {
+  it('renders an accessible add button and navigates to the provided redirect', () => {
     render(
       <MemoryRouter initialEntries={['/orders']}>
         <AddButton redirect="/orders/new" />
@@ -20,7 +19,7 @@ describe('AddButton component', () => {
 
     expect(screen.getByTestId('current-path').textContent).toBe('/orders');
 
-    await userEvent.click(screen.getByRole('button', { name: /custom button/i }));
+    fireEvent.click(screen.getByRole('button', { name: /custom button/i }));
 
     expect(screen.getByTestId('current-path').textContent).toBe('/orders/new');
   });
