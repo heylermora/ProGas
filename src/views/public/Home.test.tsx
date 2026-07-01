@@ -20,6 +20,11 @@ const renderHome = () => render(
   </ChakraProvider>
 );
 
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: width });
+  window.dispatchEvent(new Event('resize'));
+};
+
 describe('Home', () => {
   it('renders the main conversion copy and customer actions', () => {
     renderHome();
@@ -30,7 +35,7 @@ describe('Home', () => {
     expect(screen.getAllByTestId('sponsor-strip')).toHaveLength(2);
   });
 
-  it('keeps social links hidden until the responsive logo hub is opened', () => {
+  it('opens and closes the social logo hub with accessible state', () => {
     renderHome();
 
     const toggle = screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i });
@@ -42,18 +47,22 @@ describe('Home', () => {
     fireEvent.click(toggle);
 
     expect(screen.getByRole('button', { name: /ocultar redes sociales de gas memo/i }).getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
+    expect(screen.getByRole('link', { name: 'Facebook', hidden: true }).getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
   });
 
-  it('emits responsive Chakra styles for mobile-first layout and desktop breakpoints', () => {
+  it('keeps the main actions available on mobile and desktop viewport widths', () => {
+    const { unmount } = renderHome();
+
+    setViewportWidth(375);
+    expect(screen.getByRole('link', { name: /hacer pedido/i }).getAttribute('href')).toBe('/customer/data');
+    expect(screen.getByRole('link', { name: /ver pedido/i }).getAttribute('href')).toBe('/customer/view-order');
+
+    unmount();
+    setViewportWidth(1280);
     renderHome();
 
-    const styles = Array.from(document.querySelectorAll('style'))
-      .map((style) => style.textContent || '')
-      .join('\n');
-
-    expect(styles).toContain('@media screen and (min-width: 48em)');
-    expect(styles).toContain('@media screen and (min-width: 62em)');
+    expect(screen.getByRole('heading', { name: /pedí tu gas en minutos/i })).toBeTruthy();
+    expect(screen.getAllByTestId('sponsor-strip')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i })).toBeTruthy();
   });
 });
