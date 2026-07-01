@@ -28,6 +28,10 @@ export default function MiniCalendar(props: { selectRange: boolean; [x: string]:
 				defaultValue={date}
 				selectRange={selectRange}
 				tileContent={<Text color='brand.500' />}
+				prevAriaLabel='Previous month'
+				nextAriaLabel='Next month'
+				prev2AriaLabel='Previous year'
+				next2AriaLabel='Next year'
 				prevLabel={<Icon as={MdChevronLeft} w='24px' h='24px' mt='4px' />}
 				nextLabel={<Icon as={MdChevronRight} w='24px' h='24px' mt='4px' />}
 			/>

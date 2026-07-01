@@ -1,20 +1,26 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import AddButton from './AddButton';
 
-describe('Test AddButton component', () => {
-  it('renders the button with the provided redirect', () => {
-    const redirect = '/example-path';
-    const { getByLabelText } = render(
-      <MemoryRouter>
-        <AddButton redirect={redirect} />
+function CurrentPath() {
+  const location = useLocation();
+  return <span data-testid="current-path">{location.pathname}</span>;
+}
+
+describe('AddButton component', () => {
+  it('renders an accessible add button and navigates to the provided redirect', () => {
+    render(
+      <MemoryRouter initialEntries={['/orders']}>
+        <AddButton redirect="/orders/new" />
+        <CurrentPath />
       </MemoryRouter>
     );
 
-    const button = screen.getByLabelText('Custom Button');
-    fireEvent.click(button);
+    expect(screen.getByTestId('current-path').textContent).toBe('/orders');
 
-    expect(button).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /custom button/i }));
+
+    expect(screen.getByTestId('current-path').textContent).toBe('/orders/new');
   });
 });

@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - work
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+      - work
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run tests
+        run: npm test -- --watchAll=false --passWithNoTests --runInBand
+
+      - name: Generate coverage report
+        run: npm test -- --coverage --watchAll=false --passWithNoTests --runInBand --coverageReporters=text-summary --coverageReporters=lcov --collectCoverageFrom='src/**/*.{ts,tsx}' --collectCoverageFrom='!src/**/*.d.ts' --collectCoverageFrom='!src/index.tsx'
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: progas-coverage
+          path: coverage
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Build production bundle
+        env:
+          CI: false
+          GENERATE_SOURCEMAP: false
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: progas-build
+          path: build
+          if-no-files-found: error
+          retention-days: 7
