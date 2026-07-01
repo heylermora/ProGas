@@ -20,7 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdAddBusiness, MdEmail, MdLink } from 'react-icons/md';
+import { MdAddBusiness, MdClose, MdEmail, MdLink, MdPlayCircleFilled, MdShare } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
 
@@ -63,21 +63,8 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
   const hasLinks = cleanLinks.length > 0;
 
   return (
-    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? '4px' : '0px'}>
-      <Box
-        as={hasLinks ? 'button' : 'div'}
-        type={hasLinks ? 'button' : undefined}
-        aria-label={isOpen ? `Ocultar links de ${sponsor.name}` : `Mostrar links de ${sponsor.name}`}
-        aria-expanded={hasLinks ? isOpen : undefined}
-        onClick={hasLinks ? () => setIsOpen((current) => !current) : undefined}
-        position="relative"
-        borderRadius="22px"
-        p={{ base: '4px', md: '6px' }}
-        transition="transform .2s ease, filter .2s ease"
-        cursor={hasLinks ? 'pointer' : 'default'}
-        _hover={hasLinks ? { transform: 'translateY(-2px) scale(1.01)', filter: 'drop-shadow(0 12px 20px rgba(15, 23, 42, .18))' } : undefined}
-        _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' }}
-      >
+    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? '10px' : '0px'}>
+      <Box position="relative" borderRadius="22px" p={{ base: '4px', md: '6px' }}>
         {sponsor.logoUrl ? (
           <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '42px', md: '64px' }} maxW="100%" objectFit="contain" pointerEvents="none" />
         ) : (
@@ -85,14 +72,39 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
         )}
       </Box>
 
+      {hasLinks && (
+        <IconButton
+          type="button"
+          aria-label={isOpen ? `Ocultar redes de ${sponsor.name}` : `Ver redes de ${sponsor.name}`}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((current) => !current)}
+          icon={<Icon as={isOpen ? MdClose : MdShare} w={{ base: '16px', md: '18px' }} h={{ base: '16px', md: '18px' }} />}
+          position="absolute"
+          right={{ base: '8px', md: '14px' }}
+          bottom={{ base: '2px', md: '4px' }}
+          w={{ base: '38px', md: '44px' }}
+          h={{ base: '38px', md: '44px' }}
+          minW={{ base: '38px', md: '44px' }}
+          borderRadius="full"
+          color="white"
+          bgGradient="linear(135deg, #F6D365 0%, #D4AF37 45%, #B8860B 100%)"
+          boxShadow="0 12px 24px rgba(184, 134, 11, .35)"
+          border="2px solid"
+          borderColor="white"
+          zIndex={2}
+          _hover={{ transform: 'translateY(-2px) scale(1.04)', filter: 'brightness(1.05)' }}
+          _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.200', outlineOffset: '3px' }}
+        />
+      )}
+
       {cleanLinks.map((link, index) => {
         const meta = getLinkMeta(link);
         const href = link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
         const positions = [
-          { top: '0px', left: '8%' },
-          { top: '0px', right: '8%' },
-          { bottom: '0px', left: '12%' },
-          { bottom: '0px', right: '12%' },
+          { top: { base: '2px', md: '4px' }, left: { base: '12%', md: '18%' } },
+          { top: { base: '2px', md: '4px' }, right: { base: '12%', md: '18%' } },
+          { bottom: { base: '2px', md: '4px' }, left: { base: '12%', md: '18%' } },
+          { bottom: { base: '2px', md: '4px' }, right: { base: '12%', md: '18%' } },
         ];
 
         return (
@@ -102,23 +114,23 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
               href={href}
               isExternal={!href.startsWith('mailto:')}
               aria-label={meta.label}
-              icon={<Icon as={meta.icon} w="18px" h="18px" />}
+              icon={<Icon as={meta.icon} w="16px" h="16px" />}
               position="absolute"
               {...positions[index % positions.length]}
               sx={{ background: meta.bg }}
               color="white"
               borderRadius="full"
-              w={{ base: "32px", md: "38px" }}
-              h={{ base: "32px", md: "38px" }}
-              minW={{ base: "32px", md: "38px" }}
-              boxShadow="0 12px 22px rgba(15, 23, 42, .22)"
+              w={{ base: '32px', md: '36px' }}
+              h={{ base: '32px', md: '36px' }}
+              minW={{ base: '32px', md: '36px' }}
+              boxShadow="0 10px 18px rgba(15, 23, 42, .18)"
               border="2px solid"
               borderColor="white"
               opacity={isOpen ? 1 : 0}
               visibility={isOpen ? 'visible' : 'hidden'}
-              transform={isOpen ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 10px, 0) scale(.65)'}
-              transition={`all .25s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`}
-              _hover={{ transform: 'translate3d(0, -3px, 0) scale(1.07)', filter: 'brightness(1.05)', textDecoration: 'none' }}
+              transform={isOpen ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 6px, 0) scale(.75)'}
+              transition={`all .22s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 35 : 0}ms`}
+              _hover={{ transform: 'translate3d(0, -2px, 0) scale(1.06)', filter: 'brightness(1.05)', textDecoration: 'none' }}
               _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
             />
           </Tooltip>
@@ -127,7 +139,6 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
     </Box>
   );
 }
-
 export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
   const [sponsors, setSponsors] = useState([]);
   const [activeVideoSponsor, setActiveVideoSponsor] = useState(null);
@@ -215,7 +226,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   const renderSponsorCard = (sponsor) => {
     if (sponsor.isAvailable) return renderAvailableCard(sponsor);
     const linkMax = sponsor?.type === 'General' || type === 'General' ? 1 : 4;
-    const videoColumns = { base: 1, md: sponsor?.videoUrl && sponsor?.type === 'VIP' ? 2 : 1 };
+    const videoColumns = { base: 1 };
 
     return (
       <Box key={sponsor.id} bg={cardBg} p={{ base: '10px', md: '12px' }} borderRadius={{ base: '14px', md: '18px' }} boxShadow="sm" border="1px solid" borderColor={borderColor} minW="0" overflow="hidden">
@@ -229,30 +240,28 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
             <Box
               as="button"
               type="button"
-              aria-label={`Abrir video de ${sponsor.name}`}
+              aria-label={`Ver video de ${sponsor.name}`}
               onClick={() => setActiveVideoSponsor(sponsor)}
-              w={{ base: '72%', md: '82%' }}
-              maxW={{ base: '180px', md: '260px' }}
               mx="auto"
+              mt="2px"
+              px={{ base: '12px', md: '14px' }}
+              py={{ base: '7px', md: '8px' }}
+              borderRadius="full"
+              color="white"
+              bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
+              boxShadow="0 14px 28px rgba(184, 134, 11, .35)"
+              display="inline-flex"
+              alignItems="center"
+              gap="6px"
+              fontSize={{ base: 'xs', md: 'sm' }}
+              fontWeight="900"
+              letterSpacing=".01em"
               cursor="pointer"
-              borderRadius="10px"
-              overflow="hidden"
-              _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '3px' }}
+              _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
+              _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.200', outlineOffset: '3px' }}
             >
-              <AspectRatio ratio={16 / 9} w="100%" pointerEvents="none">
-                {shouldRenderIframeVideo(sponsor.videoUrl) ? (
-                  <Box
-                    as="iframe"
-                    src={getVideoEmbedSrc(sponsor.videoUrl)}
-                    title={`Video de ${sponsor.name}`}
-                    border="0"
-                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                ) : (
-                  <Box as="video" src={sponsor.videoUrl} muted playsInline />
-                )}
-              </AspectRatio>
+              <Icon as={MdPlayCircleFilled} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />
+              Ver video
             </Box>
           )}
         </SimpleGrid>
