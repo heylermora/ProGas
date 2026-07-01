@@ -14,8 +14,9 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdLink } from 'react-icons/md';
+import { MdAddBusiness, MdEmail, MdLink } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
 
@@ -40,6 +41,17 @@ const getLinkMeta = (url = '') => {
   if (lower.includes('http')) return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
   return { label: 'Link', icon: MdLink, bg: '#64748B' };
 };
+
+const SPONSOR_CAPACITY = { VIP: 4, Premium: 8, General: 12 };
+
+const makeAvailableSponsor = (type, index) => ({
+  id: `available-${type}-${index}`,
+  type,
+  name: 'Disponible',
+  description: 'Reservá este espacio publicitario para que tu negocio aparezca aquí.',
+  isAvailable: true,
+  active: true,
+});
 
 function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -139,11 +151,65 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   }, [type, max, offset, injectedSponsors, previewSponsor]);
 
   const visibleSponsors = sponsors.filter((sponsor) => sponsor.active !== false);
-  const columns = { base: 1, sm: Math.min(max, 2), lg: Math.min(max, 3), xl: Math.min(max, 4) };
+  const slotCount = Math.min(max, Math.max(0, (SPONSOR_CAPACITY[type] || max) - offset));
+  const sponsorsWithAvailableSlots = [
+    ...visibleSponsors,
+    ...Array.from({ length: Math.max(slotCount - visibleSponsors.length, 0) }, (_, index) => makeAvailableSponsor(type, offset + visibleSponsors.length + index + 1)),
+  ];
+  const columns = { base: 1, sm: Math.min(slotCount || max, 2), lg: Math.min(slotCount || max, 3), xl: Math.min(slotCount || max, 4) };
 
-  if (!visibleSponsors.length) return null;
+  const renderAvailableCard = (sponsor) => (
+    <Box
+      key={sponsor.id}
+      as={RLink}
+      to="/sponsors/packages"
+      role="group"
+      bg={cardBg}
+      p={{ base: '16px', md: '18px' }}
+      borderRadius={{ base: '18px', md: '24px' }}
+      boxShadow="md"
+      border="1px dashed"
+      borderColor="brand.300"
+      minW="0"
+      minH={{ base: '230px', md: '260px' }}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      textAlign="center"
+      position="relative"
+      overflow="hidden"
+      transition="transform .2s ease, box-shadow .2s ease, border-color .2s ease"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        bg: 'repeating-linear-gradient(135deg, rgba(56, 161, 105, .10) 0px, rgba(56, 161, 105, .10) 12px, rgba(255,255,255,.28) 12px, rgba(255,255,255,.28) 24px)',
+      }}
+      _after={{
+        content: '""',
+        position: 'absolute',
+        inset: '10px',
+        borderRadius: { base: '14px', md: '20px' },
+        border: '1px solid',
+        borderColor: 'whiteAlpha.700',
+        pointerEvents: 'none',
+      }}
+      _hover={{ transform: 'translateY(-4px)', boxShadow: 'xl', borderColor: 'brand.500', textDecoration: 'none' }}
+      _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '4px' }}
+    >
+      <Stack spacing="12px" position="relative" zIndex={1} align="center">
+        <Box w="66px" h="66px" borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
+          <Icon as={MdAddBusiness} w="34px" h="34px" />
+        </Box>
+        <Badge colorScheme={type === 'VIP' ? 'yellow' : type === 'Premium' ? 'purple' : 'green'} fontSize="0.78rem">{type}</Badge>
+        <Text fontWeight="900" fontSize={{ base: 'xl', md: '2xl' }} color="brand.600">Disponible</Text>
+        <Text color={muted} fontSize={{ base: 'sm', md: 'md' }} maxW="230px">Tocá para ver paquetes y reservar este espacio.</Text>
+      </Stack>
+    </Box>
+  );
 
   const renderSponsorCard = (sponsor) => {
+    if (sponsor.isAvailable) return renderAvailableCard(sponsor);
     const linkMax = sponsor?.type === 'General' || type === 'General' ? 1 : 4;
     const videoColumns = { base: 1, md: sponsor?.videoUrl && sponsor?.type === 'VIP' ? 2 : 1 };
 
@@ -185,7 +251,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       {title && <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="800" mb={{ base: '14px', md: '18px' }}>{title}</Text>}
       {previewSponsor ? renderSponsorCard(visibleSponsors[0]) : (
         <SimpleGrid columns={columns} spacing={{ base: '12px', md: '16px' }}>
-          {visibleSponsors.map(renderSponsorCard)}
+          {sponsorsWithAvailableSlots.map(renderSponsorCard)}
         </SimpleGrid>
       )}
     </Box>
