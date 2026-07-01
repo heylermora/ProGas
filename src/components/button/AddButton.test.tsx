@@ -19,7 +19,7 @@ describe('AddButton component', () => {
 
     expect(screen.getByTestId('current-path').textContent).toBe('/orders');
 
-    fireEvent.click(screen.getByRole('button', { name: /custom button/i }));
+    fireEvent.click(screen.getByRole('button', { name: /agregar nuevo registro/i }));
 
     expect(screen.getByTestId('current-path').textContent).toBe('/orders/new');
   });

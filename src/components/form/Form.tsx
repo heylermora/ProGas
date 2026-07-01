@@ -150,25 +150,25 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
     ));
 
   return (
-    <Box me="auto">
-      <Heading color={textColor} fontSize={{ base: '28px', md: '36px' }} mb="10px" sx={{ letterSpacing: '-0.72px' }}>
+    <Box me="auto" w="100%" maxW="100%">
+      <Heading color={textColor} fontSize={{ base: '26px', md: '34px' }} lineHeight="1.12" mb="10px" sx={{ letterSpacing: '-0.72px' }}>
         {title}
       </Heading>
 
       {!title.includes('Detalles') && (
-        <Text mb="36px" ms="4px" color={textColorSecondary} fontWeight="400" fontSize="md">
+        <Text mb={{ base: "24px", md: "34px" }} ms="4px" color={textColorSecondary} fontWeight="400" fontSize="md">
           ¡Ingrese todos los datos requeridos!
         </Text>
       )}
 
-      <Flex align="center" mb="25px">
+      <Flex align="center" mb={{ base: "22px", md: "28px" }}>
         <HSeparator />
       </Flex>
 
       {!title.includes('Detalles') && !title.includes('Planilla') ? (
         renderFields()
       ) : (
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2}>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 3, md: 5 }}>
           {renderFields()}
         </SimpleGrid>
       )}
@@ -180,8 +180,8 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
             variant="brand"
             fontWeight="500"
             w="100%"
-            h="50px"
-            mt="16px"
+            h="52px"
+            mt="24px"
             mb="12px"
             onClick={handleSubmit}
           >
@@ -189,7 +189,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
           </Button>
 
           {back && (
-            <Center>
+            <Center mt="6px">
               <NavLink to={back}>
                 <Text color={brandStars} as="span" ms="5px" fontWeight="500">
                   Volver
