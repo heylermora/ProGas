@@ -58,7 +58,7 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
   const hasLinks = cleanLinks.length > 0;
 
   return (
-    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? { base: '8px', md: '14px' } : '0px'}>
+    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? '4px' : '0px'}>
       <Box
         as={hasLinks ? 'button' : 'div'}
         type={hasLinks ? 'button' : undefined}
@@ -67,16 +67,16 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
         onClick={hasLinks ? () => setIsOpen((current) => !current) : undefined}
         position="relative"
         borderRadius="22px"
-        p="8px"
+        p={{ base: '4px', md: '6px' }}
         transition="transform .2s ease, filter .2s ease"
         cursor={hasLinks ? 'pointer' : 'default'}
         _hover={hasLinks ? { transform: 'translateY(-2px) scale(1.01)', filter: 'drop-shadow(0 12px 20px rgba(15, 23, 42, .18))' } : undefined}
         _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' }}
       >
         {sponsor.logoUrl ? (
-          <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '72px', md: '104px' }} maxW="100%" objectFit="contain" pointerEvents="none" />
+          <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '42px', md: '64px' }} maxW="100%" objectFit="contain" pointerEvents="none" />
         ) : (
-          <Box h={{ base: '72px', md: '104px' }} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
+          <Box h={{ base: '42px', md: '64px' }} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
         )}
       </Box>
 
@@ -103,9 +103,9 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
               sx={{ background: meta.bg }}
               color="white"
               borderRadius="full"
-              w="42px"
-              h="42px"
-              minW="42px"
+              w={{ base: "32px", md: "38px" }}
+              h={{ base: "32px", md: "38px" }}
+              minW={{ base: "32px", md: "38px" }}
               boxShadow="0 12px 22px rgba(15, 23, 42, .22)"
               border="2px solid"
               borderColor="white"
@@ -155,7 +155,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     ...visibleSponsors,
     ...Array.from({ length: Math.max(slotCount - visibleSponsors.length, 0) }, (_, index) => makeAvailableSponsor(type, offset + visibleSponsors.length + index + 1)),
   ];
-  const columns = { base: 1, md: Math.min(slotCount || max, 2), lg: Math.min(slotCount || max, 3), xl: Math.min(slotCount || max, 4) };
+  const columns = { base: Math.min(slotCount || max, 2), md: Math.min(slotCount || max, 4) };
 
   const renderAvailableCard = (sponsor) => (
     <Box
@@ -164,13 +164,13 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       to="/sponsors/packages"
       role="group"
       bg={cardBg}
-      p={{ base: '12px', md: '18px' }}
-      borderRadius={{ base: '18px', md: '24px' }}
-      boxShadow="md"
+      p={{ base: '10px', md: '12px' }}
+      borderRadius={{ base: '14px', md: '18px' }}
+      boxShadow="sm"
       border="1px dashed"
       borderColor="brand.300"
       minW="0"
-      minH={{ base: '176px', md: '240px' }}
+      minH={{ base: '118px', md: '140px' }}
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -182,26 +182,26 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
         content: '""',
         position: 'absolute',
         inset: 0,
-        bg: 'repeating-linear-gradient(135deg, rgba(56, 161, 105, .10) 0px, rgba(56, 161, 105, .10) 12px, rgba(255,255,255,.28) 12px, rgba(255,255,255,.28) 24px)',
+        bg: 'repeating-linear-gradient(135deg, rgba(56, 161, 105, .06) 0px, rgba(56, 161, 105, .06) 10px, rgba(255,255,255,.18) 10px, rgba(255,255,255,.18) 20px)',
       }}
       _after={{
         content: '""',
         position: 'absolute',
-        inset: '10px',
+        inset: '6px',
         borderRadius: { base: '14px', md: '20px' },
         border: '1px solid',
         borderColor: 'whiteAlpha.700',
         pointerEvents: 'none',
       }}
-      _hover={{ transform: 'translateY(-4px)', boxShadow: 'xl', borderColor: 'brand.500', textDecoration: 'none' }}
+      _hover={{ transform: 'translateY(-2px)', boxShadow: 'md', borderColor: 'brand.500', textDecoration: 'none' }}
       _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '4px' }}
     >
-      <Stack spacing={{ base: '8px', md: '12px' }} position="relative" zIndex={1} align="center">
-        <Text fontWeight="900" fontSize={{ base: 'lg', md: '2xl' }} color="brand.600">Disponible</Text>
-        <Box w={{ base: '48px', md: '66px' }} h={{ base: '48px', md: '66px' }} borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
-          <Icon as={MdAddBusiness} w={{ base: '26px', md: '34px' }} h={{ base: '26px', md: '34px' }} />
+      <Stack spacing={{ base: '4px', md: '6px' }} position="relative" zIndex={1} align="center">
+        <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} color="brand.600">Disponible</Text>
+        <Box w={{ base: '34px', md: '42px' }} h={{ base: '34px', md: '42px' }} borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
+          <Icon as={MdAddBusiness} w={{ base: '18px', md: '22px' }} h={{ base: '18px', md: '22px' }} />
         </Box>
-        <Text color={muted} fontSize={{ base: 'xs', md: 'md' }} maxW="230px">Tocá para ver paquetes.</Text>
+        <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} maxW="230px">Tocá para ver paquetes.</Text>
       </Stack>
     </Box>
   );
@@ -212,15 +212,15 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     const videoColumns = { base: 1, md: sponsor?.videoUrl && sponsor?.type === 'VIP' ? 2 : 1 };
 
     return (
-      <Box key={sponsor.id} bg={cardBg} p={{ base: '12px', md: '18px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" border="1px solid" borderColor={borderColor} minW="0">
-        <SimpleGrid columns={videoColumns} spacing={{ base: '14px', md: '18px' }} alignItems="center">
-          <Stack spacing={{ base: '8px', md: '12px' }} h="100%" align="center" textAlign="center">
-            <Text fontWeight="800" fontSize={{ base: 'md', md: 'xl' }} noOfLines={2}>{sponsor.name}</Text>
+      <Box key={sponsor.id} bg={cardBg} p={{ base: '10px', md: '12px' }} borderRadius={{ base: '14px', md: '18px' }} boxShadow="sm" border="1px solid" borderColor={borderColor} minW="0">
+        <SimpleGrid columns={videoColumns} spacing={{ base: '8px', md: '12px' }} alignItems="center">
+          <Stack spacing={{ base: '4px', md: '6px' }} h="100%" align="center" textAlign="center">
+            <Text fontWeight="800" fontSize={{ base: 'sm', md: 'md' }} noOfLines={2}>{sponsor.name}</Text>
             <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} />
-            {sponsor.description && <Text color={muted} fontSize={{ base: 'xs', md: 'sm' }} noOfLines={2}>{sponsor.description}</Text>}
+            {sponsor.description && <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} noOfLines={1}>{sponsor.description}</Text>}
           </Stack>
           {sponsor.type === 'VIP' && sponsor.videoUrl && (
-            <AspectRatio ratio={16 / 9} w="100%">
+            <AspectRatio ratio={16 / 9} w="100%" display={{ base: 'none', md: 'block' }}>
               {shouldRenderIframeVideo(sponsor.videoUrl) ? (
                 <Box
                   as="iframe"
@@ -242,10 +242,10 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   };
 
   return (
-    <Box w="100%">
-      {title && <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="800" mb={{ base: '14px', md: '18px' }}>{title}</Text>}
+    <Box w="100%" opacity={0.82}>
+      {title && <Text fontSize={{ base: 'xs', md: 'sm' }} color={muted} fontWeight="700" mb={{ base: '8px', md: '10px' }}>{title}</Text>}
       {previewSponsor ? renderSponsorCard(visibleSponsors[0]) : (
-        <SimpleGrid columns={columns} spacing={{ base: '12px', md: '16px' }}>
+        <SimpleGrid columns={columns} spacing={{ base: '8px', md: '10px' }}>
           {sponsorsWithAvailableSlots.map(renderSponsorCard)}
         </SimpleGrid>
       )}
