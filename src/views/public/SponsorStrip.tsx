@@ -187,7 +187,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       border="1px dashed"
       borderColor="brand.300"
       minW="0"
-      minH={{ base: '118px', md: '140px' }}
+      minH={{ base: '104px', md: '122px' }}
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -226,6 +226,49 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   const renderSponsorCard = (sponsor) => {
     if (sponsor.isAvailable) return renderAvailableCard(sponsor);
     const linkMax = sponsor?.type === 'General' || type === 'General' ? 1 : 4;
+    const isVipWithVideo = sponsor?.type === 'VIP' && sponsor.videoUrl;
+
+    if (isVipWithVideo) {
+      return (
+        <Box key={sponsor.id} bg={cardBg} p={{ base: '10px', md: '12px' }} borderRadius={{ base: '14px', md: '18px' }} boxShadow="sm" border="1px solid" borderColor={borderColor} minW="0" overflow="hidden">
+          <Stack spacing={{ base: '6px', md: '8px' }} align="center" textAlign="center">
+            <Text fontWeight="800" fontSize={{ base: 'sm', md: 'md' }} noOfLines={2}>{sponsor.name}</Text>
+            <Box display="flex" alignItems="center" justifyContent="center" gap={{ base: '8px', md: '12px' }} w="100%">
+              <Box flex="1" minW="0">
+                <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} />
+              </Box>
+              <Box
+                as="button"
+                type="button"
+                aria-label={`Ver video de ${sponsor.name}`}
+                onClick={() => setActiveVideoSponsor(sponsor)}
+                flexShrink={0}
+                px={{ base: '10px', md: '12px' }}
+                py={{ base: '7px', md: '8px' }}
+                borderRadius="full"
+                color="white"
+                bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
+                boxShadow="0 12px 22px rgba(184, 134, 11, .32)"
+                display="inline-flex"
+                alignItems="center"
+                gap="5px"
+                fontSize={{ base: '11px', md: 'xs' }}
+                fontWeight="900"
+                whiteSpace="nowrap"
+                cursor="pointer"
+                _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
+                _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.200', outlineOffset: '3px' }}
+              >
+                <Icon as={MdPlayCircleFilled} w={{ base: '17px', md: '19px' }} h={{ base: '17px', md: '19px' }} />
+                Video
+              </Box>
+            </Box>
+            {sponsor.description && <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} noOfLines={1}>{sponsor.description}</Text>}
+          </Stack>
+        </Box>
+      );
+    }
+
     const videoColumns = { base: 1 };
 
     return (
