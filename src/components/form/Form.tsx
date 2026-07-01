@@ -151,7 +151,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
 
   return (
     <Box me="auto">
-      <Heading color={textColor} fontSize="36px" mb="10px" sx={{ letterSpacing: '-0.72px' }}>
+      <Heading color={textColor} fontSize={{ base: '28px', md: '36px' }} mb="10px" sx={{ letterSpacing: '-0.72px' }}>
         {title}
       </Heading>
 
@@ -168,7 +168,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
       {!title.includes('Detalles') && !title.includes('Planilla') ? (
         renderFields()
       ) : (
-        <SimpleGrid columns={2} spacing={2}>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2}>
           {renderFields()}
         </SimpleGrid>
       )}

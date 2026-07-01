@@ -49,7 +49,7 @@ export default function LineCard(props: { title: string, subtitle: string, entit
 	return (
 		<Card justifyContent='center' alignItems='center' flexDirection='column' w='100%' h='100%' mb='0px' {...rest}>
 			<Flex w='100%' flexDirection={{ base: 'column', lg: 'row' }}>
-				<Flex flexDirection='column' me='20px' mt='28px'>
+				<Flex flexDirection='column' me={{ base: '0px', lg: '20px' }} mt='28px' minW='0'>
 					<Text isTruncated color={textColor} fontSize='24px' textAlign='start' fontWeight='700' lineHeight='100%'>
 						{title}
 					</Text>
@@ -59,7 +59,7 @@ export default function LineCard(props: { title: string, subtitle: string, entit
 						</Text>
 					</Flex>
 				</Flex>
-				<Box minH='260px' minW='75%' mt='auto'>
+				<Box minH='260px' minW={{ base: '0', lg: '75%' }} w='100%' mt='auto'>
 					<LineChart chartData={lineChartData(dataList)} chartOptions={lineChartOptions(labels)} />
 				</Box>
 			</Flex>
