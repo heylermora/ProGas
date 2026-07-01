@@ -39,7 +39,7 @@ describe('Home', () => {
     renderHome();
 
     const toggle = screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i });
-    const facebook = screen.getByRole('link', { name: 'Facebook', hidden: true });
+    const facebook = screen.getByLabelText('Facebook');
 
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(facebook.getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
@@ -47,7 +47,7 @@ describe('Home', () => {
     fireEvent.click(toggle);
 
     expect(screen.getByRole('button', { name: /ocultar redes sociales de gas memo/i }).getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByRole('link', { name: 'Facebook', hidden: true }).getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
+    expect(screen.getByLabelText('Facebook').getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
   });
 
   it('keeps the main actions available on mobile and desktop viewport widths', () => {
