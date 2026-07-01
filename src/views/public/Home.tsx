@@ -130,8 +130,9 @@ function SocialLogoHub() {
 export default function Home() {
   return (
     <PublicPage maxW="1200px">
-      <SponsorStrip type="VIP" max={2} />
-      <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '28px', md: '40px' }}>
+      <SponsorStrip type="VIP" max={2} title="Patrocinadores" />
+      <Box h={{ base: '10px', md: '14px' }} />
+      <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '18px', md: '28px' }}>
         <Stack spacing={{ base: '10px', md: '12px' }} maxW={{ base: '100%', lg: '680px' }}>
           <Text color="brand.500" fontWeight="900" letterSpacing="wide">GAS MEMO</Text>
           <Heading fontSize={{ base: '34px', md: '48px', xl: '56px' }} lineHeight="1.05">Pedí tu gas en minutos.</Heading>
@@ -143,7 +144,7 @@ export default function Home() {
         </Stack>
         <SocialLogoHub />
       </Flex>
-      <SponsorStrip type="VIP" max={2} offset={2} />
+      <SponsorStrip type="VIP" max={2} offset={2} title="Patrocinadores" />
     </PublicPage>
   );
 }

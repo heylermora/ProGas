@@ -251,16 +251,16 @@ export default function Index() {
 					/>
 				</SimpleGrid>
 				<Grid
-					h="200px"
-					templateRows="repeat(2, 1fr)"
-					templateColumns="repeat(4, 1fr)"
+					h={{ base: 'auto', xl: '200px' }}
+					templateRows={{ base: 'auto', xl: 'repeat(2, 1fr)' }}
+					templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)', xl: 'repeat(4, 1fr)' }}
 					mb='20px'
 					gap='20px'
 				>
-					<GridItem  rowSpan={2} colSpan={1}>
+					<GridItem rowSpan={{ base: 1, xl: 2 }} colSpan={1}>
 						<CheckList title='Clientes' items={clientsList} checkedItems={checkedClientsList} onCheckedItemsChange={setCheckedClientsList}/>
 					</GridItem>
-					<GridItem  colSpan={3}>
+					<GridItem colSpan={{ base: 1, lg: 2, xl: 3 }}>
 					{checkedClientsList?.length === 1 ? 
 						(
 							<LineCard
@@ -280,7 +280,7 @@ export default function Index() {
 						)
 					}
 					</GridItem>
-					<GridItem  colSpan={3}>
+					<GridItem colSpan={{ base: 1, lg: 2, xl: 3 }}>
 					{checkedClientsList.length === 1 ? 
 						(
 							<LineCard
@@ -300,10 +300,10 @@ export default function Index() {
 						)
 					}
 					</GridItem>
-					<GridItem  rowSpan={2} colSpan={1}>
+					<GridItem rowSpan={{ base: 1, xl: 2 }} colSpan={1}>
 						<CheckList title='Proyectos' items={projectsList} checkedItems={checkedProjectsList} onCheckedItemsChange={setCheckedProjectsList} />
 					</GridItem>
-					<GridItem  colSpan={3}>
+					<GridItem colSpan={{ base: 1, lg: 2, xl: 3 }}>
 						{checkedProjectsList.length === 1 ? 
 						(
 							<LineCard
@@ -323,7 +323,7 @@ export default function Index() {
 						)
 						}
 					</GridItem>
-					<GridItem  colSpan={3}>
+					<GridItem colSpan={{ base: 1, lg: 2, xl: 3 }}>
 						{checkedProjectsList.length === 1 ? 
 						(
 							<LineCard
@@ -343,7 +343,7 @@ export default function Index() {
 						)
 						}
 					</GridItem>
-					<GridItem  colSpan={3}>
+					<GridItem colSpan={{ base: 1, lg: 2, xl: 3 }}>
 						<LineCard 
 							title='Resumen'
 							subtitle='Financiero'
