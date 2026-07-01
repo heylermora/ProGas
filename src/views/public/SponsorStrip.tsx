@@ -324,7 +324,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
               <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} variant={visual.logo} actionLabel={visual.actionLabel} />
             </Box>
             <Stack spacing={{ base: '6px', md: '8px' }} align={{ base: 'flex-start', md: 'center' }} textAlign={{ base: 'left', md: 'center' }} flex="1" minW="0">
-              <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>
+              {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>}
               {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines}>{sponsor.description}</Text>}
               <Box
                 as="button"
@@ -366,7 +366,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
               <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} variant={visual.logo} actionLabel={visual.actionLabel} />
             </Box>
             <Stack spacing={{ base: '4px', md: '6px' }} align={{ base: 'flex-start', md: 'center' }} textAlign={{ base: 'left', md: 'center' }} flex="1" minW="0">
-              <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>
+              {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>}
               {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines}>{sponsor.description}</Text>}
             </Stack>
           </Stack>
