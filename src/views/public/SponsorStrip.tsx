@@ -212,7 +212,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     const videoColumns = { base: 1, md: sponsor?.videoUrl && sponsor?.type === 'VIP' ? 2 : 1 };
 
     return (
-      <Box key={sponsor.id} bg={cardBg} p={{ base: '10px', md: '12px' }} borderRadius={{ base: '14px', md: '18px' }} boxShadow="sm" border="1px solid" borderColor={borderColor} minW="0">
+      <Box key={sponsor.id} bg={cardBg} p={{ base: '10px', md: '12px' }} borderRadius={{ base: '14px', md: '18px' }} boxShadow="sm" border="1px solid" borderColor={borderColor} minW="0" overflow="hidden">
         <SimpleGrid columns={videoColumns} spacing={{ base: '8px', md: '12px' }} alignItems="center">
           <Stack spacing={{ base: '4px', md: '6px' }} h="100%" align="center" textAlign="center">
             <Text fontWeight="800" fontSize={{ base: 'sm', md: 'md' }} noOfLines={2}>{sponsor.name}</Text>
@@ -220,19 +220,19 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
             {sponsor.description && <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} noOfLines={1}>{sponsor.description}</Text>}
           </Stack>
           {sponsor.type === 'VIP' && sponsor.videoUrl && (
-            <AspectRatio ratio={16 / 9} w="100%">
+            <AspectRatio ratio={16 / 9} w={{ base: '72%', md: '82%' }} maxW={{ base: '180px', md: '260px' }} mx="auto">
               {shouldRenderIframeVideo(sponsor.videoUrl) ? (
                 <Box
                   as="iframe"
                   src={getVideoEmbedSrc(sponsor.videoUrl)}
                   title={`Video de ${sponsor.name}`}
                   border="0"
-                  borderRadius="18px"
+                  borderRadius="10px"
                   allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                   allowFullScreen
                 />
               ) : (
-                <Box as="video" src={sponsor.videoUrl} controls borderRadius="18px" overflow="hidden" />
+                <Box as="video" src={sponsor.videoUrl} controls borderRadius="10px" overflow="hidden" />
               )}
             </AspectRatio>
           )}
