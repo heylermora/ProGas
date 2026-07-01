@@ -44,7 +44,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 
   const shouldShowBox = currentPath.includes('/order/index') || currentPath.includes('/product/index') || currentPath.includes('/sponsor/index') || currentPath.includes('/order/balance') ||  currentPath.includes('/dashboard/index');
   const size = currentPath.includes('/expense/index') ? '4xl' : 'lg';
-  const adminPadding: ResponsiveValue<string> = { base: '20px', md: '30px' };
+  const adminPadding: ResponsiveValue<string> = { base: '16px', md: '28px', xl: '32px' };
 
   return (
     <Box>
@@ -75,7 +75,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 								{...rest}
 							/>
 						</Portal>
-						<Box mx='auto' p={adminPadding} pe='20px' minH='100vh' pt='50px'>	
+						<Box mx='auto' p={adminPadding} minH='100vh' pt={{ base: '70px', md: '62px' }} maxW='1600px'>
 							<Switch>
 								{getRoutes(routes)}
 								<Redirect from='/' to={`/admin/order/index/${search}`} />
@@ -84,7 +84,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 					</Box>
 			</SidebarContext.Provider>
   		):(
-			<Box mx='auto' p={adminPadding} pe='20px' maxW={size}>
+			<Box mx='auto' p={adminPadding} maxW={size}>
 				<Switch>
 					{getRoutes(routes)}
 					<Redirect from='/' to='/admin/order/index' />

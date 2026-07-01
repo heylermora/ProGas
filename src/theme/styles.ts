@@ -84,10 +84,30 @@ export const globalStyles = {
 				overflowX: 'hidden',
 				bg: mode('secondaryGray.300', 'navy.900')(props),
 				fontFamily: 'DM Sans',
-				letterSpacing: '-0.5px'
+				letterSpacing: '-0.2px',
+				color: mode('navy.700', 'white')(props),
+				WebkitFontSmoothing: 'antialiased',
+				MozOsxFontSmoothing: 'grayscale'
 			},
 			input: {
-				color: 'gray.700'
+				color: mode('navy.700', 'white')(props)
+			},
+			'*, *::before, *::after': {
+				boxSizing: 'border-box'
+			},
+			'a, button, [role=button], input, select, textarea': {
+				_focusVisible: {
+					boxShadow: '0 0 0 3px rgba(66, 42, 251, 0.28)',
+					outline: 'none'
+				}
+			},
+			'::-webkit-scrollbar': {
+				width: '10px',
+				height: '10px'
+			},
+			'::-webkit-scrollbar-thumb': {
+				background: mode('#CBD5E1', '#334155')(props),
+				borderRadius: '999px'
 			},
 			html: {
 				fontFamily: 'DM Sans'

@@ -5,7 +5,8 @@ export const inputStyles = {
 			baseStyle: {
 				field: {
 					fontWeight: 400,
-					borderRadius: '8px'
+					borderRadius: '12px',
+					minH: '44px'
 				}
 			},
 
@@ -16,10 +17,12 @@ export const inputStyles = {
 						border: '1px solid',
 						color: mode('secondaryGray.900', 'white')(props),
 						borderColor: mode('secondaryGray.100', 'whiteAlpha.100')(props),
-						borderRadius: '16px',
+						borderRadius: '14px',
 						fontSize: 'sm',
 						p: '20px',
-						_placeholder: { color: 'secondaryGray.400' }
+						_placeholder: { color: 'secondaryGray.500' },
+						_hover: { borderColor: mode('secondaryGray.500', 'whiteAlpha.300')(props) },
+						_focus: { borderColor: mode('brand.500', 'brand.300')(props), boxShadow: '0 0 0 1px var(--chakra-colors-brand-500)' }
 					}
 				}),
 				auth: (props: any) => ({
@@ -29,8 +32,11 @@ export const inputStyles = {
 						bg: mode('transparent', 'transparent')(props),
 						border: '1px solid',
 						borderColor: mode('secondaryGray.100', 'rgba(135, 140, 189, 0.3)')(props),
-						borderRadius: '16px',
-						_placeholder: { color: 'secondaryGray.600', fontWeight: '400' }
+						borderRadius: '14px',
+						minH: '46px',
+						_placeholder: { color: 'secondaryGray.600', fontWeight: '400' },
+						_hover: { borderColor: mode('secondaryGray.500', 'whiteAlpha.300')(props) },
+						_focus: { borderColor: mode('brand.500', 'brand.300')(props), boxShadow: '0 0 0 1px var(--chakra-colors-brand-500)' }
 					}
 				}),
 				authSecondary: () => ({
@@ -112,7 +118,7 @@ export const inputStyles = {
 					field: {
 						bg: mode('transparent', 'navy.800')(props),
 						border: '1px solid',
-						color: 'secondaryGray.600',
+						color: mode('navy.700', 'white')(props),
 						borderColor: mode('secondaryGray.100', 'whiteAlpha.100')(props),
 						borderRadius: '16px',
 						_placeholder: { color: 'secondaryGray.600' }

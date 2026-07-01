@@ -55,6 +55,7 @@ const FieldInput = ({
             fontSize="sm"
             ms={{ base: '0px', md: '0px' }}
             size="md"
+            h="46px"
             value={fieldValues[field.name] ?? ''}
             onChange={handleChange(field.type)}
           >
@@ -90,6 +91,7 @@ const FieldInput = ({
             type={field.type}
             fontWeight="500"
             size="md"
+            h="46px"
             value={fieldValues[field.name] ?? ''}
             onChange={handleChange(field.type)}
           />
@@ -98,14 +100,15 @@ const FieldInput = ({
   };
 
   return (
-    <FormControl isDisabled={isDisabled} isInvalid={isInvalid}>
+    <FormControl isDisabled={isDisabled} isInvalid={isInvalid} mb={{ base: "14px", md: "18px" }}>
       <FormLabel
         display="flex"
         ms="4px"
         fontSize="sm"
-        fontWeight="500"
+        fontWeight="700"
         color={textColor}
-        mt="16px"
+        mt="0px"
+        mb="8px"
       >
         {field.label}
         {field.validation?.required && (
@@ -116,14 +119,14 @@ const FieldInput = ({
       </FormLabel>
 
       {field.helper !== undefined && (
-        <FormHelperText ml="4px" mt="0px" pb="12px">
+        <FormHelperText ml="4px" mt="0px" pb="10px" color="secondaryGray.600">
           {field.helper}
         </FormHelperText>
       )}
 
       {renderInput()}
 
-      <FormErrorMessage ml="12px">
+      <FormErrorMessage ml="4px" fontWeight="600">
         {errorInfo.message}
       </FormErrorMessage>
     </FormControl>
