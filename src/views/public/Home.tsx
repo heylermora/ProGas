@@ -16,11 +16,16 @@ import {
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail } from 'react-icons/md';
+import { MdEmail, MdFavorite } from 'react-icons/md';
 import SponsorStrip from './SponsorStrip';
 import { PublicPage } from './PublicPage';
 
 const gasMemoLogo = `${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`;
+const bmaLogo = `${process.env.PUBLIC_URL}/Banda%20Municipal%20de%20Acosta/Logo.png`;
+const bmaDonationUrl =
+  'https://api.whatsapp.com/send/?phone=50683978524&text=' +
+  encodeURIComponent('Hola, quiero apoyar a la Banda Municipal de Acosta con una donación. ¿Me comparten la información?') +
+  '&type=phone_number&app_absent=0';
 
 const socialLinks = [
   {
@@ -59,6 +64,136 @@ const socialLinks = [
     position: { base: { bottom: '42px', right: '-10px' }, md: { top: '50%', right: '-28px' } },
   },
 ];
+
+
+function DonationBanner() {
+  const bg = useColorModeValue(
+    'linear-gradient(135deg, #FFF8E1 0%, #FFFFFF 48%, #FFF3C4 100%)',
+    'linear-gradient(135deg, rgba(113, 63, 18, .45) 0%, rgba(23, 25, 35, .96) 55%, rgba(66, 32, 6, .55) 100%)'
+  );
+
+  const borderColor = useColorModeValue('yellow.200', 'yellow.700');
+  const textColor = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const muted = useColorModeValue('gray.600', 'gray.300');
+  const logoBg = useColorModeValue('white', 'whiteAlpha.900');
+
+  return (
+    <Box
+      bg={bg}
+      border="1px solid"
+      borderColor={borderColor}
+      borderRadius={{ base: '20px', md: '28px' }}
+      boxShadow="0 18px 45px rgba(0, 0, 0, 0.08)"
+      px={{ base: 4, md: 6 }}
+      py={{ base: 4, md: 5 }}
+      overflow="hidden"
+      position="relative"
+    >
+      <Box
+        position="absolute"
+        top="-45px"
+        right="-45px"
+        w="140px"
+        h="140px"
+        bg="yellow.300"
+        opacity="0.22"
+        borderRadius="full"
+      />
+
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        align={{ base: 'stretch', md: 'center' }}
+        justify="space-between"
+        gap={{ base: 4, md: 6 }}
+        position="relative"
+        zIndex={1}
+      >
+        <Flex align="center" gap={{ base: 3, md: 5 }} minW="0">
+          <Box
+            bg={logoBg}
+            border="1px solid"
+            borderColor={useColorModeValue('yellow.100', 'yellow.600')}
+            borderRadius={{ base: '18px', md: '22px' }}
+            boxShadow="sm"
+            p={{ base: 2, md: 3 }}
+            w={{ base: '78px', md: '104px' }}
+            minW={{ base: '78px', md: '104px' }}
+            h={{ base: '64px', md: '82px' }}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Image
+              src={bmaLogo}
+              alt="Banda Municipal de Acosta"
+              maxH="100%"
+              maxW="100%"
+              objectFit="contain"
+            />
+          </Box>
+
+          <Stack spacing={{ base: 1, md: 2 }} minW="0">
+            <Text
+              color="yellow.700"
+              fontWeight="900"
+              fontSize={{ base: 'xs', md: 'sm' }}
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+            >
+              Campaña solidaria
+            </Text>
+
+            <Heading
+              color={textColor}
+              fontSize={{ base: 'xl', md: '3xl' }}
+              lineHeight="1.1"
+              letterSpacing="-0.03em"
+            >
+              Apoyá a la Banda Municipal de Acosta
+            </Heading>
+
+            <Text
+              color={muted}
+              fontSize={{ base: 'sm', md: 'md' }}
+              maxW="620px"
+              lineHeight="1.55"
+            >
+              Tu donación ayuda a impulsar la música, la formación artística y el talento local.
+              Cualquier aporte suma.
+            </Text>
+          </Stack>
+        </Flex>
+
+        <Button
+          as="a"
+          href={bmaDonationUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          leftIcon={<MdFavorite />}
+          size={{ base: 'md', md: 'lg' }}
+          alignSelf={{ base: 'stretch', md: 'center' }}
+          flexShrink={0}
+          bg="yellow.400"
+          color="gray.900"
+          fontWeight="900"
+          borderRadius="full"
+          px={{ base: 6, md: 8 }}
+          boxShadow="0 10px 24px rgba(202, 138, 4, 0.28)"
+          _hover={{
+            bg: 'yellow.300',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 14px 30px rgba(202, 138, 4, 0.36)',
+          }}
+          _active={{
+            transform: 'translateY(0)',
+          }}
+        >
+          Donar ahora
+        </Button>
+      </Flex>
+    </Box>
+  );
+}
 
 function SocialLogoHub() {
   const [isOpen, setIsOpen] = useState(false);
@@ -144,6 +279,8 @@ export default function Home() {
         </Stack>
         <SocialLogoHub />
       </Flex>
+      <DonationBanner />
+      <Box h={{ base: '14px', md: '18px' }} />
       <SponsorStrip type="VIP" max={2} offset={2} title="Patrocinadores" />
     </PublicPage>
   );
