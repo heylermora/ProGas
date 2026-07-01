@@ -13,6 +13,7 @@ import {
   ModalContent,
   ModalOverlay,
   SimpleGrid,
+  useBreakpointValue,
   Stack,
   Text,
   Tooltip,
@@ -20,7 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdAddBusiness, MdClose, MdEmail, MdLink, MdPlayCircleFilled, MdShare } from 'react-icons/md';
+import { MdAddBusiness, MdClose, MdEmail, MdLink, MdPlayCircleFilled, MdShare, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
 
@@ -65,8 +66,8 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
         borderColor: 'yellow.200',
         boxShadow: '0 18px 45px rgba(180, 130, 24, .16)',
         borderRadius: { base: '20px', md: '26px' },
-        p: { base: '14px', md: hasVideo ? '16px' : '18px' },
-        minH: { base: hasVideo ? '138px' : '154px', md: hasVideo ? '158px' : '178px' },
+        p: { base: '16px', md: hasVideo ? '16px' : '18px' },
+        minH: { base: hasVideo ? '172px' : '186px', md: hasVideo ? '158px' : '178px' },
         _hover: { transform: 'translateY(-5px) scale(1.01)', boxShadow: '0 22px 56px rgba(180, 130, 24, .22)', borderColor: 'yellow.300' },
       },
       logo: 'hero',
@@ -83,8 +84,8 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
         borderColor: 'purple.100',
         boxShadow: '0 12px 30px rgba(71, 85, 105, .12)',
         borderRadius: { base: '18px', md: '22px' },
-        p: { base: '12px', md: '14px' },
-        minH: { base: '124px', md: '142px' },
+        p: { base: '14px', md: '14px' },
+        minH: { base: '158px', md: '142px' },
         _hover: { transform: 'translateY(-4px)', boxShadow: '0 18px 40px rgba(71, 85, 105, .17)', borderColor: 'purple.200' },
       },
       logo: 'featured',
@@ -100,8 +101,8 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
       borderColor: 'gray.100',
       boxShadow: '0 8px 22px rgba(15, 23, 42, .08)',
       borderRadius: { base: '16px', md: '18px' },
-      p: { base: '10px', md: '12px' },
-      minH: { base: '108px', md: '122px' },
+      p: { base: '12px', md: '12px' },
+      minH: { base: '146px', md: '122px' },
       _hover: { transform: 'translateY(-3px)', boxShadow: '0 14px 30px rgba(15, 23, 42, .12)', borderColor: 'brand.100' },
     },
     logo: 'compact',
@@ -112,9 +113,9 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
 };
 
 const logoSize = (variant) => {
-  if (variant === 'hero') return { h: { base: '62px', md: '86px' }, placeholderH: { base: '62px', md: '86px' }, icon: { base: '38px', md: '42px' } };
-  if (variant === 'featured') return { h: { base: '50px', md: '70px' }, placeholderH: { base: '50px', md: '70px' }, icon: { base: '34px', md: '38px' } };
-  return { h: { base: '42px', md: '58px' }, placeholderH: { base: '42px', md: '58px' }, icon: { base: '30px', md: '34px' } };
+  if (variant === 'hero') return { h: { base: '76px', md: '86px' }, placeholderH: { base: '76px', md: '86px' }, icon: { base: '40px', md: '42px' } };
+  if (variant === 'featured') return { h: { base: '64px', md: '70px' }, placeholderH: { base: '64px', md: '70px' }, icon: { base: '36px', md: '38px' } };
+  return { h: { base: '56px', md: '58px' }, placeholderH: { base: '56px', md: '58px' }, icon: { base: '34px', md: '34px' } };
 };
 
 function SponsorLogoHub({ sponsor, links = [], max = 4, muted, variant = 'compact', actionLabel = 'Conectar' }) {
@@ -222,6 +223,7 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted, variant = 'compac
   );
 }
 export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
+  const isMobile = useBreakpointValue({ base: true, md: false });
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
   const [sponsors, setSponsors] = useState([]);
@@ -255,7 +257,9 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     ...visibleSponsors,
     ...Array.from({ length: Math.max(slotCount - visibleSponsors.length, 0) }, (_, index) => makeAvailableSponsor(type, normalizedOffset + visibleSponsors.length + index + 1)),
   ];
-  const columns = { base: Math.min(slotCount || normalizedMax, 2), md: Math.min(slotCount || normalizedMax, 4) };
+  const columns = { base: 1, sm: 2, md: Math.min(slotCount || normalizedMax, 4) };
+  const shouldUseMobileRail = Boolean(isMobile && !previewSponsor && sponsorsWithAvailableSlots.length > 1);
+  const mobileCardWidth = type === 'VIP' ? 'min(86vw, 360px)' : 'min(78vw, 320px)';
 
   const renderAvailableCard = (sponsor) => (
     <Box
@@ -270,7 +274,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       border="1px dashed"
       borderColor="brand.300"
       minW="0"
-      minH={{ base: '104px', md: '122px' }}
+      minH={{ base: '146px', md: '122px' }}
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -297,11 +301,11 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '4px' }}
     >
       <Stack spacing={{ base: '4px', md: '6px' }} position="relative" zIndex={1} align="center">
-        <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} color="brand.600">Tu marca aquí</Text>
+        <Text fontWeight="900" fontSize={{ base: 'md', md: 'md' }} color="brand.600">Tu marca aquí</Text>
         <Box w={{ base: '34px', md: '42px' }} h={{ base: '34px', md: '42px' }} borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
           <Icon as={MdAddBusiness} w={{ base: '18px', md: '22px' }} h={{ base: '18px', md: '22px' }} />
         </Box>
-        <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} maxW="230px">Llegá a clientes locales mientras hacen su pedido.</Text>
+        <Text color={muted} fontSize={{ base: 'xs', md: 'xs' }} maxW="230px" lineHeight="1.35">Llegá a clientes locales mientras hacen su pedido.</Text>
       </Stack>
     </Box>
   );
@@ -316,7 +320,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
 
     if (isVipWithVideo) {
       return (
-        <Box key={sponsor.id} {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
+        <Box key={sponsor.id} data-sponsor-card {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
           <Stack spacing={{ base: '6px', md: '8px' }} align="center" textAlign="center">
             <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>
             <Box display="flex" alignItems="center" justifyContent="center" gap={{ base: '8px', md: '12px' }} w="100%">
@@ -358,7 +362,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     const videoColumns = { base: 1 };
 
     return (
-      <Box key={sponsor.id} {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
+      <Box key={sponsor.id} data-sponsor-card {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
         <SimpleGrid columns={videoColumns} spacing={{ base: '8px', md: '12px' }} alignItems="center">
           <Stack spacing={{ base: '4px', md: '6px' }} h="100%" align="center" textAlign="center">
             <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>
@@ -401,9 +405,20 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   return (
     <>
       <Box w="100%">
-        {title && <Text fontSize={{ base: 'xs', md: 'sm' }} color={muted} fontWeight="700" mb={{ base: '8px', md: '10px' }}>{title}</Text>}
-        {previewSponsor ? renderSponsorCard(visibleSponsors[0] || previewSponsor) : (
-          <SimpleGrid columns={columns} spacing={{ base: '8px', md: '10px' }}>
+        {title && (
+          <Box display="flex" alignItems="center" gap="8px" mb={{ base: '10px', md: '10px' }}>
+            <Box w="28px" h="28px" borderRadius="full" bg="yellow.100" color="yellow.700" display="flex" alignItems="center" justifyContent="center">
+              <Icon as={MdStar} w="15px" h="15px" />
+            </Box>
+            <Text fontSize={{ base: 'sm', md: 'sm' }} color={muted} fontWeight="900" letterSpacing=".04em" textTransform="uppercase">{title}</Text>
+          </Box>
+        )}
+        {previewSponsor ? renderSponsorCard(visibleSponsors[0] || previewSponsor) : shouldUseMobileRail ? (
+          <Box display="flex" gap="12px" overflowX="auto" overflowY="visible" pb="10px" mx="-16px" px="16px" scrollSnapType="x mandatory" sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, '& > [data-sponsor-card], & > a': { flex: `0 0 ${mobileCardWidth}`, scrollSnapAlign: 'start' } }}>
+            {sponsorsWithAvailableSlots.map(renderSponsorCard)}
+          </Box>
+        ) : (
+          <SimpleGrid columns={columns} spacing={{ base: '12px', md: '10px' }}>
             {sponsorsWithAvailableSlots.map(renderSponsorCard)}
           </SimpleGrid>
         )}
