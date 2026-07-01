@@ -7,6 +7,11 @@ import {
   IconButton,
   Image,
   Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalOverlay,
   SimpleGrid,
   Stack,
   Text,
@@ -125,6 +130,7 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
 
 export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
   const [sponsors, setSponsors] = useState([]);
+  const [activeVideoSponsor, setActiveVideoSponsor] = useState(null);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.400');
   const borderColor = useColorModeValue('gray.100', 'whiteAlpha.200');
@@ -220,21 +226,34 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
             {sponsor.description && <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} noOfLines={1}>{sponsor.description}</Text>}
           </Stack>
           {sponsor.type === 'VIP' && sponsor.videoUrl && (
-            <AspectRatio ratio={16 / 9} w={{ base: '72%', md: '82%' }} maxW={{ base: '180px', md: '260px' }} mx="auto">
-              {shouldRenderIframeVideo(sponsor.videoUrl) ? (
-                <Box
-                  as="iframe"
-                  src={getVideoEmbedSrc(sponsor.videoUrl)}
-                  title={`Video de ${sponsor.name}`}
-                  border="0"
-                  borderRadius="10px"
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-              ) : (
-                <Box as="video" src={sponsor.videoUrl} controls borderRadius="10px" overflow="hidden" />
-              )}
-            </AspectRatio>
+            <Box
+              as="button"
+              type="button"
+              aria-label={`Abrir video de ${sponsor.name}`}
+              onClick={() => setActiveVideoSponsor(sponsor)}
+              w={{ base: '72%', md: '82%' }}
+              maxW={{ base: '180px', md: '260px' }}
+              mx="auto"
+              cursor="pointer"
+              borderRadius="10px"
+              overflow="hidden"
+              _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '3px' }}
+            >
+              <AspectRatio ratio={16 / 9} w="100%" pointerEvents="none">
+                {shouldRenderIframeVideo(sponsor.videoUrl) ? (
+                  <Box
+                    as="iframe"
+                    src={getVideoEmbedSrc(sponsor.videoUrl)}
+                    title={`Video de ${sponsor.name}`}
+                    border="0"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                ) : (
+                  <Box as="video" src={sponsor.videoUrl} muted playsInline />
+                )}
+              </AspectRatio>
+            </Box>
           )}
         </SimpleGrid>
       </Box>
@@ -242,13 +261,39 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   };
 
   return (
-    <Box w="100%" opacity={0.82}>
-      {title && <Text fontSize={{ base: 'xs', md: 'sm' }} color={muted} fontWeight="700" mb={{ base: '8px', md: '10px' }}>{title}</Text>}
-      {previewSponsor ? renderSponsorCard(visibleSponsors[0]) : (
-        <SimpleGrid columns={columns} spacing={{ base: '8px', md: '10px' }}>
-          {sponsorsWithAvailableSlots.map(renderSponsorCard)}
-        </SimpleGrid>
-      )}
-    </Box>
+    <>
+      <Box w="100%" opacity={0.82}>
+        {title && <Text fontSize={{ base: 'xs', md: 'sm' }} color={muted} fontWeight="700" mb={{ base: '8px', md: '10px' }}>{title}</Text>}
+        {previewSponsor ? renderSponsorCard(visibleSponsors[0]) : (
+          <SimpleGrid columns={columns} spacing={{ base: '8px', md: '10px' }}>
+            {sponsorsWithAvailableSlots.map(renderSponsorCard)}
+          </SimpleGrid>
+        )}
+      </Box>
+      <Modal isOpen={Boolean(activeVideoSponsor)} onClose={() => setActiveVideoSponsor(null)} size="full" isCentered>
+        <ModalOverlay />
+        <ModalContent m={0} maxW="100vw" h="100vh" borderRadius={0} bg="black">
+          <ModalCloseButton color="white" zIndex={2} />
+          <ModalBody p={{ base: '44px 12px 12px', md: '56px 40px 40px' }} display="flex" alignItems="center" justifyContent="center">
+            {activeVideoSponsor?.videoUrl && (
+              <AspectRatio ratio={16 / 9} w="100%" maxH={{ base: 'calc(100vh - 72px)', md: '70vh' }}>
+                {shouldRenderIframeVideo(activeVideoSponsor.videoUrl) ? (
+                  <Box
+                    as="iframe"
+                    src={getVideoEmbedSrc(activeVideoSponsor.videoUrl)}
+                    title={`Video de ${activeVideoSponsor.name}`}
+                    border="0"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                ) : (
+                  <Box as="video" src={activeVideoSponsor.videoUrl} controls autoPlay playsInline />
+                )}
+              </AspectRatio>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
