@@ -29,8 +29,8 @@ export default function AdminNavbar(props: {
 	let navbarFilter = 'none';
 	let navbarBackdrop = 'blur(20px)';
 	let navbarShadow = 'none';
-	let navbarBg = useColorModeValue('rgba(244, 247, 254, 0.2)', 'rgba(11,20,55,0.5)');
-	let navbarBorder = 'transparent';
+	let navbarBg = useColorModeValue('rgba(255, 255, 255, 0.86)', 'rgba(11,20,55,0.78)');
+	let navbarBorder = useColorModeValue('rgba(226,232,240,0.9)', 'rgba(255,255,255,0.12)');
 	let secondaryMargin = '0px';
 	let paddingX = '15px';
 	let gap = '0px';
@@ -52,7 +52,7 @@ export default function AdminNavbar(props: {
 			backdropFilter={navbarBackdrop}
 			backgroundPosition='center'
 			backgroundSize='cover'
-			borderRadius='16px'
+			borderRadius='20px'
 			borderWidth='1.5px'
 			borderStyle='solid'
 			transitionDelay='0s, 0s, 0s, 0s'
@@ -61,12 +61,12 @@ export default function AdminNavbar(props: {
 			transitionTimingFunction='linear, linear, linear, linear'
 			alignItems={{ xl: 'center' }}
 			display={secondary ? 'block' : 'flex'}
-			minH='75px'
+			minH={{ base: '72px', md: '76px' }}
 			justifyContent={{ xl: 'center' }}
 			lineHeight='25.6px'
 			mx='auto'
 			mt={secondaryMargin}
-			pb='8px'
+			pb={{ base: '10px', md: '8px' }}
 			right={{ base: '12px', md: '30px', lg: '30px', xl: '30px' }}
 			px={{
 				sm: paddingX,
@@ -75,7 +75,7 @@ export default function AdminNavbar(props: {
 			ps={{
 				xl: '12px'
 			}}
-			pt='8px'
+			pt={{ base: '10px', md: '8px' }}
 			top={{ base: '12px', md: '16px', xl: '18px' }}
 			w={{
 				base: 'calc(100vw - 6%)',
@@ -99,7 +99,9 @@ export default function AdminNavbar(props: {
 						bg='inherit'
 						borderRadius='inherit'
 						fontWeight='bold'
-						fontSize='34px'
+						fontSize={{ base: '24px', md: '30px', xl: '34px' }}
+						lineHeight='1.1'
+						noOfLines={1 as any}
 						_hover={{ color: { mainText } }}
 						_active={{
 							bg: 'inherit',

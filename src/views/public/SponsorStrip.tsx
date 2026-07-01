@@ -222,6 +222,8 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted, variant = 'compac
   );
 }
 export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
+  const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
+  const normalizedOffset = Math.max(0, Number(offset || 0));
   const [sponsors, setSponsors] = useState([]);
   const [activeVideoSponsor, setActiveVideoSponsor] = useState(null);
   const cardBg = useColorModeValue('white', 'navy.800');
@@ -234,26 +236,26 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     }
 
     if (injectedSponsors) {
-      const activeSponsors = injectedSponsors.filter((sponsor) => sponsor.active !== false).slice(offset, offset + max);
+      const activeSponsors = injectedSponsors.filter(Boolean).filter((sponsor) => sponsor.active !== false).slice(normalizedOffset, normalizedOffset + normalizedMax);
       setSponsors(activeSponsors);
       return;
     }
 
-    SponsorService.getPublicByType(type, max + offset)
+    SponsorService.getPublicByType(type, normalizedMax + normalizedOffset)
       .then((data) => {
-        const visible = data.filter((sponsor) => sponsor.active !== false).slice(offset, offset + max);
+        const visible = (data || []).filter(Boolean).filter((sponsor) => sponsor.active !== false).slice(normalizedOffset, normalizedOffset + normalizedMax);
         setSponsors(visible);
       })
       .catch(() => setSponsors([]));
-  }, [type, max, offset, injectedSponsors, previewSponsor]);
+  }, [type, normalizedMax, normalizedOffset, injectedSponsors, previewSponsor]);
 
-  const visibleSponsors = sponsors.filter((sponsor) => sponsor.active !== false);
-  const slotCount = Math.min(max, Math.max(0, (SPONSOR_CAPACITY[type] || max) - offset));
+  const visibleSponsors = sponsors.filter(Boolean).filter((sponsor) => sponsor.active !== false);
+  const slotCount = Math.min(normalizedMax, Math.max(0, (SPONSOR_CAPACITY[type] || normalizedMax) - normalizedOffset));
   const sponsorsWithAvailableSlots = [
     ...visibleSponsors,
-    ...Array.from({ length: Math.max(slotCount - visibleSponsors.length, 0) }, (_, index) => makeAvailableSponsor(type, offset + visibleSponsors.length + index + 1)),
+    ...Array.from({ length: Math.max(slotCount - visibleSponsors.length, 0) }, (_, index) => makeAvailableSponsor(type, normalizedOffset + visibleSponsors.length + index + 1)),
   ];
-  const columns = { base: Math.min(slotCount || max, 2), md: Math.min(slotCount || max, 4) };
+  const columns = { base: Math.min(slotCount || normalizedMax, 2), md: Math.min(slotCount || normalizedMax, 4) };
 
   const renderAvailableCard = (sponsor) => (
     <Box
@@ -305,6 +307,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   );
 
   const renderSponsorCard = (sponsor) => {
+    if (!sponsor) return null;
     if (sponsor.isAvailable) return renderAvailableCard(sponsor);
     const sponsorType = sponsor?.type || type;
     const linkMax = sponsorType === 'General' ? 1 : 4;
@@ -399,7 +402,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     <>
       <Box w="100%">
         {title && <Text fontSize={{ base: 'xs', md: 'sm' }} color={muted} fontWeight="700" mb={{ base: '8px', md: '10px' }}>{title}</Text>}
-        {previewSponsor ? renderSponsorCard(visibleSponsors[0]) : (
+        {previewSponsor ? renderSponsorCard(visibleSponsors[0] || previewSponsor) : (
           <SimpleGrid columns={columns} spacing={{ base: '8px', md: '10px' }}>
             {sponsorsWithAvailableSlots.map(renderSponsorCard)}
           </SimpleGrid>

@@ -84,7 +84,7 @@ function ComplexTable<T extends TableDataProperties>(props: { tableData: T[], se
                 justifyContent='space-between'
                 align='center'
                 fontSize={{ sm: '10px', lg: '12px' }}
-                color='gray.400'
+                color='secondaryGray.600'
               >
                 {translations[key]?.toUpperCase()}
               </Text>
@@ -139,17 +139,19 @@ function ComplexTable<T extends TableDataProperties>(props: { tableData: T[], se
       return <Empty />;
     }
     return (
-      <Table variant='simple' color='gray.500' mb='24px' mt='12px'>
+      <Table variant='simple' color='gray.600' mb='12px' mt='8px' size='md'>
         <Thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <Tr key={headerGroup.id}>
-              <Th borderColor={borderColor}></Th>
+              <Th borderColor={borderColor} bg='secondaryGray.300'></Th>
               {headerGroup.headers.map((header) => (
                 <Th
                   key={header.id}
                   colSpan={header.colSpan}
                   pe='10px'
+                  py='14px'
                   borderColor={borderColor}
+                  bg='secondaryGray.300'
                   cursor='pointer'
                   onClick={header.column.getToggleSortingHandler()}
                 >
@@ -157,7 +159,7 @@ function ComplexTable<T extends TableDataProperties>(props: { tableData: T[], se
                     justifyContent='space-between'
                     align='center'
                     fontSize={{ sm: '10px', lg: '12px' }}
-                    color='gray.400'>
+                    color='secondaryGray.600'>
                     {flexRender(header.column.columnDef.header, header.getContext())}{{
                       asc: '',
                       desc: '',
@@ -165,14 +167,14 @@ function ComplexTable<T extends TableDataProperties>(props: { tableData: T[], se
                   </Flex>
                 </Th>
               ))}
-              <Th borderColor={borderColor}></Th>
+              <Th borderColor={borderColor} bg='secondaryGray.300'></Th>
             </Tr>
           ))}
         </Thead>
         <Tbody>
           {table.getRowModel().rows.map((row) => (
-            <Tr key={row.id}>
-              <Td>
+            <Tr key={row.id} _hover={{ bg: 'blackAlpha.50' }} transition='background .15s ease'>
+              <Td borderColor={borderColor} py='14px'>
                 <TransparentMenu
                   ms='auto'
                   mb='0px'
@@ -187,19 +189,20 @@ function ComplexTable<T extends TableDataProperties>(props: { tableData: T[], se
                   key={cell.id}
                   fontSize={{ sm: '14px' }}
                   width='auto'
-                  borderColor='transparent'
+                  borderColor={borderColor}
+                  py='14px'
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </Td>
               ))}
               {typeModal !== 'receipt' &&
-                <Td>
+                <Td borderColor={borderColor} py='14px'>
                   <NavLink to="#" onClick={() => openModal(row.original.id)}>
                     <Text
                       color={brandStars}
                       as="span"
                       ms="5px"
-                      fontWeight="500"
+                      fontWeight="800"
                       textAlign="center"
                     >
                       Ver más
@@ -215,8 +218,8 @@ function ComplexTable<T extends TableDataProperties>(props: { tableData: T[], se
   };
 
   return (
-    <Card flexDirection='column' w='auto' px='0px' overflowX={{ sm: 'scroll', lg: 'hidden' }}>
-      <Box overflowX='auto'>
+    <Card flexDirection='column' w='100%' px='0px' overflow='hidden'>
+      <Box overflowX='auto' sx={{ WebkitOverflowScrolling: 'touch' }}>
         {renderTableContent()}
         {typeModal === 'purchaseorder' ? invoiceModal() : null}
         {typeModal === 'invoice' ? receiptModal() : null}

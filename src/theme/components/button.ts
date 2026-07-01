@@ -3,12 +3,23 @@ export const buttonStyles = {
 	components: {
 		Button: {
 			baseStyle: {
-				borderRadius: '16px',
+				borderRadius: '14px',
+				minH: '44px',
+				fontWeight: '700',
 				boxShadow: '45px 76px 113px 7px rgba(112, 144, 176, 0.08)',
 				transition: '.25s all ease',
 				boxSizing: 'border-box',
 				_focus: {
 					boxShadow: 'none'
+				},
+				_focusVisible: {
+					boxShadow: '0 0 0 3px rgba(66, 42, 251, 0.28)'
+				},
+				_disabled: {
+					opacity: 0.55,
+					cursor: 'not-allowed',
+					boxShadow: 'none',
+					transform: 'none'
 				},
 				_active: {
 					boxShadow: 'none'
@@ -28,7 +39,9 @@ export const buttonStyles = {
 						bg: mode('brand.500', 'brand.400')(props)
 					},
 					_hover: {
-						bg: mode('brand.600', 'brand.400')(props)
+						bg: mode('brand.600', 'brand.300')(props),
+						transform: 'translateY(-1px)',
+						boxShadow: '0 10px 20px rgba(66, 42, 251, 0.22)'
 					}
 				}),
 				darkBrand: (props: any) => ({
