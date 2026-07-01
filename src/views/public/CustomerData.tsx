@@ -75,14 +75,14 @@ export default function CustomerData() {
       description="Primero consultamos nuestros registros por cédula. Solo si el cliente no existe usamos la API externa para sugerir el nombre."
       maxW="900px"
     >
+      <SponsorStrip type="Premium" max={4} title="Patrocinadores" />
+      <Box h={{ base: '8px', md: '12px' }} />
       <PublicCard>
         {message && <Alert status="warning" mb="18px" borderRadius="12px"><AlertIcon />{message}</Alert>}
         <Form title="Datos de verificación" button="Verificar y continuar" fields={fields} onSubmit={handleSubmit} />
       </PublicCard>
       <Box h={{ base: '8px', md: '12px' }} />
-      <SponsorStrip type="Premium" max={4} title="Patrocinadores" />
-      <Box h={{ base: '8px', md: '12px' }} />
-      <SponsorStrip type="Premium" max={4} offset={4} />
+      <SponsorStrip type="Premium" max={4} offset={4} title="Patrocinadores" />
     </PublicPage>
   );
 }

@@ -220,7 +220,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
             {sponsor.description && <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} noOfLines={1}>{sponsor.description}</Text>}
           </Stack>
           {sponsor.type === 'VIP' && sponsor.videoUrl && (
-            <AspectRatio ratio={16 / 9} w="100%" display={{ base: 'none', md: 'block' }}>
+            <AspectRatio ratio={16 / 9} w="100%">
               {shouldRenderIframeVideo(sponsor.videoUrl) ? (
                 <Box
                   as="iframe"

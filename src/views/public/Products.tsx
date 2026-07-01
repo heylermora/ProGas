@@ -117,6 +117,8 @@ export default function Products() {
 
   return (
     <PublicPage title="Productos y pedido" description="Confirme productos, pago y ubicación. La dirección viene por defecto desde el cliente, pero puede ajustarse para este pedido.">
+      <SponsorStrip type="General" max={4} title="Patrocinadores" />
+      <Box h={{ base: '8px', md: '12px' }} />
       <PublicCard>
         <Stack spacing="16px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
@@ -142,9 +144,7 @@ export default function Products() {
         </Stack>
       </PublicCard>
       <Box h={{ base: '8px', md: '12px' }} />
-      <SponsorStrip type="General" max={4} title="Patrocinadores" />
-      <Box h={{ base: '8px', md: '12px' }} />
-      <SponsorStrip type="General" max={8} offset={4} />
+      <SponsorStrip type="General" max={8} offset={4} title="Patrocinadores" />
       {showModal && <OkModal message="Pedido creado correctamente." isOpen={showModal} onClose={() => setShowModal(false)} />}
     </PublicPage>
   );
