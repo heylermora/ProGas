@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   AspectRatio,
-  Badge,
   Box,
   Icon,
   IconButton,
@@ -59,7 +58,7 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
   const hasLinks = cleanLinks.length > 0;
 
   return (
-    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? '18px' : '0px'}>
+    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? { base: '8px', md: '14px' } : '0px'}>
       <Box
         as={hasLinks ? 'button' : 'div'}
         type={hasLinks ? 'button' : undefined}
@@ -75,9 +74,9 @@ function SponsorLogoHub({ sponsor, links = [], max = 4, muted }) {
         _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' }}
       >
         {sponsor.logoUrl ? (
-          <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '88px', md: '108px' }} objectFit="contain" pointerEvents="none" />
+          <Image src={sponsor.logoUrl} alt={sponsor.name} h={{ base: '72px', md: '104px' }} maxW="100%" objectFit="contain" pointerEvents="none" />
         ) : (
-          <Box h={{ base: '88px', md: '108px' }} minW={{ base: '180px', md: '220px' }} borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
+          <Box h={{ base: '72px', md: '104px' }} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
         )}
       </Box>
 
@@ -156,7 +155,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     ...visibleSponsors,
     ...Array.from({ length: Math.max(slotCount - visibleSponsors.length, 0) }, (_, index) => makeAvailableSponsor(type, offset + visibleSponsors.length + index + 1)),
   ];
-  const columns = { base: 1, sm: Math.min(slotCount || max, 2), lg: Math.min(slotCount || max, 3), xl: Math.min(slotCount || max, 4) };
+  const columns = { base: 1, md: Math.min(slotCount || max, 2), lg: Math.min(slotCount || max, 3), xl: Math.min(slotCount || max, 4) };
 
   const renderAvailableCard = (sponsor) => (
     <Box
@@ -165,13 +164,13 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       to="/sponsors/packages"
       role="group"
       bg={cardBg}
-      p={{ base: '16px', md: '18px' }}
+      p={{ base: '12px', md: '18px' }}
       borderRadius={{ base: '18px', md: '24px' }}
       boxShadow="md"
       border="1px dashed"
       borderColor="brand.300"
       minW="0"
-      minH={{ base: '230px', md: '260px' }}
+      minH={{ base: '176px', md: '240px' }}
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -197,13 +196,12 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       _hover={{ transform: 'translateY(-4px)', boxShadow: 'xl', borderColor: 'brand.500', textDecoration: 'none' }}
       _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '4px' }}
     >
-      <Stack spacing="12px" position="relative" zIndex={1} align="center">
-        <Box w="66px" h="66px" borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
-          <Icon as={MdAddBusiness} w="34px" h="34px" />
+      <Stack spacing={{ base: '8px', md: '12px' }} position="relative" zIndex={1} align="center">
+        <Text fontWeight="900" fontSize={{ base: 'lg', md: '2xl' }} color="brand.600">Disponible</Text>
+        <Box w={{ base: '48px', md: '66px' }} h={{ base: '48px', md: '66px' }} borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
+          <Icon as={MdAddBusiness} w={{ base: '26px', md: '34px' }} h={{ base: '26px', md: '34px' }} />
         </Box>
-        <Badge colorScheme={type === 'VIP' ? 'yellow' : type === 'Premium' ? 'purple' : 'green'} fontSize="0.78rem">{type}</Badge>
-        <Text fontWeight="900" fontSize={{ base: 'xl', md: '2xl' }} color="brand.600">Disponible</Text>
-        <Text color={muted} fontSize={{ base: 'sm', md: 'md' }} maxW="230px">Tocá para ver paquetes y reservar este espacio.</Text>
+        <Text color={muted} fontSize={{ base: 'xs', md: 'md' }} maxW="230px">Tocá para ver paquetes.</Text>
       </Stack>
     </Box>
   );
@@ -214,15 +212,12 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     const videoColumns = { base: 1, md: sponsor?.videoUrl && sponsor?.type === 'VIP' ? 2 : 1 };
 
     return (
-      <Box key={sponsor.id} bg={cardBg} p={{ base: '14px', md: '18px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" border="1px solid" borderColor={borderColor} minW="0">
+      <Box key={sponsor.id} bg={cardBg} p={{ base: '12px', md: '18px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" border="1px solid" borderColor={borderColor} minW="0">
         <SimpleGrid columns={videoColumns} spacing={{ base: '14px', md: '18px' }} alignItems="center">
-          <Stack spacing="12px" h="100%" align={{ base: 'center', md: 'flex-start' }} textAlign={{ base: 'center', md: 'left' }}>
-            <Badge w="fit-content" colorScheme={sponsor.type === 'VIP' ? 'yellow' : sponsor.type === 'Premium' ? 'purple' : 'green'}>
-              {sponsor.type || type}
-            </Badge>
+          <Stack spacing={{ base: '8px', md: '12px' }} h="100%" align="center" textAlign="center">
+            <Text fontWeight="800" fontSize={{ base: 'md', md: 'xl' }} noOfLines={2}>{sponsor.name}</Text>
             <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} />
-            <Text fontWeight="800" fontSize={{ base: 'lg', md: 'xl' }} noOfLines={2}>{sponsor.name}</Text>
-            {sponsor.description && <Text color={muted} fontSize="sm" noOfLines={3}>{sponsor.description}</Text>}
+            {sponsor.description && <Text color={muted} fontSize={{ base: 'xs', md: 'sm' }} noOfLines={2}>{sponsor.description}</Text>}
           </Stack>
           {sponsor.type === 'VIP' && sponsor.videoUrl && (
             <AspectRatio ratio={16 / 9} w="100%">
