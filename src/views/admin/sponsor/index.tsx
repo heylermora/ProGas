@@ -1,9 +1,8 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
-  Button,
   Flex,
   HStack,
   IconButton,
@@ -40,15 +39,27 @@ export default function SponsorsAdmin() {
   const muted = useColorModeValue('gray.500', 'gray.400');
   const dropBg = useColorModeValue('brand.50', 'whiteAlpha.100');
 
-  const load = () => SponsorService.getAll().then((data) => {
-    setSponsors(data);
-    setSelectedSponsorId((current) => {
-      const activeOfType = data.filter((sponsor) => sponsor.active !== false && sponsor.type === selectedType);
-      return activeOfType.some((sponsor) => sponsor.id === current) ? current : activeOfType[0]?.id || '';
-    });
-  }).finally(() => setLoading(false));
+  const load = useCallback(() => {
+    setLoading(true);
 
-  useEffect(() => { load(); }, []);
+    return SponsorService.getAll()
+      .then((data) => {
+        setSponsors(data);
+
+        setSelectedSponsorId((current) => {
+          const activeOfType = data.filter(
+            (sponsor) => sponsor.active !== false && sponsor.type === selectedType
+          );
+
+          return activeOfType.some((sponsor) => sponsor.id === current)
+            ? current
+            : activeOfType[0]?.id || '';
+        });
+      })
+      .finally(() => setLoading(false));
+  }, [selectedType]);
+
+  useEffect(() => { load(); }, [load]);
 
   const sponsorsByType = useMemo(() => SPONSOR_TYPES.reduce((acc, type) => ({
     ...acc,

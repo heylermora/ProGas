@@ -171,13 +171,16 @@ function SponsorFlipCard({ sponsor, visual, linkMax, muted }) {
   const { _hover, minH, ...flipCard } = visual.card;
 
   return (
-    <Box key={sponsor.id} minW="0" perspective="1200px">
+    <Box key={sponsor.id} minW="0" sx={{ perspective: '1200px' }}>
       <Box
         position="relative"
         minH={{ base: '318px', md: '334px' }}
-        transformStyle="preserve-3d"
-        transform={isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'}
-        transition="transform .62s cubic-bezier(.2,.8,.2,1)"
+        sx={{
+          transformStyle: 'preserve-3d',
+          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+          transition: 'transform .62s cubic-bezier(.2,.8,.2,1)',
+          willChange: 'transform',
+        }}
       >
         <Box
           {...flipCard}
@@ -188,9 +191,8 @@ function SponsorFlipCard({ sponsor, visual, linkMax, muted }) {
           position="absolute"
           inset="0"
           overflow="hidden"
-          backfaceVisibility="hidden"
-          transform="rotateY(0deg)"
           transition="box-shadow .22s ease, border-color .22s ease"
+          sx={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(0deg)' }}
         >
           <Stack h="100%" spacing={{ base: '12px', md: '14px' }} align="center" justify="space-between" textAlign="center" minW={0}>
             <Stack spacing={{ base: '8px', md: '10px' }} align="center" w="100%" minW={0}>
@@ -238,9 +240,8 @@ function SponsorFlipCard({ sponsor, visual, linkMax, muted }) {
           position="absolute"
           inset="0"
           overflow="hidden"
-          backfaceVisibility="hidden"
-          transform="rotateY(180deg)"
           transition="box-shadow .22s ease, border-color .22s ease"
+          sx={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           <Stack h="100%" spacing="12px" justify="space-between" minW={0}>
             <Stack spacing="10px" minW={0}>
