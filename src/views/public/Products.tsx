@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, AlertIcon, Box, Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import { customAlphabet } from 'nanoid';
+import { useHistory } from 'react-router-dom';
 import Map from 'components/form/Map';
 import OkModal from 'components/modal/OkModal';
 import orderService from 'services/OrderService';
@@ -9,6 +10,7 @@ import productService from 'services/ProductService';
 import type { ProductItem } from 'interfaces/OrderItem';
 import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
+import OrderNavigation from './OrderNavigation';
 import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 6);
@@ -21,6 +23,7 @@ const parseCoordinates = (value?: string) => {
 const coordsToText = (coords?: number[] | null) => Array.isArray(coords) ? `${coords[1]},${coords[0]}` : '';
 
 export default function Products() {
+  const history = useHistory();
   const draft = getCustomerDraft();
   const defaultAddress = addressToText(draft.address);
   const [catalog, setCatalog] = useState([]);
@@ -140,7 +143,7 @@ export default function Products() {
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option>Efectivo</option><option>SINPE</option><option>Otro</option></Select></FormControl>
           </SimpleGrid>
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
-          <Button colorScheme="brand" onClick={submitOrder}>Confirmar pedido</Button>
+          <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel="Confirmar pedido" isFinal onBack={() => history.push('/customer/info')} onContinue={submitOrder} />
         </Stack>
       </PublicCard>
       <Box h={{ base: '8px', md: '12px' }} />
