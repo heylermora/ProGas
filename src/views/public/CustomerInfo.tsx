@@ -1,11 +1,12 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
 import Map from 'components/form/Map';
 import ClientService from 'services/ClientService';
 import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
+import OrderNavigation from './OrderNavigation';
 import { getCustomerDraft, saveCustomerDraft } from './customerDraft';
 
 const parseCoordinates = (value?: string) => {
@@ -139,7 +140,7 @@ export default function CustomerInfo() {
           </SimpleGrid>
           <FormControl><FormLabel>Mapa para coordenadas</FormLabel><Map value={locationMap} onChange={handleMapChange} /></FormControl>
           <FormControl isRequired><FormLabel>Otras señas</FormLabel><Input value={form.details} onChange={(e) => set('details', e.target.value)} /></FormControl>
-          <Button colorScheme="brand" onClick={saveAndContinue}>Continuar al pedido</Button>
+          <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.push('/customer/data')} onContinue={saveAndContinue} />
         </Stack>
       </PublicCard>
       <SponsorStrip type="Premium" max={4} offset={4} title="Más patrocinadores Premium" />

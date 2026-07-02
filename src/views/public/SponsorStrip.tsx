@@ -3,24 +3,18 @@ import React, { useEffect, useState } from 'react';
 import {
   AspectRatio,
   Box,
+  Button,
   Icon,
-  IconButton,
   Image,
   Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalOverlay,
   SimpleGrid,
   Stack,
   Text,
-  Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdAddBusiness, MdClose, MdEmail, MdLink, MdPlayCircleFilled, MdShare } from 'react-icons/md';
+import { MdAddBusiness, MdEmail, MdFlip, MdLink, MdPlayCircleFilled, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
 
@@ -66,7 +60,7 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
         boxShadow: '0 18px 45px rgba(180, 130, 24, .16)',
         borderRadius: { base: '20px', md: '26px' },
         p: { base: '14px', md: hasVideo ? '16px' : '18px' },
-        minH: { base: hasVideo ? '138px' : '154px', md: hasVideo ? '158px' : '178px' },
+        minH: { base: hasVideo ? '150px' : '158px', md: hasVideo ? '158px' : '178px' },
         _hover: { transform: 'translateY(-5px) scale(1.01)', boxShadow: '0 22px 56px rgba(180, 130, 24, .22)', borderColor: 'yellow.300' },
       },
       logo: 'hero',
@@ -84,7 +78,7 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
         boxShadow: '0 12px 30px rgba(71, 85, 105, .12)',
         borderRadius: { base: '18px', md: '22px' },
         p: { base: '12px', md: '14px' },
-        minH: { base: '124px', md: '142px' },
+        minH: { base: '132px', md: '142px' },
         _hover: { transform: 'translateY(-4px)', boxShadow: '0 18px 40px rgba(71, 85, 105, .17)', borderColor: 'purple.200' },
       },
       logo: 'featured',
@@ -100,8 +94,8 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
       borderColor: 'gray.100',
       boxShadow: '0 8px 22px rgba(15, 23, 42, .08)',
       borderRadius: { base: '16px', md: '18px' },
-      p: { base: '10px', md: '12px' },
-      minH: { base: '108px', md: '122px' },
+      p: { base: '12px', md: '12px' },
+      minH: { base: '118px', md: '122px' },
       _hover: { transform: 'translateY(-3px)', boxShadow: '0 14px 30px rgba(15, 23, 42, .12)', borderColor: 'brand.100' },
     },
     logo: 'compact',
@@ -112,112 +106,158 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
 };
 
 const logoSize = (variant) => {
-  if (variant === 'hero') return { h: { base: '62px', md: '86px' }, placeholderH: { base: '62px', md: '86px' }, icon: { base: '38px', md: '42px' } };
-  if (variant === 'featured') return { h: { base: '50px', md: '70px' }, placeholderH: { base: '50px', md: '70px' }, icon: { base: '34px', md: '38px' } };
-  return { h: { base: '42px', md: '58px' }, placeholderH: { base: '42px', md: '58px' }, icon: { base: '30px', md: '34px' } };
+  if (variant === 'hero') return { h: { base: '64px', md: '86px' }, placeholderH: { base: '64px', md: '86px' }, icon: { base: '38px', md: '42px' } };
+  if (variant === 'featured') return { h: { base: '54px', md: '70px' }, placeholderH: { base: '54px', md: '70px' }, icon: { base: '34px', md: '38px' } };
+  return { h: { base: '48px', md: '58px' }, placeholderH: { base: '48px', md: '58px' }, icon: { base: '32px', md: '34px' } };
 };
 
-function SponsorLogoHub({ sponsor, links = [], max = 4, muted, variant = 'compact', actionLabel = 'Conectar' }) {
-  const [isOpen, setIsOpen] = useState(false);
+function SponsorActionRow({ links = [], max = 4, muted, size = 'sm' }) {
   const cleanLinks = links.filter(Boolean).slice(0, max);
-  const hasLinks = cleanLinks.length > 0;
-  const sizes = logoSize(variant);
-  const isHero = variant === 'hero';
+  if (!cleanLinks.length) return null;
 
   return (
-    <Box position="relative" w="100%" display="flex" justifyContent="center" py={hasLinks ? { base: '8px', md: '10px' } : '0px'}>
-      <Box
-        as={hasLinks ? 'button' : 'div'}
-        type={hasLinks ? 'button' : undefined}
-        aria-label={hasLinks ? (isOpen ? `Ocultar acciones de ${sponsor.name}` : `Ver acciones de ${sponsor.name}`) : undefined}
-        aria-expanded={hasLinks ? isOpen : undefined}
-        onClick={hasLinks ? () => setIsOpen((current) => !current) : undefined}
-        position="relative"
-        borderRadius={isHero ? '24px' : '20px'}
-        p={{ base: '5px', md: isHero ? '8px' : '6px' }}
-        cursor={hasLinks ? 'pointer' : 'default'}
-        transition="transform .22s ease, filter .22s ease"
-        _hover={hasLinks ? { transform: 'translateY(-2px)', filter: 'drop-shadow(0 12px 20px rgba(15, 23, 42, .12))' } : undefined}
-        _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' }}
-      >
-        {sponsor.logoUrl ? (
-          <Image src={sponsor.logoUrl} alt={sponsor.name} h={sizes.h} maxW="100%" objectFit="contain" pointerEvents="none" />
-        ) : (
-          <Box h={sizes.placeholderH} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
-        )}
-      </Box>
-
-      {hasLinks && (
-        <IconButton
-          type="button"
-          aria-label={isOpen ? `Ocultar acciones de ${sponsor.name}` : `Ver acciones de ${sponsor.name}`}
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen((current) => !current)}
-          icon={<Icon as={isOpen ? MdClose : MdShare} w={{ base: '16px', md: '18px' }} h={{ base: '16px', md: '18px' }} />}
-          position="absolute"
-          right={{ base: isHero ? '6px' : '8px', md: isHero ? '18px' : '14px' }}
-          bottom={{ base: isHero ? '0px' : '2px', md: isHero ? '6px' : '4px' }}
-          w={sizes.icon}
-          h={sizes.icon}
-          minW={sizes.icon}
-          borderRadius="full"
-          color="white"
-          bgGradient={isHero ? 'linear(135deg, #FFE29F 0%, #D4AF37 48%, #8A5A00 100%)' : 'linear(135deg, #F6D365 0%, #D4AF37 45%, #B8860B 100%)'}
-          boxShadow={isHero ? '0 16px 30px rgba(184, 134, 11, .38)' : '0 12px 24px rgba(184, 134, 11, .28)'}
-          border="2px solid"
-          borderColor="white"
-          zIndex={2}
-          _hover={{ transform: 'translateY(-2px) scale(1.04)', filter: 'brightness(1.05)' }}
-          _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.200', outlineOffset: '3px' }}
-        />
-      )}
-
-      {hasLinks && isOpen && (
-        <Text position="absolute" top={{ base: '-4px', md: '-2px' }} left="50%" transform="translateX(-50%)" color={muted} fontSize={{ base: '9px', md: '10px' }} fontWeight="800" letterSpacing=".08em" textTransform="uppercase" whiteSpace="nowrap">
-          {actionLabel}
-        </Text>
-      )}
-
+    <Stack direction="row" spacing="8px" justify="center" flexWrap="wrap" w="100%">
       {cleanLinks.map((link, index) => {
         const meta = getLinkMeta(link);
         const href = link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
-        const distance = isHero ? { base: '6%', md: '12%' } : { base: '12%', md: '18%' };
-        const positions = [
-          { top: { base: '2px', md: '4px' }, left: distance },
-          { top: { base: '2px', md: '4px' }, right: distance },
-          { bottom: { base: '2px', md: '4px' }, left: distance },
-          { bottom: { base: '2px', md: '4px' }, right: distance },
-        ];
 
         return (
-          <Tooltip key={`${link}-${index}`} label={meta.label} hasArrow placement="top">
-            <IconButton
-              as={Link}
-              href={href}
-              isExternal={!href.startsWith('mailto:')}
-              aria-label={meta.label}
-              icon={<Icon as={meta.icon} w={isHero ? '18px' : '16px'} h={isHero ? '18px' : '16px'} />}
-              position="absolute"
-              {...positions[index % positions.length]}
-              sx={{ background: meta.bg }}
-              color="white"
-              borderRadius="full"
-              w={isHero ? { base: '36px', md: '42px' } : { base: '32px', md: '36px' }}
-              h={isHero ? { base: '36px', md: '42px' } : { base: '32px', md: '36px' }}
-              minW={isHero ? { base: '36px', md: '42px' } : { base: '32px', md: '36px' }}
-              boxShadow="0 12px 22px rgba(15, 23, 42, .20)"
-              border="2px solid"
-              borderColor="white"
-              opacity={isOpen ? 1 : 0}
-              visibility={isOpen ? 'visible' : 'hidden'}
-              transform={isOpen ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 8px, 0) scale(.72)'}
-              transition={`all .24s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 42 : 0}ms`}
-              _hover={{ transform: 'translate3d(0, -3px, 0) scale(1.08)', filter: 'brightness(1.05)', textDecoration: 'none' }}
-              _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
-            />
-          </Tooltip>
+          <Button
+            key={`${link}-${index}`}
+            as={Link}
+            href={href}
+            isExternal={!href.startsWith('mailto:')}
+            size={size}
+            leftIcon={<Icon as={meta.icon} />}
+            borderRadius="full"
+            variant="outline"
+            color={muted}
+            borderColor="blackAlpha.200"
+            maxW="100%"
+            _hover={{ textDecoration: 'none', transform: 'translateY(-1px)', borderColor: 'brand.300' }}
+          >
+            <Text as="span" noOfLines={1}>{meta.label === 'Instagram' ? 'Historia' : meta.label}</Text>
+          </Button>
         );
       })}
+    </Stack>
+  );
+}
+
+function SponsorVideoFrame({ sponsor }) {
+  if (!sponsor?.videoUrl) return null;
+
+  return (
+    <AspectRatio ratio={16 / 9} w="100%" borderRadius="18px" overflow="hidden" bg="black" flexShrink={0}>
+      {shouldRenderIframeVideo(sponsor.videoUrl) ? (
+        <Box
+          as="iframe"
+          src={getVideoEmbedSrc(sponsor.videoUrl)}
+          title={`Video de ${sponsor.name || 'patrocinador'}`}
+          border="0"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : (
+        <Box as="video" src={sponsor.videoUrl} controls playsInline />
+      )}
+    </AspectRatio>
+  );
+}
+
+function SponsorFlipCard({ sponsor, visual, linkMax, muted }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const hasVideo = Boolean(sponsor.videoUrl);
+  const { _hover, minH, ...flipCard } = visual.card;
+
+  return (
+    <Box key={sponsor.id} minW="0" sx={{ perspective: '1200px' }}>
+      <Box
+        position="relative"
+        minH={{ base: '318px', md: '334px' }}
+        sx={{
+          transformStyle: 'preserve-3d',
+          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+          transition: 'transform .62s cubic-bezier(.2,.8,.2,1)',
+          willChange: 'transform',
+        }}
+      >
+        <Box
+          {...flipCard}
+          border="1px solid"
+          minW="0"
+          minH="100%"
+          h="100%"
+          position="absolute"
+          inset="0"
+          overflow="hidden"
+          transition="box-shadow .22s ease, border-color .22s ease"
+          sx={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(0deg)' }}
+        >
+          <Stack h="100%" spacing={{ base: '12px', md: '14px' }} align="center" justify="space-between" textAlign="center" minW={0}>
+            <Stack spacing={{ base: '8px', md: '10px' }} align="center" w="100%" minW={0}>
+              <Box w="100%" minH={{ base: '104px', md: '124px' }} display="flex" alignItems="center" justifyContent="center" px={{ base: '8px', md: '12px' }}>
+                {sponsor.logoUrl ? (
+                  <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} maxH={{ base: '104px', md: '124px' }} maxW="100%" objectFit="contain" />
+                ) : (
+                  <Box h={{ base: '88px', md: '104px' }} w="100%" borderRadius="18px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
+                )}
+              </Box>
+              {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
+              {sponsor.description && <Text color={muted} fontSize={{ base: '12px', md: 'sm' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
+            </Stack>
+
+            <Stack spacing="8px" w="100%" align="center">
+              {hasVideo && (
+                <Button
+                  type="button"
+                  onClick={() => setIsFlipped(true)}
+                  leftIcon={<MdPlayCircleFilled />}
+                  rightIcon={<MdFlip />}
+                  size={{ base: 'sm', md: 'md' }}
+                  borderRadius="full"
+                  bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
+                  color="white"
+                  boxShadow="0 12px 22px rgba(184, 134, 11, .28)"
+                  maxW="100%"
+                  whiteSpace="normal"
+                  _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
+                >
+                  Tocar para ver
+                </Button>
+              )}
+              <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} />
+            </Stack>
+          </Stack>
+        </Box>
+
+        <Box
+          {...flipCard}
+          border="1px solid"
+          minW="0"
+          minH="100%"
+          h="100%"
+          position="absolute"
+          inset="0"
+          overflow="hidden"
+          transition="box-shadow .22s ease, border-color .22s ease"
+          sx={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+        >
+          <Stack h="100%" spacing="12px" justify="space-between" minW={0}>
+            <Stack spacing="10px" minW={0}>
+              <SponsorVideoFrame sponsor={sponsor} />
+              {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
+              {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2}>{sponsor.description}</Text>}
+            </Stack>
+            <Stack spacing="8px" w="100%">
+              <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
+              <Button type="button" onClick={() => setIsFlipped(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />}>
+                Volver al frente
+              </Button>
+            </Stack>
+          </Stack>
+        </Box>
+      </Box>
     </Box>
   );
 }
@@ -225,7 +265,6 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
   const [sponsors, setSponsors] = useState([]);
-  const [activeVideoSponsor, setActiveVideoSponsor] = useState(null);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.400');
 
@@ -255,7 +294,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     ...visibleSponsors,
     ...Array.from({ length: Math.max(slotCount - visibleSponsors.length, 0) }, (_, index) => makeAvailableSponsor(type, normalizedOffset + visibleSponsors.length + index + 1)),
   ];
-  const columns = { base: Math.min(slotCount || normalizedMax, 2), md: Math.min(slotCount || normalizedMax, 4) };
+  const columns = { base: 1, sm: 2, md: Math.min(slotCount || normalizedMax, 4) };
 
   const renderAvailableCard = (sponsor) => (
     <Box
@@ -270,7 +309,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       border="1px dashed"
       borderColor="brand.300"
       minW="0"
-      minH={{ base: '104px', md: '122px' }}
+      minH={{ base: '118px', md: '122px' }}
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -296,12 +335,14 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       _hover={{ transform: 'translateY(-2px)', boxShadow: 'md', borderColor: 'brand.500', textDecoration: 'none' }}
       _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '4px' }}
     >
-      <Stack spacing={{ base: '4px', md: '6px' }} position="relative" zIndex={1} align="center">
-        <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} color="brand.600">Tu marca aquí</Text>
-        <Box w={{ base: '34px', md: '42px' }} h={{ base: '34px', md: '42px' }} borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
-          <Icon as={MdAddBusiness} w={{ base: '18px', md: '22px' }} h={{ base: '18px', md: '22px' }} />
+      <Stack direction={{ base: 'row', md: 'column' }} spacing={{ base: '12px', md: '6px' }} position="relative" zIndex={1} align="center" justify="center" textAlign={{ base: 'left', md: 'center' }}>
+        <Box flexShrink={0} w={{ base: '42px', md: '42px' }} h={{ base: '42px', md: '42px' }} borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center" _groupHover={{ transform: 'scale(1.06)' }} transition="transform .2s ease">
+          <Icon as={MdAddBusiness} w={{ base: '22px', md: '22px' }} h={{ base: '22px', md: '22px' }} />
         </Box>
-        <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} maxW="230px">Llegá a clientes locales mientras hacen su pedido.</Text>
+        <Stack spacing="3px" minW="0">
+          <Text fontWeight="900" fontSize={{ base: 'md', md: 'md' }} color="brand.600">Tu marca aquí</Text>
+          <Text color={muted} fontSize={{ base: 'xs', md: 'xs' }} maxW="230px" lineHeight="1.35">Llegá a clientes locales mientras hacen su pedido.</Text>
+        </Stack>
       </Stack>
     </Box>
   );
@@ -315,84 +356,28 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     const visual = sponsorVisual(sponsorType, Boolean(sponsor.videoUrl));
 
     if (isVipWithVideo) {
-      return (
-        <Box key={sponsor.id} {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
-          <Stack spacing={{ base: '6px', md: '8px' }} align="center" textAlign="center">
-            <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>
-            <Box display="flex" alignItems="center" justifyContent="center" gap={{ base: '8px', md: '12px' }} w="100%">
-              <Box flex="1" minW="0">
-                <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} variant={visual.logo} actionLabel={visual.actionLabel} />
-              </Box>
-              <Box
-                as="button"
-                type="button"
-                aria-label={`Ver video de ${sponsor.name}`}
-                onClick={() => setActiveVideoSponsor(sponsor)}
-                flexShrink={0}
-                px={{ base: '10px', md: '12px' }}
-                py={{ base: '7px', md: '8px' }}
-                borderRadius="full"
-                color="white"
-                bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
-                boxShadow="0 12px 22px rgba(184, 134, 11, .32)"
-                display="inline-flex"
-                alignItems="center"
-                gap="5px"
-                fontSize={{ base: '11px', md: 'xs' }}
-                fontWeight="900"
-                whiteSpace="nowrap"
-                cursor="pointer"
-                _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
-                _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.200', outlineOffset: '3px' }}
-              >
-                <Icon as={MdPlayCircleFilled} w={{ base: '17px', md: '19px' }} h={{ base: '17px', md: '19px' }} />
-                Ver video
-              </Box>
-            </Box>
-            {sponsor.description && <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} noOfLines={visual.descriptionLines}>{sponsor.description}</Text>}
-          </Stack>
-        </Box>
-      );
+      return <SponsorFlipCard key={sponsor.id} sponsor={sponsor} visual={visual} linkMax={linkMax} muted={muted} />;
     }
 
     const videoColumns = { base: 1 };
 
     return (
       <Box key={sponsor.id} {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
-        <SimpleGrid columns={videoColumns} spacing={{ base: '8px', md: '12px' }} alignItems="center">
-          <Stack spacing={{ base: '4px', md: '6px' }} h="100%" align="center" textAlign="center">
-            <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2}>{sponsor.name}</Text>
-            <SponsorLogoHub sponsor={sponsor} links={sponsor.links} max={linkMax} muted={muted} variant={visual.logo} actionLabel={visual.actionLabel} />
-            {sponsor.description && <Text color={muted} fontSize={{ base: '10px', md: 'xs' }} noOfLines={visual.descriptionLines}>{sponsor.description}</Text>}
-          </Stack>
-          {sponsor.type === 'VIP' && sponsor.videoUrl && (
-            <Box
-              as="button"
-              type="button"
-              aria-label={`Ver video de ${sponsor.name}`}
-              onClick={() => setActiveVideoSponsor(sponsor)}
-              mx="auto"
-              mt="2px"
-              px={{ base: '12px', md: '14px' }}
-              py={{ base: '7px', md: '8px' }}
-              borderRadius="full"
-              color="white"
-              bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
-              boxShadow="0 14px 28px rgba(184, 134, 11, .35)"
-              display="inline-flex"
-              alignItems="center"
-              gap="6px"
-              fontSize={{ base: 'xs', md: 'sm' }}
-              fontWeight="900"
-              letterSpacing=".01em"
-              cursor="pointer"
-              _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
-              _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.200', outlineOffset: '3px' }}
-            >
-              <Icon as={MdPlayCircleFilled} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />
-              Ver video
+        <SimpleGrid columns={videoColumns} spacing={{ base: '8px', md: '12px' }} alignItems="center" h="100%">
+          <Stack direction={{ base: 'row', md: 'column' }} spacing={{ base: '12px', md: '6px' }} h="100%" align="center">
+            <Box flex={{ base: '0 0 38%', md: 'initial' }} minW="0" w={{ base: '38%', md: '100%' }} display="flex" alignItems="center" justifyContent="center">
+              {sponsor.logoUrl ? (
+                <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} h={logoSize(visual.logo).h} maxW="100%" objectFit="contain" />
+              ) : (
+                <Box h={logoSize(visual.logo).placeholderH} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
+              )}
             </Box>
-          )}
+            <Stack spacing={{ base: '4px', md: '6px' }} align={{ base: 'flex-start', md: 'center' }} textAlign={{ base: 'left', md: 'center' }} flex="1" minW="0" overflow="hidden">
+              {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
+              {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
+              <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
+            </Stack>
+          </Stack>
         </SimpleGrid>
       </Box>
     );
@@ -401,37 +386,21 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   return (
     <>
       <Box w="100%">
-        {title && <Text fontSize={{ base: 'xs', md: 'sm' }} color={muted} fontWeight="700" mb={{ base: '8px', md: '10px' }}>{title}</Text>}
+        {title && (
+          <Box display="flex" alignItems="center" gap="8px" mb={{ base: '10px', md: '10px' }}>
+            <Box w="28px" h="28px" borderRadius="full" bg="yellow.100" color="yellow.700" display="flex" alignItems="center" justifyContent="center">
+              <Icon as={MdStar} w="15px" h="15px" />
+            </Box>
+            <Text fontSize={{ base: 'sm', md: 'sm' }} color={muted} fontWeight="900" letterSpacing=".04em" textTransform="uppercase">{title}</Text>
+          </Box>
+        )}
         {previewSponsor ? renderSponsorCard(visibleSponsors[0] || previewSponsor) : (
-          <SimpleGrid columns={columns} spacing={{ base: '8px', md: '10px' }}>
+          <SimpleGrid columns={columns} spacing={{ base: '12px', md: '10px' }}>
             {sponsorsWithAvailableSlots.map(renderSponsorCard)}
           </SimpleGrid>
         )}
       </Box>
-      <Modal isOpen={Boolean(activeVideoSponsor)} onClose={() => setActiveVideoSponsor(null)} size="full" isCentered>
-        <ModalOverlay />
-        <ModalContent m={0} maxW="100vw" h="100vh" borderRadius={0} bg="black">
-          <ModalCloseButton color="white" zIndex={2} />
-          <ModalBody p={{ base: '44px 12px 12px', md: '56px 40px 40px' }} display="flex" alignItems="center" justifyContent="center">
-            {activeVideoSponsor?.videoUrl && (
-              <AspectRatio ratio={16 / 9} w="100%" maxH={{ base: 'calc(100vh - 72px)', md: '70vh' }}>
-                {shouldRenderIframeVideo(activeVideoSponsor.videoUrl) ? (
-                  <Box
-                    as="iframe"
-                    src={getVideoEmbedSrc(activeVideoSponsor.videoUrl)}
-                    title={`Video de ${activeVideoSponsor.name}`}
-                    border="0"
-                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                ) : (
-                  <Box as="video" src={activeVideoSponsor.videoUrl} controls autoPlay playsInline />
-                )}
-              </AspectRatio>
-            )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+
     </>
   );
 }
