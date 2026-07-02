@@ -4,12 +4,10 @@ import {
   AspectRatio,
   Box,
   Button,
-  HStack,
   Icon,
   IconButton,
   Image,
   Link,
-  ScaleFade,
   SimpleGrid,
   Stack,
   Text,
@@ -115,112 +113,112 @@ const logoSize = (variant) => {
   return { h: { base: '48px', md: '58px' }, placeholderH: { base: '48px', md: '58px' }, icon: { base: '32px', md: '34px' } };
 };
 
-function SponsorActionRow({ links = [], max = 4, muted, size = 'sm', isExpanded: controlledExpanded, onToggle }) {
-  const [localExpanded, setLocalExpanded] = useState(false);
-  const cleanLinks = links.filter(Boolean).slice(0, max);
-  if (!cleanLinks.length) return null;
+const bubblePlacements = [
+  { base: { top: '-8px', left: '18px' }, md: { top: '6px', left: '-10px' } },
+  { base: { top: '-10px', right: '20px' }, md: { top: '-6px', right: '10px' } },
+  { base: { bottom: '-8px', left: '22px' }, md: { bottom: '6px', left: '-12px' } },
+  { base: { bottom: '-10px', right: '22px' }, md: { bottom: '0', right: '4px' } },
+];
 
-  const primaryMeta = getLinkMeta(cleanLinks[0]);
-  const primaryHref = cleanLinks[0].includes('@') && !cleanLinks[0].startsWith('mailto:') ? `mailto:${cleanLinks[0]}` : cleanLinks[0];
-  const bubbleSize = size === 'xs' ? { base: '34px', md: '36px' } : { base: '40px', md: '44px' };
-  const iconSize = size === 'xs' ? { base: '16px', md: '17px' } : { base: '18px', md: '20px' };
-  const extraLinks = cleanLinks.slice(1);
-  const isExpanded = controlledExpanded ?? localExpanded;
-  const toggleExpanded = onToggle || (() => setLocalExpanded((current) => !current));
+const normalizeHref = (link = '') => (link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link);
+
+function SponsorLogoHub({ sponsor, visual, muted, links = [], onPlay, hasVideo }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const cleanLinks = links.filter(Boolean);
+  const hasLinks = cleanLinks.length > 0;
+  const size = logoSize(visual.logo);
 
   return (
-    <Stack spacing="8px" align="center" w="100%" minW={0}>
-      <HStack spacing="7px" justify="center" flexWrap="wrap" maxW="100%">
-        <Tooltip label={primaryMeta.label} hasArrow placement="top">
-          <IconButton
-            as={Link}
-            href={primaryHref}
-            isExternal={!primaryHref.startsWith('mailto:')}
-            aria-label={`Abrir ${primaryMeta.label}`}
-            icon={<Icon as={primaryMeta.icon} w={iconSize} h={iconSize} />}
-            w={bubbleSize}
-            h={bubbleSize}
-            minW={bubbleSize}
-            borderRadius="full"
-            color="white"
-            sx={{ background: primaryMeta.bg }}
-            boxShadow="0 12px 24px rgba(15, 23, 42, .20)"
-            border="2px solid"
-            borderColor="whiteAlpha.900"
-            _hover={{ textDecoration: 'none', transform: 'translateY(-3px) scale(1.07)', filter: 'brightness(1.06)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
-          />
-        </Tooltip>
-
-        {extraLinks.length > 0 && (
-          <Button
-            type="button"
-            onClick={toggleExpanded}
-            size={size}
-            h={bubbleSize}
-            minW={bubbleSize}
-            px={isExpanded ? '12px' : '0'}
-            borderRadius="full"
-            aria-expanded={isExpanded}
-            aria-label={isExpanded ? 'Ocultar links del partner' : 'Mostrar links del partner'}
-            color={isExpanded ? 'white' : muted}
-            bg={isExpanded ? 'brand.500' : 'white'}
-            border="1px solid"
-            borderColor={isExpanded ? 'brand.500' : 'blackAlpha.200'}
-            boxShadow="0 10px 22px rgba(15, 23, 42, .12)"
-            _hover={{ transform: 'translateY(-2px)', bg: isExpanded ? 'brand.600' : 'gray.50' }}
-          >
-            {isExpanded ? 'Cerrar' : `+${extraLinks.length}`}
-          </Button>
+    <Box position="relative" w="100%" maxW={{ base: '210px', md: visual.logo === 'hero' ? '260px' : '220px' }} mx="auto" py={{ base: '8px', md: '10px' }} overflow="visible">
+      <Box
+        as="button"
+        type="button"
+        aria-label={hasLinks ? (isOpen ? `Ocultar links de ${sponsor.name || 'patrocinador'}` : `Mostrar links de ${sponsor.name || 'patrocinador'}`) : `Logo de ${sponsor.name || 'patrocinador'}`}
+        aria-expanded={hasLinks ? isOpen : undefined}
+        onClick={() => hasLinks && setIsOpen((current) => !current)}
+        position="relative"
+        zIndex={2}
+        w="100%"
+        minH={size.placeholderH}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        borderRadius={{ base: '18px', md: '22px' }}
+        cursor={hasLinks ? 'pointer' : 'default'}
+        transition="transform .2s ease, filter .2s ease, box-shadow .2s ease"
+        _hover={hasLinks ? { transform: 'translateY(-2px) scale(1.01)', boxShadow: 'inset 0 0 0 1px rgba(56, 161, 105, .22)' } : undefined}
+        _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' } : undefined}
+      >
+        {sponsor.logoUrl ? (
+          <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} h={size.h} maxW="100%" objectFit="contain" pointerEvents="none" />
+        ) : (
+          <Box h={size.placeholderH} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
         )}
-      </HStack>
+      </Box>
 
-      {extraLinks.length > 0 && (
-        <ScaleFade initialScale={0.88} in={isExpanded} unmountOnExit>
-          <HStack
-            spacing="7px"
-            justify="center"
-            flexWrap="wrap"
-            bg="whiteAlpha.900"
-            border="1px solid"
-            borderColor="blackAlpha.100"
-            borderRadius="full"
-            px="8px"
-            py="6px"
-            boxShadow="0 14px 28px rgba(15, 23, 42, .14)"
-            maxW="100%"
-          >
-            {extraLinks.map((link, index) => {
-              const meta = getLinkMeta(link);
-              const href = link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
-
-              return (
-                <Tooltip key={`${link}-${index}`} label={meta.label} hasArrow placement="top">
-                  <IconButton
-                    as={Link}
-                    href={href}
-                    isExternal={!href.startsWith('mailto:')}
-                    aria-label={`Abrir ${meta.label}`}
-                    icon={<Icon as={meta.icon} w={iconSize} h={iconSize} />}
-                    w={bubbleSize}
-                    h={bubbleSize}
-                    minW={bubbleSize}
-                    borderRadius="full"
-                    color="white"
-                    sx={{ background: meta.bg }}
-                    boxShadow="0 10px 20px rgba(15, 23, 42, .18)"
-                    border="2px solid"
-                    borderColor="white"
-                    _hover={{ textDecoration: 'none', transform: 'translateY(-3px) scale(1.08)', filter: 'brightness(1.06)' }}
-                    _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
-                  />
-                </Tooltip>
-              );
-            })}
-          </HStack>
-        </ScaleFade>
+      {hasVideo && (
+        <IconButton
+          aria-label={`Ver video de ${sponsor.name || 'patrocinador'}`}
+          icon={<Icon as={MdPlayCircleFilled} w={{ base: '20px', md: '24px' }} h={{ base: '20px', md: '24px' }} />}
+          onClick={onPlay}
+          position="absolute"
+          zIndex={3}
+          left="50%"
+          bottom={{ base: '-8px', md: '-6px' }}
+          transform="translateX(-50%)"
+          w={{ base: '40px', md: '46px' }}
+          h={{ base: '40px', md: '46px' }}
+          minW={{ base: '40px', md: '46px' }}
+          borderRadius="full"
+          bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
+          color="white"
+          boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
+          border="2px solid"
+          borderColor="white"
+          _hover={{ transform: 'translateX(-50%) translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
+          _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
+        />
       )}
-    </Stack>
+
+      {cleanLinks.slice(0, 4).map((link, index) => {
+        const meta = getLinkMeta(link);
+        const href = normalizeHref(link);
+        const placement = bubblePlacements[index] || bubblePlacements[0];
+
+        return (
+          <Tooltip key={`${link}-${index}`} label={meta.label} hasArrow placement="top">
+            <IconButton
+              as={Link}
+              href={href}
+              isExternal={!href.startsWith('mailto:')}
+              aria-label={`Abrir ${meta.label}`}
+              icon={<Icon as={meta.icon} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />}
+              position="absolute"
+              zIndex={1}
+              {...placement.base}
+              sx={{
+                '@media screen and (min-width: 48em)': placement.md,
+                background: meta.bg,
+              }}
+              color="white"
+              w={{ base: '42px', md: '48px' }}
+              h={{ base: '42px', md: '48px' }}
+              minW={{ base: '42px', md: '48px' }}
+              borderRadius="full"
+              border="2px solid"
+              borderColor="white"
+              boxShadow="0 14px 24px rgba(15, 23, 42, .24)"
+              opacity={isOpen ? 1 : 0}
+              visibility={isOpen ? 'visible' : 'hidden'}
+              transform={isOpen ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 12px, 0) scale(.6)'}
+              transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`}
+              _hover={{ textDecoration: 'none', transform: 'translate3d(0, -4px, 0) scale(1.08)', filter: 'brightness(1.06)' }}
+              _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
+            />
+          </Tooltip>
+        );
+      })}
+    </Box>
   );
 }
 
@@ -245,157 +243,39 @@ function SponsorVideoFrame({ sponsor }) {
   );
 }
 
-function SponsorFlipCard({ sponsor, visual, linkMax, muted }) {
-  const [isFlipped, setIsFlipped] = useState(false);
+function SponsorCard({ sponsor, visual, linkMax, muted }) {
+  const [showVideo, setShowVideo] = useState(false);
   const hasVideo = Boolean(sponsor.videoUrl);
-  const { _hover, minH, ...flipCard } = visual.card;
+  const { _hover, minH, ...cardStyles } = visual.card;
 
-  const frontLogo = (
-    <Box
-      as="button"
-      type="button"
-      aria-label={hasVideo ? `Ver video de ${sponsor.name || 'patrocinador'}` : `Ver links de ${sponsor.name || 'patrocinador'}`}
-      onClick={() => hasVideo && setIsFlipped(true)}
-      w="100%"
-      minH={{ base: '112px', md: '132px' }}
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      px={{ base: '8px', md: '12px' }}
-      borderRadius="20px"
-      cursor={hasVideo ? 'pointer' : 'default'}
-      position="relative"
-      transition="transform .2s ease, box-shadow .2s ease"
-      _hover={hasVideo ? { transform: 'translateY(-2px)', boxShadow: 'inset 0 0 0 1px rgba(212, 175, 55, .32)' } : undefined}
-      _focusVisible={hasVideo ? { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' } : undefined}
-    >
-      {sponsor.logoUrl ? (
-        <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} maxH={{ base: '112px', md: '132px' }} maxW="100%" objectFit="contain" pointerEvents="none" />
-      ) : (
-        <Box h={{ base: '88px', md: '104px' }} w="100%" borderRadius="18px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
-      )}
-      {hasVideo && (
-        <Box
-          position="absolute"
-          right={{ base: '8px', md: '14px' }}
-          bottom={{ base: '8px', md: '12px' }}
-          w={{ base: '34px', md: '40px' }}
-          h={{ base: '34px', md: '40px' }}
-          borderRadius="full"
-          bg="yellow.400"
-          color="white"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          boxShadow="0 10px 22px rgba(180, 130, 24, .32)"
-        >
-          <Icon as={MdPlayCircleFilled} w={{ base: '22px', md: '25px' }} h={{ base: '22px', md: '25px' }} />
-        </Box>
-      )}
-    </Box>
-  );
-
-  if (isFlipped) {
+  if (showVideo) {
     return (
-      <Box key={sponsor.id} minW="0">
-        <Box {...flipCard} border="1px solid" minW="0" overflow="hidden" transition="box-shadow .22s ease, border-color .22s ease">
-          <Stack spacing={{ base: '10px', md: '12px' }} minW={0}>
-            <SponsorVideoFrame sponsor={sponsor} />
-            <Stack direction={{ base: 'column', sm: 'row' }} spacing="10px" align={{ base: 'stretch', sm: 'center' }} justify="space-between" minW={0}>
-              <Stack spacing="3px" minW={0} flex="1">
-                {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
-                {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2}>{sponsor.description}</Text>}
-              </Stack>
-              <Button type="button" onClick={() => setIsFlipped(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm" flexShrink={0}>
-                Frente
-              </Button>
+      <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="hidden" transition="box-shadow .22s ease, border-color .22s ease">
+        <Stack spacing={{ base: '10px', md: '12px' }} minW={0}>
+          <SponsorVideoFrame sponsor={sponsor} />
+          <Stack direction={{ base: 'column', sm: 'row' }} spacing="10px" align={{ base: 'stretch', sm: 'center' }} justify="space-between" minW={0}>
+            <Stack spacing="3px" minW={0} flex="1">
+              {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
+              {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2}>{sponsor.description}</Text>}
             </Stack>
-            <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
+            <Button type="button" onClick={() => setShowVideo(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm" flexShrink={0}>
+              Volver
+            </Button>
           </Stack>
-        </Box>
+        </Stack>
       </Box>
     );
   }
 
   return (
-    <Box key={sponsor.id} minW="0">
-      <Box {...flipCard} border="1px solid" minW="0" overflow="hidden" transition="box-shadow .22s ease, border-color .22s ease">
-        <Stack spacing={{ base: '10px', md: '12px' }} align="center" justify="space-between" textAlign="center" minW={0}>
-          <Stack spacing={{ base: '7px', md: '9px' }} align="center" w="100%" minW={0}>
-            {frontLogo}
-            {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
-            {sponsor.description && <Text color={muted} fontSize={{ base: '12px', md: 'sm' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
-          </Stack>
-
-          <Stack spacing="8px" w="100%" align="center">
-            {hasVideo && (
-              <Button
-                type="button"
-                onClick={() => setIsFlipped(true)}
-                leftIcon={<MdPlayCircleFilled />}
-                size={{ base: 'sm', md: 'md' }}
-                borderRadius="full"
-                bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
-                color="white"
-                boxShadow="0 12px 22px rgba(184, 134, 11, .28)"
-                maxW="100%"
-                whiteSpace="normal"
-                _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
-              >
-                Tocar para ver
-              </Button>
-            )}
-            <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
-          </Stack>
+    <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="visible" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
+      <Stack spacing={{ base: '8px', md: '10px' }} h="100%" align="center" justify="space-between" textAlign="center" minW={0}>
+        <SponsorLogoHub sponsor={sponsor} visual={visual} muted={muted} links={(sponsor.links || []).slice(0, linkMax)} hasVideo={hasVideo} onPlay={() => setShowVideo(true)} />
+        <Stack spacing={{ base: '4px', md: '6px' }} align="center" minW={0} w="100%">
+          {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
+          {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
         </Stack>
-      </Box>
-    </Box>
-  );
-}
-function SponsorStaticCard({ sponsor, visual, linkMax, muted }) {
-  const [linksOpen, setLinksOpen] = useState(false);
-
-  return (
-    <Box key={sponsor.id} {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
-      <SimpleGrid columns={{ base: 1 }} spacing={{ base: '8px', md: '12px' }} alignItems="center" h="100%">
-        <Stack direction={{ base: 'column', sm: 'row', md: 'column' }} spacing={{ base: '10px', sm: '12px', md: '6px' }} h="100%" align="center">
-          <Box
-            as="button"
-            type="button"
-            aria-label={linksOpen ? `Ocultar links de ${sponsor.name || 'patrocinador'}` : `Mostrar links de ${sponsor.name || 'patrocinador'}`}
-            aria-expanded={linksOpen}
-            onClick={() => setLinksOpen((current) => !current)}
-            flex={{ base: 'initial', sm: '0 0 38%', md: 'initial' }}
-            minW="0"
-            w={{ base: '100%', sm: '38%', md: '100%' }}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            borderRadius="18px"
-            position="relative"
-            cursor="pointer"
-            transition="transform .2s ease, box-shadow .2s ease"
-            _hover={{ transform: 'translateY(-2px)', boxShadow: 'inset 0 0 0 1px rgba(56, 161, 105, .22)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
-          >
-            {sponsor.logoUrl ? (
-              <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} h={logoSize(visual.logo).h} maxW="100%" objectFit="contain" pointerEvents="none" />
-            ) : (
-              <Box h={logoSize(visual.logo).placeholderH} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
-            )}
-            {sponsor.links?.length > 1 && (
-              <Box position="absolute" right="6px" bottom="4px" bg="brand.500" color="white" borderRadius="full" px="8px" py="2px" fontSize="11px" fontWeight="900" boxShadow="0 8px 18px rgba(15, 23, 42, .18)">
-                +{Math.min(sponsor.links.length, linkMax) - 1}
-              </Box>
-            )}
-          </Box>
-          <Stack spacing={{ base: '5px', md: '6px' }} align="center" textAlign="center" flex="1" minW="0" overflow="hidden" w="100%">
-            {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
-            {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
-            <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" isExpanded={linksOpen} onToggle={() => setLinksOpen((current) => !current)} />
-          </Stack>
-        </Stack>
-      </SimpleGrid>
+      </Stack>
     </Box>
   );
 }
@@ -491,14 +371,9 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     if (sponsor.isAvailable) return renderAvailableCard(sponsor);
     const sponsorType = sponsor?.type || type;
     const linkMax = sponsorType === 'General' ? 1 : 4;
-    const isVipWithVideo = sponsorType === 'VIP' && sponsor.videoUrl;
     const visual = sponsorVisual(sponsorType, Boolean(sponsor.videoUrl));
 
-    if (isVipWithVideo) {
-      return <SponsorFlipCard key={sponsor.id} sponsor={sponsor} visual={visual} linkMax={linkMax} muted={muted} />;
-    }
-
-    return <SponsorStaticCard key={sponsor.id} sponsor={sponsor} visual={visual} linkMax={linkMax} muted={muted} />;
+    return <SponsorCard key={sponsor.id} sponsor={sponsor} visual={visual} linkMax={linkMax} muted={muted} />;
   };
 
   return (
