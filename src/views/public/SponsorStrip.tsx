@@ -4,12 +4,16 @@ import {
   AspectRatio,
   Box,
   Button,
+  HStack,
   Icon,
+  IconButton,
   Image,
   Link,
+  ScaleFade,
   SimpleGrid,
   Stack,
   Text,
+  Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
@@ -112,34 +116,108 @@ const logoSize = (variant) => {
 };
 
 function SponsorActionRow({ links = [], max = 4, muted, size = 'sm' }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const cleanLinks = links.filter(Boolean).slice(0, max);
   if (!cleanLinks.length) return null;
 
-  return (
-    <Stack direction="row" spacing="8px" justify="center" flexWrap="wrap" w="100%">
-      {cleanLinks.map((link, index) => {
-        const meta = getLinkMeta(link);
-        const href = link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
+  const primaryMeta = getLinkMeta(cleanLinks[0]);
+  const primaryHref = cleanLinks[0].includes('@') && !cleanLinks[0].startsWith('mailto:') ? `mailto:${cleanLinks[0]}` : cleanLinks[0];
+  const bubbleSize = size === 'xs' ? { base: '34px', md: '36px' } : { base: '40px', md: '44px' };
+  const iconSize = size === 'xs' ? { base: '16px', md: '17px' } : { base: '18px', md: '20px' };
+  const extraLinks = cleanLinks.slice(1);
 
-        return (
-          <Button
-            key={`${link}-${index}`}
+  return (
+    <Stack spacing="8px" align="center" w="100%" minW={0}>
+      <HStack spacing="7px" justify="center" flexWrap="wrap" maxW="100%">
+        <Tooltip label={primaryMeta.label} hasArrow placement="top">
+          <IconButton
             as={Link}
-            href={href}
-            isExternal={!href.startsWith('mailto:')}
-            size={size}
-            leftIcon={<Icon as={meta.icon} />}
+            href={primaryHref}
+            isExternal={!primaryHref.startsWith('mailto:')}
+            aria-label={`Abrir ${primaryMeta.label}`}
+            icon={<Icon as={primaryMeta.icon} w={iconSize} h={iconSize} />}
+            w={bubbleSize}
+            h={bubbleSize}
+            minW={bubbleSize}
             borderRadius="full"
-            variant="outline"
-            color={muted}
-            borderColor="blackAlpha.200"
-            maxW="100%"
-            _hover={{ textDecoration: 'none', transform: 'translateY(-1px)', borderColor: 'brand.300' }}
+            color="white"
+            sx={{ background: primaryMeta.bg }}
+            boxShadow="0 12px 24px rgba(15, 23, 42, .20)"
+            border="2px solid"
+            borderColor="whiteAlpha.900"
+            _hover={{ textDecoration: 'none', transform: 'translateY(-3px) scale(1.07)', filter: 'brightness(1.06)' }}
+            _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
+          />
+        </Tooltip>
+
+        {extraLinks.length > 0 && (
+          <Button
+            type="button"
+            onClick={() => setIsExpanded((current) => !current)}
+            size={size}
+            h={bubbleSize}
+            minW={bubbleSize}
+            px={isExpanded ? '12px' : '0'}
+            borderRadius="full"
+            aria-expanded={isExpanded}
+            aria-label={isExpanded ? 'Ocultar links del partner' : 'Mostrar links del partner'}
+            color={isExpanded ? 'white' : muted}
+            bg={isExpanded ? 'brand.500' : 'white'}
+            border="1px solid"
+            borderColor={isExpanded ? 'brand.500' : 'blackAlpha.200'}
+            boxShadow="0 10px 22px rgba(15, 23, 42, .12)"
+            _hover={{ transform: 'translateY(-2px)', bg: isExpanded ? 'brand.600' : 'gray.50' }}
           >
-            <Text as="span" noOfLines={1}>{meta.label === 'Instagram' ? 'Historia' : meta.label}</Text>
+            {isExpanded ? 'Cerrar' : `+${extraLinks.length}`}
           </Button>
-        );
-      })}
+        )}
+      </HStack>
+
+      {extraLinks.length > 0 && (
+        <ScaleFade initialScale={0.88} in={isExpanded} unmountOnExit>
+          <HStack
+            spacing="7px"
+            justify="center"
+            flexWrap="wrap"
+            bg="whiteAlpha.900"
+            border="1px solid"
+            borderColor="blackAlpha.100"
+            borderRadius="full"
+            px="8px"
+            py="6px"
+            boxShadow="0 14px 28px rgba(15, 23, 42, .14)"
+            maxW="100%"
+          >
+            {extraLinks.map((link, index) => {
+              const meta = getLinkMeta(link);
+              const href = link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
+
+              return (
+                <Tooltip key={`${link}-${index}`} label={meta.label} hasArrow placement="top">
+                  <IconButton
+                    as={Link}
+                    href={href}
+                    isExternal={!href.startsWith('mailto:')}
+                    aria-label={`Abrir ${meta.label}`}
+                    icon={<Icon as={meta.icon} w={iconSize} h={iconSize} />}
+                    w={bubbleSize}
+                    h={bubbleSize}
+                    minW={bubbleSize}
+                    borderRadius="full"
+                    color="white"
+                    sx={{ background: meta.bg }}
+                    boxShadow="0 10px 20px rgba(15, 23, 42, .18)"
+                    border="2px solid"
+                    borderColor="white"
+                    _hover={{ textDecoration: 'none', transform: 'translateY(-3px) scale(1.08)', filter: 'brightness(1.06)' }}
+                    _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
+                  />
+                </Tooltip>
+              );
+            })}
+          </HStack>
+        </ScaleFade>
+      )}
     </Stack>
   );
 }
