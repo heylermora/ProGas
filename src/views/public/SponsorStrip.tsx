@@ -115,8 +115,8 @@ const logoSize = (variant) => {
   return { h: { base: '48px', md: '58px' }, placeholderH: { base: '48px', md: '58px' }, icon: { base: '32px', md: '34px' } };
 };
 
-function SponsorActionRow({ links = [], max = 4, muted, size = 'sm' }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+function SponsorActionRow({ links = [], max = 4, muted, size = 'sm', isExpanded: controlledExpanded, onToggle }) {
+  const [localExpanded, setLocalExpanded] = useState(false);
   const cleanLinks = links.filter(Boolean).slice(0, max);
   if (!cleanLinks.length) return null;
 
@@ -125,6 +125,8 @@ function SponsorActionRow({ links = [], max = 4, muted, size = 'sm' }) {
   const bubbleSize = size === 'xs' ? { base: '34px', md: '36px' } : { base: '40px', md: '44px' };
   const iconSize = size === 'xs' ? { base: '16px', md: '17px' } : { base: '18px', md: '20px' };
   const extraLinks = cleanLinks.slice(1);
+  const isExpanded = controlledExpanded ?? localExpanded;
+  const toggleExpanded = onToggle || (() => setLocalExpanded((current) => !current));
 
   return (
     <Stack spacing="8px" align="center" w="100%" minW={0}>
@@ -153,7 +155,7 @@ function SponsorActionRow({ links = [], max = 4, muted, size = 'sm' }) {
         {extraLinks.length > 0 && (
           <Button
             type="button"
-            onClick={() => setIsExpanded((current) => !current)}
+            onClick={toggleExpanded}
             size={size}
             h={bubbleSize}
             minW={bubbleSize}
@@ -248,97 +250,156 @@ function SponsorFlipCard({ sponsor, visual, linkMax, muted }) {
   const hasVideo = Boolean(sponsor.videoUrl);
   const { _hover, minH, ...flipCard } = visual.card;
 
-  return (
-    <Box key={sponsor.id} minW="0" sx={{ perspective: '1200px' }}>
-      <Box
-        position="relative"
-        minH={{ base: '318px', md: '334px' }}
-        sx={{
-          transformStyle: 'preserve-3d',
-          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-          transition: 'transform .62s cubic-bezier(.2,.8,.2,1)',
-          willChange: 'transform',
-        }}
-      >
+  const frontLogo = (
+    <Box
+      as="button"
+      type="button"
+      aria-label={hasVideo ? `Ver video de ${sponsor.name || 'patrocinador'}` : `Ver links de ${sponsor.name || 'patrocinador'}`}
+      onClick={() => hasVideo && setIsFlipped(true)}
+      w="100%"
+      minH={{ base: '112px', md: '132px' }}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      px={{ base: '8px', md: '12px' }}
+      borderRadius="20px"
+      cursor={hasVideo ? 'pointer' : 'default'}
+      position="relative"
+      transition="transform .2s ease, box-shadow .2s ease"
+      _hover={hasVideo ? { transform: 'translateY(-2px)', boxShadow: 'inset 0 0 0 1px rgba(212, 175, 55, .32)' } : undefined}
+      _focusVisible={hasVideo ? { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' } : undefined}
+    >
+      {sponsor.logoUrl ? (
+        <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} maxH={{ base: '112px', md: '132px' }} maxW="100%" objectFit="contain" pointerEvents="none" />
+      ) : (
+        <Box h={{ base: '88px', md: '104px' }} w="100%" borderRadius="18px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
+      )}
+      {hasVideo && (
         <Box
-          {...flipCard}
-          border="1px solid"
-          minW="0"
-          minH="100%"
-          h="100%"
           position="absolute"
-          inset="0"
-          overflow="hidden"
-          transition="box-shadow .22s ease, border-color .22s ease"
-          sx={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(0deg)' }}
+          right={{ base: '8px', md: '14px' }}
+          bottom={{ base: '8px', md: '12px' }}
+          w={{ base: '34px', md: '40px' }}
+          h={{ base: '34px', md: '40px' }}
+          borderRadius="full"
+          bg="yellow.400"
+          color="white"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          boxShadow="0 10px 22px rgba(180, 130, 24, .32)"
         >
-          <Stack h="100%" spacing={{ base: '12px', md: '14px' }} align="center" justify="space-between" textAlign="center" minW={0}>
-            <Stack spacing={{ base: '8px', md: '10px' }} align="center" w="100%" minW={0}>
-              <Box w="100%" minH={{ base: '104px', md: '124px' }} display="flex" alignItems="center" justifyContent="center" px={{ base: '8px', md: '12px' }}>
-                {sponsor.logoUrl ? (
-                  <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} maxH={{ base: '104px', md: '124px' }} maxW="100%" objectFit="contain" />
-                ) : (
-                  <Box h={{ base: '88px', md: '104px' }} w="100%" borderRadius="18px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
-                )}
-              </Box>
-              {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
-              {sponsor.description && <Text color={muted} fontSize={{ base: '12px', md: 'sm' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
-            </Stack>
-
-            <Stack spacing="8px" w="100%" align="center">
-              {hasVideo && (
-                <Button
-                  type="button"
-                  onClick={() => setIsFlipped(true)}
-                  leftIcon={<MdPlayCircleFilled />}
-                  rightIcon={<MdFlip />}
-                  size={{ base: 'sm', md: 'md' }}
-                  borderRadius="full"
-                  bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
-                  color="white"
-                  boxShadow="0 12px 22px rgba(184, 134, 11, .28)"
-                  maxW="100%"
-                  whiteSpace="normal"
-                  _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
-                >
-                  Tocar para ver
-                </Button>
-              )}
-              <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} />
-            </Stack>
-          </Stack>
+          <Icon as={MdPlayCircleFilled} w={{ base: '22px', md: '25px' }} h={{ base: '22px', md: '25px' }} />
         </Box>
+      )}
+    </Box>
+  );
 
-        <Box
-          {...flipCard}
-          border="1px solid"
-          minW="0"
-          minH="100%"
-          h="100%"
-          position="absolute"
-          inset="0"
-          overflow="hidden"
-          transition="box-shadow .22s ease, border-color .22s ease"
-          sx={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-        >
-          <Stack h="100%" spacing="12px" justify="space-between" minW={0}>
-            <Stack spacing="10px" minW={0}>
-              <SponsorVideoFrame sponsor={sponsor} />
-              {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
-              {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2}>{sponsor.description}</Text>}
-            </Stack>
-            <Stack spacing="8px" w="100%">
-              <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
-              <Button type="button" onClick={() => setIsFlipped(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />}>
-                Volver al frente
+  if (isFlipped) {
+    return (
+      <Box key={sponsor.id} minW="0">
+        <Box {...flipCard} border="1px solid" minW="0" overflow="hidden" transition="box-shadow .22s ease, border-color .22s ease">
+          <Stack spacing={{ base: '10px', md: '12px' }} minW={0}>
+            <SponsorVideoFrame sponsor={sponsor} />
+            <Stack direction={{ base: 'column', sm: 'row' }} spacing="10px" align={{ base: 'stretch', sm: 'center' }} justify="space-between" minW={0}>
+              <Stack spacing="3px" minW={0} flex="1">
+                {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
+                {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2}>{sponsor.description}</Text>}
+              </Stack>
+              <Button type="button" onClick={() => setIsFlipped(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm" flexShrink={0}>
+                Frente
               </Button>
             </Stack>
+            <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
           </Stack>
         </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <Box key={sponsor.id} minW="0">
+      <Box {...flipCard} border="1px solid" minW="0" overflow="hidden" transition="box-shadow .22s ease, border-color .22s ease">
+        <Stack spacing={{ base: '10px', md: '12px' }} align="center" justify="space-between" textAlign="center" minW={0}>
+          <Stack spacing={{ base: '7px', md: '9px' }} align="center" w="100%" minW={0}>
+            {frontLogo}
+            {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
+            {sponsor.description && <Text color={muted} fontSize={{ base: '12px', md: 'sm' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
+          </Stack>
+
+          <Stack spacing="8px" w="100%" align="center">
+            {hasVideo && (
+              <Button
+                type="button"
+                onClick={() => setIsFlipped(true)}
+                leftIcon={<MdPlayCircleFilled />}
+                size={{ base: 'sm', md: 'md' }}
+                borderRadius="full"
+                bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 42%, #8A5A00 100%)"
+                color="white"
+                boxShadow="0 12px 22px rgba(184, 134, 11, .28)"
+                maxW="100%"
+                whiteSpace="normal"
+                _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.05)' }}
+              >
+                Tocar para ver
+              </Button>
+            )}
+            <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
+          </Stack>
+        </Stack>
       </Box>
     </Box>
   );
 }
+function SponsorStaticCard({ sponsor, visual, linkMax, muted }) {
+  const [linksOpen, setLinksOpen] = useState(false);
+
+  return (
+    <Box key={sponsor.id} {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
+      <SimpleGrid columns={{ base: 1 }} spacing={{ base: '8px', md: '12px' }} alignItems="center" h="100%">
+        <Stack direction={{ base: 'column', sm: 'row', md: 'column' }} spacing={{ base: '10px', sm: '12px', md: '6px' }} h="100%" align="center">
+          <Box
+            as="button"
+            type="button"
+            aria-label={linksOpen ? `Ocultar links de ${sponsor.name || 'patrocinador'}` : `Mostrar links de ${sponsor.name || 'patrocinador'}`}
+            aria-expanded={linksOpen}
+            onClick={() => setLinksOpen((current) => !current)}
+            flex={{ base: 'initial', sm: '0 0 38%', md: 'initial' }}
+            minW="0"
+            w={{ base: '100%', sm: '38%', md: '100%' }}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            borderRadius="18px"
+            position="relative"
+            cursor="pointer"
+            transition="transform .2s ease, box-shadow .2s ease"
+            _hover={{ transform: 'translateY(-2px)', boxShadow: 'inset 0 0 0 1px rgba(56, 161, 105, .22)' }}
+            _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
+          >
+            {sponsor.logoUrl ? (
+              <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} h={logoSize(visual.logo).h} maxW="100%" objectFit="contain" pointerEvents="none" />
+            ) : (
+              <Box h={logoSize(visual.logo).placeholderH} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
+            )}
+            {sponsor.links?.length > 1 && (
+              <Box position="absolute" right="6px" bottom="4px" bg="brand.500" color="white" borderRadius="full" px="8px" py="2px" fontSize="11px" fontWeight="900" boxShadow="0 8px 18px rgba(15, 23, 42, .18)">
+                +{Math.min(sponsor.links.length, linkMax) - 1}
+              </Box>
+            )}
+          </Box>
+          <Stack spacing={{ base: '5px', md: '6px' }} align="center" textAlign="center" flex="1" minW="0" overflow="hidden" w="100%">
+            {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
+            {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
+            <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" isExpanded={linksOpen} onToggle={() => setLinksOpen((current) => !current)} />
+          </Stack>
+        </Stack>
+      </SimpleGrid>
+    </Box>
+  );
+}
+
 export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
@@ -437,28 +498,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       return <SponsorFlipCard key={sponsor.id} sponsor={sponsor} visual={visual} linkMax={linkMax} muted={muted} />;
     }
 
-    const videoColumns = { base: 1 };
-
-    return (
-      <Box key={sponsor.id} {...visual.card} border="1px solid" minW="0" overflow="hidden" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
-        <SimpleGrid columns={videoColumns} spacing={{ base: '8px', md: '12px' }} alignItems="center" h="100%">
-          <Stack direction={{ base: 'row', md: 'column' }} spacing={{ base: '12px', md: '6px' }} h="100%" align="center">
-            <Box flex={{ base: '0 0 38%', md: 'initial' }} minW="0" w={{ base: '38%', md: '100%' }} display="flex" alignItems="center" justifyContent="center">
-              {sponsor.logoUrl ? (
-                <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} h={logoSize(visual.logo).h} maxW="100%" objectFit="contain" />
-              ) : (
-                <Box h={logoSize(visual.logo).placeholderH} w="100%" borderRadius="16px" bg="gray.100" display="flex" alignItems="center" justifyContent="center"><Text color={muted}>Logo</Text></Box>
-              )}
-            </Box>
-            <Stack spacing={{ base: '4px', md: '6px' }} align={{ base: 'flex-start', md: 'center' }} textAlign={{ base: 'left', md: 'center' }} flex="1" minW="0" overflow="hidden">
-              {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
-              {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
-              <SponsorActionRow links={sponsor.links} max={linkMax} muted={muted} size="xs" />
-            </Stack>
-          </Stack>
-        </SimpleGrid>
-      </Box>
-    );
+    return <SponsorStaticCard key={sponsor.id} sponsor={sponsor} visual={visual} linkMax={linkMax} muted={muted} />;
   };
 
   return (
