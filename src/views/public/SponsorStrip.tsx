@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdAddBusiness, MdEmail, MdFlip, MdLink, MdPlayCircleFilled, MdStar } from 'react-icons/md';
+import { MdAddBusiness, MdEmail, MdFlip, MdLink, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
 
@@ -61,8 +61,8 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
         borderColor: 'yellow.200',
         boxShadow: '0 18px 45px rgba(180, 130, 24, .16)',
         borderRadius: { base: '20px', md: '26px' },
-        p: { base: '14px', md: hasVideo ? '16px' : '18px' },
-        minH: { base: hasVideo ? '150px' : '158px', md: hasVideo ? '158px' : '178px' },
+        p: { base: '16px', md: hasVideo ? '18px' : '20px' },
+        minH: { base: hasVideo ? '220px' : '210px', md: hasVideo ? '250px' : '230px' },
         _hover: { transform: 'translateY(-5px) scale(1.01)', boxShadow: '0 22px 56px rgba(180, 130, 24, .22)', borderColor: 'yellow.300' },
       },
       logo: 'hero',
@@ -108,7 +108,7 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
 };
 
 const logoSize = (variant) => {
-  if (variant === 'hero') return { h: { base: '64px', md: '86px' }, placeholderH: { base: '64px', md: '86px' }, icon: { base: '38px', md: '42px' } };
+  if (variant === 'hero') return { h: { base: '104px', md: '132px' }, placeholderH: { base: '108px', md: '136px' }, icon: { base: '38px', md: '42px' } };
   if (variant === 'featured') return { h: { base: '54px', md: '70px' }, placeholderH: { base: '54px', md: '70px' }, icon: { base: '34px', md: '38px' } };
   return { h: { base: '48px', md: '58px' }, placeholderH: { base: '48px', md: '58px' }, icon: { base: '32px', md: '34px' } };
 };
@@ -122,14 +122,14 @@ const bubblePlacements = [
 
 const normalizeHref = (link = '') => (link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link);
 
-function SponsorLogoHub({ sponsor, visual, muted, links = [], onPlay, hasVideo }) {
+function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
   const [isOpen, setIsOpen] = useState(false);
   const cleanLinks = links.filter(Boolean);
   const hasLinks = cleanLinks.length > 0;
   const size = logoSize(visual.logo);
 
   return (
-    <Box position="relative" w="100%" maxW={{ base: '210px', md: visual.logo === 'hero' ? '260px' : '220px' }} mx="auto" py={{ base: '8px', md: '10px' }} overflow="visible">
+    <Box position="relative" w="100%" maxW={{ base: visual.logo === 'hero' ? '260px' : '210px', md: visual.logo === 'hero' ? '320px' : '220px' }} mx="auto" py={{ base: '8px', md: '10px' }} overflow="visible">
       <Box
         as="button"
         type="button"
@@ -156,29 +156,6 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [], onPlay, hasVideo }
         )}
       </Box>
 
-      {hasVideo && (
-        <IconButton
-          aria-label={`Ver video de ${sponsor.name || 'patrocinador'}`}
-          icon={<Icon as={MdPlayCircleFilled} w={{ base: '20px', md: '24px' }} h={{ base: '20px', md: '24px' }} />}
-          onClick={onPlay}
-          position="absolute"
-          zIndex={3}
-          left="50%"
-          bottom={{ base: '-8px', md: '-6px' }}
-          transform="translateX(-50%)"
-          w={{ base: '40px', md: '46px' }}
-          h={{ base: '40px', md: '46px' }}
-          minW={{ base: '40px', md: '46px' }}
-          borderRadius="full"
-          bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
-          color="white"
-          boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
-          border="2px solid"
-          borderColor="white"
-          _hover={{ transform: 'translateX(-50%) translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
-          _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
-        />
-      )}
 
       {cleanLinks.slice(0, 4).map((link, index) => {
         const meta = getLinkMeta(link);
@@ -253,13 +230,11 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
       <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="hidden" transition="box-shadow .22s ease, border-color .22s ease">
         <Stack spacing={{ base: '10px', md: '12px' }} minW={0}>
           <SponsorVideoFrame sponsor={sponsor} />
-          <Stack direction={{ base: 'column', sm: 'row' }} spacing="10px" align={{ base: 'stretch', sm: 'center' }} justify="space-between" minW={0}>
-            <Stack spacing="3px" minW={0} flex="1">
-              {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
-              {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2}>{sponsor.description}</Text>}
-            </Stack>
-            <Button type="button" onClick={() => setShowVideo(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm" flexShrink={0}>
-              Volver
+          <Stack spacing="8px" align="center" textAlign="center" minW={0}>
+            {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
+            {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2} maxW="100%">{sponsor.description}</Text>}
+            <Button type="button" onClick={() => setShowVideo(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm">
+              Voltear
             </Button>
           </Stack>
         </Stack>
@@ -270,7 +245,12 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
   return (
     <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="visible" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
       <Stack spacing={{ base: '8px', md: '10px' }} h="100%" align="center" justify="space-between" textAlign="center" minW={0}>
-        <SponsorLogoHub sponsor={sponsor} visual={visual} muted={muted} links={(sponsor.links || []).slice(0, linkMax)} hasVideo={hasVideo} onPlay={() => setShowVideo(true)} />
+        <SponsorLogoHub sponsor={sponsor} visual={visual} muted={muted} links={(sponsor.links || []).slice(0, linkMax)} />
+        {hasVideo && (
+          <Button type="button" onClick={() => setShowVideo(true)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm" mt={{ base: '-4px', md: '-2px' }}>
+            Voltear
+          </Button>
+        )}
         <Stack spacing={{ base: '4px', md: '6px' }} align="center" minW={0} w="100%">
           {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
           {sponsor.description && <Text color={muted} fontSize={{ base: '11px', md: 'xs' }} noOfLines={visual.descriptionLines} maxW="100%">{sponsor.description}</Text>}
