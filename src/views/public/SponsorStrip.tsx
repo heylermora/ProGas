@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import {
   AspectRatio,
   Box,
-  Button,
   Icon,
   IconButton,
   Image,
@@ -16,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdAddBusiness, MdEmail, MdFlip, MdLink, MdStar } from 'react-icons/md';
+import { MdAddBusiness, MdEmail, MdLink, MdPlayCircleFilled, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
 
@@ -233,9 +232,23 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
           <Stack spacing="8px" align="center" textAlign="center" minW={0}>
             {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
             {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2} maxW="100%">{sponsor.description}</Text>}
-            <Button type="button" onClick={() => setShowVideo(false)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm">
-              Voltear
-            </Button>
+            <IconButton
+              type="button"
+              onClick={() => setShowVideo(false)}
+              aria-label="Volver al logo y links del patrocinador"
+              icon={<Icon as={MdLink} w={{ base: '20px', md: '22px' }} h={{ base: '20px', md: '22px' }} />}
+              w={{ base: '44px', md: '48px' }}
+              h={{ base: '44px', md: '48px' }}
+              minW={{ base: '44px', md: '48px' }}
+              borderRadius="full"
+              bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
+              color="white"
+              boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
+              border="2px solid"
+              borderColor="white"
+              _hover={{ transform: 'translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
+              _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
+            />
           </Stack>
         </Stack>
       </Box>
@@ -247,9 +260,24 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
       <Stack spacing={{ base: '8px', md: '10px' }} h="100%" align="center" justify="space-between" textAlign="center" minW={0}>
         <SponsorLogoHub sponsor={sponsor} visual={visual} muted={muted} links={(sponsor.links || []).slice(0, linkMax)} />
         {hasVideo && (
-          <Button type="button" onClick={() => setShowVideo(true)} variant="outline" borderRadius="full" leftIcon={<MdFlip />} size="sm" mt={{ base: '-4px', md: '-2px' }}>
-            Voltear
-          </Button>
+          <IconButton
+            type="button"
+            onClick={() => setShowVideo(true)}
+            aria-label={`Ver video de ${sponsor.name || 'patrocinador'}`}
+            icon={<Icon as={MdPlayCircleFilled} w={{ base: '20px', md: '24px' }} h={{ base: '20px', md: '24px' }} />}
+            mt={{ base: '-4px', md: '-2px' }}
+            w={{ base: '44px', md: '50px' }}
+            h={{ base: '44px', md: '50px' }}
+            minW={{ base: '44px', md: '50px' }}
+            borderRadius="full"
+            bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
+            color="white"
+            boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
+            border="2px solid"
+            borderColor="white"
+            _hover={{ transform: 'translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
+            _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
+          />
         )}
         <Stack spacing={{ base: '4px', md: '6px' }} align="center" minW={0} w="100%">
           {sponsor.name && <Text fontWeight="900" fontSize={visual.nameSize} noOfLines={2} maxW="100%">{sponsor.name}</Text>}
