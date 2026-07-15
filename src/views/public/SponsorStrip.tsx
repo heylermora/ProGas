@@ -240,8 +240,8 @@ function SponsorVideoFrame({ sponsor }) {
           aria-label={`Expandir ${videoTitle}`}
           icon={<Icon as={MdOpenInFull} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />}
           position="absolute"
-          right={{ base: '10px', md: '12px' }}
-          bottom={{ base: '10px', md: '12px' }}
+          right={{ base: '16px', md: '18px' }}
+          bottom={{ base: '-58px', md: '-62px' }}
           zIndex={2}
           w={{ base: '42px', md: '44px' }}
           h={{ base: '42px', md: '44px' }}
@@ -280,7 +280,7 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
 
   if (showVideo) {
     return (
-      <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="hidden" transition="box-shadow .22s ease, border-color .22s ease">
+      <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="visible" transition="box-shadow .22s ease, border-color .22s ease">
         <Stack spacing={{ base: '10px', md: '12px' }} minW={0}>
           <SponsorVideoFrame sponsor={sponsor} />
           <Stack spacing="8px" align="center" textAlign="center" minW={0}>
