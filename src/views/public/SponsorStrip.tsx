@@ -7,6 +7,12 @@ import {
   IconButton,
   Image,
   Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
   SimpleGrid,
   Stack,
   Text,
@@ -15,7 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdAddBusiness, MdEmail, MdLink, MdPlayCircleFilled, MdStar } from 'react-icons/md';
+import { MdAddBusiness, MdEmail, MdLink, MdOpenInFull, MdPlayCircleFilled, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 
 
@@ -198,24 +204,72 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
   );
 }
 
+function SponsorVideoPlayer({ sponsor }) {
+  if (shouldRenderIframeVideo(sponsor.videoUrl)) {
+    return (
+      <Box
+        as="iframe"
+        src={getVideoEmbedSrc(sponsor.videoUrl)}
+        title={`Video de ${sponsor.name || 'patrocinador'}`}
+        border="0"
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
+        allowFullScreen
+      />
+    );
+  }
+
+  return <Box as="video" src={sponsor.videoUrl} controls playsInline />;
+}
+
 function SponsorVideoFrame({ sponsor }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!sponsor?.videoUrl) return null;
 
+  const videoTitle = `Video de ${sponsor.name || 'patrocinador'}`;
+
   return (
-    <AspectRatio ratio={16 / 9} w="100%" borderRadius="18px" overflow="hidden" bg="black" flexShrink={0}>
-      {shouldRenderIframeVideo(sponsor.videoUrl) ? (
-        <Box
-          as="iframe"
-          src={getVideoEmbedSrc(sponsor.videoUrl)}
-          title={`Video de ${sponsor.name || 'patrocinador'}`}
-          border="0"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          allowFullScreen
+    <>
+      <Box position="relative" w="100%" flexShrink={0}>
+        <AspectRatio ratio={16 / 9} w="100%" borderRadius="18px" overflow="hidden" bg="black">
+          <SponsorVideoPlayer sponsor={sponsor} />
+        </AspectRatio>
+        <IconButton
+          type="button"
+          onClick={() => setIsExpanded(true)}
+          aria-label={`Expandir ${videoTitle}`}
+          icon={<Icon as={MdOpenInFull} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />}
+          position="absolute"
+          right={{ base: '10px', md: '12px' }}
+          bottom={{ base: '10px', md: '12px' }}
+          zIndex={2}
+          w={{ base: '42px', md: '44px' }}
+          h={{ base: '42px', md: '44px' }}
+          minW={{ base: '42px', md: '44px' }}
+          borderRadius="full"
+          bg="blackAlpha.700"
+          color="white"
+          border="1px solid"
+          borderColor="whiteAlpha.700"
+          boxShadow="0 10px 22px rgba(0, 0, 0, .34)"
+          _hover={{ bg: 'blackAlpha.800', transform: 'scale(1.04)' }}
+          _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
         />
-      ) : (
-        <Box as="video" src={sponsor.videoUrl} controls playsInline />
-      )}
-    </AspectRatio>
+      </Box>
+
+      <Modal isOpen={isExpanded} onClose={() => setIsExpanded(false)} size="6xl" isCentered>
+        <ModalOverlay bg="blackAlpha.800" />
+        <ModalContent mx={{ base: 3, md: 6 }} bg="gray.900" color="white" borderRadius={{ base: '18px', md: '24px' }} overflow="hidden">
+          <ModalHeader pr="56px" fontSize={{ base: 'md', md: 'lg' }}>{videoTitle}</ModalHeader>
+          <ModalCloseButton top={{ base: '12px', md: '14px' }} right={{ base: '12px', md: '14px' }} />
+          <ModalBody p={{ base: 3, md: 5 }} pt={0}>
+            <AspectRatio ratio={16 / 9} w="100%" borderRadius={{ base: '14px', md: '18px' }} overflow="hidden" bg="black">
+              <SponsorVideoPlayer sponsor={sponsor} />
+            </AspectRatio>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
 
