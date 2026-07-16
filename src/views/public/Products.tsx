@@ -1,8 +1,9 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, AlertIcon, Box, Button, FormControl, FormHelperText, FormLabel, HStack, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import { customAlphabet } from 'nanoid';
 import { useHistory } from 'react-router-dom';
+import DeviceLocationMap from 'components/form/DeviceLocationMap';
 import OkModal from 'components/modal/OkModal';
 import orderService from 'services/OrderService';
 import productService from 'services/ProductService';
@@ -11,6 +12,7 @@ import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import OrderNavigation from './OrderNavigation';
 import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
+import { mapsSearchUrl } from 'utils/location';
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 6);
 
@@ -44,15 +46,8 @@ export default function Products() {
 
   const selectedProduct = useMemo(() => catalog.find((product) => product.id === orderForm.productId), [catalog, orderForm.productId]);
   const set = (key, value) => setOrderForm((prev) => ({ ...prev, [key]: value }));
-  const openLocation = (provider) => {
-    const query = orderForm.coordinates || orderForm.locationUrl || orderForm.address;
-    if (!query) return;
-    const encoded = encodeURIComponent(query);
-    const url = provider === 'waze'
-      ? `https://waze.com/ul?q=${encoded}&navigate=yes`
-      : `https://www.google.com/maps/search/?api=1&query=${encoded}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
+
+
 
   const addItem = () => {
     if (!selectedProduct) return;
@@ -77,12 +72,9 @@ export default function Products() {
       setMessage('Agregue al menos un producto al pedido.');
       return;
     }
-    if (!orderForm.coordinates && !orderForm.locationUrl) {
-      setMessage('Ingrese coordenadas o un enlace de ubicación como plan B.');
-      return;
-    }
+    const locationUrl = orderForm.locationUrl || mapsSearchUrl(orderForm.coordinates || orderForm.address);
 
-    saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: orderForm.coordinates, locationUrl: orderForm.locationUrl } });
+    saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: orderForm.coordinates, locationUrl } });
 
     await orderService.create({
       orderCode: nano(),
@@ -94,7 +86,7 @@ export default function Products() {
       location: {
         address: orderForm.address,
         coordinates: orderForm.coordinates,
-        locationUrl: orderForm.locationUrl,
+        locationUrl,
       },
       paymentMethod: orderForm.paymentMethod,
       transport: orderForm.transport,
@@ -122,16 +114,18 @@ export default function Products() {
             {items.map((item, index) => <Box key={`${item.productId}-${index}`} p="12px" borderWidth="1px" borderRadius="12px"><Text fontWeight="700">{item.gasType}</Text><Text fontSize="sm">Cantidad: {item.quantity} • ₡{item.price}</Text></Box>)}
           </Stack>
           <FormControl isRequired><FormLabel>Dirección del pedido</FormLabel><Textarea value={orderForm.address} onChange={(e) => set('address', e.target.value)} placeholder="Barrio y señas principales" /></FormControl>
+          <FormControl>
+            <FormLabel>Ubicación en el mapa</FormLabel>
+            <DeviceLocationMap
+              coordinates={orderForm.coordinates}
+              addressQuery={orderForm.address}
+              onLocation={(location) => setOrderForm((prev) => ({ ...prev, ...location }))}
+            />
+          </FormControl>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
-            <FormControl><FormLabel>Coordenadas exactas</FormLabel><Input value={orderForm.coordinates} onChange={(e) => set('coordinates', e.target.value)} placeholder="Ej. 9.8000,-84.1600" /><FormHelperText>Opcional. Podés copiar coordenadas de Google Maps o Waze.</FormHelperText></FormControl>
-            <FormControl><FormLabel>Link gratis de ubicación</FormLabel><Input value={orderForm.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /><FormHelperText>Pegá aquí el enlace compartido de Maps o Waze.</FormHelperText></FormControl>
             <FormControl><FormLabel>Transporte</FormLabel><Input value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Si aplica" /></FormControl>
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option value="Efectivo">Efectivo</option><option value="SINPE">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
           </SimpleGrid>
-          <HStack spacing="10px" flexWrap="wrap">
-            <Button size="sm" variant="outline" onClick={() => openLocation('maps')}>Abrir en Google Maps</Button>
-            <Button size="sm" variant="outline" onClick={() => openLocation('waze')}>Abrir en Waze</Button>
-          </HStack>
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
           <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel="Confirmar pedido" isFinal onBack={() => history.push('/customer/info')} onContinue={submitOrder} />
         </Stack>

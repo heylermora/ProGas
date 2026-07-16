@@ -1,0 +1,64 @@
+// @ts-nocheck
+import React, { useMemo, useState } from 'react';
+import { Alert, AlertIcon, Box, Button, FormHelperText, HStack, Spinner, Stack, Text } from '@chakra-ui/react';
+import { MdMyLocation, MdOpenInNew } from 'react-icons/md';
+import { coordinatesToText, mapsEmbedUrl, mapsSearchUrl, wazeUrl } from 'utils/location';
+
+type DeviceLocationMapProps = {
+  coordinates?: string;
+  addressQuery?: string;
+  onLocation?: (value: { coordinates: string; locationUrl: string }) => void;
+};
+
+export default function DeviceLocationMap({ coordinates = '', addressQuery = '', onLocation }: DeviceLocationMapProps) {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const query = coordinates || addressQuery;
+  const embedUrl = useMemo(() => mapsEmbedUrl(query), [query]);
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      setMessage('Este dispositivo no permite obtener la ubicación automáticamente. Escribí las señas para continuar.');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const nextCoordinates = coordinatesToText(position.coords.latitude, position.coords.longitude);
+        onLocation?.({ coordinates: nextCoordinates, locationUrl: mapsSearchUrl(nextCoordinates) });
+        setLoading(false);
+      },
+      () => {
+        setMessage('No pudimos obtener la ubicación. Revisá permisos del navegador o continuá con las señas.');
+        setLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+    );
+  };
+
+  const openExternal = (provider) => {
+    const url = provider === 'waze' ? wazeUrl(query) : mapsSearchUrl(query);
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  return (
+    <Stack spacing="10px">
+      <HStack spacing="10px" flexWrap="wrap">
+        <Button leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
+          Usar mi ubicación actual
+        </Button>
+        <Button leftIcon={<MdOpenInNew />} variant="outline" onClick={() => openExternal('maps')} isDisabled={!query}>Abrir Maps</Button>
+        <Button leftIcon={<MdOpenInNew />} variant="outline" onClick={() => openExternal('waze')} isDisabled={!query}>Abrir Waze</Button>
+      </HStack>
+      <FormHelperText>Solo necesitás aceptar el permiso de ubicación; no tenés que copiar coordenadas ni enlaces.</FormHelperText>
+      {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
+      {embedUrl && (
+        <Box border="1px solid" borderColor="gray.200" borderRadius="16px" overflow="hidden" bg="gray.50">
+          <Box as="iframe" title="Vista previa de ubicación en Google Maps" src={embedUrl} w="100%" h={{ base: '220px', md: '280px' }} border="0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+        </Box>
+      )}
+    </Stack>
+  );
+}
