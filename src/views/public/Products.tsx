@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, AlertIcon, Badge, Box, Button, Divider, Flex, FormControl, FormLabel, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
+import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, FormControl, FormLabel, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import { customAlphabet } from 'nanoid';
 import { useHistory } from 'react-router-dom';
 import { MdAdd, MdDelete } from 'react-icons/md';
@@ -25,6 +25,8 @@ export default function Products() {
   const [items, setItems] = useState<ProductItem[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState('');
+  const [useCustomerAddress, setUseCustomerAddress] = useState(Boolean(defaultAddress));
+  const [hasTransport, setHasTransport] = useState(false);
   const [orderForm, setOrderForm] = useState({
     productId: '',
     quantity: 1,
@@ -53,6 +55,10 @@ export default function Products() {
     setItems((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
+  const effectiveAddress = useCustomerAddress ? defaultAddress : orderForm.address;
+  const effectiveCoordinates = useCustomerAddress ? draft.address?.coordinates || '' : orderForm.coordinates;
+  const effectiveLocationUrl = useCustomerAddress ? draft.address?.locationUrl || '' : orderForm.locationUrl;
+
   const addItem = () => {
     if (!selectedProduct) return;
     setItems((prev) => [
@@ -76,9 +82,9 @@ export default function Products() {
       setMessage('Agregue al menos un producto al pedido.');
       return;
     }
-    const locationUrl = orderForm.locationUrl || mapsSearchUrl(orderForm.coordinates || orderForm.address);
+    const locationUrl = effectiveLocationUrl || mapsSearchUrl(effectiveCoordinates || effectiveAddress);
 
-    saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: orderForm.coordinates, locationUrl } });
+    saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: effectiveCoordinates, locationUrl } });
 
     await orderService.create({
       orderCode: nano(),
@@ -88,12 +94,12 @@ export default function Products() {
       clientId: draft.nationalId,
       phone: draft.phone,
       location: {
-        address: orderForm.address,
-        coordinates: orderForm.coordinates,
+        address: effectiveAddress,
+        coordinates: effectiveCoordinates,
         locationUrl,
       },
       paymentMethod: orderForm.paymentMethod,
-      transport: orderForm.transport,
+      transport: hasTransport ? orderForm.transport : '',
       comment: orderForm.comment,
       items,
       totalAmount,
@@ -142,17 +148,39 @@ export default function Products() {
               </Flex>
             </Stack>
           </Box>
-          <FormControl isRequired><FormLabel>Dirección del pedido</FormLabel><Textarea value={orderForm.address} onChange={(e) => set('address', e.target.value)} placeholder="Barrio y señas principales" /></FormControl>
-          <FormControl>
-            <FormLabel>Ubicación en el mapa</FormLabel>
-            <DeviceLocationMap
-              coordinates={orderForm.coordinates}
-              addressQuery={orderForm.address}
-              onLocation={(location) => setOrderForm((prev) => ({ ...prev, ...location }))}
-            />
-          </FormControl>
+          <Box p={{ base: '12px', md: '16px' }} border="1px solid" borderColor="gray.200" borderRadius="18px">
+            <Stack spacing="12px">
+              <Checkbox isChecked={useCustomerAddress} onChange={(e) => setUseCustomerAddress(e.target.checked)} isDisabled={!defaultAddress} fontWeight="700">
+                Usar la dirección registrada del cliente
+              </Checkbox>
+              {useCustomerAddress && (
+                <Box p="12px" borderRadius="14px" bg="gray.50">
+                  <Text fontSize="sm" color="gray.600">Dirección del cliente</Text>
+                  <Text fontWeight="800">{defaultAddress || 'Sin dirección guardada'}</Text>
+                </Box>
+              )}
+              {!useCustomerAddress && (
+                <Stack spacing="12px">
+                  <FormControl isRequired><FormLabel>Dirección del pedido</FormLabel><Textarea value={orderForm.address} onChange={(e) => set('address', e.target.value)} placeholder="Barrio y señas principales" /></FormControl>
+                  <FormControl>
+                    <FormLabel>Ubicación en el mapa</FormLabel>
+                    <DeviceLocationMap
+                      coordinates={orderForm.coordinates}
+                      addressQuery={orderForm.address}
+                      onLocation={(location) => setOrderForm((prev) => ({ ...prev, ...location }))}
+                    />
+                  </FormControl>
+                </Stack>
+              )}
+            </Stack>
+          </Box>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
-            <FormControl><FormLabel>Transporte</FormLabel><Input value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Si aplica" /></FormControl>
+            <FormControl>
+              <Checkbox isChecked={hasTransport} onChange={(e) => setHasTransport(e.target.checked)} fontWeight="700">
+                Agregar transporte
+              </Checkbox>
+              {hasTransport && <Input mt="10px" value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Detalle del transporte" />}
+            </FormControl>
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option value="Efectivo">Efectivo</option><option value="SINPE">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
           </SimpleGrid>
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
