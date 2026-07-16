@@ -49,6 +49,19 @@ const getLinkMeta = (url = '') => {
 
 const SPONSOR_CAPACITY = { VIP: 4, Premium: 8, General: 12 };
 
+const sponsorActionButtonStyles = {
+  w: { base: '44px', md: '48px' },
+  h: { base: '44px', md: '48px' },
+  minW: { base: '44px', md: '48px' },
+  borderRadius: 'full',
+  border: '2px solid',
+  borderColor: 'white',
+  transition: 'transform .2s ease, filter .2s ease, background .2s ease',
+  _focusVisible: { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' },
+};
+
+const sponsorActionIconSize = { base: '20px', md: '22px' };
+
 const makeAvailableSponsor = (type, index) => ({
   id: `available-${type}-${index}`,
   type,
@@ -238,22 +251,17 @@ function SponsorVideoFrame({ sponsor }) {
           type="button"
           onClick={() => setIsExpanded(true)}
           aria-label={`Expandir ${videoTitle}`}
-          icon={<Icon as={MdOpenInFull} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />}
+          icon={<Icon as={MdOpenInFull} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
           position="absolute"
           right={{ base: '16px', md: '18px' }}
           bottom={{ base: '-58px', md: '-62px' }}
           zIndex={2}
-          w={{ base: '42px', md: '44px' }}
-          h={{ base: '42px', md: '44px' }}
-          minW={{ base: '42px', md: '44px' }}
-          borderRadius="full"
+          {...sponsorActionButtonStyles}
           bg="blackAlpha.700"
           color="white"
-          border="1px solid"
           borderColor="whiteAlpha.700"
           boxShadow="0 10px 22px rgba(0, 0, 0, .34)"
           _hover={{ bg: 'blackAlpha.800', transform: 'scale(1.04)' }}
-          _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
         />
       </Box>
 
@@ -290,18 +298,12 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
               type="button"
               onClick={() => setShowVideo(false)}
               aria-label="Volver al logo y links del patrocinador"
-              icon={<Icon as={MdLink} w={{ base: '20px', md: '22px' }} h={{ base: '20px', md: '22px' }} />}
-              w={{ base: '44px', md: '48px' }}
-              h={{ base: '44px', md: '48px' }}
-              minW={{ base: '44px', md: '48px' }}
-              borderRadius="full"
+              icon={<Icon as={MdLink} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
+              {...sponsorActionButtonStyles}
               bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
               color="white"
               boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
-              border="2px solid"
-              borderColor="white"
               _hover={{ transform: 'translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
-              _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
             />
           </Stack>
         </Stack>
@@ -318,19 +320,13 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
             type="button"
             onClick={() => setShowVideo(true)}
             aria-label={`Ver video de ${sponsor.name || 'patrocinador'}`}
-            icon={<Icon as={MdPlayCircleFilled} w={{ base: '20px', md: '24px' }} h={{ base: '20px', md: '24px' }} />}
+            icon={<Icon as={MdPlayCircleFilled} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
             mt={{ base: '-4px', md: '-2px' }}
-            w={{ base: '44px', md: '50px' }}
-            h={{ base: '44px', md: '50px' }}
-            minW={{ base: '44px', md: '50px' }}
-            borderRadius="full"
+            {...sponsorActionButtonStyles}
             bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
             color="white"
             boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
-            border="2px solid"
-            borderColor="white"
             _hover={{ transform: 'translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
           />
         )}
         <Stack spacing={{ base: '4px', md: '6px' }} align="center" minW={0} w="100%">
