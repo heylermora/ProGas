@@ -12,9 +12,9 @@ type OrderNavigationProps = {
 };
 
 const steps = [
-  { step: 1, label: 'Verificación' },
-  { step: 2, label: 'Cliente' },
-  { step: 3, label: 'Pedido' },
+  { step: 1, label: 'Verificación', shortLabel: 'Verif.' },
+  { step: 2, label: 'Cliente', shortLabel: 'Cliente' },
+  { step: 3, label: 'Pedido', shortLabel: 'Pedido' },
 ];
 
 export default function OrderNavigation({ currentStep, backLabel = 'Retroceder', continueLabel = 'Continuar', isFinal = false, onBack, onContinue }: OrderNavigationProps) {
@@ -38,11 +38,15 @@ export default function OrderNavigation({ currentStep, backLabel = 'Retroceder',
                 px={{ base: '6px', md: '10px' }}
                 py="6px"
                 borderRadius="full"
-                fontSize={{ base: '10px', md: 'xs' }}
+                fontSize={{ base: '10px', sm: '11px', md: 'xs' }}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
                 whiteSpace="nowrap"
                 colorScheme={isCurrent ? 'brand' : isDone ? 'green' : 'gray'}
               >
-                {isDone ? '✓' : item.step}. {item.label}
+                <Box as="span" display={{ base: 'none', sm: 'inline' }}>{isDone ? '✓' : item.step}. {item.label}</Box>
+                <Box as="span" display={{ base: 'inline', sm: 'none' }}>{isDone ? '✓' : item.step}. {item.shortLabel}</Box>
               </Badge>
             );
           })}

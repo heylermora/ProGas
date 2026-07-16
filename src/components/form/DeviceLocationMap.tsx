@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
-import { Alert, AlertIcon, Box, Button, FormHelperText, HStack, Spinner, Stack, Text } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Button, FormHelperText, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react';
 import { MdMyLocation, MdOpenInNew } from 'react-icons/md';
 import { coordinatesToText, mapsEmbedUrl, mapsSearchUrl, wazeUrl } from 'utils/location';
 
@@ -45,13 +45,14 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
 
   return (
     <Stack spacing="10px">
-      <HStack spacing="10px" flexWrap="wrap">
-        <Button leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
-          Usar mi ubicación actual
+      <SimpleGrid columns={{ base: 3, md: 3 }} spacing={{ base: '6px', md: '10px' }}>
+        <Button size={{ base: 'sm', md: 'md' }} px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
+          <Text as="span" display={{ base: 'none', sm: 'inline' }}>Usar mi ubicación</Text>
+          <Text as="span" display={{ base: 'inline', sm: 'none' }}>Ubicar</Text>
         </Button>
-        <Button leftIcon={<MdOpenInNew />} variant="outline" onClick={() => openExternal('maps')} isDisabled={!query}>Abrir Maps</Button>
-        <Button leftIcon={<MdOpenInNew />} variant="outline" onClick={() => openExternal('waze')} isDisabled={!query}>Abrir Waze</Button>
-      </HStack>
+        <Button size={{ base: 'sm', md: 'md' }} px={{ base: 2, md: 4 }} leftIcon={<MdOpenInNew />} variant="outline" onClick={() => openExternal('maps')} isDisabled={!query}>Maps</Button>
+        <Button size={{ base: 'sm', md: 'md' }} px={{ base: 2, md: 4 }} leftIcon={<MdOpenInNew />} variant="outline" onClick={() => openExternal('waze')} isDisabled={!query}>Waze</Button>
+      </SimpleGrid>
       <FormHelperText>Solo necesitás aceptar el permiso de ubicación; no tenés que copiar coordenadas ni enlaces.</FormHelperText>
       {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
       {embedUrl && (
