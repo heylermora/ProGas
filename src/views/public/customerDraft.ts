@@ -35,7 +35,7 @@ export const saveCustomerDraft = (next: CustomerDraft) => {
 
 export const addressToText = (address?: CustomerDraftAddress) => {
   if (!address) return '';
-  return [address.province, address.canton, address.district, address.neighborhood, address.details]
+  return [address.district, address.neighborhood, address.details]
     .filter(Boolean)
     .join(', ');
 };

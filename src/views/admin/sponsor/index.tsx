@@ -20,13 +20,14 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { MdDelete, MdDragIndicator, MdEdit } from 'react-icons/md';
+import { MdAddBusiness, MdDelete, MdDragIndicator, MdEdit } from 'react-icons/md';
 import Card from 'components/card/Card';
 import SponsorService from 'services/SponsorService';
 import AddButton from 'components/button/AddButton';
 import SponsorStrip from 'views/public/SponsorStrip';
 
 const SPONSOR_TYPES = ['VIP', 'Premium', 'General'];
+const SPONSOR_CAPACITY = { VIP: 4, Premium: 8, General: 12 };
 
 export default function SponsorsAdmin() {
   const [sponsors, setSponsors] = useState([]);
@@ -66,7 +67,12 @@ export default function SponsorsAdmin() {
     [type]: sponsors.filter((sponsor) => sponsor.type === type),
   }), {}), [sponsors]);
 
-  const currentSponsors = sponsorsByType[selectedType] || [];
+  const currentSponsors = [...(sponsorsByType[selectedType] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
+  const slotCount = Math.max(SPONSOR_CAPACITY[selectedType] || currentSponsors.length || 1, currentSponsors.length);
+  const sponsorSlots = Array.from({ length: slotCount }, (_, index) => ({
+    slot: index + 1,
+    sponsor: currentSponsors[index] || null,
+  }));
   const activeCurrentSponsors = currentSponsors.filter((sponsor) => sponsor.active !== false);
   const selectedSponsor = activeCurrentSponsors.find((sponsor) => sponsor.id === selectedSponsorId) || activeCurrentSponsors[0];
 
@@ -84,22 +90,22 @@ export default function SponsorsAdmin() {
 
   const remove = async (id) => { await SponsorService.delete(id); load(); };
 
-  const reorderSponsors = async (targetSponsorId) => {
-    if (!draggedSponsorId || draggedSponsorId === targetSponsorId || savingOrder) return;
+  const reorderSponsors = async (targetSlotIndex) => {
+    if (!draggedSponsorId || savingOrder) return;
 
     const fromIndex = currentSponsors.findIndex((sponsor) => sponsor.id === draggedSponsorId);
-    const toIndex = currentSponsors.findIndex((sponsor) => sponsor.id === targetSponsorId);
-    if (fromIndex < 0 || toIndex < 0) return;
+    if (fromIndex < 0) return;
 
     const nextSponsors = [...currentSponsors];
     const [moved] = nextSponsors.splice(fromIndex, 1);
-    nextSponsors.splice(toIndex, 0, moved);
+    const safeTargetIndex = Math.max(0, Math.min(Number(targetSlotIndex) || 0, nextSponsors.length));
+    nextSponsors.splice(safeTargetIndex, 0, moved);
 
     setSavingOrder(true);
     setSponsors((prev) => [
       ...prev.filter((sponsor) => sponsor.type !== selectedType),
       ...nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1 })),
-    ].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || '')));
+    ].sort((a, b) => (a.type || '').localeCompare(b.type || '') || a.order - b.order || (a.name || '').localeCompare(b.name || '')));
 
     Promise.all(nextSponsors.map((sponsor, index) => SponsorService.edit(sponsor.id, { ...sponsor, order: index + 1 })))
       .catch(() => {})
@@ -158,39 +164,53 @@ export default function SponsorsAdmin() {
       </Tabs>
 
       <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={{ base: '12px', md: '18px' }}>
-        {currentSponsors.map((s, index) => (
+        {sponsorSlots.map(({ sponsor: s, slot }, index) => (
           <Card
-            key={s.id}
+            key={s?.id || `empty-${selectedType}-${slot}`}
             p={{ base: '14px', md: '18px' }}
             minW="0"
-            draggable
-            cursor="grab"
+            minH={{ base: '230px', md: '260px' }}
+            draggable={Boolean(s)}
+            cursor={s ? 'grab' : 'default'}
             border="1px solid"
-            borderColor={draggedSponsorId === s.id ? 'brand.300' : 'transparent'}
-            bg={draggedSponsorId === s.id ? dropBg : undefined}
-            onClick={() => s.active !== false && setSelectedSponsorId(s.id)}
-            onDragStart={() => setDraggedSponsorId(s.id)}
+            borderColor={s && draggedSponsorId === s.id ? 'brand.300' : s ? 'transparent' : 'brand.200'}
+            borderStyle={s ? 'solid' : 'dashed'}
+            bg={s && draggedSponsorId === s.id ? dropBg : undefined}
+            onClick={() => s?.active !== false && s?.id && setSelectedSponsorId(s.id)}
+            onDragStart={() => s?.id && setDraggedSponsorId(s.id)}
             onDragOver={(event) => event.preventDefault()}
-            onDrop={() => reorderSponsors(s.id)}
+            onDrop={() => reorderSponsors(index)}
           >
-            <Stack spacing="12px">
-              <Flex align="center" justify="space-between" gap="10px">
-                <HStack spacing="8px" minW="0">
-                  <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" />
-                  <Badge colorScheme="brand">#{index + 1}</Badge>
-                  <Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge>
+            {s ? (
+              <Stack spacing="12px" h="100%">
+                <Flex align="center" justify="space-between" gap="10px">
+                  <HStack spacing="8px" minW="0">
+                    <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" />
+                    <Badge colorScheme="brand">Posición #{slot}</Badge>
+                    <Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge>
+                  </HStack>
+                  <Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Activo' : 'Oculto'}</Badge>
+                </Flex>
+                {s.logoUrl ? <Image src={s.logoUrl} alt={s.name || 'Sponsor'} h={{ base: '72px', md: '92px' }} objectFit="contain" /> : <Box h={{ base: '72px', md: '92px' }} bg="gray.100" borderRadius="16px" />}
+                <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }} noOfLines={2}>{s.name || 'Sin título'}</Text>
+                {s.description && <Text color="gray.500" noOfLines={2} fontSize="sm">{s.description}</Text>}
+                <Box flex="1" />
+                <HStack justify="space-between"><Text>Activo</Text><Switch isChecked={s.active} onChange={() => toggleActive(s)} /></HStack>
+                <HStack justify="flex-end">
+                  <IconButton aria-label="Editar" icon={<MdEdit />} as={RLink} to={`/admin/sponsor/edit/${s.id}`} />
+                  <IconButton aria-label="Eliminar" icon={<MdDelete />} onClick={() => remove(s.id)} />
                 </HStack>
-                <Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Activo' : 'Oculto'}</Badge>
-              </Flex>
-              {s.logoUrl ? <Image src={s.logoUrl} alt={s.name || 'Sponsor'} h={{ base: '72px', md: '92px' }} objectFit="contain" /> : <Box h={{ base: '72px', md: '92px' }} bg="gray.100" borderRadius="16px" />}
-              <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }} noOfLines={2}>{s.name || 'Sin título'}</Text>
-              {s.description && <Text color="gray.500" noOfLines={2} fontSize="sm">{s.description}</Text>}
-              <HStack justify="space-between"><Text>Activo</Text><Switch isChecked={s.active} onChange={() => toggleActive(s)} /></HStack>
-              <HStack justify="flex-end">
-                <IconButton aria-label="Editar" icon={<MdEdit />} as={RLink} to={`/admin/sponsor/edit/${s.id}`} />
-                <IconButton aria-label="Eliminar" icon={<MdDelete />} onClick={() => remove(s.id)} />
-              </HStack>
-            </Stack>
+              </Stack>
+            ) : (
+              <Stack h="100%" align="center" justify="center" textAlign="center" spacing="10px" color={muted}>
+                <Box w="56px" h="56px" borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center">
+                  <MdAddBusiness size="28px" />
+                </Box>
+                <Badge colorScheme="brand">Posición #{slot}</Badge>
+                <Text fontWeight="800" color={textColor}>Espacio disponible</Text>
+                <Text fontSize="sm">Arrastrá un patrocinador aquí para asignarlo a esta posición.</Text>
+              </Stack>
+            )}
           </Card>
         ))}
       </SimpleGrid>

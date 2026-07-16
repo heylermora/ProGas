@@ -1,9 +1,10 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, AlertIcon, Box, Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
+import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, FormControl, FormHelperText, FormLabel, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import { customAlphabet } from 'nanoid';
 import { useHistory } from 'react-router-dom';
-import Map from 'components/form/Map';
+import { MdAdd, MdDelete } from 'react-icons/md';
+import DeviceLocationMap from 'components/form/DeviceLocationMap';
 import OkModal from 'components/modal/OkModal';
 import orderService from 'services/OrderService';
 import productService from 'services/ProductService';
@@ -12,15 +13,9 @@ import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import OrderNavigation from './OrderNavigation';
 import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
+import { mapsSearchUrl } from 'utils/location';
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 6);
-
-const parseCoordinates = (value?: string) => {
-  const [lat, lng] = String(value || '').split(',').map((part) => Number(part.trim()));
-  return Number.isFinite(lat) && Number.isFinite(lng) ? [lng, lat] : null;
-};
-
-const coordsToText = (coords?: number[] | null) => Array.isArray(coords) ? `${coords[1]},${coords[0]}` : '';
 
 export default function Products() {
   const history = useHistory();
@@ -30,11 +25,8 @@ export default function Products() {
   const [items, setItems] = useState<ProductItem[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState('');
-  const [locationMap, setLocationMap] = useState({
-    coords: parseCoordinates(draft.address?.coordinates),
-    address: defaultAddress,
-    isManualAddress: false,
-  });
+  const [useCustomerAddress, setUseCustomerAddress] = useState(Boolean(defaultAddress));
+  const [hasTransport, setHasTransport] = useState(false);
   const [orderForm, setOrderForm] = useState({
     productId: '',
     quantity: 1,
@@ -56,16 +48,16 @@ export default function Products() {
   }, []);
 
   const selectedProduct = useMemo(() => catalog.find((product) => product.id === orderForm.productId), [catalog, orderForm.productId]);
+  const totalAmount = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
   const set = (key, value) => setOrderForm((prev) => ({ ...prev, [key]: value }));
-  const handleMapChange = (nextLocation) => {
-    const coordinates = coordsToText(nextLocation.coords);
-    setLocationMap(nextLocation);
-    setOrderForm((prev) => ({
-      ...prev,
-      address: nextLocation.address || prev.address,
-      coordinates: coordinates || prev.coordinates,
-    }));
+
+  const removeItem = (indexToRemove) => {
+    setItems((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
+
+  const effectiveAddress = useCustomerAddress ? defaultAddress : orderForm.address;
+  const effectiveCoordinates = useCustomerAddress ? draft.address?.coordinates || '' : orderForm.coordinates;
+  const effectiveLocationUrl = useCustomerAddress ? draft.address?.locationUrl || '' : orderForm.locationUrl;
 
   const addItem = () => {
     if (!selectedProduct) return;
@@ -90,12 +82,9 @@ export default function Products() {
       setMessage('Agregue al menos un producto al pedido.');
       return;
     }
-    if (!orderForm.coordinates && !orderForm.locationUrl) {
-      setMessage('Ingrese coordenadas o un enlace de ubicación como plan B.');
-      return;
-    }
+    const locationUrl = effectiveLocationUrl || mapsSearchUrl(effectiveCoordinates || effectiveAddress);
 
-    saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: orderForm.coordinates, locationUrl: orderForm.locationUrl } });
+    saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: effectiveCoordinates, locationUrl } });
 
     await orderService.create({
       orderCode: nano(),
@@ -105,15 +94,15 @@ export default function Products() {
       clientId: draft.nationalId,
       phone: draft.phone,
       location: {
-        address: orderForm.address,
-        coordinates: orderForm.coordinates,
-        locationUrl: orderForm.locationUrl,
+        address: effectiveAddress,
+        coordinates: effectiveCoordinates,
+        locationUrl,
       },
       paymentMethod: orderForm.paymentMethod,
-      transport: orderForm.transport,
+      transport: hasTransport ? orderForm.transport : '',
       comment: orderForm.comment,
       items,
-      totalAmount: items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0),
+      totalAmount,
     });
     setShowModal(true);
   };
@@ -125,22 +114,75 @@ export default function Products() {
       <PublicCard>
         <Stack spacing="16px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing="16px">
-            <FormControl isRequired><FormLabel>Producto</FormLabel><Select value={orderForm.productId} onChange={(e) => set('productId', e.target.value)}>{catalog.map((product) => <option key={product.id} value={product.id}>{product.description}</option>)}</Select></FormControl>
-            <FormControl isRequired><FormLabel>Cantidad</FormLabel><Input type="number" min="1" value={orderForm.quantity} onChange={(e) => set('quantity', e.target.value)} /></FormControl>
-            <FormControl><FormLabel>Datos del cilindro</FormLabel><Input value={orderForm.cylinderDetails} onChange={(e) => set('cylinderDetails', e.target.value)} placeholder="Tipo / tamaño si aplica" /></FormControl>
-          </SimpleGrid>
-          <Button alignSelf="flex-start" onClick={addItem}>Agregar producto</Button>
-          <Stack spacing="8px">
-            {items.map((item, index) => <Box key={`${item.productId}-${index}`} p="12px" borderWidth="1px" borderRadius="12px"><Text fontWeight="700">{item.gasType}</Text><Text fontSize="sm">Cantidad: {item.quantity} • ₡{item.price}</Text></Box>)}
-          </Stack>
-          <FormControl isRequired><FormLabel>Ubicación con mapa</FormLabel><Map value={locationMap} onChange={handleMapChange} /></FormControl>
-          <FormControl isRequired><FormLabel>Dirección del pedido</FormLabel><Textarea value={orderForm.address} onChange={(e) => set('address', e.target.value)} /></FormControl>
+          <Box p={{ base: '12px', md: '16px' }} border="1px solid" borderColor="gray.200" borderRadius="18px" bg="gray.50">
+            <Stack spacing="14px">
+              <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} gap="10px" direction={{ base: 'column', md: 'row' }}>
+                <Box>
+                  <Text fontWeight="900" fontSize={{ base: 'lg', md: 'xl' }}>Productos del pedido</Text>
+                  <Text color="gray.500" fontSize="sm">Agregá uno o varios productos antes de confirmar.</Text>
+                </Box>
+                <Badge colorScheme={items.length ? 'green' : 'gray'} px="10px" py="6px" borderRadius="full">{items.length} producto(s)</Badge>
+              </Flex>
+              <SimpleGrid columns={{ base: 1, lg: 3 }} spacing="12px">
+                <FormControl isRequired><FormLabel>Producto</FormLabel><Select bg="white" value={orderForm.productId} onChange={(e) => set('productId', e.target.value)}>{catalog.map((product) => <option key={product.id} value={product.id}>{product.description}</option>)}</Select></FormControl>
+                <FormControl isRequired><FormLabel>Cantidad</FormLabel><Input bg="white" type="number" min="1" value={orderForm.quantity} onChange={(e) => set('quantity', e.target.value)} /></FormControl>
+                <FormControl><FormLabel>Datos del cilindro</FormLabel><Input bg="white" value={orderForm.cylinderDetails} onChange={(e) => set('cylinderDetails', e.target.value)} placeholder="Tipo / tamaño si aplica" /></FormControl>
+              </SimpleGrid>
+              <Button leftIcon={<MdAdd />} alignSelf={{ base: 'stretch', md: 'flex-start' }} onClick={addItem} isDisabled={!selectedProduct}>Agregar producto</Button>
+              <Divider />
+              <Stack spacing="8px">
+                {!items.length && <Box p="14px" borderWidth="1px" borderStyle="dashed" borderRadius="14px" bg="white"><Text color="gray.500" fontSize="sm">Todavía no hay productos agregados.</Text></Box>}
+                {items.map((item, index) => (
+                  <Flex key={`${item.productId}-${index}`} p="12px" borderWidth="1px" borderRadius="14px" bg="white" justify="space-between" align="center" gap="10px">
+                    <Box minW="0">
+                      <Text fontWeight="800" noOfLines={1}>{item.gasType}</Text>
+                      <Text fontSize="sm" color="gray.500">Cantidad: {item.quantity} • ₡{item.price}</Text>
+                    </Box>
+                    <IconButton aria-label="Quitar producto" icon={<MdDelete />} variant="ghost" colorScheme="red" onClick={() => removeItem(index)} />
+                  </Flex>
+                ))}
+              </Stack>
+              <Flex justify="space-between" align="center" fontWeight="900" fontSize={{ base: 'md', md: 'lg' }}>
+                <Text>Total estimado</Text>
+                <Text>₡{totalAmount.toLocaleString('es-CR')}</Text>
+              </Flex>
+            </Stack>
+          </Box>
+          <Box p={{ base: '12px', md: '16px' }} border="1px solid" borderColor="gray.200" borderRadius="18px">
+            <Stack spacing="12px">
+              <Checkbox isChecked={useCustomerAddress} onChange={(e) => setUseCustomerAddress(e.target.checked)} isDisabled={!defaultAddress} fontWeight="700">
+                Usar la dirección registrada del cliente
+              </Checkbox>
+              {useCustomerAddress && (
+                <Box p="12px" borderRadius="14px" bg="gray.50">
+                  <Text fontSize="sm" color="gray.600">Dirección del cliente</Text>
+                  <Text fontWeight="800">{defaultAddress || 'Sin dirección guardada'}</Text>
+                </Box>
+              )}
+              {!useCustomerAddress && (
+                <Stack spacing="12px">
+                  <FormControl isRequired><FormLabel>Dirección del pedido</FormLabel><Textarea value={orderForm.address} onChange={(e) => set('address', e.target.value)} placeholder="Barrio y señas principales" /></FormControl>
+                  <FormControl>
+                    <FormLabel>Ubicación en el mapa</FormLabel>
+                    <DeviceLocationMap
+                      coordinates={orderForm.coordinates}
+                      addressQuery={orderForm.address}
+                      onLocation={(location) => setOrderForm((prev) => ({ ...prev, ...location }))}
+                    />
+                  </FormControl>
+                </Stack>
+              )}
+            </Stack>
+          </Box>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
-            <FormControl><FormLabel>Coordenadas exactas</FormLabel><Input value={orderForm.coordinates} onChange={(e) => set('coordinates', e.target.value)} placeholder="Ej. 9.8000,-84.1600" /></FormControl>
-            <FormControl><FormLabel>Link de ubicación (plan B si el mapa falla)</FormLabel><Input value={orderForm.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /></FormControl>
-            <FormControl><FormLabel>Transporte</FormLabel><Input value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Si aplica" /></FormControl>
-            <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option>Efectivo</option><option>SINPE</option><option>Otro</option></Select></FormControl>
+            <FormControl>
+              <Checkbox isChecked={hasTransport} onChange={(e) => setHasTransport(e.target.checked)} fontWeight="700">
+                Agregar transporte
+              </Checkbox>
+              <FormHelperText>Marcá esta opción si el pedido necesita entrega, ruta especial o coordinación de transporte.</FormHelperText>
+              {hasTransport && <Input mt="10px" value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Detalle del transporte" />}
+            </FormControl>
+            <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option value="Efectivo">Efectivo</option><option value="SINPE">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
           </SimpleGrid>
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
           <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel="Confirmar pedido" isFinal onBack={() => history.push('/customer/info')} onContinue={submitOrder} />

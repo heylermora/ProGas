@@ -8,8 +8,7 @@ import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import OrderNavigation from './OrderNavigation';
 import { saveCustomerDraft } from './customerDraft';
-
-const onlyDigits = (value: string) => String(value || '').replace(/\D/g, '');
+import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
 
 export default function CustomerData() {
   const history = useHistory();
@@ -43,7 +42,7 @@ export default function CustomerData() {
 
         saveCustomerDraft({
           nationalId,
-          phone: existingClient.phone || existingClient.telefono || form.phone,
+          phone: onlyDigits(existingClient.phone || existingClient.telefono || phoneDigits),
           clientRecordId: existingClient.id,
           isExistingClient: true,
           name: existingClient.name,
@@ -57,7 +56,7 @@ export default function CustomerData() {
       const apiName = await fetchClientNameByCedula(nationalId);
       saveCustomerDraft({
         nationalId,
-        phone: form.phone,
+        phone: phoneDigits,
         isExistingClient: false,
         name: apiName || '',
       });
@@ -85,12 +84,12 @@ export default function CustomerData() {
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormControl isRequired>
               <FormLabel>Cédula</FormLabel>
-              <Input value={form.nationalId} onChange={(e) => set('nationalId', e.target.value)} placeholder="Ej. 101110111" />
+              <Input value={form.nationalId} onChange={(e) => set('nationalId', onlyDigits(e.target.value))} inputMode="numeric" placeholder="Ej. 101110111" />
               <FormHelperText>Solo para verificar si el cliente existe o debe crearse.</FormHelperText>
             </FormControl>
             <FormControl isRequired>
               <FormLabel>Teléfono</FormLabel>
-              <Input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="Ej. 8888-8888" />
+              <Input value={formatPhoneDisplay(form.phone)} onChange={(e) => set('phone', onlyDigits(e.target.value))} inputMode="tel" maxLength={9} placeholder="Ej. 8888-8888" />
               <FormHelperText>Debe tener al menos 8 dígitos.</FormHelperText>
             </FormControl>
           </SimpleGrid>

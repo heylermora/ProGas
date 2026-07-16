@@ -188,7 +188,7 @@ function DonationBanner() {
             transform: 'translateY(0)',
           }}
         >
-          Donar ahora
+          Colabore ahora
         </Button>
       </Flex>
     </Box>
