@@ -262,8 +262,8 @@ function SponsorVideoFrame({ sponsor }) {
           aria-label={`Expandir ${videoTitle}`}
           icon={<Icon as={MdOpenInFull} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
           position="absolute"
-          right={{ base: '16px', md: '18px' }}
-          bottom={{ base: '-58px', md: '-62px' }}
+          right={{ base: '10px', md: '12px' }}
+          bottom={{ base: '10px', md: '12px' }}
           zIndex={2}
           {...sponsorActionButtonStyles}
           bg="blackAlpha.700"
