@@ -254,7 +254,9 @@ function SponsorVideoFrame({ sponsor }) {
     <>
       <Box position="relative" w="100%" flexShrink={0}>
         <AspectRatio ratio={16 / 9} w="100%" borderRadius="18px" overflow="hidden" bg="black">
-          {!isExpanded && <SponsorVideoPlayer sponsor={sponsor} />}
+          <Box w="100%" h="100%" sx={{ '& > iframe, & > video': { width: '100%', height: '100%' } }}>
+            {!isExpanded && <SponsorVideoPlayer sponsor={sponsor} />}
+          </Box>
         </AspectRatio>
         <IconButton
           type="button"
@@ -262,8 +264,8 @@ function SponsorVideoFrame({ sponsor }) {
           aria-label={`Expandir ${videoTitle}`}
           icon={<Icon as={MdOpenInFull} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
           position="absolute"
-          right={{ base: '10px', md: '12px' }}
-          bottom={{ base: '10px', md: '12px' }}
+          right={{ base: '4px', md: '8px' }}
+          bottom={{ base: '-58px', md: '-62px' }}
           zIndex={2}
           {...sponsorActionButtonStyles}
           bg="blackAlpha.700"
