@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, AlertIcon, Box, Button, FormHelperText, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react';
 import { MdMyLocation } from 'react-icons/md';
-import { coordinatesToText, mapsEmbedUrl } from 'utils/location';
+import { coordinatesToText, mapsEmbedUrl, mapsSearchUrl } from 'utils/location';
 
 type DeviceLocationMapProps = {
   coordinates?: string;
