@@ -30,7 +30,11 @@ describe('SponsorStrip video player', () => {
     fireEvent.click(screen.getByRole('button', { name: /ver video de patrocinador de prueba/i }));
     expect(container.querySelectorAll('video')).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole('button', { name: /expandir video de patrocinador de prueba/i }));
+    const backButton = screen.getByRole('button', { name: /volver al logo y links del patrocinador/i });
+    const expandButton = screen.getByRole('button', { name: /expandir video de patrocinador de prueba/i });
+
+    expect(backButton.parentElement).toBe(expandButton.parentElement);
+    fireEvent.click(expandButton);
 
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(document.querySelectorAll('video')).toHaveLength(1);
