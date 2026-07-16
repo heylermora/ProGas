@@ -11,7 +11,6 @@ import {
 } from '@chakra-ui/react';
 
 import FormField from 'interfaces/FormField';
-import Map from './Map';
 import ItemsFieldControl from './ItemsFieldControl';
 
 type FieldInputProps = {
@@ -68,14 +67,6 @@ const FieldInput = ({
             )}
           </Select>
         );
-
-      case 'location':
-        return <Map
-          value={fieldValues[field.name]}
-          onChange={(value) =>
-            handleInputChange(field.name, value, field.type)
-          }
-        />
 
       case 'items':
         return <ItemsFieldControl {...field.value} />;

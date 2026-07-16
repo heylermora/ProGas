@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, FormControl, FormLabel, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
+import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, FormControl, FormHelperText, FormLabel, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import { customAlphabet } from 'nanoid';
 import { useHistory } from 'react-router-dom';
 import { MdAdd, MdDelete } from 'react-icons/md';
@@ -179,6 +179,7 @@ export default function Products() {
               <Checkbox isChecked={hasTransport} onChange={(e) => setHasTransport(e.target.checked)} fontWeight="700">
                 Agregar transporte
               </Checkbox>
+              <FormHelperText>Marcá esta opción si el pedido necesita entrega, ruta especial o coordinación de transporte.</FormHelperText>
               {hasTransport && <Input mt="10px" value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Detalle del transporte" />}
             </FormControl>
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option value="Efectivo">Efectivo</option><option value="SINPE">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
