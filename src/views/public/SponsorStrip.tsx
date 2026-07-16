@@ -49,6 +49,28 @@ const getLinkMeta = (url = '') => {
 
 const SPONSOR_CAPACITY = { VIP: 4, Premium: 8, General: 12 };
 
+const sponsorActionButtonStyles = {
+  w: { base: '44px', md: '48px' },
+  h: { base: '44px', md: '48px' },
+  minW: { base: '44px', md: '48px' },
+  borderRadius: 'full',
+  border: '2px solid',
+  borderColor: 'white',
+  transition: 'transform .2s ease, filter .2s ease, background .2s ease',
+  _focusVisible: { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' },
+};
+
+const sponsorActionIconSize = { base: '20px', md: '22px' };
+
+type SponsorStripProps = {
+  type: string;
+  max?: number;
+  title?: string;
+  offset?: number;
+  sponsors?: any[];
+  previewSponsor?: any;
+};
+
 const makeAvailableSponsor = (type, index) => ({
   id: `available-${type}-${index}`,
   type,
@@ -221,7 +243,7 @@ function SponsorVideoPlayer({ sponsor }) {
   return <Box as="video" src={sponsor.videoUrl} controls playsInline />;
 }
 
-function SponsorVideoFrame({ sponsor }) {
+function SponsorVideoFrame({ sponsor, onBack }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!sponsor?.videoUrl) return null;
@@ -232,30 +254,37 @@ function SponsorVideoFrame({ sponsor }) {
     <>
       <Box position="relative" w="100%" flexShrink={0}>
         <AspectRatio ratio={16 / 9} w="100%" borderRadius="18px" overflow="hidden" bg="black">
-          <SponsorVideoPlayer sponsor={sponsor} />
+          <Box w="100%" h="100%" sx={{ '& > iframe, & > video': { width: '100%', height: '100%' } }}>
+            {!isExpanded && <SponsorVideoPlayer sponsor={sponsor} />}
+          </Box>
         </AspectRatio>
+      </Box>
+
+      <Stack direction="row" spacing={{ base: '12px', md: '14px' }} justify="center" align="center">
+        <IconButton
+          type="button"
+          onClick={onBack}
+          aria-label="Volver al logo y links del patrocinador"
+          icon={<Icon as={MdLink} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
+          {...sponsorActionButtonStyles}
+          bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
+          color="white"
+          boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
+          _hover={{ transform: 'translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
+        />
         <IconButton
           type="button"
           onClick={() => setIsExpanded(true)}
           aria-label={`Expandir ${videoTitle}`}
-          icon={<Icon as={MdOpenInFull} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />}
-          position="absolute"
-          right={{ base: '16px', md: '18px' }}
-          bottom={{ base: '-58px', md: '-62px' }}
-          zIndex={2}
-          w={{ base: '42px', md: '44px' }}
-          h={{ base: '42px', md: '44px' }}
-          minW={{ base: '42px', md: '44px' }}
-          borderRadius="full"
+          icon={<Icon as={MdOpenInFull} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
+          {...sponsorActionButtonStyles}
           bg="blackAlpha.700"
           color="white"
-          border="1px solid"
           borderColor="whiteAlpha.700"
           boxShadow="0 10px 22px rgba(0, 0, 0, .34)"
           _hover={{ bg: 'blackAlpha.800', transform: 'scale(1.04)' }}
-          _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
         />
-      </Box>
+      </Stack>
 
       <Modal isOpen={isExpanded} onClose={() => setIsExpanded(false)} size="6xl" isCentered>
         <ModalOverlay bg="blackAlpha.800" />
@@ -282,27 +311,10 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
     return (
       <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="visible" transition="box-shadow .22s ease, border-color .22s ease">
         <Stack spacing={{ base: '10px', md: '12px' }} minW={0}>
-          <SponsorVideoFrame sponsor={sponsor} />
+          <SponsorVideoFrame sponsor={sponsor} onBack={() => setShowVideo(false)} />
           <Stack spacing="8px" align="center" textAlign="center" minW={0}>
             {sponsor.name && <Text fontWeight="900" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>{sponsor.name}</Text>}
             {sponsor.description && <Text color={muted} fontSize="xs" noOfLines={2} maxW="100%">{sponsor.description}</Text>}
-            <IconButton
-              type="button"
-              onClick={() => setShowVideo(false)}
-              aria-label="Volver al logo y links del patrocinador"
-              icon={<Icon as={MdLink} w={{ base: '20px', md: '22px' }} h={{ base: '20px', md: '22px' }} />}
-              w={{ base: '44px', md: '48px' }}
-              h={{ base: '44px', md: '48px' }}
-              minW={{ base: '44px', md: '48px' }}
-              borderRadius="full"
-              bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
-              color="white"
-              boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
-              border="2px solid"
-              borderColor="white"
-              _hover={{ transform: 'translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
-              _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
-            />
           </Stack>
         </Stack>
       </Box>
@@ -318,19 +330,13 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
             type="button"
             onClick={() => setShowVideo(true)}
             aria-label={`Ver video de ${sponsor.name || 'patrocinador'}`}
-            icon={<Icon as={MdPlayCircleFilled} w={{ base: '20px', md: '24px' }} h={{ base: '20px', md: '24px' }} />}
+            icon={<Icon as={MdPlayCircleFilled} w={sponsorActionIconSize} h={sponsorActionIconSize} />}
             mt={{ base: '-4px', md: '-2px' }}
-            w={{ base: '44px', md: '50px' }}
-            h={{ base: '44px', md: '50px' }}
-            minW={{ base: '44px', md: '50px' }}
-            borderRadius="full"
+            {...sponsorActionButtonStyles}
             bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)"
             color="white"
             boxShadow="0 14px 26px rgba(184, 134, 11, .34)"
-            border="2px solid"
-            borderColor="white"
             _hover={{ transform: 'translateY(-2px) scale(1.06)', filter: 'brightness(1.05)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' }}
           />
         )}
         <Stack spacing={{ base: '4px', md: '6px' }} align="center" minW={0} w="100%">
@@ -342,7 +348,7 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
   );
 }
 
-export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
+export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }: SponsorStripProps) {
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
   const [sponsors, setSponsors] = useState([]);
