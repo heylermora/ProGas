@@ -84,7 +84,7 @@ export default function CustomerData() {
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormControl isRequired>
               <FormLabel>Cédula</FormLabel>
-              <Input value={form.nationalId} onChange={(e) => set('nationalId', e.target.value)} placeholder="Ej. 101110111" />
+              <Input value={form.nationalId} onChange={(e) => set('nationalId', onlyDigits(e.target.value))} inputMode="numeric" placeholder="Ej. 101110111" />
               <FormHelperText>Solo para verificar si el cliente existe o debe crearse.</FormHelperText>
             </FormControl>
             <FormControl isRequired>

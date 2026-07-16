@@ -132,6 +132,7 @@ export default function CustomerInfo() {
             <FormControl isRequired><FormLabel>Distrito</FormLabel><Select value={form.district} onChange={(e) => { const nextDistrict = e.target.value; setForm((prev) => ({ ...prev, district: nextDistrict, neighborhood: (locationOptions[form.province]?.[form.canton]?.[nextDistrict] || [''])[0] })); }}>{districts.map((district) => <option key={district} value={district}>{district}</option>)}</Select></FormControl>
             <FormControl isRequired><FormLabel>Barrio</FormLabel><Select value={form.neighborhood} onChange={(e) => set('neighborhood', e.target.value)}>{neighborhoods.map((neighborhood) => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}</Select></FormControl>
           </SimpleGrid>
+          <FormControl isRequired><FormLabel>Otras señas</FormLabel><Input value={form.details} onChange={(e) => set('details', e.target.value)} placeholder="Casa, color, referencia o punto cercano" /></FormControl>
           <FormControl>
             <FormLabel>Ubicación en el mapa</FormLabel>
             <DeviceLocationMap
@@ -140,7 +141,6 @@ export default function CustomerInfo() {
               onLocation={(location) => setForm((prev) => ({ ...prev, ...location }))}
             />
           </FormControl>
-          <FormControl isRequired><FormLabel>Otras señas</FormLabel><Input value={form.details} onChange={(e) => set('details', e.target.value)} /></FormControl>
           <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.push('/customer/data')} onContinue={saveAndContinue} />
         </Stack>
       </PublicCard>
