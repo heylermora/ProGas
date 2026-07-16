@@ -108,7 +108,7 @@ const routes: RoutesType[] = [
     secondary: true,
   },
   {
-    name: 'Balance',
+    name: 'Operaciones',
     layout: '/admin',
     path: '/order/balance',
     icon: <Icon as={MdAssessment} width="20px" height="20px" />,
