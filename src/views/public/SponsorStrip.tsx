@@ -232,7 +232,7 @@ function SponsorVideoFrame({ sponsor }) {
     <>
       <Box position="relative" w="100%" flexShrink={0}>
         <AspectRatio ratio={16 / 9} w="100%" borderRadius="18px" overflow="hidden" bg="black">
-          <SponsorVideoPlayer sponsor={sponsor} />
+          {!isExpanded && <SponsorVideoPlayer sponsor={sponsor} />}
         </AspectRatio>
         <IconButton
           type="button"
