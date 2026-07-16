@@ -1,20 +1,12 @@
 // @ts-nocheck
-import React, { useMemo, useState } from 'react';
-import { Box, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Button, FormControl, FormHelperText, FormLabel, HStack, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
-import Map from 'components/form/Map';
 import ClientService from 'services/ClientService';
 import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import OrderNavigation from './OrderNavigation';
 import { getCustomerDraft, saveCustomerDraft } from './customerDraft';
-
-const parseCoordinates = (value?: string) => {
-  const [lat, lng] = String(value || '').split(',').map((part) => Number(part.trim()));
-  return Number.isFinite(lat) && Number.isFinite(lng) ? [lng, lat] : null;
-};
-
-const coordsToText = (coords?: number[] | null) => Array.isArray(coords) ? `${coords[1]},${coords[0]}` : '';
 
 const locationOptions = {
   'San José': {
@@ -57,11 +49,6 @@ const locationOptions = {
 export default function CustomerInfo() {
   const history = useHistory();
   const draft = getCustomerDraft();
-  const [locationMap, setLocationMap] = useState({
-    coords: parseCoordinates(draft.address?.coordinates),
-    address: draft.address?.details || '',
-    isManualAddress: false,
-  });
   const [form, setForm] = useState({
     name: draft.name || '',
     nickname: draft.nickname || '',
@@ -77,15 +64,28 @@ export default function CustomerInfo() {
   const cantons = useMemo(() => Object.keys(locationOptions[form.province] || {}), [form.province]);
   const districts = useMemo(() => Object.keys(locationOptions[form.province]?.[form.canton] || {}), [form.province, form.canton]);
   const neighborhoods = locationOptions[form.province]?.[form.canton]?.[form.district] || [];
+
+  useEffect(() => {
+    const nextCanton = cantons.includes(form.canton) ? form.canton : cantons[0] || '';
+    const nextDistricts = Object.keys(locationOptions[form.province]?.[nextCanton] || {});
+    const nextDistrict = nextDistricts.includes(form.district) ? form.district : nextDistricts[0] || '';
+    const nextNeighborhoods = locationOptions[form.province]?.[nextCanton]?.[nextDistrict] || [];
+    const nextNeighborhood = nextNeighborhoods.includes(form.neighborhood) ? form.neighborhood : nextNeighborhoods[0] || '';
+
+    if (nextCanton !== form.canton || nextDistrict !== form.district || nextNeighborhood !== form.neighborhood) {
+      setForm((prev) => ({ ...prev, canton: nextCanton, district: nextDistrict, neighborhood: nextNeighborhood }));
+    }
+  }, [cantons, form.canton, form.district, form.neighborhood, form.province]);
+
   const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
-  const handleMapChange = (nextLocation) => {
-    const coordinates = coordsToText(nextLocation.coords);
-    setLocationMap(nextLocation);
-    setForm((prev) => ({
-      ...prev,
-      coordinates: coordinates || prev.coordinates,
-      details: nextLocation.address || prev.details,
-    }));
+  const openLocation = (provider) => {
+    const query = form.coordinates || form.locationUrl || [form.province, form.canton, form.district, form.neighborhood].filter(Boolean).join(', ');
+    if (!query) return;
+    const encoded = encodeURIComponent(query);
+    const url = provider === 'waze'
+      ? `https://waze.com/ul?q=${encoded}&navigate=yes`
+      : `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const saveAndContinue = async () => {
@@ -131,14 +131,17 @@ export default function CustomerInfo() {
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input value={form.name} onChange={(e) => set('name', e.target.value)} /></FormControl>
             <FormControl><FormLabel>Apodo</FormLabel><Input value={form.nickname} onChange={(e) => set('nickname', e.target.value)} /></FormControl>
-            <FormControl isRequired><FormLabel>Provincia</FormLabel><Select value={form.province} onChange={(e) => set('province', e.target.value)}><option>San José</option></Select></FormControl>
-            <FormControl isRequired><FormLabel>Cantón</FormLabel><Select value={form.canton} onChange={(e) => { const nextCanton = e.target.value; const nextDistrict = Object.keys(locationOptions[form.province]?.[nextCanton] || {})[0] || ''; setForm((prev) => ({ ...prev, canton: nextCanton, district: nextDistrict, neighborhood: (locationOptions[form.province]?.[nextCanton]?.[nextDistrict] || [''])[0] })); }}>{cantons.map((canton) => <option key={canton}>{canton}</option>)}</Select></FormControl>
-            <FormControl isRequired><FormLabel>Distrito</FormLabel><Select value={form.district} onChange={(e) => { const nextDistrict = e.target.value; setForm((prev) => ({ ...prev, district: nextDistrict, neighborhood: (locationOptions[form.province]?.[form.canton]?.[nextDistrict] || [''])[0] })); }}>{districts.map((district) => <option key={district}>{district}</option>)}</Select></FormControl>
-            <FormControl isRequired><FormLabel>Barrio</FormLabel><Select value={form.neighborhood} onChange={(e) => set('neighborhood', e.target.value)}>{neighborhoods.map((neighborhood) => <option key={neighborhood}>{neighborhood}</option>)}</Select></FormControl>
-            <FormControl><FormLabel>Coordenadas</FormLabel><Input value={form.coordinates} onChange={(e) => set('coordinates', e.target.value)} placeholder="Ej. 9.8000,-84.1600" /></FormControl>
-            <FormControl><FormLabel>Link de ubicación (plan B si el mapa falla)</FormLabel><Input value={form.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /></FormControl>
+            <FormControl isRequired><FormLabel>Provincia</FormLabel><Select value={form.province} onChange={(e) => set('province', e.target.value)}><option value="San José">San José</option></Select></FormControl>
+            <FormControl isRequired><FormLabel>Cantón</FormLabel><Select value={form.canton} onChange={(e) => { const nextCanton = e.target.value; const nextDistrict = Object.keys(locationOptions[form.province]?.[nextCanton] || {})[0] || ''; setForm((prev) => ({ ...prev, canton: nextCanton, district: nextDistrict, neighborhood: (locationOptions[form.province]?.[nextCanton]?.[nextDistrict] || [''])[0] })); }}>{cantons.map((canton) => <option key={canton} value={canton}>{canton}</option>)}</Select></FormControl>
+            <FormControl isRequired><FormLabel>Distrito</FormLabel><Select value={form.district} onChange={(e) => { const nextDistrict = e.target.value; setForm((prev) => ({ ...prev, district: nextDistrict, neighborhood: (locationOptions[form.province]?.[form.canton]?.[nextDistrict] || [''])[0] })); }}>{districts.map((district) => <option key={district} value={district}>{district}</option>)}</Select></FormControl>
+            <FormControl isRequired><FormLabel>Barrio</FormLabel><Select value={form.neighborhood} onChange={(e) => set('neighborhood', e.target.value)}>{neighborhoods.map((neighborhood) => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}</Select></FormControl>
+            <FormControl><FormLabel>Coordenadas o pin</FormLabel><Input value={form.coordinates} onChange={(e) => set('coordinates', e.target.value)} placeholder="Ej. 9.8000,-84.1600" /><FormHelperText>Opcional. Pegá coordenadas de Google Maps o Waze si las tenés.</FormHelperText></FormControl>
+            <FormControl><FormLabel>Link gratis de ubicación</FormLabel><Input value={form.locationUrl} onChange={(e) => set('locationUrl', e.target.value)} placeholder="Google Maps / Waze" /><FormHelperText>Sin Mapbox: podés pegar un enlace compartido de Maps o Waze.</FormHelperText></FormControl>
           </SimpleGrid>
-          <FormControl><FormLabel>Mapa para coordenadas</FormLabel><Map value={locationMap} onChange={handleMapChange} /></FormControl>
+          <HStack spacing="10px" flexWrap="wrap">
+            <Button size="sm" variant="outline" onClick={() => openLocation('maps')}>Abrir en Google Maps</Button>
+            <Button size="sm" variant="outline" onClick={() => openLocation('waze')}>Abrir en Waze</Button>
+          </HStack>
           <FormControl isRequired><FormLabel>Otras señas</FormLabel><Input value={form.details} onChange={(e) => set('details', e.target.value)} /></FormControl>
           <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.push('/customer/data')} onContinue={saveAndContinue} />
         </Stack>
