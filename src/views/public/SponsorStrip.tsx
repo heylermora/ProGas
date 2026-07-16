@@ -62,6 +62,15 @@ const sponsorActionButtonStyles = {
 
 const sponsorActionIconSize = { base: '20px', md: '22px' };
 
+type SponsorStripProps = {
+  type: string;
+  max?: number;
+  title?: string;
+  offset?: number;
+  sponsors?: any[];
+  previewSponsor?: any;
+};
+
 const makeAvailableSponsor = (type, index) => ({
   id: `available-${type}-${index}`,
   type,
@@ -338,7 +347,7 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
   );
 }
 
-export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }) {
+export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }: SponsorStripProps) {
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
   const [sponsors, setSponsors] = useState([]);
