@@ -111,10 +111,14 @@ export default function SponsorsAdmin() {
     setSavingOrder(true);
     setSponsors((prev) => [
       ...prev.filter((sponsor) => sponsor.type !== selectedType),
-      ...nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1 })),
+      ...nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1, active: index < (SPONSOR_CAPACITY[selectedType] || 0) })),
     ].sort((a, b) => (a.type || '').localeCompare(b.type || '') || a.order - b.order || (a.name || '').localeCompare(b.name || '')));
 
-    Promise.all(nextSponsors.map((sponsor, index) => SponsorService.edit(sponsor.id, { ...sponsor, order: index + 1 })))
+    Promise.all(nextSponsors.map((sponsor, index) => SponsorService.edit(sponsor.id, {
+      ...sponsor,
+      order: index + 1,
+      active: index < (SPONSOR_CAPACITY[selectedType] || 0),
+    })))
       .catch(() => {})
       .finally(() => {
         setDraggedSponsorId('');
@@ -185,11 +189,10 @@ export default function SponsorsAdmin() {
             <TabPanels>
               {SPONSOR_TYPES.map((type) => (
                 <TabPanel key={type} px="0" pb="0">
-                  {selectedSponsor ? (
-                    <SponsorStrip type={selectedSponsor.type} max={1} previewSponsor={{ ...selectedSponsor, active: true }} availableCopy={availableCopy} />
-                  ) : (
-                    <Text color={muted} fontSize="sm">No hay patrocinadores activos para previsualizar en este tipo.</Text>
-                  )}
+                  <Stack spacing="8px">
+                    <Text color={muted} fontSize="sm" fontWeight="700">Vista completa para el cliente</Text>
+                    <SponsorStrip type={type} max={SPONSOR_CAPACITY[type]} sponsors={(sponsorsByType[type] || []).slice(0, SPONSOR_CAPACITY[type])} availableCopy={availableCopy} />
+                  </Stack>
                 </TabPanel>
               ))}
             </TabPanels>
@@ -245,13 +248,13 @@ export default function SponsorsAdmin() {
                     <Badge colorScheme="brand">Posición #{slot}</Badge>
                     <Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge>
                   </HStack>
-                  <Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Activo' : 'Oculto'}</Badge>
+                  <Badge colorScheme={slot > SPONSOR_CAPACITY[selectedType] ? 'orange' : s.active ? 'green' : 'gray'}>{slot > SPONSOR_CAPACITY[selectedType] ? 'Excede el límite' : s.active ? 'Activo' : 'Oculto'}</Badge>
                 </Flex>
                 {s.logoUrl ? <Image src={s.logoUrl} alt={s.name || 'Sponsor'} h={{ base: '72px', md: '92px' }} objectFit="contain" /> : <Box h={{ base: '72px', md: '92px' }} bg="gray.100" borderRadius="16px" />}
                 <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }} noOfLines={2}>{s.name || 'Sin título'}</Text>
                 {s.description && <Text color="gray.500" noOfLines={2} fontSize="sm">{s.description}</Text>}
                 <Box flex="1" />
-                <HStack justify="space-between"><Text>Activo</Text><Switch isChecked={s.active} onChange={() => toggleActive(s)} /></HStack>
+                <HStack justify="space-between"><Text>{slot > SPONSOR_CAPACITY[selectedType] ? 'Inactivo por límite' : 'Activo'}</Text><Switch isChecked={s.active} isDisabled={slot > SPONSOR_CAPACITY[selectedType]} onChange={() => toggleActive(s)} /></HStack>
                 <HStack justify="flex-end">
                   <IconButton aria-label="Editar" icon={<MdEdit />} as={RLink} to={`/admin/sponsor/edit/${s.id}`} />
                   <IconButton aria-label="Eliminar" icon={<MdDelete />} onClick={() => remove(s.id)} />

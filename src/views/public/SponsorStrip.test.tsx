@@ -26,9 +26,11 @@ const renderSponsorStrip = () => render(
 );
 
 describe('SponsorStrip', () => {
-  it('shows each sponsor link as a labeled action without requiring a logo click', () => {
+  it('reveals labeled sponsor contact bubbles from the logo', () => {
     renderSponsorStrip();
 
+    expect(screen.queryByRole('link', { name: /abrir instagram de patrocinador de prueba/i })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /ver contactos de patrocinador de prueba/i }));
     expect(screen.getByRole('link', { name: /abrir instagram de patrocinador de prueba/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /abrir whatsapp de patrocinador de prueba/i })).toBeTruthy();
   });

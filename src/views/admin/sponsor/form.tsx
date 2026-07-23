@@ -22,7 +22,9 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useHistory, useParams } from 'react-router-dom';
-import SponsorService from 'services/SponsorService';
+import { MdArrowBack, MdInfoOutline, MdVisibility } from 'react-icons/md';
+import Card from 'components/card/Card';
+import SponsorService, { SPONSOR_CAPACITY } from 'services/SponsorService';
 import SponsorStrip from 'views/public/SponsorStrip';
 
 const empty = { name: '', type: 'VIP', active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
@@ -36,6 +38,8 @@ export default function SponsorForm() {
   const [message, setMessage] = useState(null);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.500', 'gray.400');
+  const sectionBg = useColorModeValue('gray.50', 'whiteAlpha.50');
+  const headerBg = useColorModeValue('linear(to-r, white, brand.50)', 'linear(to-r, navy.800, navy.700)');
 
   useEffect(() => { if (id) SponsorService.get(id).then((s) => setSponsor({ ...empty, ...s, links: [...(s.links || []), '', '', '', ''].slice(0, 4) })); }, [id]);
 
@@ -73,7 +77,14 @@ export default function SponsorForm() {
         links: cleanLinks,
         videoUrl: sponsor.type === 'VIP' ? sponsor.videoUrl : '',
       };
-      if (id) await SponsorService.edit(id, { ...payload, id }); else await SponsorService.create(payload);
+      if (id) {
+        const current = await SponsorService.get(id);
+        await SponsorService.edit(id, { ...payload, id });
+        if (current.type !== payload.type) await SponsorService.enforceCapacity(current.type);
+      } else {
+        await SponsorService.create(payload);
+      }
+      await SponsorService.enforceCapacity(payload.type);
       history.push('/admin/sponsor/index');
     } catch (error) {
       console.error('[SponsorForm] Error guardando patrocinador:', error);
@@ -84,17 +95,29 @@ export default function SponsorForm() {
   };
 
   return (
-    <Box pt={{ base: '40px', md: '40px' }} px={{ base: '0px', md: '0px' }}>
-      <Stack spacing="6px" mb="20px">
-        <Heading fontSize={{ base: '28px', md: '36px' }}>{id ? 'Editar' : 'Nuevo'} patrocinador</Heading>
-        <Text color={muted}>Completá solo la información necesaria. El título y la descripción pueden quedar vacíos.</Text>
-      </Stack>
+    <Box pt={{ base: '86px', md: '80px' }} px={{ base: '0px', md: '0px' }} pb="36px">
+      <Card p={{ base: '18px', md: '24px' }} mb="22px" bgGradient={headerBg}>
+        <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="16px" direction={{ base: 'column', md: 'row' }}>
+          <HStack spacing="14px" align="flex-start">
+            <Button aria-label="Volver a patrocinadores" leftIcon={<MdArrowBack />} variant="ghost" onClick={() => history.push('/admin/sponsor/index')} flexShrink={0}>Volver</Button>
+            <Box>
+              <Heading fontSize={{ base: '24px', md: '32px' }}>{id ? 'Editar patrocinador' : 'Nuevo patrocinador'}</Heading>
+              <Text color={muted} mt="4px">Configurá su presencia pública, enlaces y contenido visual en un solo lugar.</Text>
+            </Box>
+          </HStack>
+          <HStack spacing="8px" flexWrap="wrap">
+            <Badge px="10px" py="5px" borderRadius="full" colorScheme={sponsor.type === 'VIP' ? 'yellow' : sponsor.type === 'Premium' ? 'purple' : 'green'}>{sponsor.type}</Badge>
+            <Badge px="10px" py="5px" borderRadius="full" colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Visible' : 'Oculto'}</Badge>
+          </HStack>
+        </Flex>
+      </Card>
 
       <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={{ base: '18px', md: '24px' }} alignItems="start">
-        <Stack bg={cardBg} p={{ base: '16px', md: '24px' }} borderRadius={{ base: '18px', md: '24px' }} boxShadow="md" spacing="18px" overflow="hidden">
+        <Card bg={cardBg} p={{ base: '16px', md: '24px' }} overflow="hidden">
+          <Stack spacing="20px">
           {message && <Alert status={message.status} borderRadius="14px"><AlertIcon />{message.text}</Alert>}
 
-          <Stack spacing="4px">
+          <Stack spacing="4px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
             <HStack spacing="8px" flexWrap="wrap">
               <Badge colorScheme={sponsor.type === 'VIP' ? 'yellow' : sponsor.type === 'Premium' ? 'purple' : 'green'}>{sponsor.type}</Badge>
               <Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Activo' : 'Oculto'}</Badge>
@@ -103,7 +126,7 @@ export default function SponsorForm() {
             <Text color={muted} fontSize="sm">El orden se usa dentro de cada tipo de sponsor y también se puede ajustar arrastrando desde el listado.</Text>
           </Stack>
 
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
             <FormControl>
               <FormLabel>Título / nombre</FormLabel>
               <Input value={sponsor.name} placeholder="Ej. Restaurante El Centro" onChange={(e) => set('name', e.target.value)} />
@@ -116,6 +139,7 @@ export default function SponsorForm() {
             <FormControl>
               <FormLabel>Orden</FormLabel>
               <Input type="number" min="1" value={sponsor.order} onChange={(e) => set('order', e.target.value)} />
+              <FormHelperText>{sponsor.type} permite {SPONSOR_CAPACITY[sponsor.type]} espacios activos. Los que excedan este límite se guardan como inactivos.</FormHelperText>
             </FormControl>
             <FormControl display="flex" alignItems="center" gap="10px" pt={{ base: 0, md: '30px' }}>
               <Switch isChecked={sponsor.active} onChange={(e) => set('active', e.target.checked)} />
@@ -125,7 +149,7 @@ export default function SponsorForm() {
 
           <Divider />
 
-          <Stack spacing="12px">
+          <Stack spacing="12px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
             <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Contenido visual</Text>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
               <FormControl>
@@ -150,13 +174,13 @@ export default function SponsorForm() {
             </SimpleGrid>
           </Stack>
 
-          <FormControl>
+          <FormControl p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
             <FormLabel>Descripción</FormLabel>
             <Textarea value={sponsor.description} placeholder="Mensaje corto del negocio, promoción o categoría." onChange={(e) => set('description', e.target.value)} />
             <FormHelperText>Opcional. Usá una frase corta para que no sature el card.</FormHelperText>
           </FormControl>
 
-          <Stack spacing="12px">
+          <Stack spacing="12px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
             <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Links de contacto</Text>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
               {sponsor.links.map((link, i) => (
@@ -169,17 +193,21 @@ export default function SponsorForm() {
             </SimpleGrid>
           </Stack>
 
-          <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px">
-            <Button colorScheme="brand" onClick={save} isLoading={saving} loadingText="Guardando" w={{ base: '100%', sm: 'auto' }}>Guardar</Button>
+          <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px" pt="4px">
+            <Button colorScheme="brand" size="lg" onClick={save} isLoading={saving} loadingText="Guardando" w={{ base: '100%', sm: 'auto' }}>Guardar patrocinador</Button>
             <Button variant="outline" isDisabled={saving} onClick={() => history.push('/admin/sponsor/index')} w={{ base: '100%', sm: 'auto' }}>Cancelar</Button>
           </Stack>
-        </Stack>
+          </Stack>
+        </Card>
 
-        <Stack spacing="12px" position={{ xl: 'sticky' }} top={{ xl: '90px' }}>
-          <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Previsualización</Text>
-          <Text color={muted} fontSize="sm">Así se verá el card con los datos actuales. Guardá para publicarlo.</Text>
-          <SponsorStrip type={sponsor.type} max={1} previewSponsor={{ ...sponsor, id: id || 'preview', active: true }} />
-        </Stack>
+        <Card p={{ base: '16px', md: '20px' }} position={{ xl: 'sticky' }} top={{ xl: '90px' }} border="1px solid" borderColor="brand.100">
+          <Stack spacing="12px">
+          <HStack><Box p="8px" borderRadius="full" bg="brand.50" color="brand.500"><MdVisibility size="20px" /></Box><Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Previsualización en vivo</Text></HStack>
+          <Text color={muted} fontSize="sm">Revisá el resultado antes de guardar. Los contactos se despliegan al tocar el logo.</Text>
+          <Box p={{ base: '10px', md: '14px' }} borderRadius="16px" bg={sectionBg}><SponsorStrip type={sponsor.type} max={1} previewSponsor={{ ...sponsor, id: id || 'preview', active: true }} /></Box>
+          <HStack color={muted} fontSize="xs"><MdInfoOutline /><Text>Los cambios se publican al guardar.</Text></HStack>
+          </Stack>
+        </Card>
       </SimpleGrid>
     </Box>
   );
