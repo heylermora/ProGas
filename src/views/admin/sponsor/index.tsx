@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
+  Button,
   Flex,
   HStack,
   IconButton,
@@ -17,12 +18,14 @@ import {
   TabPanels,
   Tabs,
   Text,
+  Textarea,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { MdAddBusiness, MdDelete, MdDragIndicator, MdEdit } from 'react-icons/md';
 import Card from 'components/card/Card';
 import SponsorService from 'services/SponsorService';
+import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import AddButton from 'components/button/AddButton';
 import SponsorStrip from 'views/public/SponsorStrip';
 
@@ -36,6 +39,9 @@ export default function SponsorsAdmin() {
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [availableCopy, setAvailableCopy] = useState(defaultSponsorDisplaySettings);
+  const [savingAvailableCopy, setSavingAvailableCopy] = useState(false);
+  const [dropTargetIndex, setDropTargetIndex] = useState(null);
   const textColor = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.500', 'gray.400');
   const dropBg = useColorModeValue('brand.50', 'whiteAlpha.100');
@@ -61,6 +67,7 @@ export default function SponsorsAdmin() {
   }, [selectedType]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
 
   const sponsorsByType = useMemo(() => SPONSOR_TYPES.reduce((acc, type) => ({
     ...acc,
@@ -90,10 +97,10 @@ export default function SponsorsAdmin() {
 
   const remove = async (id) => { await SponsorService.delete(id); load(); };
 
-  const reorderSponsors = async (targetSlotIndex) => {
-    if (!draggedSponsorId || savingOrder) return;
+  const reorderSponsors = async (targetSlotIndex, sponsorId = draggedSponsorId) => {
+    if (!sponsorId || savingOrder) return;
 
-    const fromIndex = currentSponsors.findIndex((sponsor) => sponsor.id === draggedSponsorId);
+    const fromIndex = currentSponsors.findIndex((sponsor) => sponsor.id === sponsorId);
     if (fromIndex < 0) return;
 
     const nextSponsors = [...currentSponsors];
@@ -111,9 +118,36 @@ export default function SponsorsAdmin() {
       .catch(() => {})
       .finally(() => {
         setDraggedSponsorId('');
+        setDropTargetIndex(null);
         setSavingOrder(false);
         load();
       });
+  };
+
+  const startDrag = (event, sponsorId) => {
+    if (!sponsorId) return;
+    // Firefox y algunos navegadores no inician el arrastre si dataTransfer no contiene datos.
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', sponsorId);
+    setDraggedSponsorId(sponsorId);
+  };
+
+  const finishDrag = () => {
+    setDraggedSponsorId('');
+    setDropTargetIndex(null);
+  };
+
+  const saveAvailableCopy = async () => {
+    setSavingAvailableCopy(true);
+    try {
+      await SponsorDisplaySettingsService.save(availableCopy);
+      setAvailableCopy({
+        availableTitle: availableCopy.availableTitle.trim() || defaultSponsorDisplaySettings.availableTitle,
+        availableDescription: availableCopy.availableDescription.trim() || defaultSponsorDisplaySettings.availableDescription,
+      });
+    } finally {
+      setSavingAvailableCopy(false);
+    }
   };
 
   if (loading) return <Flex pt={{ base: '80px', md: '120px' }} justify="center"><Spinner size="xl" /></Flex>;
@@ -152,7 +186,7 @@ export default function SponsorsAdmin() {
               {SPONSOR_TYPES.map((type) => (
                 <TabPanel key={type} px="0" pb="0">
                   {selectedSponsor ? (
-                    <SponsorStrip type={selectedSponsor.type} max={1} previewSponsor={{ ...selectedSponsor, active: true }} />
+                    <SponsorStrip type={selectedSponsor.type} max={1} previewSponsor={{ ...selectedSponsor, active: true }} availableCopy={availableCopy} />
                   ) : (
                     <Text color={muted} fontSize="sm">No hay patrocinadores activos para previsualizar en este tipo.</Text>
                   )}
@@ -162,6 +196,26 @@ export default function SponsorsAdmin() {
           </Stack>
         </Card>
       </Tabs>
+
+      <Card p={{ base: '14px', md: '18px' }} mb="20px">
+        <Stack spacing="12px">
+          <Box>
+            <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Texto de espacios disponibles</Text>
+            <Text color={muted} fontSize="sm">Personalizá el mensaje que aparece en las tarjetas sin patrocinador de las páginas públicas.</Text>
+          </Box>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px">
+            <Box>
+              <Text fontSize="sm" fontWeight="700" mb="6px">Título</Text>
+              <Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} resize="vertical" minH="44px" />
+            </Box>
+            <Box>
+              <Text fontSize="sm" fontWeight="700" mb="6px">Descripción</Text>
+              <Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} resize="vertical" minH="44px" />
+            </Box>
+          </SimpleGrid>
+          <Button alignSelf="flex-start" colorScheme="brand" onClick={saveAvailableCopy} isLoading={savingAvailableCopy} loadingText="Guardando">Guardar texto</Button>
+        </Stack>
+      </Card>
 
       <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={{ base: '12px', md: '18px' }}>
         {sponsorSlots.map(({ sponsor: s, slot }, index) => (
@@ -173,19 +227,21 @@ export default function SponsorsAdmin() {
             draggable={Boolean(s)}
             cursor={s ? 'grab' : 'default'}
             border="1px solid"
-            borderColor={s && draggedSponsorId === s.id ? 'brand.300' : s ? 'transparent' : 'brand.200'}
+            borderColor={s && draggedSponsorId === s.id ? 'brand.300' : draggedSponsorId && dropTargetIndex === index ? 'brand.500' : s ? 'transparent' : 'brand.200'}
             borderStyle={s ? 'solid' : 'dashed'}
             bg={s && draggedSponsorId === s.id ? dropBg : undefined}
             onClick={() => s?.active !== false && s?.id && setSelectedSponsorId(s.id)}
-            onDragStart={() => s?.id && setDraggedSponsorId(s.id)}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={() => reorderSponsors(index)}
+            onDragStart={(event) => startDrag(event, s?.id)}
+            onDragEnd={finishDrag}
+            onDragEnter={(event) => { event.preventDefault(); if (draggedSponsorId) setDropTargetIndex(index); }}
+            onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }}
+            onDrop={(event) => { event.preventDefault(); const sponsorId = draggedSponsorId || event.dataTransfer.getData('text/plain'); if (sponsorId) setDraggedSponsorId(sponsorId); reorderSponsors(index, sponsorId); }}
           >
             {s ? (
               <Stack spacing="12px" h="100%">
                 <Flex align="center" justify="space-between" gap="10px">
                   <HStack spacing="8px" minW="0">
-                    <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" />
+                    <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" pointerEvents="none" />
                     <Badge colorScheme="brand">Posición #{slot}</Badge>
                     <Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge>
                   </HStack>

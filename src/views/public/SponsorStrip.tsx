@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import {
   AspectRatio,
   Box,
+  Button,
   Icon,
   IconButton,
   Image,
@@ -16,13 +17,13 @@ import {
   SimpleGrid,
   Stack,
   Text,
-  Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdAddBusiness, MdEmail, MdLink, MdOpenInFull, MdPlayCircleFilled, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
+import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 
 
 const getVideoEmbedSrc = (value = '') => {
@@ -140,29 +141,15 @@ const logoSize = (variant) => {
   return { h: { base: '48px', md: '58px' }, placeholderH: { base: '48px', md: '58px' }, icon: { base: '32px', md: '34px' } };
 };
 
-const bubblePlacements = [
-  { base: { top: '-8px', left: '18px' }, md: { top: '6px', left: '-10px' } },
-  { base: { top: '-10px', right: '20px' }, md: { top: '-6px', right: '10px' } },
-  { base: { bottom: '-8px', left: '22px' }, md: { bottom: '6px', left: '-12px' } },
-  { base: { bottom: '-10px', right: '22px' }, md: { bottom: '0', right: '4px' } },
-];
-
 const normalizeHref = (link = '') => (link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link);
 
 function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
-  const [isOpen, setIsOpen] = useState(false);
   const cleanLinks = links.filter(Boolean);
-  const hasLinks = cleanLinks.length > 0;
   const size = logoSize(visual.logo);
 
   return (
     <Box position="relative" w="100%" maxW={{ base: visual.logo === 'hero' ? '260px' : '210px', md: visual.logo === 'hero' ? '320px' : '220px' }} mx="auto" py={{ base: '8px', md: '10px' }} overflow="visible">
       <Box
-        as="button"
-        type="button"
-        aria-label={hasLinks ? (isOpen ? `Ocultar links de ${sponsor.name || 'patrocinador'}` : `Mostrar links de ${sponsor.name || 'patrocinador'}`) : `Logo de ${sponsor.name || 'patrocinador'}`}
-        aria-expanded={hasLinks ? isOpen : undefined}
-        onClick={() => hasLinks && setIsOpen((current) => !current)}
         position="relative"
         zIndex={2}
         w="100%"
@@ -171,10 +158,7 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
         alignItems="center"
         justifyContent="center"
         borderRadius={{ base: '18px', md: '22px' }}
-        cursor={hasLinks ? 'pointer' : 'default'}
-        transition="transform .2s ease, filter .2s ease, box-shadow .2s ease"
-        _hover={hasLinks ? { transform: 'translateY(-2px) scale(1.01)', boxShadow: 'inset 0 0 0 1px rgba(56, 161, 105, .22)' } : undefined}
-        _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' } : undefined}
+        aria-label={`Logo de ${sponsor.name || 'patrocinador'}`}
       >
         {sponsor.logoUrl ? (
           <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} h={size.h} maxW="100%" objectFit="contain" pointerEvents="none" />
@@ -184,44 +168,35 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
       </Box>
 
 
+      {cleanLinks.length > 0 && (
+        <SimpleGrid columns={{ base: 1, sm: Math.min(cleanLinks.length, 2) }} spacing="8px" mt="8px" position="relative" zIndex={3}>
       {cleanLinks.slice(0, 4).map((link, index) => {
         const meta = getLinkMeta(link);
         const href = normalizeHref(link);
-        const placement = bubblePlacements[index] || bubblePlacements[0];
 
         return (
-          <Tooltip key={`${link}-${index}`} label={meta.label} hasArrow placement="top">
-            <IconButton
+            <Button
+              key={`${link}-${index}`}
               as={Link}
               href={href}
               isExternal={!href.startsWith('mailto:')}
-              aria-label={`Abrir ${meta.label}`}
-              icon={<Icon as={meta.icon} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />}
-              position="absolute"
-              zIndex={1}
-              {...placement.base}
-              sx={{
-                '@media screen and (min-width: 48em)': placement.md,
-                background: meta.bg,
-              }}
+              aria-label={`Abrir ${meta.label} de ${sponsor.name || 'patrocinador'}`}
+              leftIcon={<Icon as={meta.icon} w="16px" h="16px" />}
+              bg={meta.bg}
               color="white"
-              w={{ base: '42px', md: '48px' }}
-              h={{ base: '42px', md: '48px' }}
-              minW={{ base: '42px', md: '48px' }}
-              borderRadius="full"
-              border="2px solid"
-              borderColor="white"
-              boxShadow="0 14px 24px rgba(15, 23, 42, .24)"
-              opacity={isOpen ? 1 : 0}
-              visibility={isOpen ? 'visible' : 'hidden'}
-              transform={isOpen ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 12px, 0) scale(.6)'}
-              transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`}
-              _hover={{ textDecoration: 'none', transform: 'translate3d(0, -4px, 0) scale(1.08)', filter: 'brightness(1.06)' }}
+              size="sm"
+              minH="36px"
+              borderRadius="10px"
+              boxShadow="sm"
+              _hover={{ textDecoration: 'none', filter: 'brightness(1.06)', transform: 'translateY(-1px)' }}
               _focusVisible={{ outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '3px' }}
-            />
-          </Tooltip>
+            >
+              {meta.label}
+            </Button>
         );
       })}
+        </SimpleGrid>
+      )}
     </Box>
   );
 }
@@ -348,10 +323,11 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
   );
 }
 
-export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }: SponsorStripProps) {
+export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor, availableCopy }: SponsorStripProps & { availableCopy?: typeof defaultSponsorDisplaySettings }) {
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
   const [sponsors, setSponsors] = useState([]);
+  const [displaySettings, setDisplaySettings] = useState(defaultSponsorDisplaySettings);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.400');
 
@@ -374,6 +350,15 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       })
       .catch(() => setSponsors([]));
   }, [type, normalizedMax, normalizedOffset, injectedSponsors, previewSponsor]);
+
+  useEffect(() => {
+    if (availableCopy) {
+      setDisplaySettings({ ...defaultSponsorDisplaySettings, ...availableCopy });
+      return;
+    }
+
+    SponsorDisplaySettingsService.get().then(setDisplaySettings).catch(() => setDisplaySettings(defaultSponsorDisplaySettings));
+  }, [availableCopy]);
 
   const visibleSponsors = sponsors.filter(Boolean).filter((sponsor) => sponsor.active !== false);
   const slotCount = Math.min(normalizedMax, Math.max(0, (SPONSOR_CAPACITY[type] || normalizedMax) - normalizedOffset));
@@ -427,8 +412,8 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
           <Icon as={MdAddBusiness} w={{ base: '22px', md: '22px' }} h={{ base: '22px', md: '22px' }} />
         </Box>
         <Stack spacing="3px" minW="0">
-          <Text fontWeight="900" fontSize={{ base: 'md', md: 'md' }} color="brand.600">Tu marca aquí</Text>
-          <Text color={muted} fontSize={{ base: 'xs', md: 'xs' }} maxW="230px" lineHeight="1.35">Llegá a clientes locales mientras hacen su pedido.</Text>
+          <Text fontWeight="900" fontSize={{ base: 'md', md: 'md' }} color="brand.600">{displaySettings.availableTitle}</Text>
+          <Text color={muted} fontSize={{ base: 'xs', md: 'xs' }} maxW="230px" lineHeight="1.35">{displaySettings.availableDescription}</Text>
         </Stack>
       </Stack>
     </Box>
