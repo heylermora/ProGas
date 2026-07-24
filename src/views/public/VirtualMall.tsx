@@ -2,13 +2,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Badge, Box, Button, Flex, Heading, Icon, IconButton, Image, Input, InputGroup, InputLeftElement, Stack, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdBolt, MdEmail, MdFavorite, MdFavoriteBorder, MdLink, MdLocalMall, MdSearch, MdStorefront } from 'react-icons/md';
+import { MdBolt, MdEmail, MdFavorite, MdFavoriteBorder, MdLink, MdLocalMall, MdMyLocation, MdSearch, MdStorefront } from 'react-icons/md';
 import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
 import { PublicPage } from './PublicPage';
 
 const categoryEmoji = ['🍽️', '🍔', '🍕', '☕', '🍦', '🍷', '🛒', '🛍️', '💎', '👟', '💈', '💇', '🐾', '💊', '🔨', '🌱', '💪', '🏍️', '🔧', '🛡️', '✨'];
 const mapSpans = [2, 1, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 2];
+const contactBubblePositions = [
+  { top: '-10px', right: '-10px' },
+  { top: '18px', right: '-26px' },
+  { bottom: '-10px', right: '-10px' },
+  { bottom: '18px', right: '-26px' },
+];
 
 const hrefFor = (link = '') => link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
 const linkMeta = (link = '') => {
@@ -27,6 +33,7 @@ export default function VirtualMall() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [query, setQuery] = useState('');
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [openContactId, setOpenContactId] = useState('');
   const panelBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.300');
 
@@ -54,14 +61,14 @@ export default function VirtualMall() {
 
       <Box bg={panelBg} borderRadius={{ base: '20px', md: '28px' }} p={{ base: '12px', md: '22px' }} boxShadow="lg" mb="22px" overflow="hidden">
         <Flex align="center" justify="space-between" mb="14px" gap="12px" direction={{ base: 'column', sm: 'row' }}><Box><Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa del centro comercial</Heading><Text color={muted} fontSize="sm">Entrá a una zona para descubrir sus comercios.</Text></Box><Button size="sm" variant={selectedCategory ? 'outline' : 'solid'} colorScheme="brand" onClick={() => setSelectedCategory('')}>Ver todo</Button></Flex>
-        <Box display="grid" gridTemplateColumns={{ base: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(4, minmax(0, 1fr))', lg: 'repeat(6, minmax(0, 1fr))' }} gap={{ base: '8px', md: '10px' }} p={{ base: '8px', md: '14px' }} borderRadius="20px" bg="linear-gradient(135deg, #EDF2F7 25%, #E2E8F0 25%, #E2E8F0 50%, #EDF2F7 50%, #EDF2F7 75%, #E2E8F0 75%)" backgroundSize="32px 32px">
-          <Box gridColumn={{ base: 'span 2', sm: 'span 4', lg: 'span 6' }} py="7px" textAlign="center" borderRadius="full" bg="whiteAlpha.800" color="gray.600" fontSize="xs" fontWeight="800">ENTRADA PRINCIPAL · PLAZA CENTRAL</Box>
+        <Box position="relative" display="grid" gridTemplateColumns={{ base: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(4, minmax(0, 1fr))', lg: 'repeat(6, minmax(0, 1fr))' }} gap={{ base: '8px', md: '10px' }} p={{ base: '8px', md: '14px' }} borderRadius="20px" bg="linear-gradient(135deg, #D9F99D 0%, #BBF7D0 45%, #BFDBFE 100%)" _before={{ content: '""', position: 'absolute', inset: { base: '18px', md: '28px' }, border: '16px solid rgba(255,255,255,.74)', borderRadius: '18px', pointerEvents: 'none' }}>
+          <Flex gridColumn={{ base: 'span 2', sm: 'span 4', lg: 'span 6' }} py="7px" px="12px" align="center" justify="space-between" borderRadius="full" bg="whiteAlpha.900" color="gray.600" fontSize="xs" fontWeight="800" position="relative"><Text>ENTRADA PRINCIPAL · PLAZA CENTRAL</Text><Badge colorScheme="red" borderRadius="full"><Icon as={MdMyLocation} mr="3px" />ESTÁS AQUÍ</Badge></Flex>
           {BUSINESS_CATEGORIES.map((category, index) => {
             const selected = selectedCategory === category;
             const total = activeBusinesses.filter((business) => business.category === category).length;
-            return <Button key={category} gridColumn={{ base: 'span 1', sm: 'span 1', lg: `span ${mapSpans[index]}` }} h="auto" minH={{ base: '94px', md: '112px' }} whiteSpace="normal" py="10px" px="8px" variant={selected ? 'solid' : 'unstyled'} bg={selected ? 'brand.500' : 'white'} color={selected ? 'white' : 'navy.700'} border="2px solid" borderColor={selected ? 'brand.500' : 'white'} boxShadow={selected ? '0 12px 20px rgba(49, 130, 206, .30)' : '0 5px 12px rgba(15, 23, 42, .12)'} onClick={() => setSelectedCategory(category)} display="flex" flexDirection="column" gap="3px" transition="all .18s ease" _hover={{ transform: 'translateY(-3px) scale(1.02)', borderColor: 'brand.300' }}><Text fontSize={{ base: '22px', md: '28px' }}>{categoryEmoji[index]}</Text><Text fontSize={{ base: '11px', md: 'xs' }} noOfLines={2}>{category}</Text><Badge fontSize="9px" colorScheme={selected ? 'whiteAlpha' : 'brand'}>{total} negocios</Badge></Button>;
+            return <Button key={category} gridColumn={{ base: 'span 1', sm: 'span 1', lg: `span ${mapSpans[index]}` }} h="auto" minH={{ base: '94px', md: '112px' }} whiteSpace="normal" py="10px" px="8px" variant={selected ? 'solid' : 'unstyled'} bg={selected ? 'brand.500' : 'white'} color={selected ? 'white' : 'navy.700'} border="2px solid" borderColor={selected ? 'brand.500' : 'white'} boxShadow={selected ? '0 12px 20px rgba(49, 130, 206, .30)' : '0 5px 12px rgba(15, 23, 42, .16)'} onClick={() => setSelectedCategory(category)} display="flex" flexDirection="column" gap="3px" transition="all .18s ease" position="relative" zIndex={1} _hover={{ transform: 'translateY(-4px) scale(1.03)', borderColor: 'brand.300', boxShadow: '0 14px 24px rgba(15, 23, 42, .22)' }}><Text fontSize={{ base: '22px', md: '28px' }}>{categoryEmoji[index]}</Text><Text fontSize={{ base: '11px', md: 'xs' }} noOfLines={2}>{category}</Text><Badge fontSize="9px" colorScheme={selected ? 'whiteAlpha' : 'brand'}>{total} negocios</Badge>{total > 0 && <Box position="absolute" top="5px" right="5px" w="7px" h="7px" borderRadius="full" bg={selected ? 'yellow.300' : 'green.400'} boxShadow="0 0 0 3px rgba(255,255,255,.65)" />}</Button>;
           })}
-          <Box gridColumn={{ base: 'span 2', sm: 'span 4', lg: 'span 6' }} py="6px" textAlign="center" borderRadius="full" bg="gray.700" color="white" fontSize="xs" fontWeight="800">SALIDA · VOLVÉ PRONTO</Box>
+          <Box gridColumn={{ base: 'span 2', sm: 'span 4', lg: 'span 6' }} py="6px" textAlign="center" borderRadius="full" bg="gray.700" color="white" fontSize="xs" fontWeight="800" position="relative">SALIDA · VOLVÉ PRONTO</Box>
         </Box>
       </Box>
 
@@ -69,9 +76,10 @@ export default function VirtualMall() {
       {shownBusinesses.length ? <Box display="grid" gridTemplateColumns={{ base: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }} gap="16px">
         {shownBusinesses.map((business) => {
           const isFavorite = favoriteIds.includes(business.id);
+          const contactLinks = (business.links || []).filter(Boolean).slice(0, 4);
+          const contactsOpen = openContactId === business.id;
           return <Box key={business.id} p="16px" borderRadius="22px" bg={panelBg} border="1px solid" borderColor="gray.100" boxShadow="md" transition="all .2s ease" _hover={{ transform: 'translateY(-5px)', boxShadow: 'xl', borderColor: 'brand.300' }}>
-            <Flex gap="14px" align="center"><Box w="72px" h="72px" borderRadius="18px" overflow="hidden" bg="brand.50" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={business.name} w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} w="32px" h="32px" color="brand.500" />}</Box><Stack spacing="3px" minW="0" flex="1"><Badge w="fit-content" colorScheme="brand">{business.category}</Badge><Text fontWeight="900" fontSize="lg" noOfLines={1}>{business.name}</Text><Text color={muted} fontSize="sm" noOfLines={2}>{business.description || 'Negocio local disponible en el centro comercial.'}</Text></Stack><IconButton aria-label={isFavorite ? `Quitar ${business.name} de favoritos` : `Guardar ${business.name} en favoritos`} icon={<Icon as={isFavorite ? MdFavorite : MdFavoriteBorder} />} variant="ghost" color={isFavorite ? 'red.400' : muted} onClick={() => toggleFavorite(business.id)} /></Flex>
-            <Flex mt="14px" align="center" gap="8px" flexWrap="wrap"><Text color={muted} fontSize="xs" fontWeight="800">CONTACTAR</Text>{(business.links || []).filter(Boolean).slice(0, 4).map((businessLink) => { const meta = linkMeta(businessLink); return <Tooltip key={businessLink} label={`Abrir ${meta.label}`} hasArrow><IconButton as="a" href={hrefFor(businessLink)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${meta.label} de ${business.name}`} icon={<Icon as={meta.icon} />} bg={meta.bg} color="white" borderRadius="full" size="sm" boxShadow="sm" _hover={{ transform: 'translateY(-3px) scale(1.08)', filter: 'brightness(1.08)' }} /></Tooltip>; })}{!(business.links || []).filter(Boolean).length && <Text color={muted} fontSize="xs">Contacto próximamente</Text>}</Flex>
+            <Flex gap="14px" align="center"><Box position="relative" w="72px" h="72px" flexShrink={0} overflow="visible"><IconButton aria-label={contactsOpen ? `Ocultar contactos de ${business.name}` : `Ver contactos de ${business.name}`} aria-expanded={contactsOpen} onClick={() => contactLinks.length && setOpenContactId((current) => current === business.id ? '' : business.id)} w="72px" h="72px" minW="72px" borderRadius="18px" overflow="hidden" bg="brand.50" cursor={contactLinks.length ? 'pointer' : 'default'} icon={business.logoUrl ? <Image src={business.logoUrl} alt={business.name} w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} w="32px" h="32px" color="brand.500" />} _hover={contactLinks.length ? { transform: 'scale(1.04)', boxShadow: '0 0 0 3px', boxShadowColor: 'brand.200' } : undefined} />{contactLinks.map((businessLink, index) => { const meta = linkMeta(businessLink); return <Tooltip key={businessLink} label={`Abrir ${meta.label}`} hasArrow><IconButton as="a" href={hrefFor(businessLink)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${meta.label} de ${business.name}`} icon={<Icon as={meta.icon} />} bg={meta.bg} color="white" borderRadius="full" size="sm" position="absolute" zIndex={2} {...contactBubblePositions[index]} opacity={contactsOpen ? 1 : 0} visibility={contactsOpen ? 'visible' : 'hidden'} transform={contactsOpen ? 'scale(1)' : 'scale(.45)'} transition={`all .24s cubic-bezier(.2,.8,.2,1) ${contactsOpen ? index * 45 : 0}ms`} boxShadow="0 8px 16px rgba(15, 23, 42, .25)" _hover={{ transform: 'translateY(-3px) scale(1.1)', filter: 'brightness(1.08)' }} /></Tooltip>; })}</Box><Stack spacing="3px" minW="0" flex="1"><Badge w="fit-content" colorScheme="brand">{business.category}</Badge><Text fontWeight="900" fontSize="lg" noOfLines={1}>{business.name}</Text><Text color={muted} fontSize="sm" noOfLines={2}>{business.description || 'Negocio local disponible en el centro comercial.'}</Text>{contactLinks.length > 0 && <Text color="brand.500" fontSize="xs" fontWeight="800">{contactsOpen ? 'Elegí cómo contactar' : 'Tocá el logo para contactar'}</Text>}</Stack><IconButton aria-label={isFavorite ? `Quitar ${business.name} de favoritos` : `Guardar ${business.name} en favoritos`} icon={<Icon as={isFavorite ? MdFavorite : MdFavoriteBorder} />} variant="ghost" color={isFavorite ? 'red.400' : muted} onClick={() => toggleFavorite(business.id)} /></Flex>
           </Box>;
         })}
       </Box> : <Box textAlign="center" border="2px dashed" borderColor="brand.200" borderRadius="24px" p={{ base: '34px', md: '52px' }} bg={panelBg}><Text fontSize="44px">🏪</Text><Heading fontSize="xl" mt="8px">Esta zona está por desbloquearse</Heading><Text color={muted} mt="4px">Pronto habrá negocios para explorar aquí.</Text></Box>}
