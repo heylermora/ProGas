@@ -273,8 +273,10 @@ export default function Home() {
           <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px" pt="12px" w={{ base: '100%', sm: 'auto' }}>
             <Button as={RLink} to="/customer/data" colorScheme="brand" size="lg" w={{ base: '100%', sm: 'auto' }}>Hacer pedido</Button>
             <Button as={RLink} to="/customer/view-order" variant="outline" size="lg" w={{ base: '100%', sm: 'auto' }}>Ver pedido</Button>
-            <Button as={RLink} to="/mall" variant="solid" colorScheme="yellow" size="lg" w={{ base: '100%', sm: 'auto' }}>Centro comercial</Button>
           </Stack>
+          <Box pt="20px" mt="8px" borderTop="1px solid" borderColor="gray.200">
+            <Button as={RLink} to="/mall" variant="solid" colorScheme="yellow" size="lg" w={{ base: '100%', sm: 'auto' }} px={{ base: '24px', md: '32px' }} boxShadow="0 12px 24px rgba(214, 158, 46, .28)">🕹️ Explorar centro comercial virtual</Button>
+          </Box>
         </Stack>
         <SocialLogoHub />
       </Flex>
