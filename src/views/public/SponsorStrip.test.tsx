@@ -11,19 +11,49 @@ const renderSponsorStrip = () => render(
       <SponsorStrip
         type="VIP"
         max={1}
+        availableCopy={{ availableTitle: 'Espacio personalizado', availableDescription: 'Descripción personalizada' }}
         sponsors={[{
           id: 'sponsor-with-video',
           type: 'VIP',
           name: 'Patrocinador de prueba',
           active: true,
           videoUrl: 'https://example.com/sponsor.mp4',
+          links: ['https://instagram.com/progas', 'https://wa.me/50600000000'],
         }]}
       />
     </MemoryRouter>
   </ChakraProvider>
 );
 
-describe('SponsorStrip video player', () => {
+describe('SponsorStrip', () => {
+  it('reveals labeled sponsor contact bubbles from the logo', () => {
+    renderSponsorStrip();
+
+    expect(screen.queryByRole('link', { name: /abrir instagram de patrocinador de prueba/i })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /ver contactos de patrocinador de prueba/i }));
+    expect(screen.getByRole('link', { name: /abrir instagram de patrocinador de prueba/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /abrir whatsapp de patrocinador de prueba/i })).toBeTruthy();
+  });
+
+  it('uses the customizable available-space copy', () => {
+    render(
+      <ChakraProvider theme={theme}>
+        <MemoryRouter>
+          <SponsorStrip
+            type="General"
+            max={1}
+            sponsors={[]}
+            availableCopy={{ availableTitle: 'Anunciá con nosotros', availableDescription: 'Texto administrado' }}
+          />
+        </MemoryRouter>
+      </ChakraProvider>
+    );
+
+    expect(screen.getByText('Anunciá con nosotros')).toBeTruthy();
+    expect(screen.getByText('Texto administrado')).toBeTruthy();
+  });
+
+
   it('unmounts the inline player while its expanded player is open', () => {
     const { container } = renderSponsorStrip();
 

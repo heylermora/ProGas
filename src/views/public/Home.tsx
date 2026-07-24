@@ -17,7 +17,6 @@ import {
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdEmail, MdFavorite } from 'react-icons/md';
-import SponsorStrip from './SponsorStrip';
 import { PublicPage } from './PublicPage';
 
 const gasMemoLogo = `${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`;
@@ -265,7 +264,6 @@ function SocialLogoHub() {
 export default function Home() {
   return (
     <PublicPage maxW="1200px">
-      <SponsorStrip type="VIP" max={2} title="Patrocinadores" />
       <Box h={{ base: '10px', md: '14px' }} />
       <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '18px', md: '28px' }}>
         <Stack spacing={{ base: '10px', md: '12px' }} maxW={{ base: '100%', lg: '680px' }}>
@@ -276,12 +274,14 @@ export default function Home() {
             <Button as={RLink} to="/customer/data" colorScheme="brand" size="lg" w={{ base: '100%', sm: 'auto' }}>Hacer pedido</Button>
             <Button as={RLink} to="/customer/view-order" variant="outline" size="lg" w={{ base: '100%', sm: 'auto' }}>Ver pedido</Button>
           </Stack>
+          <Box pt="20px" mt="8px" borderTop="1px solid" borderColor="gray.200">
+            <Button as={RLink} to="/mall" variant="solid" colorScheme="yellow" size="lg" w={{ base: '100%', sm: 'auto' }} px={{ base: '24px', md: '32px' }} boxShadow="0 12px 24px rgba(214, 158, 46, .28)">🕹️ Explorar centro comercial virtual</Button>
+          </Box>
         </Stack>
         <SocialLogoHub />
       </Flex>
       <DonationBanner />
       <Box h={{ base: '14px', md: '18px' }} />
-      <SponsorStrip type="VIP" max={2} offset={2} title="Patrocinadores" />
     </PublicPage>
   );
 }

@@ -1,6 +1,6 @@
 // apiConfig.ts
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDoc, getDocs, addDoc, doc, updateDoc, deleteDoc, query, where, limit, startAfter, QueryDocumentSnapshot, orderBy, DocumentData } from 'firebase/firestore';
+import { getFirestore, collection, getDoc, getDocs, addDoc, doc, updateDoc, deleteDoc, query, where, limit, startAfter, QueryDocumentSnapshot, orderBy, DocumentData, setDoc } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 
 // Tu configuración de Firebase
@@ -197,6 +197,27 @@ export const updateData = async (collectionName: string, id: string, updatedData
     } catch (error) {
         console.error(`[updateData] Error al actualizar documento de ${collectionName}, ID: ${id}:`, error);
         throw new Error(`No se pudo actualizar el documento: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
+};
+
+// Crea o actualiza un documento con un id conocido. Es útil para ajustes globales
+// que no deben duplicarse cada vez que un administrador los guarda.
+export const upsertData = async (collectionName: string, id: string, data: any) => {
+    try {
+        if (!collectionName || collectionName.trim() === '') {
+            throw new Error('El nombre de la colección es requerido');
+        }
+        if (!id || id.trim() === '') {
+            throw new Error('El ID del documento es requerido');
+        }
+        if (!data || Object.keys(data).length === 0) {
+            throw new Error('Los datos a guardar no pueden estar vacíos');
+        }
+
+        await setDoc(doc(db, collectionName, id), data, { merge: true });
+    } catch (error) {
+        console.error(`[upsertData] Error al guardar ${collectionName}, ID: ${id}:`, error);
+        throw new Error(`No se pudo guardar el documento: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
 };
 

@@ -9,7 +9,6 @@ import OkModal from 'components/modal/OkModal';
 import orderService from 'services/OrderService';
 import productService from 'services/ProductService';
 import type { ProductItem } from 'interfaces/OrderItem';
-import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
 import OrderNavigation from './OrderNavigation';
 import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
@@ -109,7 +108,6 @@ export default function Products() {
 
   return (
     <PublicPage title="Productos y pedido" description="Confirme productos, pago y ubicación. La dirección viene por defecto desde el cliente, pero puede ajustarse para este pedido.">
-      <SponsorStrip type="General" max={4} title="Patrocinadores" />
       <Box h={{ base: '8px', md: '12px' }} />
       <PublicCard>
         <Stack spacing="16px">
@@ -189,7 +187,6 @@ export default function Products() {
         </Stack>
       </PublicCard>
       <Box h={{ base: '8px', md: '12px' }} />
-      <SponsorStrip type="General" max={8} offset={4} title="Patrocinadores" />
       {showModal && <OkModal message="Pedido creado correctamente." isOpen={showModal} onClose={() => setShowModal(false)} />}
     </PublicPage>
   );
