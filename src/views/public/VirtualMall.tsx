@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { keyframes } from '@emotion/react';
-import { Badge, Box, Button, Flex, Heading, Icon, IconButton, Image, Input, InputGroup, InputLeftElement, Stack, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
+import { Badge, Box, Button, Flex, Heading, Icon, IconButton, Image, Input, InputGroup, InputLeftElement, SimpleGrid, Stack, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdBolt, MdEmail, MdFavorite, MdFavoriteBorder, MdLink, MdLocalMall, MdMyLocation, MdSearch, MdStorefront } from 'react-icons/md';
 import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
@@ -69,22 +69,31 @@ export default function VirtualMall() {
       </Box>
 
       <Box bg={panelBg} borderRadius={{ base: '20px', md: '28px' }} p={{ base: '12px', md: '22px' }} boxShadow="lg" mb="22px" overflow="hidden">
-        <Flex align="center" justify="space-between" mb="14px" gap="12px" direction={{ base: 'column', sm: 'row' }}><Box><Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa del centro comercial</Heading><Text color={muted} fontSize="sm">Mové a tu personaje tocando una zona. En móvil, deslizá el mapa para explorarlo.</Text></Box><Button size="sm" variant={selectedCategory ? 'outline' : 'solid'} colorScheme="brand" onClick={() => setSelectedCategory('')}>Volver a la plaza</Button></Flex>
-        <Box overflowX="auto" pb="6px" mx={{ base: '-4px', md: 0 }}>
-          <Box position="relative" minW={{ base: '860px', md: '100%' }} h={{ base: '560px', md: '620px' }} borderRadius="24px" overflow="hidden" bg="linear-gradient(135deg, #B7E4C7 0%, #95D5B2 42%, #90DBF4 100%)" _before={{ content: '""', position: 'absolute', inset: 0, opacity: .42, bgImage: 'radial-gradient(circle at 20% 20%, #ffffff 0 2px, transparent 3px), radial-gradient(circle at 70% 35%, #ffffff 0 2px, transparent 3px)', bgSize: '46px 46px, 58px 58px' }}>
+        <Flex align="center" justify="space-between" mb="14px" gap="12px" direction={{ base: 'column', sm: 'row' }}><Box><Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa del centro comercial</Heading><Text color={muted} fontSize="sm">Mové a tu personaje tocando una zona. En móvil usá el minimapa para navegar sin desbordes.</Text></Box><Button size="sm" variant={selectedCategory ? 'outline' : 'solid'} colorScheme="brand" onClick={() => setSelectedCategory('')}>Volver a la plaza</Button></Flex>
+        <Box display={{ base: 'none', md: 'block' }}>
+          <Box position="relative" w="100%" h={{ md: '590px', lg: '620px' }} borderRadius="24px" overflow="hidden" bg="linear-gradient(135deg, #B7E4C7 0%, #95D5B2 42%, #90DBF4 100%)" _before={{ content: '""', position: 'absolute', inset: 0, opacity: .42, bgImage: 'radial-gradient(circle at 20% 20%, #ffffff 0 2px, transparent 3px), radial-gradient(circle at 70% 35%, #ffffff 0 2px, transparent 3px)', bgSize: '46px 46px, 58px 58px' }}>
             <Box position="absolute" left="5%" right="5%" top="45%" h="58px" bg="whiteAlpha.900" borderY="8px solid" borderColor="gray.300" transform="rotate(-4deg)" />
             <Box position="absolute" top="7%" bottom="7%" left="47%" w="58px" bg="whiteAlpha.900" borderX="8px solid" borderColor="gray.300" transform="rotate(5deg)" />
             <Box position="absolute" left="39%" top="39%" w="22%" h="22%" borderRadius="full" bg="yellow.100" border="8px solid" borderColor="yellow.300" boxShadow="inset 0 0 0 8px rgba(255,255,255,.6)" display="flex" alignItems="center" justifyContent="center"><Stack align="center" spacing="0"><Text fontSize="32px">⛲</Text><Text fontSize="xs" fontWeight="900" color="yellow.800">PLAZA CENTRAL</Text></Stack></Box>
-            <Flex position="absolute" left="4%" top="4%" px="10px" py="6px" borderRadius="full" bg="whiteAlpha.900" align="center" gap="5px" fontSize="xs" fontWeight="800" color="gray.700"><Icon as={MdMyLocation} color="red.500" /> ESTÁS AQUÍ</Flex>
             {BUSINESS_CATEGORIES.map((category, index) => {
               const selected = selectedCategory === category;
               const total = activeBusinesses.filter((business) => business.category === category).length;
               const [left, top] = mapPositions[index];
               return <Button key={category} position="absolute" left={`${left}%`} top={`${top}%`} transform="translate(-50%, -50%)" w={{ base: '124px', md: '138px' }} minH={{ base: '88px', md: '96px' }} whiteSpace="normal" py="8px" px="7px" variant="unstyled" bg={selected ? 'brand.500' : 'white'} color={selected ? 'white' : 'navy.700'} border="3px solid" borderColor={selected ? 'brand.500' : 'white'} borderRadius="18px" boxShadow={selected ? '0 15px 0 #1A5D98, 0 22px 30px rgba(15, 23, 42, .28)' : '0 8px 0 #CBD5E0, 0 13px 22px rgba(15, 23, 42, .20)'} onClick={() => setSelectedCategory(category)} display="flex" flexDirection="column" justifyContent="center" gap="2px" transition="all .35s cubic-bezier(.2,.8,.2,1)" zIndex={2} _hover={{ transform: 'translate(-50%, calc(-50% - 6px)) scale(1.04)', boxShadow: selected ? '0 19px 0 #1A5D98, 0 25px 32px rgba(15, 23, 42, .3)' : '0 13px 0 #CBD5E0, 0 18px 28px rgba(15, 23, 42, .24)' }}><Text fontSize="26px">{categoryEmoji[index]}</Text><Text fontSize="xs" fontWeight="900" noOfLines={2}>{category}</Text><Badge fontSize="9px" colorScheme={selected ? 'whiteAlpha' : 'brand'}>{total} negocios</Badge>{total > 0 && <Box position="absolute" top="7px" right="7px" w="9px" h="9px" borderRadius="full" bg="green.400" boxShadow="0 0 0 3px rgba(255,255,255,.72)" />}</Button>;
             })}
-            <Box position="absolute" left={`${playerLeft}%`} top={`${playerTop}%`} zIndex={4} transition="left .55s cubic-bezier(.2,.8,.2,1), top .55s cubic-bezier(.2,.8,.2,1)" pointerEvents="none"><Box position="absolute" top="24px" left="50%" w="36px" h="10px" borderRadius="full" bg="blackAlpha.400" animation={`${playerShadow} 1s ease-in-out infinite`} /><Box animation={`${playerPulse} 1s ease-in-out infinite`} fontSize="42px" lineHeight="1">🧑‍🚀</Box></Box>
+            <Box position="absolute" left={`${playerLeft}%`} top={`${playerTop}%`} zIndex={4} transition="left .55s cubic-bezier(.2,.8,.2,1), top .55s cubic-bezier(.2,.8,.2,1)" pointerEvents="none"><Badge position="absolute" left="50%" top="-28px" transform="translateX(-50%)" whiteSpace="nowrap" colorScheme="red" borderRadius="full" boxShadow="sm"><Icon as={MdMyLocation} mr="3px" />ESTÁS AQUÍ</Badge><Box position="absolute" top="24px" left="50%" w="36px" h="10px" borderRadius="full" bg="blackAlpha.400" animation={`${playerShadow} 1s ease-in-out infinite`} /><Box animation={`${playerPulse} 1s ease-in-out infinite`} fontSize="42px" lineHeight="1">🧑‍🚀</Box></Box>
             <Box position="absolute" right="4%" bottom="4%" px="12px" py="7px" borderRadius="full" bg="gray.800" color="white" fontSize="xs" fontWeight="800">🚪 SALIDA DEL MAPA</Box>
           </Box>
+        </Box>
+        <Box display={{ base: 'block', md: 'none' }} p="10px" borderRadius="18px" bg="linear-gradient(135deg, #B7E4C7, #90DBF4)">
+          <Flex px="10px" py="7px" mb="10px" borderRadius="full" bg="whiteAlpha.900" align="center" justify="space-between" fontSize="xs" fontWeight="800" color="gray.700"><Text>MINIMAPA · ZONAS</Text><Badge colorScheme="red"><Icon as={MdMyLocation} mr="3px" />ESTÁS AQUÍ</Badge></Flex>
+          <SimpleGrid columns={2} spacing="8px">
+            {BUSINESS_CATEGORIES.map((category, index) => {
+              const selected = selectedCategory === category;
+              const total = activeBusinesses.filter((business) => business.category === category).length;
+              return <Button key={category} minH="86px" h="auto" p="8px" whiteSpace="normal" variant="unstyled" bg={selected ? 'brand.500' : 'white'} color={selected ? 'white' : 'navy.700'} border="2px solid" borderColor={selected ? 'brand.500' : 'white'} borderRadius="14px" boxShadow={selected ? '0 7px 0 #1A5D98' : '0 5px 0 #CBD5E0'} onClick={() => setSelectedCategory(category)} display="flex" flexDirection="column" justifyContent="center" gap="2px" _active={{ transform: 'translateY(3px)', boxShadow: '0 2px 0 #1A5D98' }}><Text fontSize="22px">{categoryEmoji[index]}</Text><Text fontSize="11px" fontWeight="800" noOfLines={2}>{category}</Text><Badge fontSize="9px" colorScheme={selected ? 'whiteAlpha' : 'brand'}>{total} negocios</Badge></Button>;
+            })}
+          </SimpleGrid>
         </Box>
       </Box>
 
