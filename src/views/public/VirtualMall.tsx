@@ -11,9 +11,11 @@ import { PublicPage } from './PublicPage';
 const categoryEmoji = ['🍽️', '🍔', '🍕', '☕', '🍦', '🍷', '🛒', '🛍️', '💎', '👟', '💈', '💇', '🐾', '💊', '🔨', '🌱', '💪', '🏍️', '🔧', '🛡️', '✨'];
 const categoryShortLabels = ['Rest. / sodas', 'Comidas rápidas', 'Pizzerías', 'Cafeterías', 'Heladerías', 'Licoreras', 'Súperes', 'Tiendas', 'Joyerías', 'Zapaterías', 'Barberías', 'Belleza', 'Veterinarias', 'Farmacias', 'Ferreterías', 'Agroinsumos', 'Gimnasios', 'Motos', 'Mecánicos', 'Fumigadoras', 'Otros'];
 const mapPositions = [
-  [7, 12], [26, 10], [48, 12], [70, 10], [84, 17], [8, 39], [27, 36],
-  [48, 39], [69, 35], [84, 43], [8, 67], [26, 65], [47, 70], [67, 64],
-  [83, 70], [18, 84], [38, 86], [58, 84], [76, 86], [8, 89], [88, 90],
+  [8, 12], [26, 10], [45, 12], [64, 10], [84, 12],
+  [9, 31], [26, 30], [74, 30], [91, 31],
+  [8, 50], [25, 52], [75, 52], [92, 50],
+  [9, 70], [27, 72], [73, 72], [91, 70],
+  [16, 88], [38, 88], [62, 88], [84, 88],
 ];
 const playerPulse = keyframes`
   0%, 100% { transform: translateY(0) scale(1); }
@@ -57,7 +59,9 @@ export default function VirtualMall() {
   const activeMapIndex = Math.max(0, BUSINESS_CATEGORIES.indexOf(selectedCategory));
   const [playerLeft, selectedTop] = selectedCategory ? mapPositions[activeMapIndex] : [50, 51];
   const playerTop = selectedCategory ? Math.min(selectedTop + 7, 90) : selectedTop;
-  const mapPath = mapPositions.map(([left, top]) => `${left},${top}`).join(' ');
+  const mapPath = [0, 1, 2, 3, 4, 8, 12, 16, 20, 19, 18, 17, 13, 9, 5, 6, 7, 11, 15, 14, 10]
+    .map((index) => mapPositions[index].join(','))
+    .join(' ');
 
   return (
     <PublicPage maxW="1280px">
