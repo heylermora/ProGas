@@ -24,10 +24,10 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { MdArrowBack, MdInfoOutline, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
-import SponsorService, { SPONSOR_CAPACITY } from 'services/SponsorService';
-import SponsorStrip from 'views/public/SponsorStrip';
+import SponsorService from 'services/SponsorService';
+import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
 
-const empty = { name: '', type: 'VIP', active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
+const empty = { name: '', category: BUSINESS_CATEGORIES[0], active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
 const MAX_FIRESTORE_VIDEO_BYTES = 850 * 1024;
 
 export default function SponsorForm() {
@@ -68,23 +68,20 @@ export default function SponsorForm() {
     setMessage(null);
 
     try {
-      const cleanLinks = sponsor.links.filter(Boolean).slice(0, sponsor.type === 'General' ? 1 : 4);
+      const cleanLinks = sponsor.links.filter(Boolean).slice(0, 4);
       const payload = {
         ...sponsor,
         name: sponsor.name?.trim() || '',
         description: sponsor.description?.trim() || '',
         order: Number(sponsor.order),
         links: cleanLinks,
-        videoUrl: sponsor.type === 'VIP' ? sponsor.videoUrl : '',
+        videoUrl: sponsor.videoUrl || '',
       };
       if (id) {
-        const current = await SponsorService.get(id);
         await SponsorService.edit(id, { ...payload, id });
-        if (current.type !== payload.type) await SponsorService.enforceCapacity(current.type);
       } else {
         await SponsorService.create(payload);
       }
-      await SponsorService.enforceCapacity(payload.type);
       history.push('/admin/sponsor/index');
     } catch (error) {
       console.error('[SponsorForm] Error guardando patrocinador:', error);
@@ -106,7 +103,7 @@ export default function SponsorForm() {
             </Box>
           </HStack>
           <HStack spacing="8px" flexWrap="wrap">
-            <Badge px="10px" py="5px" borderRadius="full" colorScheme={sponsor.type === 'VIP' ? 'yellow' : sponsor.type === 'Premium' ? 'purple' : 'green'}>{sponsor.type}</Badge>
+            <Badge px="10px" py="5px" borderRadius="full" colorScheme="brand">{sponsor.category}</Badge>
             <Badge px="10px" py="5px" borderRadius="full" colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Visible' : 'Oculto'}</Badge>
           </HStack>
         </Flex>
@@ -119,11 +116,11 @@ export default function SponsorForm() {
 
           <Stack spacing="4px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
             <HStack spacing="8px" flexWrap="wrap">
-              <Badge colorScheme={sponsor.type === 'VIP' ? 'yellow' : sponsor.type === 'Premium' ? 'purple' : 'green'}>{sponsor.type}</Badge>
+              <Badge colorScheme="brand">{sponsor.category}</Badge>
               <Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Activo' : 'Oculto'}</Badge>
             </HStack>
             <Text fontWeight="800" fontSize={{ base: 'lg', md: 'xl' }}>Datos principales</Text>
-            <Text color={muted} fontSize="sm">El orden se usa dentro de cada tipo de sponsor y también se puede ajustar arrastrando desde el listado.</Text>
+            <Text color={muted} fontSize="sm">Organizá el orden dentro de esta categoría del centro comercial.</Text>
           </Stack>
 
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
@@ -133,13 +130,13 @@ export default function SponsorForm() {
               <FormHelperText>Opcional. Si queda vacío, el card muestra solo el logo y links.</FormHelperText>
             </FormControl>
             <FormControl>
-              <FormLabel>Tipo</FormLabel>
-              <Select value={sponsor.type} onChange={(e) => set('type', e.target.value)}><option>VIP</option><option>Premium</option><option>General</option></Select>
+              <FormLabel>Categoría comercial</FormLabel>
+              <Select value={sponsor.category} onChange={(e) => set('category', e.target.value)}>{BUSINESS_CATEGORIES.map((category) => <option key={category}>{category}</option>)}</Select>
             </FormControl>
             <FormControl>
               <FormLabel>Orden</FormLabel>
               <Input type="number" min="1" value={sponsor.order} onChange={(e) => set('order', e.target.value)} />
-              <FormHelperText>{sponsor.type} permite {SPONSOR_CAPACITY[sponsor.type]} espacios activos. Los que excedan este límite se guardan como inactivos.</FormHelperText>
+              <FormHelperText>Define la posición del negocio dentro de su categoría.</FormHelperText>
             </FormControl>
             <FormControl display="flex" alignItems="center" gap="10px" pt={{ base: 0, md: '30px' }}>
               <Switch isChecked={sponsor.active} onChange={(e) => set('active', e.target.checked)} />
@@ -157,20 +154,16 @@ export default function SponsorForm() {
                 <Input type="file" accept="image/*" onChange={(e) => readFile('logoUrl', e.target.files?.[0])} />
                 <FormHelperText>Recomendado: PNG o JPG horizontal con fondo transparente o claro.</FormHelperText>
               </FormControl>
-              {sponsor.type === 'VIP' && (
-                <FormControl>
-                  <FormLabel>Link o iframe de video VIP</FormLabel>
+              <FormControl>
+                  <FormLabel>Link o iframe de video</FormLabel>
                   <Input value={sponsor.videoUrl?.startsWith('data:') ? '' : sponsor.videoUrl} placeholder='<iframe src="https://..."></iframe> o https://...' onChange={(e) => set('videoUrl', e.target.value)} />
                   <FormHelperText>Opcional. Pegá iframe o link embed público para evitar límites de guardado.</FormHelperText>
                 </FormControl>
-              )}
-              {sponsor.type === 'VIP' && (
-                <FormControl>
-                  <FormLabel>O subir video pequeño VIP</FormLabel>
+              <FormControl>
+                  <FormLabel>O subir video pequeño</FormLabel>
                   <Input type="file" accept="video/*" onChange={(e) => readFile('videoUrl', e.target.files?.[0])} />
                   <FormHelperText>Opcional, menor a 850 KB. Si falla al guardar, usá el link de video.</FormHelperText>
                 </FormControl>
-              )}
             </SimpleGrid>
           </Stack>
 
@@ -184,10 +177,9 @@ export default function SponsorForm() {
             <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Links de contacto</Text>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
               {sponsor.links.map((link, i) => (
-                <FormControl key={i} isDisabled={sponsor.type === 'General' && i > 0}>
+                <FormControl key={i}>
                   <FormLabel>Link {i + 1}</FormLabel>
                   <Input value={link} placeholder="https://, wa.me/ o correo" onChange={(e) => set('links', sponsor.links.map((l, idx) => idx === i ? e.target.value : l))} />
-                  {sponsor.type === 'General' && i === 0 && <FormHelperText>General permite 1 link.</FormHelperText>}
                 </FormControl>
               ))}
             </SimpleGrid>
@@ -204,7 +196,7 @@ export default function SponsorForm() {
           <Stack spacing="12px">
           <HStack><Box p="8px" borderRadius="full" bg="brand.50" color="brand.500"><MdVisibility size="20px" /></Box><Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Previsualización en vivo</Text></HStack>
           <Text color={muted} fontSize="sm">Revisá el resultado antes de guardar. Los contactos se despliegan al tocar el logo.</Text>
-          <Box p={{ base: '10px', md: '14px' }} borderRadius="16px" bg={sectionBg}><SponsorStrip type={sponsor.type} max={1} previewSponsor={{ ...sponsor, id: id || 'preview', active: true }} /></Box>
+          <Box p={{ base: '14px', md: '18px' }} borderRadius="16px" bg={sectionBg}><Badge colorScheme="brand">{sponsor.category}</Badge><Text fontWeight="900" fontSize="xl" mt="8px">{sponsor.name || 'Nombre del negocio'}</Text><Text color={muted} fontSize="sm" mt="4px">{sponsor.description || 'La descripción aparecerá en la tarjeta del centro comercial.'}</Text></Box>
           <HStack color={muted} fontSize="xs"><MdInfoOutline /><Text>Los cambios se publican al guardar.</Text></HStack>
           </Stack>
         </Card>
