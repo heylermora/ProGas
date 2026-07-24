@@ -25,7 +25,7 @@ import { Link as RLink } from 'react-router-dom';
 import { MdAddBusiness, MdDelete, MdDragIndicator, MdEdit } from 'react-icons/md';
 import Card from 'components/card/Card';
 import SponsorService from 'services/SponsorService';
-import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
+import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import AddButton from 'components/button/AddButton';
 
@@ -33,7 +33,7 @@ const BUSINESS_TYPE_LABEL = 'Categoría';
 
 export default function SponsorsAdmin() {
   const [sponsors, setSponsors] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(BUSINESS_CATEGORIES[0]);
+  const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   const [selectedBusinessId, setSelectedBusinessId] = useState('');
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
   const [loading, setLoading] = useState(true);

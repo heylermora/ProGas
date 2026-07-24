@@ -25,9 +25,9 @@ import { useHistory, useParams } from 'react-router-dom';
 import { MdArrowBack, MdInfoOutline, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
 import SponsorService from 'services/SponsorService';
-import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
+import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 
-const empty = { name: '', category: BUSINESS_CATEGORIES[0], active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
+const empty = { name: '', category: DEFAULT_BUSINESS_CATEGORY, active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
 const MAX_FIRESTORE_VIDEO_BYTES = 850 * 1024;
 
 export default function SponsorForm() {

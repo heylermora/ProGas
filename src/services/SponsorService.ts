@@ -1,13 +1,22 @@
 import { fetchAllData, fetchDataById, addData, updateData, deleteData } from 'apiConfig';
-import SponsorItem, { BusinessCategory, SponsorType } from 'interfaces/SponsorItem';
+import SponsorItem, { BusinessCategory, DEFAULT_BUSINESS_CATEGORY, SponsorType } from 'interfaces/SponsorItem';
 
 const COLLECTION = 'Sponsors';
 export const SPONSOR_CAPACITY: Record<SponsorType, number> = { VIP: 4, Premium: 8, General: 12 };
-const LEGACY_CATEGORY: Record<SponsorType, BusinessCategory> = { VIP: 'Restaurantes/Soda', Premium: 'Tiendas', General: 'Etc.' };
+const LEGACY_CATEGORY: Record<SponsorType, BusinessCategory> = { VIP: 'Restaurantes/Sodas', Premium: 'Tiendas', General: DEFAULT_BUSINESS_CATEGORY };
+const CATEGORY_ALIASES: Record<string, BusinessCategory> = {
+  'Restaurantes/Soda': 'Restaurantes/Sodas',
+  'Súper/Pulperías': 'Súperes/Pulperías',
+  Joyería: 'Joyerías',
+  Zapatería: 'Zapaterías',
+  'Agro insumos': 'Agroinsumos',
+  Fumigadora: 'Fumigadoras',
+  'Etc.': DEFAULT_BUSINESS_CATEGORY,
+};
 
 const normalize = (item: SponsorItem): SponsorItem => ({
   ...item,
-  category: item.category || LEGACY_CATEGORY[item.type || 'General'],
+  category: CATEGORY_ALIASES[item.category] || item.category || LEGACY_CATEGORY[item.type || 'General'] || DEFAULT_BUSINESS_CATEGORY,
   active: item.active !== false,
   order: Number(item.order ?? 0),
   links: Array.isArray(item.links) ? item.links.filter(Boolean) : [],
