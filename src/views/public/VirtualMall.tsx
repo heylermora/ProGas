@@ -362,22 +362,25 @@ function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, 
 
 function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onContacts, onVideo }) {
   return (
-    <Box position="absolute" zIndex={8} right={{ base: '8px', md: '18px' }} bottom={{ base: '8px', md: '18px' }} w={{ base: 'calc(100% - 16px)', md: '370px' }} maxH={{ base: '290px', md: 'calc(100% - 36px)' }} overflowY="auto" p={{ base: '14px', md: '18px' }} borderRadius={{ base: '22px', md: '28px' }} bg="rgba(8, 14, 38, .94)" color="white" border="1px solid" borderColor="cyan.300" boxShadow="0 24px 65px rgba(0,0,0,.52), inset 0 0 28px rgba(34,211,238,.05)" backdropFilter="blur(16px)" animation={`${panelArrival} .24s ease-out`}>
-      <Flex align="center" justify="space-between" mb="12px">
+    <Box position="absolute" zIndex={8} right={{ base: '8px', md: '18px' }} bottom={{ base: '8px', md: '18px' }} w={{ base: 'calc(100% - 16px)', md: '430px' }} maxH={{ base: '260px', md: 'calc(100% - 36px)' }} overflowY="auto" p={{ base: '12px', md: '14px' }} borderRadius={{ base: '22px', md: '26px' }} bg="rgba(8, 14, 38, .94)" color="white" border="1px solid" borderColor="cyan.300" boxShadow="0 24px 65px rgba(0,0,0,.52), inset 0 0 28px rgba(34,211,238,.05)" backdropFilter="blur(16px)" animation={`${panelArrival} .24s ease-out`}>
+      <Flex align="center" justify="space-between" mb={{ base: '6px', md: '8px' }}>
         <Badge bg="cyan.300" color="navy.900" borderRadius="full" px="9px">FICHA DE ESTACIÓN</Badge>
         <IconButton aria-label="Cerrar ficha" icon={<MdClose />} size="sm" variant="ghost" color="white" onClick={onClose} />
       </Flex>
-      <Flex gap="14px" align="center">
+      <Flex gap={{ base: '10px', md: '14px' }} align="center">
         <BusinessContactHub business={business} links={contactLinks} isOpen={contactsOpen} onToggle={onContacts} />
-        <Stack spacing="3px" minW="0" flex="1">
-          {business.name && <Heading fontSize={{ base: 'lg', md: '2xl' }} lineHeight="1.06">{business.name}</Heading>}
-          {business.description && <Text fontSize="sm" color="whiteAlpha.800" noOfLines={{ base: 2, md: 4 }}>{business.description}</Text>}
+        <Stack spacing={{ base: '6px', md: '8px' }} minW="0" flex="1">
+          {(business.name || business.description) && (
+            <Stack spacing="3px" minW="0">
+              {business.name && <Heading fontSize={{ base: 'lg', md: 'xl' }} lineHeight="1.06">{business.name}</Heading>}
+              {business.description && <Text fontSize={{ base: 'xs', md: 'sm' }} color="whiteAlpha.800" noOfLines={{ base: 2, md: 3 }}>{business.description}</Text>}
+            </Stack>
+          )}
+          <Flex gap="7px" wrap="wrap">
+            {business.videoUrl && <Button leftIcon={<MdPlayArrow />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onVideo}>Ver video</Button>}
+            {contactLinks.length > 0 && <Button leftIcon={<MdLink />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onContacts}>{contactsOpen ? 'Ocultar' : 'Contactar'}</Button>}
+          </Flex>
         </Stack>
-      </Flex>
-
-      <Flex mt="16px" gap="9px" wrap="wrap">
-        {business.videoUrl && <Button leftIcon={<MdPlayArrow />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onVideo}>Ver video</Button>}
-        {contactLinks.length > 0 && <Button leftIcon={<MdLink />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onContacts}>{contactsOpen ? 'Ocultar enlaces' : 'Contactar'}</Button>}
       </Flex>
     </Box>
   );
@@ -386,16 +389,16 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
 function BusinessContactHub({ business, links, isOpen, onToggle }) {
   const hasLinks = links.length > 0;
   return (
-    <Box position="relative" w={{ base: '104px', md: '124px' }} h={{ base: '100px', md: '118px' }} flex="0 0 auto" overflow="visible">
-      <Flex as="button" type="button" aria-label={hasLinks ? `${isOpen ? 'Ocultar' : 'Mostrar'} redes de ${business.name || 'negocio'}` : `Logo de ${business.name || 'negocio'}`} aria-expanded={hasLinks ? isOpen : undefined} onClick={() => hasLinks && onToggle()} position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" zIndex={2} w={{ base: '68px', md: '82px' }} h={{ base: '68px', md: '82px' }} borderRadius="22px" bg="white" align="center" justify="center" p="9px" cursor={hasLinks ? 'pointer' : 'default'} boxShadow={isOpen ? '0 0 0 4px rgba(212,175,55,.28), 0 12px 28px rgba(0,0,0,.32)' : '0 10px 24px rgba(0,0,0,.26)'} transition="transform .2s ease, box-shadow .2s ease" _hover={hasLinks ? { transform: 'translate(-50%, -50%) scale(1.04)' } : undefined} _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' } : undefined}>
+    <Box position="relative" w={{ base: '88px', md: '104px' }} h={{ base: '86px', md: '100px' }} flex="0 0 auto" overflow="visible">
+      <Flex as="button" type="button" aria-label={hasLinks ? `${isOpen ? 'Ocultar' : 'Mostrar'} redes de ${business.name || 'negocio'}` : `Logo de ${business.name || 'negocio'}`} aria-expanded={hasLinks ? isOpen : undefined} onClick={() => hasLinks && onToggle()} position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" zIndex={2} w={{ base: '60px', md: '72px' }} h={{ base: '60px', md: '72px' }} borderRadius={{ base: '18px', md: '20px' }} bg="white" align="center" justify="center" p="8px" cursor={hasLinks ? 'pointer' : 'default'} boxShadow={isOpen ? '0 0 0 4px rgba(212,175,55,.28), 0 12px 28px rgba(0,0,0,.32)' : '0 10px 24px rgba(0,0,0,.26)'} transition="transform .2s ease, box-shadow .2s ease" _hover={hasLinks ? { transform: 'translate(-50%, -50%) scale(1.04)' } : undefined} _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' } : undefined}>
         {business.logoUrl ? <Image src={business.logoUrl} alt={business.name || 'Logo del negocio'} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="38px" color="brand.500" />}
       </Flex>
 
       {links.map((link, index) => {
         const meta = linkMeta(link);
         return (
-          <Flex key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${meta.label} de ${business.name || 'negocio'}`} position="absolute" zIndex={3} {...dossierBubblePositions[index]} w={{ base: '38px', md: '43px' }} h={{ base: '38px', md: '43px' }} borderRadius="full" bg={meta.bg} color="white" border="2px solid" borderColor="white" align="center" justify="center" boxShadow="0 12px 22px rgba(0,0,0,.38)" opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,10px,0) scale(.55)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} _hover={{ textDecoration: 'none', transform: 'translate3d(0,-3px,0) scale(1.08)', filter: 'brightness(1.08)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '2px' }}>
-            <Icon as={meta.icon} boxSize={{ base: '17px', md: '19px' }} />
+          <Flex key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${meta.label} de ${business.name || 'negocio'}`} position="absolute" zIndex={3} {...dossierBubblePositions[index]} w={{ base: '34px', md: '38px' }} h={{ base: '34px', md: '38px' }} borderRadius="full" bg={meta.bg} color="white" border="2px solid" borderColor="white" align="center" justify="center" boxShadow="0 12px 22px rgba(0,0,0,.38)" opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,10px,0) scale(.55)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} _hover={{ textDecoration: 'none', transform: 'translate3d(0,-3px,0) scale(1.08)', filter: 'brightness(1.08)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '2px' }}>
+            <Icon as={meta.icon} boxSize={{ base: '15px', md: '17px' }} />
           </Flex>
         );
       })}
