@@ -62,6 +62,10 @@ const shadowPulse = keyframes`
   0%, 100% { transform: translateX(-50%) scale(.95); opacity: .38; }
   50% { transform: translateX(-50%) scale(.62); opacity: .16; }
 `;
+const navigationFloat = keyframes`
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+`;
 const panelArrival = keyframes`
   from { opacity: 0; transform: translateY(18px) scale(.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -229,14 +233,16 @@ function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
 
   return (
     <>
-      <Flex display={{ base: 'flex', md: 'none' }} position="absolute" left="50%" bottom="16px" transform="translateX(-50%)" zIndex={6} align="center" gap="10px" px="8px" py="6px" borderRadius="full" bg="rgba(8,14,38,.82)" border="1px solid" borderColor="whiteAlpha.300" backdropFilter="blur(10px)">
-        <IconButton aria-label="Ver sector anterior" icon={<MdChevronLeft />} size="sm" borderRadius="full" colorScheme="cyan" variant="ghost" color="white" onClick={previousSector} />
-        <Stack spacing="0" align="center" minW="82px">
-          <Text color="cyan.200" fontSize="9px" fontWeight="900" letterSpacing=".12em">SECTOR</Text>
-          <Text color="white" fontSize="xs" fontWeight="800">{mobileSector + 1} de {sectorCount}</Text>
-        </Stack>
-        <IconButton aria-label="Ver sector siguiente" icon={<MdChevronRight />} size="sm" borderRadius="full" colorScheme="cyan" variant="ghost" color="white" onClick={nextSector} />
-      </Flex>
+      <Box display={{ base: 'block', md: 'none' }} position="absolute" left="8px" top="46%" zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out infinite`} _motionReduce={{ animation: 'none' }}>
+        <IconButton aria-label="Ver sector anterior" icon={<Icon as={MdChevronLeft} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="cyan.200" border="1px solid" borderColor="cyan.300" boxShadow="0 0 0 5px rgba(34,211,238,.10), 0 12px 25px rgba(0,0,0,.35)" backdropFilter="blur(10px)" onClick={previousSector} _hover={{ bg: 'rgba(14,116,144,.92)', transform: 'scale(1.06)' }} _active={{ transform: 'scale(.94)' }} />
+      </Box>
+      <Box display={{ base: 'block', md: 'none' }} position="absolute" right="8px" top="46%" zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out .35s infinite`} _motionReduce={{ animation: 'none' }}>
+        <IconButton aria-label="Ver sector siguiente" icon={<Icon as={MdChevronRight} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="cyan.200" border="1px solid" borderColor="cyan.300" boxShadow="0 0 0 5px rgba(34,211,238,.10), 0 12px 25px rgba(0,0,0,.35)" backdropFilter="blur(10px)" onClick={nextSector} _hover={{ bg: 'rgba(14,116,144,.92)', transform: 'scale(1.06)' }} _active={{ transform: 'scale(.94)' }} />
+      </Box>
+      <Stack display={{ base: 'flex', md: 'none' }} position="absolute" left="50%" bottom="15px" transform="translateX(-50%)" zIndex={6} spacing="0" align="center" minW="92px" px="13px" py="6px" borderRadius="full" bg="rgba(8,14,38,.78)" border="1px solid" borderColor="whiteAlpha.300" backdropFilter="blur(10px)">
+        <Text color="cyan.200" fontSize="8px" fontWeight="900" letterSpacing=".12em">SECTOR</Text>
+        <Text color="white" fontSize="xs" fontWeight="800">{mobileSector + 1} de {sectorCount}</Text>
+      </Stack>
 
       {BUSINESS_CATEGORIES.map((category, index) => {
         const total = businesses.filter((business) => business.category === category).length;
