@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { keyframes } from '@emotion/react';
 import {
   Badge,
@@ -46,6 +46,7 @@ const mobileCategoryPositions = [
   [50, 18], [76, 29], [78, 58], [63, 78], [37, 78], [22, 58], [24, 29],
 ];
 const CATEGORIES_PER_SECTOR = 7;
+const BUSINESSES_PER_SECTOR = 8;
 
 const astronautFloat = keyframes`
   0%, 100% { transform: translateY(0) scale(1); }
@@ -62,6 +63,15 @@ const navigationFloat = keyframes`
 const panelArrival = keyframes`
   from { opacity: 0; transform: translateY(18px) scale(.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+`;
+const mapArrival = keyframes`
+  from { opacity: 0; transform: scale(.92); filter: blur(5px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+`;
+const stationArrival = keyframes`
+  0% { box-shadow: 0 0 0 0 rgba(103,232,249,.75); }
+  70% { box-shadow: 0 0 0 16px rgba(103,232,249,0); }
+  100% { box-shadow: 0 0 0 0 rgba(103,232,249,0); }
 `;
 const dossierBubblePositions = [
   { top: '0', left: '0' },
@@ -90,7 +100,15 @@ const linkMeta = (link = '') => {
   if (value.includes('http')) return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
   return { label: 'Contacto', icon: MdLink, bg: '#64748B' };
 };
-const videoSource = (value = '') => value.match(/src=["']([^"']+)["']/i)?.[1] || value;
+const videoSource = (value = '') => {
+  const source = value.match(/src=["']([^"']+)["']/i)?.[1] || value;
+  const youtubeId = source.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([^?&/]+)/i)?.[1];
+  if (youtubeId) return `https://www.youtube.com/embed/${youtubeId}`;
+  const vimeoId = source.match(/vimeo\.com\/(?:video\/)?(\d+)/i)?.[1];
+  if (vimeoId) return `https://player.vimeo.com/video/${vimeoId}`;
+  return source;
+};
+const isDirectVideo = (value = '') => value.startsWith('data:video') || /\.(mp4|webm|ogg)(?:\?|$)/i.test(value);
 const businessPosition = (index, total) => {
   const ring = index < 8 ? 0 : 1;
   const ringIndex = ring ? index - 8 : index;
@@ -103,15 +121,27 @@ const businessPosition = (index, total) => {
 
 export default function VirtualMall() {
   const [businesses, setBusinesses] = useState([]);
+  const [loadStatus, setLoadStatus] = useState('loading');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBusinessId, setSelectedBusinessId] = useState('');
+  const [arrivedBusinessId, setArrivedBusinessId] = useState('');
   const [contactsOpen, setContactsOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [mobileSector, setMobileSector] = useState(0);
+  const [businessSector, setBusinessSector] = useState(0);
+  const travelTimer = useRef();
   const panelBg = useColorModeValue('white', 'navy.800');
 
+  const loadBusinesses = () => {
+    setLoadStatus('loading');
+    SponsorService.getAll()
+      .then((data) => { setBusinesses(data); setLoadStatus('success'); })
+      .catch(() => { setBusinesses([]); setLoadStatus('error'); });
+  };
+
   useEffect(() => {
-    SponsorService.getAll().then(setBusinesses).catch(() => setBusinesses([]));
+    loadBusinesses();
+    return () => clearTimeout(travelTimer.current);
   }, []);
 
   const activeBusinesses = useMemo(() => businesses.filter((business) => business.active !== false), [businesses]);
@@ -120,6 +150,9 @@ export default function VirtualMall() {
     [activeBusinesses, selectedCategory],
   );
   const selectedBusiness = categoryBusinesses.find((business) => business.id === selectedBusinessId);
+  const businessSectorCount = Math.max(1, Math.ceil(categoryBusinesses.length / BUSINESSES_PER_SECTOR));
+  const visibleBusinesses = categoryBusinesses.slice(businessSector * BUSINESSES_PER_SECTOR, (businessSector + 1) * BUSINESSES_PER_SECTOR);
+  const arrivedBusiness = arrivedBusinessId === selectedBusinessId ? selectedBusiness : undefined;
   const selectedCategoryIndex = BUSINESS_CATEGORIES.indexOf(selectedCategory);
   const categoryIcon = categoryEmoji[selectedCategoryIndex] || '🪐';
   const contactLinks = (selectedBusiness?.links || []).filter(Boolean).slice(0, 4);
@@ -127,15 +160,29 @@ export default function VirtualMall() {
   const enterCategory = (category) => {
     setSelectedCategory(category);
     setSelectedBusinessId('');
+    setArrivedBusinessId('');
     setContactsOpen(false);
+    setBusinessSector(0);
   };
   const returnToGalaxy = () => {
     setSelectedCategory('');
     setSelectedBusinessId('');
+    setArrivedBusinessId('');
     setContactsOpen(false);
+    setBusinessSector(0);
   };
   const selectBusiness = (id) => {
+    clearTimeout(travelTimer.current);
     setSelectedBusinessId(id);
+    setArrivedBusinessId('');
+    setContactsOpen(false);
+    travelTimer.current = setTimeout(() => setArrivedBusinessId(id), 480);
+  };
+  const changeBusinessSector = (sector) => {
+    clearTimeout(travelTimer.current);
+    setBusinessSector((sector + businessSectorCount) % businessSectorCount);
+    setSelectedBusinessId('');
+    setArrivedBusinessId('');
     setContactsOpen(false);
   };
   return (
@@ -162,15 +209,20 @@ export default function VirtualMall() {
             <Box position="absolute" inset="8%" border="1px dashed" borderColor="cyan.200" borderRadius="45%" opacity=".24" />
             <Box position="absolute" inset="21%" border="1px dashed" borderColor="purple.200" borderRadius="44%" opacity=".2" />
 
-            {!selectedCategory ? (
-              <CategoryMap businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
-            ) : (
-              <BusinessMap businesses={categoryBusinesses} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} onBack={returnToGalaxy} onSelect={selectBusiness} />
+            {loadStatus === 'loading' && <MapStatus icon="📡" title="Escaneando la galaxia" description="Buscando estaciones comerciales…" />}
+            {loadStatus === 'error' && <MapStatus icon="⚠️" title="Se perdió la señal" description="No pudimos cargar los negocios." action="Reintentar" onAction={loadBusinesses} />}
+            {loadStatus === 'success' && (
+              <Box key={selectedCategory || 'galaxy'} position="absolute" inset="0" animation={`${mapArrival} .38s ease-out`}>
+                {!selectedCategory ? (
+                  <CategoryMap businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
+                ) : (
+                  <BusinessMap businesses={visibleBusinesses} totalBusinesses={categoryBusinesses.length} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} sector={businessSector} sectorCount={businessSectorCount} onSectorChange={changeBusinessSector} onBack={returnToGalaxy} onSelect={selectBusiness} />
+                )}
+                <Astronaut selectedCategory={selectedCategory} selectedCategoryIndex={selectedCategoryIndex} selectedBusiness={selectedBusiness} businesses={visibleBusinesses} />
+              </Box>
             )}
 
-            <Astronaut selectedCategory={selectedCategory} selectedCategoryIndex={selectedCategoryIndex} selectedBusiness={selectedBusiness} businesses={categoryBusinesses} />
-
-            {selectedCategory && categoryBusinesses.length === 0 && (
+            {loadStatus === 'success' && selectedCategory && categoryBusinesses.length === 0 && (
               <Stack position="absolute" left="50%" bottom="10%" transform="translateX(-50%)" align="center" textAlign="center" color="white" zIndex={3} w="80%" pointerEvents="none">
                 <Text fontSize="38px">🛰️</Text>
                 <Heading fontSize="xl">No hay estaciones disponibles</Heading>
@@ -178,9 +230,9 @@ export default function VirtualMall() {
               </Stack>
             )}
 
-            {selectedBusiness && (
+            {loadStatus === 'success' && arrivedBusiness && (
               <BusinessDossier
-                business={selectedBusiness}
+                business={arrivedBusiness}
                 contactsOpen={contactsOpen}
                 contactLinks={contactLinks}
                 onClose={() => { setSelectedBusinessId(''); setContactsOpen(false); }}
@@ -195,13 +247,13 @@ export default function VirtualMall() {
       <Modal isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" isCentered>
         <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(8px)" />
         <ModalContent bg="navy.900" color="white" borderRadius="24px" overflow="hidden" mx="12px">
-          <ModalHeader>{selectedBusiness?.name || 'Video del negocio'}</ModalHeader>
+              <ModalHeader>{arrivedBusiness?.name || 'Video del negocio'}</ModalHeader>
           <ModalCloseButton />
           <ModalBody p={{ base: '12px', md: '20px' }}>
-            {selectedBusiness?.videoUrl?.startsWith('data:video') ? (
-              <Box as="video" src={selectedBusiness.videoUrl} controls autoPlay w="100%" maxH="70vh" borderRadius="16px" />
+            {isDirectVideo(arrivedBusiness?.videoUrl || '') ? (
+              <Box as="video" src={arrivedBusiness?.videoUrl} controls autoPlay playsInline w="100%" maxH="70vh" borderRadius="16px" />
             ) : (
-              <Box as="iframe" title={`Video de ${selectedBusiness?.name || 'negocio'}`} src={videoSource(selectedBusiness?.videoUrl)} w="100%" h={{ base: '240px', md: '520px' }} border="0" borderRadius="16px" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
+              <Box as="iframe" title={`Video de ${arrivedBusiness?.name || 'negocio'}`} src={videoSource(arrivedBusiness?.videoUrl)} w="100%" h={{ base: '240px', md: '520px' }} border="0" borderRadius="16px" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
             )}
           </ModalBody>
         </ModalContent>
@@ -246,7 +298,7 @@ function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
   );
 }
 
-function BusinessMap({ businesses, category, categoryIcon, selectedId, onBack, onSelect }) {
+function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, sector, sectorCount, onSectorChange, onBack, onSelect }) {
   return (
     <>
       <Button aria-label={`Volver al mapa principal desde ${category}`} onClick={onBack} position="absolute" left="50%" top="49%" transform="translate(-50%, -50%)" w={{ base: '108px', md: '146px' }} h={{ base: '108px', md: '146px' }} minW={{ base: '108px', md: '146px' }} p={{ base: '10px', md: '14px' }} variant="unstyled" borderRadius="full" bg="yellow.300" border={{ base: '6px solid', md: '9px solid' }} borderColor="yellow.100" color="navy.800" boxShadow="0 0 35px rgba(250,204,21,.45)" display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={1} transition="transform .2s ease, box-shadow .2s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.06)', boxShadow: '0 0 48px rgba(250,204,21,.68)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
@@ -254,11 +306,22 @@ function BusinessMap({ businesses, category, categoryIcon, selectedId, onBack, o
         <Text mt="5px" fontSize={{ base: '8px', md: '9px' }} fontWeight="900" letterSpacing=".08em">ZONA DE</Text>
         <Text maxW="100%" noOfLines={2} fontSize={{ base: '10px', md: '12px' }} fontWeight="900" lineHeight="1.05">{category}</Text>
       </Button>
-      {businesses.slice(0, 16).map((business, index) => {
-        const [left, top] = businessPosition(index, Math.min(businesses.length, 16));
+      {sectorCount > 1 && (
+        <>
+          <Box position="absolute" left={{ base: '10px', md: '18px' }} top={{ base: '12px', md: '18px' }} zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out infinite`} _motionReduce={{ animation: 'none' }}>
+            <IconButton aria-label="Ver ruta anterior de negocios" icon={<Icon as={MdChevronLeft} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="yellow.200" border="1px solid" borderColor="yellow.300" boxShadow="0 0 0 5px rgba(250,204,21,.10), 0 12px 25px rgba(0,0,0,.35)" onClick={() => onSectorChange(sector - 1)} />
+          </Box>
+          <Box position="absolute" right={{ base: '10px', md: '18px' }} top={{ base: '12px', md: '18px' }} zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out .35s infinite`} _motionReduce={{ animation: 'none' }}>
+            <IconButton aria-label="Ver ruta siguiente de negocios" icon={<Icon as={MdChevronRight} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="yellow.200" border="1px solid" borderColor="yellow.300" boxShadow="0 0 0 5px rgba(250,204,21,.10), 0 12px 25px rgba(0,0,0,.35)" onClick={() => onSectorChange(sector + 1)} />
+          </Box>
+          <Badge position="absolute" left="50%" bottom="15px" transform="translateX(-50%)" zIndex={6} px="12px" py="6px" borderRadius="full" bg="rgba(8,14,38,.82)" color="yellow.200" border="1px solid" borderColor="whiteAlpha.300">RUTA {sector + 1} DE {sectorCount} · {totalBusinesses} NEGOCIOS</Badge>
+        </>
+      )}
+      {businesses.map((business, index) => {
+        const [left, top] = businessPosition(index, businesses.length);
         const selected = business.id === selectedId;
         return (
-          <Button key={business.id} aria-label={`Abrir ficha de ${business.name || 'negocio'}`} position="absolute" left={`${left}%`} top={`${top}%`} transform="translate(-50%, -50%)" w={{ base: '66px', sm: '82px', md: '116px' }} h={{ base: '66px', sm: '78px', md: '94px' }} minW={{ base: '66px', sm: '82px', md: '116px' }} p={{ base: '6px', md: '9px' }} variant="unstyled" bg={selected ? 'cyan.100' : 'white'} color="navy.800" border="3px solid" borderColor={selected ? 'cyan.300' : 'white'} borderRadius={{ base: '20px', md: '25px' }} boxShadow={selected ? '0 0 0 5px rgba(103,232,249,.25), 0 0 30px #67E8F9' : '0 10px 20px rgba(0,0,0,.25)'} onClick={() => onSelect(business.id)} display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} transition="all .22s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.07)' }}>
+          <Button key={business.id} aria-label={`Abrir ficha de ${business.name || 'negocio'}`} position="absolute" left={`${left}%`} top={`${top}%`} transform="translate(-50%, -50%)" w={{ base: '66px', sm: '82px', md: '116px' }} h={{ base: '66px', sm: '78px', md: '94px' }} minW={{ base: '66px', sm: '82px', md: '116px' }} p={{ base: '6px', md: '9px' }} variant="unstyled" bg={selected ? 'cyan.100' : 'white'} color="navy.800" border="3px solid" borderColor={selected ? 'cyan.300' : 'white'} borderRadius={{ base: '20px', md: '25px' }} boxShadow={selected ? '0 0 0 5px rgba(103,232,249,.25), 0 0 30px #67E8F9' : '0 10px 20px rgba(0,0,0,.25)'} animation={selected ? `${stationArrival} .7s ease-out` : undefined} onClick={() => onSelect(business.id)} display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} transition="all .22s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.07)' }}>
             <Flex w={{ base: '36px', md: '50px' }} h={{ base: '32px', md: '48px' }} align="center" justify="center">
               {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize={{ base: '24px', md: '34px' }} color="brand.500" />}
             </Flex>
@@ -267,6 +330,17 @@ function BusinessMap({ businesses, category, categoryIcon, selectedId, onBack, o
         );
       })}
     </>
+  );
+}
+
+function MapStatus({ icon, title, description, action, onAction }) {
+  return (
+    <Stack position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" zIndex={7} align="center" textAlign="center" color="white" w="82%" spacing="7px">
+      <Text fontSize="48px" animation={`${astronautFloat} 1.5s ease-in-out infinite`}>{icon}</Text>
+      <Heading fontSize={{ base: 'lg', md: '2xl' }}>{title}</Heading>
+      <Text color="whiteAlpha.700" fontSize="sm">{description}</Text>
+      {action && <Button mt="6px" size="sm" borderRadius="full" {...goldenActionStyles} onClick={onAction}>{action}</Button>}
+    </Stack>
   );
 }
 

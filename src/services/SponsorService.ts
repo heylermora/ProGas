@@ -24,7 +24,9 @@ const normalize = (item: SponsorItem): SponsorItem => ({
 
 const SponsorService = {
   getAll: async () => {
-    const data = await fetchAllData<SponsorItem>(COLLECTION, undefined, 50);
+    // El mapa pagina visualmente por sectores; usamos un límite amplio para no ocultar
+    // negocios activos por el límite genérico de 50 documentos de la utilidad compartida.
+    const data = await fetchAllData<SponsorItem>(COLLECTION, undefined, 500);
     return data.map(normalize).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
   },
   getPublicByCategory: async (category: BusinessCategory) => {
