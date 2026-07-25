@@ -26,6 +26,8 @@ import {
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import {
   MdArrowBack,
+  MdChevronLeft,
+  MdChevronRight,
   MdClose,
   MdEmail,
   MdFavorite,
@@ -47,6 +49,10 @@ const categoryPositions = [
   [30, 79], [15, 62], [9, 43], [16, 25], [32, 13], [39, 29], [61, 29],
   [73, 44], [62, 60], [38, 60], [27, 44], [50, 21], [76, 70], [24, 70],
 ];
+const mobileCategoryPositions = [
+  [50, 18], [76, 29], [78, 58], [63, 78], [37, 78], [22, 58], [24, 29],
+];
+const CATEGORIES_PER_SECTOR = 7;
 
 const astronautFloat = keyframes`
   0%, 100% { transform: translateY(0) scale(1); }
@@ -95,6 +101,7 @@ export default function VirtualMall() {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [contactsOpen, setContactsOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [mobileSector, setMobileSector] = useState(0);
   const panelBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.300');
 
@@ -161,12 +168,12 @@ export default function VirtualMall() {
             )}
           </Flex>
 
-          <Box position="relative" minH={{ base: '620px', md: '690px' }} borderRadius={{ base: '18px', md: '26px' }} overflow="hidden" bg="radial-gradient(circle at 50% 46%, #4338CA 0%, #1E1B4B 38%, #070B1F 78%)" _before={{ content: '""', position: 'absolute', inset: 0, opacity: .75, bgImage: 'radial-gradient(circle at 12% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 2px), radial-gradient(circle at 42% 88%, #fff 0 1.5px, transparent 2.5px)', bgSize: '42px 42px, 58px 58px, 73px 73px' }}>
+          <Box position="relative" minH={{ base: '520px', sm: '580px', md: '690px' }} borderRadius={{ base: '18px', md: '26px' }} overflow="hidden" bg="radial-gradient(circle at 50% 46%, #4338CA 0%, #1E1B4B 38%, #070B1F 78%)" _before={{ content: '""', position: 'absolute', inset: 0, opacity: .75, bgImage: 'radial-gradient(circle at 12% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 2px), radial-gradient(circle at 42% 88%, #fff 0 1.5px, transparent 2.5px)', bgSize: '42px 42px, 58px 58px, 73px 73px' }}>
             <Box position="absolute" inset="8%" border="1px dashed" borderColor="cyan.200" borderRadius="45%" opacity=".24" />
             <Box position="absolute" inset="21%" border="1px dashed" borderColor="purple.200" borderRadius="44%" opacity=".2" />
 
             {!selectedCategory ? (
-              <CategoryMap businesses={activeBusinesses} onSelect={enterCategory} />
+              <CategoryMap businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
             ) : (
               <BusinessMap businesses={categoryBusinesses} categoryIcon={categoryIcon} selectedId={selectedBusinessId} onSelect={selectBusiness} />
             )}
@@ -215,18 +222,38 @@ export default function VirtualMall() {
   );
 }
 
-function CategoryMap({ businesses, onSelect }) {
-  return BUSINESS_CATEGORIES.map((category, index) => {
-    const total = businesses.filter((business) => business.category === category).length;
-    const [left, top] = categoryPositions[index];
-    return (
-      <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position="absolute" left={`${left}%`} top={`${top}%`} transform="translate(-50%, -50%)" w={{ base: '48px', sm: '62px', md: '94px' }} h={{ base: '48px', sm: '62px', md: '78px' }} minW={{ base: '48px', sm: '62px', md: '94px' }} p={{ base: 0, md: '7px' }} variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="3px solid white" borderRadius={{ base: 'full', md: '20px' }} boxShadow="0 0 16px rgba(255,255,255,.45)" onClick={() => onSelect(category)} display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} transition="all .2s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.09)', boxShadow: '0 0 26px rgba(103,232,249,.9)' }}>
-        <Text fontSize={{ base: '21px', md: '28px' }} lineHeight="1">{categoryEmoji[index]}</Text>
-        <Text display={{ base: 'none', md: 'block' }} mt="3px" maxW="100%" noOfLines={1} fontSize="10px" fontWeight="900">{shortLabels[index]}</Text>
-        {total > 0 && <Badge position={{ base: 'absolute', md: 'static' }} right="-3px" top="-4px" fontSize="8px" borderRadius="full" colorScheme="purple">{total}</Badge>}
-      </Button>
-    );
-  });
+function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
+  const sectorCount = Math.ceil(BUSINESS_CATEGORIES.length / CATEGORIES_PER_SECTOR);
+  const previousSector = () => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount);
+  const nextSector = () => onSectorChange((mobileSector + 1) % sectorCount);
+
+  return (
+    <>
+      <Flex display={{ base: 'flex', md: 'none' }} position="absolute" left="50%" bottom="16px" transform="translateX(-50%)" zIndex={6} align="center" gap="10px" px="8px" py="6px" borderRadius="full" bg="rgba(8,14,38,.82)" border="1px solid" borderColor="whiteAlpha.300" backdropFilter="blur(10px)">
+        <IconButton aria-label="Ver sector anterior" icon={<MdChevronLeft />} size="sm" borderRadius="full" colorScheme="cyan" variant="ghost" color="white" onClick={previousSector} />
+        <Stack spacing="0" align="center" minW="82px">
+          <Text color="cyan.200" fontSize="9px" fontWeight="900" letterSpacing=".12em">SECTOR</Text>
+          <Text color="white" fontSize="xs" fontWeight="800">{mobileSector + 1} de {sectorCount}</Text>
+        </Stack>
+        <IconButton aria-label="Ver sector siguiente" icon={<MdChevronRight />} size="sm" borderRadius="full" colorScheme="cyan" variant="ghost" color="white" onClick={nextSector} />
+      </Flex>
+
+      {BUSINESS_CATEGORIES.map((category, index) => {
+        const total = businesses.filter((business) => business.category === category).length;
+        const categorySector = Math.floor(index / CATEGORIES_PER_SECTOR);
+        const mobileIndex = index % CATEGORIES_PER_SECTOR;
+        const [desktopLeft, desktopTop] = categoryPositions[index];
+        const [mobileLeft, mobileTop] = mobileCategoryPositions[mobileIndex];
+        return (
+          <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position="absolute" left={{ base: `${mobileLeft}%`, md: `${desktopLeft}%` }} top={{ base: `${mobileTop}%`, md: `${desktopTop}%` }} transform="translate(-50%, -50%)" w={{ base: '82px', md: '94px' }} h={{ base: '72px', md: '78px' }} minW={{ base: '82px', md: '94px' }} p="7px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="3px solid white" borderRadius="20px" boxShadow="0 0 16px rgba(255,255,255,.45)" onClick={() => onSelect(category)} display={{ base: categorySector === mobileSector ? 'flex' : 'none', md: 'flex' }} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} transition="all .2s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.09)', boxShadow: '0 0 26px rgba(103,232,249,.9)' }}>
+            <Text fontSize={{ base: '25px', md: '28px' }} lineHeight="1">{categoryEmoji[index]}</Text>
+            <Text mt="4px" w="100%" noOfLines={1} fontSize="10px" fontWeight="900">{shortLabels[index]}</Text>
+            {total > 0 && <Badge position="absolute" right="-4px" top="-5px" minW="22px" fontSize="8px" borderRadius="full" colorScheme="purple">{total}</Badge>}
+          </Button>
+        );
+      })}
+    </>
+  );
 }
 
 function BusinessMap({ businesses, categoryIcon, selectedId, onSelect }) {
