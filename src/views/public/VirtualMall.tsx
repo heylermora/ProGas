@@ -10,9 +10,6 @@ import {
   Icon,
   IconButton,
   Image,
-  Input,
-  InputGroup,
-  InputLeftElement,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -25,7 +22,6 @@ import {
 } from '@chakra-ui/react';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import {
-  MdArrowBack,
   MdChevronLeft,
   MdChevronRight,
   MdClose,
@@ -35,7 +31,6 @@ import {
   MdLink,
   MdMyLocation,
   MdPlayArrow,
-  MdSearch,
   MdStorefront,
 } from 'react-icons/md';
 import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
@@ -101,25 +96,21 @@ export default function VirtualMall() {
   const [businesses, setBusinesses] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBusinessId, setSelectedBusinessId] = useState('');
-  const [query, setQuery] = useState('');
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [contactsOpen, setContactsOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [mobileSector, setMobileSector] = useState(0);
   const panelBg = useColorModeValue('white', 'navy.800');
-  const muted = useColorModeValue('gray.600', 'gray.300');
 
   useEffect(() => {
     SponsorService.getAll().then(setBusinesses).catch(() => setBusinesses([]));
   }, []);
 
   const activeBusinesses = useMemo(() => businesses.filter((business) => business.active !== false), [businesses]);
-  const categoryBusinesses = useMemo(() => {
-    const search = query.trim().toLowerCase();
-    return activeBusinesses
-      .filter((business) => business.category === selectedCategory)
-      .filter((business) => !search || `${business.name || ''} ${business.description || ''}`.toLowerCase().includes(search));
-  }, [activeBusinesses, query, selectedCategory]);
+  const categoryBusinesses = useMemo(
+    () => activeBusinesses.filter((business) => business.category === selectedCategory),
+    [activeBusinesses, selectedCategory],
+  );
   const selectedBusiness = categoryBusinesses.find((business) => business.id === selectedBusinessId);
   const selectedCategoryIndex = BUSINESS_CATEGORIES.indexOf(selectedCategory);
   const categoryIcon = categoryEmoji[selectedCategoryIndex] || '🪐';
@@ -129,13 +120,11 @@ export default function VirtualMall() {
     setSelectedCategory(category);
     setSelectedBusinessId('');
     setContactsOpen(false);
-    setQuery('');
   };
   const returnToGalaxy = () => {
     setSelectedCategory('');
     setSelectedBusinessId('');
     setContactsOpen(false);
-    setQuery('');
   };
   const selectBusiness = (id) => {
     setSelectedBusinessId(id);
@@ -156,21 +145,12 @@ export default function VirtualMall() {
         </Box>
 
         <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
-          <Flex px={{ base: '6px', md: '8px' }} pb="12px" align={{ base: 'stretch', md: 'center' }} justify="space-between" gap="10px" direction={{ base: 'column', md: 'row' }}>
-            <Stack spacing="1px">
-              <Flex align="center" gap="8px">
-                {selectedCategory && <IconButton aria-label="Volver al mapa de categorías" icon={<MdArrowBack />} size="sm" borderRadius="full" onClick={returnToGalaxy} />}
-                <Heading fontSize={{ base: 'lg', md: 'xl' }}>{selectedCategory ? `${categoryIcon} ${selectedCategory}` : 'Mapa galáctico'}</Heading>
-              </Flex>
-              <Text pl={selectedCategory ? '40px' : 0} color={muted} fontSize="xs">{selectedCategory ? 'Elegí una estación para conocer el negocio.' : 'Elegí una categoría para viajar a su submapa.'}</Text>
+          {!selectedCategory && (
+            <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
+              <Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa galáctico</Heading>
+              <Text color="gray.500" fontSize="xs">Elegí una categoría para viajar a su submapa.</Text>
             </Stack>
-            {selectedCategory && (
-              <InputGroup w={{ base: '100%', md: '280px' }} size="sm">
-                <InputLeftElement pointerEvents="none"><Icon as={MdSearch} color="gray.400" /></InputLeftElement>
-                <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar en esta zona" borderRadius="full" />
-              </InputGroup>
-            )}
-          </Flex>
+          )}
 
           <Box position="relative" minH={{ base: '520px', sm: '580px', md: '690px' }} borderRadius={{ base: '18px', md: '26px' }} overflow="hidden" bg="radial-gradient(circle at 50% 46%, #4338CA 0%, #1E1B4B 38%, #070B1F 78%)" _before={{ content: '""', position: 'absolute', inset: 0, opacity: .75, bgImage: 'radial-gradient(circle at 12% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 2px), radial-gradient(circle at 42% 88%, #fff 0 1.5px, transparent 2.5px)', bgSize: '42px 42px, 58px 58px, 73px 73px' }}>
             <Box position="absolute" inset="8%" border="1px dashed" borderColor="cyan.200" borderRadius="45%" opacity=".24" />
@@ -179,16 +159,16 @@ export default function VirtualMall() {
             {!selectedCategory ? (
               <CategoryMap businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
             ) : (
-              <BusinessMap businesses={categoryBusinesses} categoryIcon={categoryIcon} selectedId={selectedBusinessId} onSelect={selectBusiness} />
+              <BusinessMap businesses={categoryBusinesses} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} onBack={returnToGalaxy} onSelect={selectBusiness} />
             )}
 
             <Astronaut selectedCategory={selectedCategory} selectedCategoryIndex={selectedCategoryIndex} selectedBusiness={selectedBusiness} businesses={categoryBusinesses} />
 
             {selectedCategory && categoryBusinesses.length === 0 && (
-              <Stack position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" align="center" textAlign="center" color="white" zIndex={3} w="80%">
-                <Text fontSize="52px">🛰️</Text>
+              <Stack position="absolute" left="50%" bottom="10%" transform="translateX(-50%)" align="center" textAlign="center" color="white" zIndex={3} w="80%" pointerEvents="none">
+                <Text fontSize="38px">🛰️</Text>
                 <Heading fontSize="xl">No hay estaciones disponibles</Heading>
-                <Text color="whiteAlpha.700" fontSize="sm">Probá otra búsqueda o regresá al mapa galáctico.</Text>
+                <Text color="whiteAlpha.700" fontSize="sm">Tocá el centro de la zona para regresar al mapa galáctico.</Text>
               </Stack>
             )}
 
@@ -262,13 +242,14 @@ function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
   );
 }
 
-function BusinessMap({ businesses, categoryIcon, selectedId, onSelect }) {
+function BusinessMap({ businesses, category, categoryIcon, selectedId, onBack, onSelect }) {
   return (
     <>
-      <Flex position="absolute" left="50%" top="49%" transform="translate(-50%, -50%)" w={{ base: '86px', md: '118px' }} h={{ base: '86px', md: '118px' }} borderRadius="full" bg="yellow.300" border={{ base: '6px solid', md: '9px solid' }} borderColor="yellow.100" align="center" justify="center" direction="column" color="navy.800" boxShadow="0 0 35px rgba(250,204,21,.45)" zIndex={1}>
-        <Text fontSize={{ base: '30px', md: '42px' }}>{categoryIcon}</Text>
-        <Text fontSize="9px" fontWeight="900">PLAZA DE ZONA</Text>
-      </Flex>
+      <Button aria-label={`Volver al mapa principal desde ${category}`} onClick={onBack} position="absolute" left="50%" top="49%" transform="translate(-50%, -50%)" w={{ base: '108px', md: '146px' }} h={{ base: '108px', md: '146px' }} minW={{ base: '108px', md: '146px' }} p={{ base: '10px', md: '14px' }} variant="unstyled" borderRadius="full" bg="yellow.300" border={{ base: '6px solid', md: '9px solid' }} borderColor="yellow.100" color="navy.800" boxShadow="0 0 35px rgba(250,204,21,.45)" display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={1} transition="transform .2s ease, box-shadow .2s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.06)', boxShadow: '0 0 48px rgba(250,204,21,.68)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
+        <Text fontSize={{ base: '27px', md: '38px' }} lineHeight="1">{categoryIcon}</Text>
+        <Text mt="5px" fontSize={{ base: '8px', md: '9px' }} fontWeight="900" letterSpacing=".08em">ZONA DE</Text>
+        <Text maxW="100%" noOfLines={2} fontSize={{ base: '10px', md: '12px' }} fontWeight="900" lineHeight="1.05">{category}</Text>
+      </Button>
       {businesses.slice(0, 16).map((business, index) => {
         const [left, top] = businessPosition(index, Math.min(businesses.length, 16));
         const selected = business.id === selectedId;
