@@ -65,10 +65,21 @@ const panelArrival = keyframes`
   from { opacity: 0; transform: translateY(18px) scale(.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 `;
-const bubbleArrival = keyframes`
-  from { opacity: 0; transform: translateX(12px) scale(.72); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
-`;
+const dossierBubblePositions = [
+  { top: '0', left: '0' },
+  { top: '0', right: '0' },
+  { bottom: '0', left: '0' },
+  { bottom: '0', right: '0' },
+];
+const goldenActionStyles = {
+  bgGradient: 'linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)',
+  color: 'white',
+  border: '2px solid',
+  borderColor: 'whiteAlpha.800',
+  boxShadow: '0 14px 26px rgba(184, 134, 11, .34)',
+  _hover: { transform: 'translateY(-2px) scale(1.04)', filter: 'brightness(1.06)' },
+  _focusVisible: { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' },
+};
 
 const hrefFor = (link = '') => link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
 const linkMeta = (link = '') => {
@@ -290,9 +301,7 @@ function BusinessDossier({ business, favorite, contactsOpen, contactLinks, onClo
         <IconButton aria-label="Cerrar ficha" icon={<MdClose />} size="sm" variant="ghost" color="white" onClick={onClose} />
       </Flex>
       <Flex gap="14px" align="center">
-        <Flex w={{ base: '66px', md: '84px' }} h={{ base: '66px', md: '84px' }} flex="0 0 auto" borderRadius="22px" bg="white" align="center" justify="center" p="9px">
-          {business.logoUrl ? <Image src={business.logoUrl} alt={business.name || 'Logo del negocio'} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="38px" color="brand.500" />}
-        </Flex>
+        <BusinessContactHub business={business} links={contactLinks} isOpen={contactsOpen} onToggle={onContacts} />
         <Stack spacing="3px" minW="0" flex="1">
           {business.name && <Heading fontSize={{ base: 'lg', md: '2xl' }} lineHeight="1.06">{business.name}</Heading>}
           {business.description && <Text fontSize="sm" color="whiteAlpha.800" noOfLines={{ base: 2, md: 4 }}>{business.description}</Text>}
@@ -301,23 +310,29 @@ function BusinessDossier({ business, favorite, contactsOpen, contactLinks, onClo
       </Flex>
 
       <Flex mt="16px" gap="9px" wrap="wrap">
-        {business.videoUrl && <Button leftIcon={<MdPlayArrow />} size="sm" borderRadius="full" bg="purple.500" _hover={{ bg: 'purple.400' }} onClick={onVideo}>Ver video</Button>}
-        {contactLinks.length > 0 && <Button leftIcon={<MdLink />} size="sm" borderRadius="full" colorScheme="cyan" color="navy.900" onClick={onContacts}>{contactsOpen ? 'Ocultar enlaces' : 'Contactar'}</Button>}
+        {business.videoUrl && <Button leftIcon={<MdPlayArrow />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onVideo}>Ver video</Button>}
+        {contactLinks.length > 0 && <Button leftIcon={<MdLink />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onContacts}>{contactsOpen ? 'Ocultar enlaces' : 'Contactar'}</Button>}
+      </Flex>
+    </Box>
+  );
+}
+
+function BusinessContactHub({ business, links, isOpen, onToggle }) {
+  const hasLinks = links.length > 0;
+  return (
+    <Box position="relative" w={{ base: '104px', md: '124px' }} h={{ base: '100px', md: '118px' }} flex="0 0 auto" overflow="visible">
+      <Flex as="button" type="button" aria-label={hasLinks ? `${isOpen ? 'Ocultar' : 'Mostrar'} redes de ${business.name || 'negocio'}` : `Logo de ${business.name || 'negocio'}`} aria-expanded={hasLinks ? isOpen : undefined} onClick={() => hasLinks && onToggle()} position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" zIndex={2} w={{ base: '68px', md: '82px' }} h={{ base: '68px', md: '82px' }} borderRadius="22px" bg="white" align="center" justify="center" p="9px" cursor={hasLinks ? 'pointer' : 'default'} boxShadow={isOpen ? '0 0 0 4px rgba(212,175,55,.28), 0 12px 28px rgba(0,0,0,.32)' : '0 10px 24px rgba(0,0,0,.26)'} transition="transform .2s ease, box-shadow .2s ease" _hover={hasLinks ? { transform: 'translate(-50%, -50%) scale(1.04)' } : undefined} _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' } : undefined}>
+        {business.logoUrl ? <Image src={business.logoUrl} alt={business.name || 'Logo del negocio'} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="38px" color="brand.500" />}
       </Flex>
 
-      {contactsOpen && (
-        <Flex mt="14px" gap="12px" wrap="wrap" aria-label="Enlaces del negocio">
-          {contactLinks.map((link, index) => {
-            const meta = linkMeta(link);
-            return (
-              <Stack key={link} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" align="center" spacing="4px" color="white" animation={`${bubbleArrival} .22s ease-out ${index * .04}s both`} _hover={{ textDecoration: 'none', transform: 'translateY(-3px)' }}>
-                <Flex w={{ base: '44px', md: '50px' }} h={{ base: '44px', md: '50px' }} borderRadius="full" bg={meta.bg} align="center" justify="center" boxShadow="0 10px 22px rgba(0,0,0,.4)"><Icon as={meta.icon} boxSize={{ base: '19px', md: '22px' }} /></Flex>
-                <Text fontSize="9px" fontWeight="800">{meta.label}</Text>
-              </Stack>
-            );
-          })}
-        </Flex>
-      )}
+      {links.map((link, index) => {
+        const meta = linkMeta(link);
+        return (
+          <Flex key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${meta.label} de ${business.name || 'negocio'}`} position="absolute" zIndex={3} {...dossierBubblePositions[index]} w={{ base: '38px', md: '43px' }} h={{ base: '38px', md: '43px' }} borderRadius="full" bg={meta.bg} color="white" border="2px solid" borderColor="white" align="center" justify="center" boxShadow="0 12px 22px rgba(0,0,0,.38)" opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,10px,0) scale(.55)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} _hover={{ textDecoration: 'none', transform: 'translate3d(0,-3px,0) scale(1.08)', filter: 'brightness(1.08)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '2px' }}>
+            <Icon as={meta.icon} boxSize={{ base: '17px', md: '19px' }} />
+          </Flex>
+        );
+      })}
     </Box>
   );
 }
