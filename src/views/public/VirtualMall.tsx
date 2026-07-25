@@ -73,6 +73,10 @@ const stationArrival = keyframes`
   70% { box-shadow: 0 0 0 16px rgba(103,232,249,0); }
   100% { box-shadow: 0 0 0 0 rgba(103,232,249,0); }
 `;
+const actionInvite = keyframes`
+  0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 0 rgba(250,204,21,0)); }
+  50% { transform: translateY(-4px); filter: drop-shadow(0 0 8px rgba(250,204,21,.72)); }
+`;
 const dossierBubblePositions = [
   { top: '0', left: '0' },
   { top: '0', right: '0' },
@@ -376,9 +380,17 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
               {business.description && <Text fontSize={{ base: 'xs', md: 'sm' }} color="whiteAlpha.800" noOfLines={{ base: 2, md: 3 }}>{business.description}</Text>}
             </Stack>
           )}
-          <Flex gap="7px" wrap="wrap">
-            {business.videoUrl && <Button leftIcon={<MdPlayArrow />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onVideo}>Ver video</Button>}
-            {contactLinks.length > 0 && <Button leftIcon={<MdLink />} size="sm" borderRadius="full" {...goldenActionStyles} onClick={onContacts}>{contactsOpen ? 'Ocultar' : 'Contactar'}</Button>}
+          <Flex gap="10px" wrap="wrap" align="center">
+            {business.videoUrl && (
+              <Box animation={`${actionInvite} 1.8s ease-in-out infinite`} _motionReduce={{ animation: 'none' }}>
+                <IconButton aria-label={`Abrir video de ${business.name || 'negocio'}`} icon={<Icon as={MdPlayArrow} boxSize="24px" />} w="48px" h="48px" minW="48px" borderRadius="full" {...goldenActionStyles} onClick={onVideo} />
+              </Box>
+            )}
+            {contactLinks.length > 0 && (
+              <Box animation={`${actionInvite} 1.8s ease-in-out .3s infinite`} _motionReduce={{ animation: 'none' }}>
+                <IconButton aria-label={`${contactsOpen ? 'Ocultar' : 'Abrir'} contactos de ${business.name || 'negocio'}`} aria-expanded={contactsOpen} icon={<Icon as={MdLink} boxSize="21px" />} w="48px" h="48px" minW="48px" borderRadius="full" {...goldenActionStyles} boxShadow={contactsOpen ? '0 0 0 5px rgba(250,204,21,.24), 0 14px 26px rgba(184,134,11,.42)' : goldenActionStyles.boxShadow} onClick={onContacts} />
+              </Box>
+            )}
           </Flex>
         </Stack>
       </Flex>
