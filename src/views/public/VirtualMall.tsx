@@ -26,8 +26,6 @@ import {
   MdChevronRight,
   MdClose,
   MdEmail,
-  MdFavorite,
-  MdFavoriteBorder,
   MdLink,
   MdMyLocation,
   MdPlayArrow,
@@ -107,7 +105,6 @@ export default function VirtualMall() {
   const [businesses, setBusinesses] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBusinessId, setSelectedBusinessId] = useState('');
-  const [favoriteIds, setFavoriteIds] = useState([]);
   const [contactsOpen, setContactsOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [mobileSector, setMobileSector] = useState(0);
@@ -141,8 +138,6 @@ export default function VirtualMall() {
     setSelectedBusinessId(id);
     setContactsOpen(false);
   };
-  const toggleFavorite = (id) => setFavoriteIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-
   return (
     <PublicPage maxW="1280px">
       <Stack spacing={{ base: '16px', md: '22px' }}>
@@ -186,11 +181,9 @@ export default function VirtualMall() {
             {selectedBusiness && (
               <BusinessDossier
                 business={selectedBusiness}
-                favorite={favoriteIds.includes(selectedBusiness.id)}
                 contactsOpen={contactsOpen}
                 contactLinks={contactLinks}
                 onClose={() => { setSelectedBusinessId(''); setContactsOpen(false); }}
-                onFavorite={() => toggleFavorite(selectedBusiness.id)}
                 onContacts={() => setContactsOpen((open) => !open)}
                 onVideo={() => setVideoOpen(true)}
               />
@@ -293,7 +286,7 @@ function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, 
   );
 }
 
-function BusinessDossier({ business, favorite, contactsOpen, contactLinks, onClose, onFavorite, onContacts, onVideo }) {
+function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onContacts, onVideo }) {
   return (
     <Box position="absolute" zIndex={8} right={{ base: '8px', md: '18px' }} bottom={{ base: '8px', md: '18px' }} w={{ base: 'calc(100% - 16px)', md: '370px' }} maxH={{ base: '290px', md: 'calc(100% - 36px)' }} overflowY="auto" p={{ base: '14px', md: '18px' }} borderRadius={{ base: '22px', md: '28px' }} bg="rgba(8, 14, 38, .94)" color="white" border="1px solid" borderColor="cyan.300" boxShadow="0 24px 65px rgba(0,0,0,.52), inset 0 0 28px rgba(34,211,238,.05)" backdropFilter="blur(16px)" animation={`${panelArrival} .24s ease-out`}>
       <Flex align="center" justify="space-between" mb="12px">
@@ -306,7 +299,6 @@ function BusinessDossier({ business, favorite, contactsOpen, contactLinks, onClo
           {business.name && <Heading fontSize={{ base: 'lg', md: '2xl' }} lineHeight="1.06">{business.name}</Heading>}
           {business.description && <Text fontSize="sm" color="whiteAlpha.800" noOfLines={{ base: 2, md: 4 }}>{business.description}</Text>}
         </Stack>
-        <IconButton aria-label={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'} icon={<Icon as={favorite ? MdFavorite : MdFavoriteBorder} />} variant="ghost" color={favorite ? 'red.300' : 'white'} onClick={onFavorite} />
       </Flex>
 
       <Flex mt="16px" gap="9px" wrap="wrap">
