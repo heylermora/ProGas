@@ -17,6 +17,7 @@ import {
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdEmail, MdFavorite } from 'react-icons/md';
+import MallPreview from './MallPreview';
 import { PublicPage } from './PublicPage';
 
 const gasMemoLogo = `${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`;
@@ -274,12 +275,11 @@ export default function Home() {
             <Button as={RLink} to="/customer/data" colorScheme="brand" size="lg" w={{ base: '100%', sm: 'auto' }}>Hacer pedido</Button>
             <Button as={RLink} to="/customer/view-order" variant="outline" size="lg" w={{ base: '100%', sm: 'auto' }}>Ver pedido</Button>
           </Stack>
-          <Box pt="20px" mt="8px" borderTop="1px solid" borderColor="gray.200">
-            <Button as={RLink} to="/mall" variant="solid" colorScheme="yellow" size="lg" w={{ base: '100%', sm: 'auto' }} px={{ base: '24px', md: '32px' }} boxShadow="0 12px 24px rgba(214, 158, 46, .28)">🕹️ Explorar centro comercial virtual</Button>
-          </Box>
         </Stack>
         <SocialLogoHub />
       </Flex>
+      <MallPreview />
+      <Box h={{ base: '14px', md: '18px' }} />
       <DonationBanner />
       <Box h={{ base: '14px', md: '18px' }} />
     </PublicPage>

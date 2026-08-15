@@ -10,6 +10,7 @@ import orderService from 'services/OrderService';
 import productService from 'services/ProductService';
 import type { ProductItem } from 'interfaces/OrderItem';
 import { PublicCard, PublicPage } from './PublicPage';
+import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
 import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import { mapsSearchUrl } from 'utils/location';
@@ -186,6 +187,7 @@ export default function Products() {
           <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel="Confirmar pedido" isFinal onBack={() => history.push('/customer/info')} onContinue={submitOrder} />
         </Stack>
       </PublicCard>
+      <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
       {showModal && <OkModal message="Pedido creado correctamente." isOpen={showModal} onClose={() => setShowModal(false)} />}
     </PublicPage>

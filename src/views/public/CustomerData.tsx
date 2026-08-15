@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import ClientService from 'services/ClientService';
 import { fetchClientNameByCedula } from 'services/CedulaService';
 import { PublicCard, PublicPage } from './PublicPage';
+import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
 import { saveCustomerDraft } from './customerDraft';
 import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
@@ -94,6 +95,7 @@ export default function CustomerData() {
           <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel="Verificar y continuar" onBack={() => history.push('/')} onContinue={handleContinue} />
         </Stack>
       </PublicCard>
+      <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
     </PublicPage>
   );

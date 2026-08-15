@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import ClientService from 'services/ClientService';
 import DeviceLocationMap from 'components/form/DeviceLocationMap';
 import { PublicCard, PublicPage } from './PublicPage';
+import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
 import { getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import { mapsSearchUrl } from 'utils/location';
@@ -142,6 +143,7 @@ export default function CustomerInfo() {
           <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.push('/customer/data')} onContinue={saveAndContinue} />
         </Stack>
       </PublicCard>
+      <MallPreview compact />
     </PublicPage>
   );
 }
