@@ -13,7 +13,7 @@ import CustomerData from './views/public/CustomerData';
 import CustomerInfo from './views/public/CustomerInfo';
 import PublicProducts from './views/public/Products';
 import ViewOrder from './views/public/ViewOrder';
-import SponsorshipPackages from './views/public/SponsorshipPackages';
+import VirtualMall from './views/public/VirtualMall';
 import { AuthProvider } from './contexts/AuthContext';
 
 ReactDOM.render(
@@ -28,7 +28,8 @@ ReactDOM.render(
 							<Route path={`/customer/info`} component={CustomerInfo} />
 							<Route path={`/customer/products`} component={PublicProducts} />
 							<Route path={`/customer/view-order`} component={ViewOrder} />
-							<Route path={`/sponsors/packages`} component={SponsorshipPackages} />
+							<Route exact path={`/mall`} component={VirtualMall} />
+							<Redirect from={`/sponsors/packages`} to={`/mall`} />
 							<Route path={`/auth`} component={AuthLayout} />
 							<PrivateRoute path={`/admin/order`} roles={['admin', 'colaborador']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/product`} roles={['admin', 'colaborador']} component={AdminLayout} />

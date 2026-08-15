@@ -4,8 +4,8 @@ import { Alert, AlertIcon, Box, FormControl, FormHelperText, FormLabel, Input, S
 import { useHistory } from 'react-router-dom';
 import ClientService from 'services/ClientService';
 import { fetchClientNameByCedula } from 'services/CedulaService';
-import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
+import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
 import { saveCustomerDraft } from './customerDraft';
 import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
@@ -72,7 +72,6 @@ export default function CustomerData() {
       description="Primero consultamos nuestros registros por cédula. Solo si el cliente no existe usamos la API externa para sugerir el nombre."
       maxW="900px"
     >
-      <SponsorStrip type="Premium" max={4} title="Patrocinadores" />
       <Box h={{ base: '8px', md: '12px' }} />
       <PublicCard>
         <Stack spacing="18px">
@@ -96,8 +95,8 @@ export default function CustomerData() {
           <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel="Verificar y continuar" onBack={() => history.push('/')} onContinue={handleContinue} />
         </Stack>
       </PublicCard>
+      <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
-      <SponsorStrip type="Premium" max={4} offset={4} title="Patrocinadores" />
     </PublicPage>
   );
 }

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
+  Button,
   Flex,
   HStack,
   IconButton,
@@ -17,25 +18,29 @@ import {
   TabPanels,
   Tabs,
   Text,
+  Textarea,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { MdAddBusiness, MdDelete, MdDragIndicator, MdEdit } from 'react-icons/md';
 import Card from 'components/card/Card';
 import SponsorService from 'services/SponsorService';
+import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import AddButton from 'components/button/AddButton';
-import SponsorStrip from 'views/public/SponsorStrip';
 
-const SPONSOR_TYPES = ['VIP', 'Premium', 'General'];
-const SPONSOR_CAPACITY = { VIP: 4, Premium: 8, General: 12 };
+const BUSINESS_TYPE_LABEL = 'Categoría';
 
 export default function SponsorsAdmin() {
   const [sponsors, setSponsors] = useState([]);
-  const [selectedType, setSelectedType] = useState('VIP');
-  const [selectedSponsorId, setSelectedSponsorId] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
+  const [selectedBusinessId, setSelectedBusinessId] = useState('');
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [availableCopy, setAvailableCopy] = useState(defaultSponsorDisplaySettings);
+  const [savingAvailableCopy, setSavingAvailableCopy] = useState(false);
+  const [dropTargetIndex, setDropTargetIndex] = useState(null);
   const textColor = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.500', 'gray.400');
   const dropBg = useColorModeValue('brand.50', 'whiteAlpha.100');
@@ -47,9 +52,9 @@ export default function SponsorsAdmin() {
       .then((data) => {
         setSponsors(data);
 
-        setSelectedSponsorId((current) => {
+        setSelectedBusinessId((current) => {
           const activeOfType = data.filter(
-            (sponsor) => sponsor.active !== false && sponsor.type === selectedType
+            (sponsor) => sponsor.active !== false && sponsor.category === selectedCategory
           );
 
           return activeOfType.some((sponsor) => sponsor.id === current)
@@ -58,29 +63,30 @@ export default function SponsorsAdmin() {
         });
       })
       .finally(() => setLoading(false));
-  }, [selectedType]);
+  }, [selectedCategory]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
 
-  const sponsorsByType = useMemo(() => SPONSOR_TYPES.reduce((acc, type) => ({
+  const sponsorsByCategory = useMemo(() => BUSINESS_CATEGORIES.reduce((acc, type) => ({
     ...acc,
-    [type]: sponsors.filter((sponsor) => sponsor.type === type),
+    [type]: sponsors.filter((sponsor) => sponsor.category === type),
   }), {}), [sponsors]);
 
-  const currentSponsors = [...(sponsorsByType[selectedType] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-  const slotCount = Math.max(SPONSOR_CAPACITY[selectedType] || currentSponsors.length || 1, currentSponsors.length);
+  const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
+  const slotCount = Math.max(currentBusinesses.length, 1);
   const sponsorSlots = Array.from({ length: slotCount }, (_, index) => ({
     slot: index + 1,
-    sponsor: currentSponsors[index] || null,
+    sponsor: currentBusinesses[index] || null,
   }));
-  const activeCurrentSponsors = currentSponsors.filter((sponsor) => sponsor.active !== false);
-  const selectedSponsor = activeCurrentSponsors.find((sponsor) => sponsor.id === selectedSponsorId) || activeCurrentSponsors[0];
+  const activeCurrentSponsors = currentBusinesses.filter((sponsor) => sponsor.active !== false);
+  const selectedBusiness = activeCurrentSponsors.find((sponsor) => sponsor.id === selectedBusinessId) || activeCurrentSponsors[0];
 
   const selectType = (index) => {
-    const nextType = SPONSOR_TYPES[index];
-    setSelectedType(nextType);
-    const firstActive = (sponsorsByType[nextType] || []).find((sponsor) => sponsor.active !== false);
-    setSelectedSponsorId(firstActive?.id || '');
+    const nextType = BUSINESS_CATEGORIES[index];
+    setSelectedCategory(nextType);
+    const firstActive = (sponsorsByCategory[nextType] || []).find((sponsor) => sponsor.active !== false);
+    setSelectedBusinessId(firstActive?.id || '');
   };
 
   const toggleActive = async (s) => {
@@ -90,30 +96,61 @@ export default function SponsorsAdmin() {
 
   const remove = async (id) => { await SponsorService.delete(id); load(); };
 
-  const reorderSponsors = async (targetSlotIndex) => {
-    if (!draggedSponsorId || savingOrder) return;
+  const reorderSponsors = async (targetSlotIndex, sponsorId = draggedSponsorId) => {
+    if (!sponsorId || savingOrder) return;
 
-    const fromIndex = currentSponsors.findIndex((sponsor) => sponsor.id === draggedSponsorId);
+    const fromIndex = currentBusinesses.findIndex((sponsor) => sponsor.id === sponsorId);
     if (fromIndex < 0) return;
 
-    const nextSponsors = [...currentSponsors];
+    const nextSponsors = [...currentBusinesses];
     const [moved] = nextSponsors.splice(fromIndex, 1);
     const safeTargetIndex = Math.max(0, Math.min(Number(targetSlotIndex) || 0, nextSponsors.length));
     nextSponsors.splice(safeTargetIndex, 0, moved);
 
     setSavingOrder(true);
     setSponsors((prev) => [
-      ...prev.filter((sponsor) => sponsor.type !== selectedType),
-      ...nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1 })),
-    ].sort((a, b) => (a.type || '').localeCompare(b.type || '') || a.order - b.order || (a.name || '').localeCompare(b.name || '')));
+      ...prev.filter((sponsor) => sponsor.category !== selectedCategory),
+      ...nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1, active: sponsor.active !== false })),
+    ].sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order || (a.name || '').localeCompare(b.name || '')));
 
-    Promise.all(nextSponsors.map((sponsor, index) => SponsorService.edit(sponsor.id, { ...sponsor, order: index + 1 })))
+    Promise.all(nextSponsors.map((sponsor, index) => SponsorService.edit(sponsor.id, {
+      ...sponsor,
+      order: index + 1,
+      active: sponsor.active !== false,
+    })))
       .catch(() => {})
       .finally(() => {
         setDraggedSponsorId('');
+        setDropTargetIndex(null);
         setSavingOrder(false);
         load();
       });
+  };
+
+  const startDrag = (event, sponsorId) => {
+    if (!sponsorId) return;
+    // Firefox y algunos navegadores no inician el arrastre si dataTransfer no contiene datos.
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', sponsorId);
+    setDraggedSponsorId(sponsorId);
+  };
+
+  const finishDrag = () => {
+    setDraggedSponsorId('');
+    setDropTargetIndex(null);
+  };
+
+  const saveAvailableCopy = async () => {
+    setSavingAvailableCopy(true);
+    try {
+      await SponsorDisplaySettingsService.save(availableCopy);
+      setAvailableCopy({
+        availableTitle: availableCopy.availableTitle.trim() || defaultSponsorDisplaySettings.availableTitle,
+        availableDescription: availableCopy.availableDescription.trim() || defaultSponsorDisplaySettings.availableDescription,
+      });
+    } finally {
+      setSavingAvailableCopy(false);
+    }
   };
 
   if (loading) return <Flex pt={{ base: '80px', md: '120px' }} justify="center"><Spinner size="xl" /></Flex>;
@@ -123,39 +160,41 @@ export default function SponsorsAdmin() {
       <Flex align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', sm: 'row' }} mb="20px" gap="12px">
         <Box flex="1" minW="0">
           <Text color={textColor} fontSize={{ base: 'xl', md: '2xl' }} fontWeight="800">Patrocinadores</Text>
-          <Text color="gray.500" fontSize={{ base: 'sm', md: 'md' }}>Organizá los espacios por tipo, cambiá el orden con el mouse y previsualizá cómo se verán publicados.</Text>
+          <Text color="gray.500" fontSize={{ base: 'sm', md: 'md' }}>Organizá los espacios por categoría, cambiá el orden con el mouse y previsualizá cómo se verán publicados.</Text>
         </Box>
         <Box alignSelf={{ base: 'flex-end', sm: 'center' }}><AddButton redirect="/admin/sponsor/new" /></Box>
       </Flex>
 
-      <Tabs index={SPONSOR_TYPES.indexOf(selectedType)} onChange={selectType} colorScheme="brand" variant="soft-rounded">
+      <Tabs index={BUSINESS_CATEGORIES.indexOf(selectedCategory)} onChange={selectType} colorScheme="brand" variant="soft-rounded">
         <Card p={{ base: '14px', md: '18px' }} mb="20px" overflow="hidden">
           <Stack spacing="16px">
             <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="12px" direction={{ base: 'column', md: 'row' }}>
               <Box>
-                <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Tipos de sponsor</Text>
-                <Text color={muted} fontSize="sm">Seleccioná un tipo y arrastrá sus cards para definir la prioridad de aparición pública.</Text>
+                <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Categorías comerciales</Text>
+                <Text color={muted} fontSize="sm">Seleccioná una categoría y arrastrá sus cards para definir la prioridad de aparición pública.</Text>
               </Box>
               {savingOrder && <Badge colorScheme="brand">Guardando orden...</Badge>}
             </Flex>
 
             <TabList overflowX="auto" pb="4px" gap="8px">
-              {SPONSOR_TYPES.map((type) => (
+              {BUSINESS_CATEGORIES.map((type) => (
                 <Tab key={type} flexShrink={0} fontWeight="800">
                   {type}
-                  <Badge ml="8px" colorScheme={type === 'VIP' ? 'yellow' : type === 'Premium' ? 'purple' : 'green'}>{sponsorsByType[type]?.length || 0}</Badge>
+                  <Badge ml="8px" colorScheme="brand">{sponsorsByCategory[type]?.length || 0}</Badge>
                 </Tab>
               ))}
             </TabList>
 
             <TabPanels>
-              {SPONSOR_TYPES.map((type) => (
+              {BUSINESS_CATEGORIES.map((type) => (
                 <TabPanel key={type} px="0" pb="0">
-                  {selectedSponsor ? (
-                    <SponsorStrip type={selectedSponsor.type} max={1} previewSponsor={{ ...selectedSponsor, active: true }} />
-                  ) : (
-                    <Text color={muted} fontSize="sm">No hay patrocinadores activos para previsualizar en este tipo.</Text>
-                  )}
+                  <Stack spacing="8px">
+                    <Text color={muted} fontSize="sm" fontWeight="700">Vista completa para el cliente</Text>
+                    <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing="10px">
+                      {(sponsorsByCategory[type] || []).filter((business) => business.active !== false).map((business) => <Box key={business.id} p="10px" borderRadius="14px" border="1px solid" borderColor="brand.100"><Text fontWeight="800" noOfLines={1}>{business.name}</Text><Text fontSize="xs" color={muted} noOfLines={1}>{business.description || business.category}</Text></Box>)}
+                      {!(sponsorsByCategory[type] || []).some((business) => business.active !== false) && <Text color={muted} fontSize="sm">Aún no hay comercios activos en esta categoría.</Text>}
+                    </SimpleGrid>
+                  </Stack>
                 </TabPanel>
               ))}
             </TabPanels>
@@ -163,31 +202,53 @@ export default function SponsorsAdmin() {
         </Card>
       </Tabs>
 
+      <Card p={{ base: '14px', md: '18px' }} mb="20px">
+        <Stack spacing="12px">
+          <Box>
+            <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Texto de espacios disponibles</Text>
+            <Text color={muted} fontSize="sm">Personalizá el mensaje que aparece en las tarjetas sin patrocinador de las páginas públicas.</Text>
+          </Box>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px">
+            <Box>
+              <Text fontSize="sm" fontWeight="700" mb="6px">Título</Text>
+              <Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} resize="vertical" minH="44px" />
+            </Box>
+            <Box>
+              <Text fontSize="sm" fontWeight="700" mb="6px">Descripción</Text>
+              <Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} resize="vertical" minH="44px" />
+            </Box>
+          </SimpleGrid>
+          <Button alignSelf="flex-start" colorScheme="brand" onClick={saveAvailableCopy} isLoading={savingAvailableCopy} loadingText="Guardando">Guardar texto</Button>
+        </Stack>
+      </Card>
+
       <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={{ base: '12px', md: '18px' }}>
         {sponsorSlots.map(({ sponsor: s, slot }, index) => (
           <Card
-            key={s?.id || `empty-${selectedType}-${slot}`}
+            key={s?.id || `empty-${selectedCategory}-${slot}`}
             p={{ base: '14px', md: '18px' }}
             minW="0"
             minH={{ base: '230px', md: '260px' }}
             draggable={Boolean(s)}
             cursor={s ? 'grab' : 'default'}
             border="1px solid"
-            borderColor={s && draggedSponsorId === s.id ? 'brand.300' : s ? 'transparent' : 'brand.200'}
+            borderColor={s && draggedSponsorId === s.id ? 'brand.300' : draggedSponsorId && dropTargetIndex === index ? 'brand.500' : s ? 'transparent' : 'brand.200'}
             borderStyle={s ? 'solid' : 'dashed'}
             bg={s && draggedSponsorId === s.id ? dropBg : undefined}
-            onClick={() => s?.active !== false && s?.id && setSelectedSponsorId(s.id)}
-            onDragStart={() => s?.id && setDraggedSponsorId(s.id)}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={() => reorderSponsors(index)}
+            onClick={() => s?.active !== false && s?.id && setSelectedBusinessId(s.id)}
+            onDragStart={(event) => startDrag(event, s?.id)}
+            onDragEnd={finishDrag}
+            onDragEnter={(event) => { event.preventDefault(); if (draggedSponsorId) setDropTargetIndex(index); }}
+            onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }}
+            onDrop={(event) => { event.preventDefault(); const sponsorId = draggedSponsorId || event.dataTransfer.getData('text/plain'); if (sponsorId) setDraggedSponsorId(sponsorId); reorderSponsors(index, sponsorId); }}
           >
             {s ? (
               <Stack spacing="12px" h="100%">
                 <Flex align="center" justify="space-between" gap="10px">
                   <HStack spacing="8px" minW="0">
-                    <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" />
+                    <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" pointerEvents="none" />
                     <Badge colorScheme="brand">Posición #{slot}</Badge>
-                    <Badge colorScheme={s.type === 'VIP' ? 'yellow' : s.type === 'Premium' ? 'purple' : 'green'}>{s.type}</Badge>
+                    <Badge colorScheme="brand">{s.category}</Badge>
                   </HStack>
                   <Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Activo' : 'Oculto'}</Badge>
                 </Flex>

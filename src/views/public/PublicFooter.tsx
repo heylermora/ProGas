@@ -20,8 +20,8 @@ export default function PublicFooter() {
           </Box>
         </HStack>
         <HStack spacing="10px" flexWrap="wrap">
-          <Button as={RLink} to="/sponsors/packages" leftIcon={<MdHandshake />} colorScheme="brand" size="sm">
-            Quiero ser patrocinador
+          <Button as={RLink} to="/mall" leftIcon={<MdHandshake />} colorScheme="brand" size="sm">
+            Explorar comercios
           </Button>
           <Button as={RLink} to="/auth/sign-in" leftIcon={<MdLogin />} variant="ghost" colorScheme="brand" size="sm">
             Iniciar sesión
@@ -29,7 +29,7 @@ export default function PublicFooter() {
         </HStack>
       </Flex>
       <Text color={textColor} fontSize="xs" mt="14px">
-        Gas Memo conecta clientes, pedidos y patrocinadores en una experiencia simple y rápida.
+        Gas Memo conecta clientes, pedidos y comercios locales en una experiencia simple y rápida.
       </Text>
     </Box>
   );
