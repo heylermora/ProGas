@@ -140,7 +140,7 @@ export default function CustomerInfo() {
               onLocation={(location) => setForm((prev) => ({ ...prev, ...location }))}
             />
           </FormControl>
-          <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.push('/customer/data')} onContinue={saveAndContinue} />
+          <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.replace('/customer/data')} onContinue={saveAndContinue} />
         </Stack>
       </PublicCard>
       <MallPreview compact />

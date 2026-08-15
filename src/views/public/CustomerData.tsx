@@ -92,7 +92,7 @@ export default function CustomerData() {
               <FormHelperText>Debe tener al menos 8 dígitos.</FormHelperText>
             </FormControl>
           </SimpleGrid>
-          <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel="Verificar y continuar" onBack={() => history.push('/')} onContinue={handleContinue} />
+          <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel="Verificar y continuar" onBack={() => history.replace('/')} onContinue={handleContinue} />
         </Stack>
       </PublicCard>
       <MallPreview compact />

@@ -1,8 +1,9 @@
 import { Box, Button, Flex, HStack, Text, useColorModeValue } from '@chakra-ui/react';
-import { Link as RLink } from 'react-router-dom';
-import { MdHandshake, MdLogin } from 'react-icons/md';
+import { Link as RLink, useLocation } from 'react-router-dom';
+import { MdHandshake, MdHome, MdLogin, MdShoppingCart } from 'react-icons/md';
 
 export default function PublicFooter() {
+  const location = useLocation();
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const textColor = useColorModeValue('gray.600', 'gray.300');
   const logoBg = useColorModeValue('brand.500', 'brand.300');
@@ -20,9 +21,9 @@ export default function PublicFooter() {
           </Box>
         </HStack>
         <HStack spacing="10px" flexWrap="wrap">
-          <Button as={RLink} to="/mall" leftIcon={<MdHandshake />} colorScheme="brand" size="sm">
-            Explorar comercios
-          </Button>
+          {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" colorScheme="brand" size="sm">Inicio</Button>}
+          {location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" colorScheme="brand" size="sm">Hacer pedido</Button>}
+          {location.pathname !== '/mall' && <Button as={RLink} to={{ pathname: '/mall', state: { from: location.pathname, fromLabel: 'Volver' } }} leftIcon={<MdHandshake />} colorScheme="brand" size="sm">Explorar comercios</Button>}
           <Button as={RLink} to="/auth/sign-in" leftIcon={<MdLogin />} variant="ghost" colorScheme="brand" size="sm">
             Iniciar sesión
           </Button>

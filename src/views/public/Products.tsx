@@ -184,7 +184,7 @@ export default function Products() {
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option value="Efectivo">Efectivo</option><option value="SINPE">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
           </SimpleGrid>
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
-          <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel="Confirmar pedido" isFinal onBack={() => history.push('/customer/info')} onContinue={submitOrder} />
+          <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel="Confirmar pedido" isFinal onBack={() => history.replace('/customer/info')} onContinue={submitOrder} />
         </Stack>
       </PublicCard>
       <MallPreview compact />

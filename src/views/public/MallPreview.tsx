@@ -12,7 +12,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { Link as RLink } from 'react-router-dom';
+import { Link as RLink, useLocation } from 'react-router-dom';
 import { MdChevronLeft, MdChevronRight, MdExplore, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
@@ -47,6 +47,7 @@ type MallPreviewProps = {
 };
 
 export default function MallPreview({ compact = false }: MallPreviewProps) {
+  const location = useLocation();
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(!cachedBusinesses);
@@ -70,6 +71,15 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
     setSelectedCategory(category);
     trackRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
   };
+  const originLabels: Record<string, string> = {
+    '/': 'Volver al inicio',
+    '/customer/data': 'Volver a verificación',
+    '/customer/info': 'Volver al cliente',
+    '/customer/products': 'Volver al pedido',
+    '/customer/view-order': 'Volver a consultar pedido',
+  };
+  const mallDestination = { pathname: '/mall', state: { from: location.pathname, fromLabel: originLabels[location.pathname] || 'Volver' } };
+  const secondaryWindow = compact ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 
   return (
     <Box
@@ -95,7 +105,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
             {!compact && <Text color="whiteAlpha.800" fontSize="sm">Una galaxia de comercios locales te espera en el centro comercial virtual.</Text>}
           </Stack>
         </Flex>
-        <Button as={RLink} to="/mall" leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} borderRadius="full" bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 48%, #8A5A00 100%)" color="white" boxShadow="0 12px 24px rgba(184,134,11,.34)" _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.06)' }}>Explorar el mapa</Button>
+        <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} borderRadius="full" bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 48%, #8A5A00 100%)" color="white" boxShadow="0 12px 24px rgba(184,134,11,.34)" _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.06)' }}>Explorar el mapa{compact ? ' ↗' : ''}</Button>
       </Flex>
 
       {!loading && categories.length > 1 && (
@@ -113,7 +123,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
           <Flex ref={trackRef} gap="10px" overflowX="auto" scrollSnapType="x mandatory" pb="3px" sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
             {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="96px" borderRadius="18px" bg="whiteAlpha.200" opacity={1 - item * .14} />)}
             {!loading && previewBusinesses.map((business) => (
-              <Flex key={business.id} as={RLink} to="/mall" scrollSnapAlign="start" flex={{ base: '0 0 178px', md: '0 0 210px' }} minW="0" minH={{ base: '94px', md: '104px' }} p="10px" gap="10px" align="center" borderRadius="18px" bg="rgba(255,255,255,.94)" color="navy.900" border="2px solid" borderColor="white" boxShadow="0 10px 24px rgba(0,0,0,.22)" transition="transform .2s ease, box-shadow .2s ease" _hover={{ textDecoration: 'none', transform: 'translateY(-3px)', boxShadow: '0 15px 30px rgba(0,0,0,.30)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}>
+              <Flex key={business.id} as={RLink} to={mallDestination} {...secondaryWindow} scrollSnapAlign="start" flex={{ base: '0 0 178px', md: '0 0 210px' }} minW="0" minH={{ base: '94px', md: '104px' }} p="10px" gap="10px" align="center" borderRadius="18px" bg="rgba(255,255,255,.94)" color="navy.900" border="2px solid" borderColor="white" boxShadow="0 10px 24px rgba(0,0,0,.22)" transition="transform .2s ease, box-shadow .2s ease" _hover={{ textDecoration: 'none', transform: 'translateY(-3px)', boxShadow: '0 15px 30px rgba(0,0,0,.30)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}>
                 <Flex w={{ base: '54px', md: '62px' }} h={{ base: '54px', md: '62px' }} flex="0 0 auto" borderRadius="16px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                   {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}
                 </Flex>
