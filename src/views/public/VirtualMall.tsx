@@ -33,6 +33,7 @@ import {
 } from 'react-icons/md';
 import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
+import { useLocation } from 'react-router-dom';
 import { PublicPage } from './PublicPage';
 
 const categoryEmoji = ['🍽️', '🍔', '🍕', '☕', '🍦', '🍷', '🛒', '🛍️', '💎', '👟', '💈', '💇', '🐾', '💊', '🔨', '🌱', '💪', '🏍️', '🔧', '🛡️', '✨'];
@@ -124,6 +125,7 @@ const businessPosition = (index, total) => {
 };
 
 export default function VirtualMall() {
+  const location = useLocation();
   const [businesses, setBusinesses] = useState([]);
   const [loadStatus, setLoadStatus] = useState('loading');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -139,7 +141,25 @@ export default function VirtualMall() {
   const loadBusinesses = () => {
     setLoadStatus('loading');
     SponsorService.getAll()
-      .then((data) => { setBusinesses(data); setLoadStatus('success'); })
+      .then((data) => {
+        setBusinesses(data);
+        const requestedBusinessId = new URLSearchParams(location.search).get('business');
+        const requestedBusiness = requestedBusinessId
+          ? data.find((business) => business.id === requestedBusinessId && business.active !== false)
+          : undefined;
+
+        if (requestedBusiness) {
+          const businessesInCategory = data.filter(
+            (business) => business.active !== false && business.category === requestedBusiness.category,
+          );
+          const requestedIndex = businessesInCategory.findIndex((business) => business.id === requestedBusiness.id);
+          setSelectedCategory(requestedBusiness.category);
+          setBusinessSector(Math.max(0, Math.floor(requestedIndex / BUSINESSES_PER_SECTOR)));
+          setSelectedBusinessId(requestedBusiness.id);
+          setArrivedBusinessId(requestedBusiness.id);
+        }
+        setLoadStatus('success');
+      })
       .catch(() => { setBusinesses([]); setLoadStatus('error'); });
   };
 

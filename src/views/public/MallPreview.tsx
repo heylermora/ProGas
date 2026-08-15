@@ -79,6 +79,11 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
     '/customer/view-order': 'Volver a consultar pedido',
   };
   const mallDestination = { pathname: '/mall', state: { from: location.pathname, fromLabel: originLabels[location.pathname] || 'Volver' } };
+  const stationDestination = (business: SponsorItem) => ({
+    pathname: '/mall',
+    search: `?business=${encodeURIComponent(business.id || '')}`,
+    state: { from: location.pathname, fromLabel: originLabels[location.pathname] || 'Volver' },
+  });
   const secondaryWindow = compact ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 
   return (
@@ -123,7 +128,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
           <Flex ref={trackRef} gap="10px" overflowX="auto" scrollSnapType="x mandatory" pb="3px" sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
             {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="96px" borderRadius="18px" bg="whiteAlpha.200" opacity={1 - item * .14} />)}
             {!loading && previewBusinesses.map((business) => (
-              <Flex key={business.id} as={RLink} to={mallDestination} {...secondaryWindow} scrollSnapAlign="start" flex={{ base: '0 0 178px', md: '0 0 210px' }} minW="0" minH={{ base: '94px', md: '104px' }} p="10px" gap="10px" align="center" borderRadius="18px" bg="rgba(255,255,255,.94)" color="navy.900" border="2px solid" borderColor="white" boxShadow="0 10px 24px rgba(0,0,0,.22)" transition="transform .2s ease, box-shadow .2s ease" _hover={{ textDecoration: 'none', transform: 'translateY(-3px)', boxShadow: '0 15px 30px rgba(0,0,0,.30)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}>
+              <Flex key={business.id} as={RLink} to={stationDestination(business)} {...secondaryWindow} aria-label={`Ver estación de ${business.name || 'negocio local'}`} scrollSnapAlign="start" flex={{ base: '0 0 178px', md: '0 0 210px' }} minW="0" minH={{ base: '94px', md: '104px' }} p="10px" gap="10px" align="center" borderRadius="18px" bg="rgba(255,255,255,.94)" color="navy.900" border="2px solid" borderColor="white" boxShadow="0 10px 24px rgba(0,0,0,.22)" transition="transform .2s ease, box-shadow .2s ease" _hover={{ textDecoration: 'none', transform: 'translateY(-3px)', boxShadow: '0 15px 30px rgba(0,0,0,.30)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}>
                 <Flex w={{ base: '54px', md: '62px' }} h={{ base: '54px', md: '62px' }} flex="0 0 auto" borderRadius="16px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                   {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}
                 </Flex>

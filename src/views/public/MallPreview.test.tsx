@@ -31,6 +31,7 @@ describe('MallPreview', () => {
     expect(screen.getByText('Tienda Local')).toBeTruthy();
     expect(screen.queryByText('Negocio oculto')).toBeNull();
     expect(screen.getByRole('link', { name: /explorar el mapa/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('link', { name: /ver estación de café central/i }).getAttribute('href')).toBe('/mall?business=1');
 
     fireEvent.click(screen.getByRole('button', { name: 'Cafeterías' }));
 

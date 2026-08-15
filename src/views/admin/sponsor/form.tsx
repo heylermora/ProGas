@@ -19,6 +19,7 @@ import {
   Switch,
   Text,
   Textarea,
+  Flex,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useHistory, useParams } from 'react-router-dom';
