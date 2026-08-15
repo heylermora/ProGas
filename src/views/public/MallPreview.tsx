@@ -20,12 +20,21 @@ import SponsorService from 'services/SponsorService';
 let cachedBusinesses: SponsorItem[] | undefined;
 let businessesRequest: Promise<SponsorItem[]> | undefined;
 
+const shuffled = <T,>(items: T[]) => {
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+  }
+  return result;
+};
+
 const getPreviewBusinesses = () => {
   if (cachedBusinesses) return Promise.resolve(cachedBusinesses);
   if (!businessesRequest) {
     businessesRequest = SponsorService.getAll()
       .then((items) => {
-        cachedBusinesses = items.filter((item) => item.active !== false).slice(0, 12);
+        cachedBusinesses = shuffled(items.filter((item) => item.active !== false));
         return cachedBusinesses;
       })
       .finally(() => { businessesRequest = undefined; });
@@ -39,6 +48,7 @@ type MallPreviewProps = {
 
 export default function MallPreview({ compact = false }: MallPreviewProps) {
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(!cachedBusinesses);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +62,14 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
   }, []);
 
   const move = (direction: number) => trackRef.current?.scrollBy({ left: direction * 250, behavior: 'smooth' });
+  const categories = Array.from(new Set(businesses.map((business) => business.category).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  const previewBusinesses = businesses
+    .filter((business) => !selectedCategory || business.category === selectedCategory)
+    .slice(0, 12);
+  const chooseCategory = (category: string) => {
+    setSelectedCategory(category);
+    trackRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
+  };
 
   return (
     <Box
@@ -80,10 +98,19 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
         <Button as={RLink} to="/mall" leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} borderRadius="full" bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 48%, #8A5A00 100%)" color="white" boxShadow="0 12px 24px rgba(184,134,11,.34)" _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.06)' }}>Explorar el mapa</Button>
       </Flex>
 
+      {!loading && categories.length > 1 && (
+        <Flex position="relative" gap="7px" mb="12px" overflowX="auto" pb="2px" scrollSnapType="x proximity" sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+          <Button aria-pressed={!selectedCategory} onClick={() => chooseCategory('')} flex="0 0 auto" scrollSnapAlign="start" size="xs" px="13px" borderRadius="full" bg={!selectedCategory ? 'cyan.300' : 'whiteAlpha.150'} color={!selectedCategory ? 'navy.900' : 'white'} border="1px solid" borderColor={!selectedCategory ? 'cyan.200' : 'whiteAlpha.300'} _hover={{ bg: !selectedCategory ? 'cyan.200' : 'whiteAlpha.250' }}>Todos</Button>
+          {categories.map((category) => (
+            <Button key={category} aria-pressed={selectedCategory === category} onClick={() => chooseCategory(category)} flex="0 0 auto" scrollSnapAlign="start" size="xs" px="13px" borderRadius="full" bg={selectedCategory === category ? 'cyan.300' : 'whiteAlpha.150'} color={selectedCategory === category ? 'navy.900' : 'white'} border="1px solid" borderColor={selectedCategory === category ? 'cyan.200' : 'whiteAlpha.300'} _hover={{ bg: selectedCategory === category ? 'cyan.200' : 'whiteAlpha.250' }}>{category}</Button>
+          ))}
+        </Flex>
+      )}
+
       <Box position="relative">
-        <Flex ref={trackRef} gap="10px" overflowX="auto" scrollSnapType="x mandatory" pb="3px" pr={{ base: '22px', md: '50px' }} sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+        <Flex ref={trackRef} gap="10px" overflowX="auto" scrollSnapType="x mandatory" pb="3px" px={{ base: '46px', md: '54px' }} sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
           {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="96px" borderRadius="18px" bg="whiteAlpha.200" opacity={1 - item * .14} />)}
-          {!loading && businesses.map((business) => (
+          {!loading && previewBusinesses.map((business) => (
             <Flex key={business.id} as={RLink} to="/mall" scrollSnapAlign="start" flex={{ base: '0 0 178px', md: '0 0 210px' }} minW="0" minH={{ base: '94px', md: '104px' }} p="10px" gap="10px" align="center" borderRadius="18px" bg="rgba(255,255,255,.94)" color="navy.900" border="2px solid" borderColor="white" boxShadow="0 10px 24px rgba(0,0,0,.22)" transition="transform .2s ease, box-shadow .2s ease" _hover={{ textDecoration: 'none', transform: 'translateY(-3px)', boxShadow: '0 15px 30px rgba(0,0,0,.30)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}>
               <Flex w={{ base: '54px', md: '62px' }} h={{ base: '54px', md: '62px' }} flex="0 0 auto" borderRadius="16px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                 {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}
@@ -95,15 +122,15 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
               </Stack>
             </Flex>
           ))}
-          {!loading && !businesses.length && (
+          {!loading && !previewBusinesses.length && (
             <Flex flex="1" minH="86px" p="14px" borderRadius="18px" border="1px dashed" borderColor="whiteAlpha.400" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color="cyan.200" /><Text fontSize="sm" color="whiteAlpha.800">Muy pronto encontrarás negocios locales en este mapa.</Text></Flex>
           )}
         </Flex>
-        {!loading && businesses.length > 1 && (
-          <Flex display={{ base: 'none', md: 'flex' }} position="absolute" right="0" top="50%" transform="translateY(-50%)" gap="6px" pl="22px" bgGradient="linear(to-r, transparent, #101B46 38%)">
-            <IconButton aria-label="Ver negocios anteriores" icon={<MdChevronLeft />} size="sm" borderRadius="full" bg="whiteAlpha.200" color="white" onClick={() => move(-1)} />
-            <IconButton aria-label="Ver más negocios" icon={<MdChevronRight />} size="sm" borderRadius="full" bg="cyan.300" color="navy.900" onClick={() => move(1)} />
-          </Flex>
+        {!loading && previewBusinesses.length > 1 && (
+          <>
+            <IconButton aria-label="Ver negocios anteriores" icon={<Icon as={MdChevronLeft} boxSize="26px" />} position="absolute" left="2px" top="50%" transform="translateY(-50%)" zIndex={3} w={{ base: '40px', md: '46px' }} h={{ base: '40px', md: '46px' }} minW={{ base: '40px', md: '46px' }} borderRadius="full" bg="rgba(8,14,38,.90)" color="yellow.200" border="1px solid" borderColor="yellow.300" boxShadow="0 10px 24px rgba(0,0,0,.38), 0 0 0 4px rgba(250,204,21,.10)" backdropFilter="blur(10px)" onClick={() => move(-1)} _hover={{ bg: 'yellow.400', color: 'navy.900', transform: 'translateY(-50%) scale(1.06)' }} />
+            <IconButton aria-label="Ver más negocios" icon={<Icon as={MdChevronRight} boxSize="26px" />} position="absolute" right="2px" top="50%" transform="translateY(-50%)" zIndex={3} w={{ base: '40px', md: '46px' }} h={{ base: '40px', md: '46px' }} minW={{ base: '40px', md: '46px' }} borderRadius="full" bg="rgba(8,14,38,.90)" color="yellow.200" border="1px solid" borderColor="yellow.300" boxShadow="0 10px 24px rgba(0,0,0,.38), 0 0 0 4px rgba(250,204,21,.10)" backdropFilter="blur(10px)" onClick={() => move(1)} _hover={{ bg: 'yellow.400', color: 'navy.900', transform: 'translateY(-50%) scale(1.06)' }} />
+          </>
         )}
       </Box>
     </Box>
