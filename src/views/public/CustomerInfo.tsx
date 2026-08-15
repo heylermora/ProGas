@@ -4,8 +4,8 @@ import { Box, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@
 import { useHistory } from 'react-router-dom';
 import ClientService from 'services/ClientService';
 import DeviceLocationMap from 'components/form/DeviceLocationMap';
-import SponsorStrip from './SponsorStrip';
 import { PublicCard, PublicPage } from './PublicPage';
+import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
 import { getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import { mapsSearchUrl } from 'utils/location';
@@ -120,7 +120,6 @@ export default function CustomerInfo() {
 
   return (
     <PublicPage title="Información del cliente" description="Complete la información del cliente y su dirección. De momento se limita a Acosta y cantones vecinos." maxW="1000px">
-      <SponsorStrip type="Premium" max={4} title="Patrocinadores Premium" />
       <Box h={{ base: '20px', md: '28px' }} />
       <PublicCard>
         <Stack spacing="16px">
@@ -141,10 +140,10 @@ export default function CustomerInfo() {
               onLocation={(location) => setForm((prev) => ({ ...prev, ...location }))}
             />
           </FormControl>
-          <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.push('/customer/data')} onContinue={saveAndContinue} />
+          <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.replace('/customer/data')} onContinue={saveAndContinue} />
         </Stack>
       </PublicCard>
-      <SponsorStrip type="Premium" max={4} offset={4} title="Más patrocinadores Premium" />
+      <MallPreview compact />
     </PublicPage>
   );
 }

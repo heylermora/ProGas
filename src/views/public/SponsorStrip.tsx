@@ -23,6 +23,7 @@ import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdAddBusiness, MdEmail, MdLink, MdOpenInFull, MdPlayCircleFilled, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
+import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 
 
 const getVideoEmbedSrc = (value = '') => {
@@ -160,9 +161,6 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
       <Box
         as="button"
         type="button"
-        aria-label={hasLinks ? (isOpen ? `Ocultar links de ${sponsor.name || 'patrocinador'}` : `Mostrar links de ${sponsor.name || 'patrocinador'}`) : `Logo de ${sponsor.name || 'patrocinador'}`}
-        aria-expanded={hasLinks ? isOpen : undefined}
-        onClick={() => hasLinks && setIsOpen((current) => !current)}
         position="relative"
         zIndex={2}
         w="100%"
@@ -171,10 +169,13 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
         alignItems="center"
         justifyContent="center"
         borderRadius={{ base: '18px', md: '22px' }}
+        aria-label={hasLinks ? (isOpen ? `Ocultar contactos de ${sponsor.name || 'patrocinador'}` : `Ver contactos de ${sponsor.name || 'patrocinador'}`) : `Logo de ${sponsor.name || 'patrocinador'}`}
+        aria-expanded={hasLinks ? isOpen : undefined}
+        onClick={() => hasLinks && setIsOpen((current) => !current)}
         cursor={hasLinks ? 'pointer' : 'default'}
         transition="transform .2s ease, filter .2s ease, box-shadow .2s ease"
-        _hover={hasLinks ? { transform: 'translateY(-2px) scale(1.01)', boxShadow: 'inset 0 0 0 1px rgba(56, 161, 105, .22)' } : undefined}
-        _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'brand.200', outlineOffset: '4px' } : undefined}
+        _hover={hasLinks ? { transform: 'translateY(-2px) scale(1.01)', boxShadow: 'inset 0 0 0 2px rgba(56, 161, 105, .28)' } : undefined}
+        _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '4px' } : undefined}
       >
         {sponsor.logoUrl ? (
           <Image src={sponsor.logoUrl} alt={sponsor.name || 'Patrocinador'} h={size.h} maxW="100%" objectFit="contain" pointerEvents="none" />
@@ -184,26 +185,30 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
       </Box>
 
 
+      {hasLinks && (
+        <Text textAlign="center" color={muted} fontSize="xs" fontWeight="700" mt="2px">
+          {isOpen ? 'Elegí un contacto' : 'Tocá el logo para ver contactos'}
+        </Text>
+      )}
+
       {cleanLinks.slice(0, 4).map((link, index) => {
         const meta = getLinkMeta(link);
         const href = normalizeHref(link);
         const placement = bubblePlacements[index] || bubblePlacements[0];
 
         return (
-          <Tooltip key={`${link}-${index}`} label={meta.label} hasArrow placement="top">
+          <Tooltip key={`${link}-${index}`} label={`Abrir ${meta.label}`} hasArrow placement="top">
             <IconButton
+              key={`${link}-${index}`}
               as={Link}
               href={href}
               isExternal={!href.startsWith('mailto:')}
-              aria-label={`Abrir ${meta.label}`}
+              aria-label={`Abrir ${meta.label} de ${sponsor.name || 'patrocinador'}`}
               icon={<Icon as={meta.icon} w={{ base: '18px', md: '20px' }} h={{ base: '18px', md: '20px' }} />}
               position="absolute"
-              zIndex={1}
+              zIndex={3}
               {...placement.base}
-              sx={{
-                '@media screen and (min-width: 48em)': placement.md,
-                background: meta.bg,
-              }}
+              sx={{ '@media screen and (min-width: 48em)': placement.md, background: meta.bg }}
               color="white"
               w={{ base: '42px', md: '48px' }}
               h={{ base: '42px', md: '48px' }}
@@ -348,10 +353,11 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
   );
 }
 
-export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor }: SponsorStripProps) {
+export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor, availableCopy }: SponsorStripProps & { availableCopy?: typeof defaultSponsorDisplaySettings }) {
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
   const [sponsors, setSponsors] = useState([]);
+  const [displaySettings, setDisplaySettings] = useState(defaultSponsorDisplaySettings);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.400');
 
@@ -374,6 +380,15 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
       })
       .catch(() => setSponsors([]));
   }, [type, normalizedMax, normalizedOffset, injectedSponsors, previewSponsor]);
+
+  useEffect(() => {
+    if (availableCopy) {
+      setDisplaySettings({ ...defaultSponsorDisplaySettings, ...availableCopy });
+      return;
+    }
+
+    SponsorDisplaySettingsService.get().then(setDisplaySettings).catch(() => setDisplaySettings(defaultSponsorDisplaySettings));
+  }, [availableCopy]);
 
   const visibleSponsors = sponsors.filter(Boolean).filter((sponsor) => sponsor.active !== false);
   const slotCount = Math.min(normalizedMax, Math.max(0, (SPONSOR_CAPACITY[type] || normalizedMax) - normalizedOffset));
@@ -427,8 +442,8 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
           <Icon as={MdAddBusiness} w={{ base: '22px', md: '22px' }} h={{ base: '22px', md: '22px' }} />
         </Box>
         <Stack spacing="3px" minW="0">
-          <Text fontWeight="900" fontSize={{ base: 'md', md: 'md' }} color="brand.600">Tu marca aquí</Text>
-          <Text color={muted} fontSize={{ base: 'xs', md: 'xs' }} maxW="230px" lineHeight="1.35">Llegá a clientes locales mientras hacen su pedido.</Text>
+          <Text fontWeight="900" fontSize={{ base: 'md', md: 'md' }} color="brand.600">{displaySettings.availableTitle}</Text>
+          <Text color={muted} fontSize={{ base: 'xs', md: 'xs' }} maxW="230px" lineHeight="1.35">{displaySettings.availableDescription}</Text>
         </Stack>
       </Stack>
     </Box>

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import Form from 'components/form/Form';
 import type FormField from 'interfaces/FormField';
 import { PublicCard, PublicPage } from './PublicPage';
+import MallPreview from './MallPreview';
 
 export default function ViewOrder() {
   const fields: FormField[] = useMemo(
@@ -14,6 +15,7 @@ export default function ViewOrder() {
       <PublicCard>
         <Form title="Consultar pedido" button="Consultar" back="/" fields={fields} onSubmit={() => undefined} />
       </PublicCard>
+      <MallPreview compact />
     </PublicPage>
   );
 }

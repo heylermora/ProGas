@@ -5,10 +5,10 @@ import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 import theme from 'theme/theme';
 
-jest.mock('./SponsorStrip', () => ({
+jest.mock('./MallPreview', () => ({
   __esModule: true,
-  default: ({ type, offset = 0 }: { type: string; offset?: number }) => (
-    <section data-testid="sponsor-strip">{`${type}-${offset}`}</section>
+  default: () => (
+    <section data-testid="mall-preview"><a href="/mall">Explorar el mapa</a></section>
   ),
 }));
 
@@ -31,8 +31,10 @@ describe('Home', () => {
 
     expect(screen.getByRole('heading', { name: /pedí tu gas en minutos/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /hacer pedido/i }).getAttribute('href')).toBe('/customer/data');
+    expect(screen.getAllByRole('link', { name: /hacer pedido/i })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /ver pedido/i }).getAttribute('href')).toBe('/customer/view-order');
-    expect(screen.getAllByTestId('sponsor-strip')).toHaveLength(2);
+    expect(screen.getByTestId('mall-preview')).toBeTruthy();
+    expect(screen.getByRole('link', { name: /explorar el mapa/i }).getAttribute('href')).toBe('/mall');
   });
 
   it('opens and closes the social logo hub with accessible state', () => {
@@ -62,7 +64,7 @@ describe('Home', () => {
     renderHome();
 
     expect(screen.getByRole('heading', { name: /pedí tu gas en minutos/i })).toBeTruthy();
-    expect(screen.getAllByTestId('sponsor-strip')).toHaveLength(2);
+    expect(screen.getByTestId('mall-preview')).toBeTruthy();
     expect(screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i })).toBeTruthy();
   });
 });
