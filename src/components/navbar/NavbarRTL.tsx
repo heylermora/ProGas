@@ -71,6 +71,7 @@ export default function AdminNavbar(props: {
 			pb='8px'
 			left={{ base: '12px', md: '30px', lg: '30px', xl: '30px' }}
 			px={{
+				base: '10px',
 				sm: paddingX,
 				md: '10px'
 			}}
@@ -89,12 +90,13 @@ export default function AdminNavbar(props: {
 			<Flex
 				w='100%'
 				flexDirection={{
+					base: 'column',
 					sm: 'column',
 					md: 'row'
 				}}
 				alignItems={{ xl: 'center' }}
 				mb={gap}>
-				<Box mb={{ sm: '8px', md: '0px' }}>
+				<Box w='100%' minW='0' mb={{ base: '8px', md: '0px' }}>
 					<Breadcrumb>
 						<BreadcrumbItem color={secondaryText} fontSize='sm' mb='5px'>
 							<BreadcrumbLink href='#' color={secondaryText}>
@@ -128,7 +130,7 @@ export default function AdminNavbar(props: {
 						{brandText}
 					</Link>
 				</Box>
-				<Box ms='auto' w={{ sm: '100%', md: 'unset' }}>
+				<Box ms={{ base: '0', md: 'auto' }} w={{ base: '100%', md: 'auto' }} minW='0'>
 					<AdminNavbarLinks
 						onOpen={props.onOpen} 
 						secondary={props.secondary}

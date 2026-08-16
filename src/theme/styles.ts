@@ -82,6 +82,7 @@ export const globalStyles = {
 		global: (props: any) => ({
 			body: {
 				overflowX: 'hidden',
+				minWidth: '0',
 				bg: mode('secondaryGray.300', 'navy.900')(props),
 				fontFamily: 'DM Sans',
 				letterSpacing: '-0.2px',
@@ -110,7 +111,13 @@ export const globalStyles = {
 				borderRadius: '999px'
 			},
 			html: {
-				fontFamily: 'DM Sans'
+				fontFamily: 'DM Sans',
+				WebkitTextSizeAdjust: '100%'
+			},
+			'@media screen and (max-width: 47.99em)': {
+				'input, select, textarea': {
+					fontSize: '16px'
+				}
 			}
 		})
 	}

@@ -8,7 +8,8 @@ function AuthIllustration(props: { children: JSX.Element | string; illustrationB
 	return (
 		<Flex position='relative' h='max-content'>
 			<Flex
-				h={{
+				 h={{
+					base: 'initial',
 					sm: 'initial',
 					md: 'unset',
 					lg: '100vh',
@@ -17,8 +18,8 @@ function AuthIllustration(props: { children: JSX.Element | string; illustrationB
 				w='100%'
 				maxW={{ md: '66%', lg: '1313px' }}
 				mx='auto'
-				pt={{ sm: '50px', md: '0px' }}
-				px={{ lg: '30px', xl: '0px' }}
+				pt={{ base: '24px', sm: '50px', md: '0px' }}
+				px={{ base: '16px', lg: '30px', xl: '0px' }}
 				ps={{ xl: '70px' }}
 				justifyContent='start'
 				direction='column'>

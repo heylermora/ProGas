@@ -18,7 +18,7 @@ import routes from 'routes/routes';
 import { useHistory } from "react-router-dom";
 import { logout } from 'services/AuthService';
 
-export default function HeaderLinks(props: { secondary: boolean }) {
+export default function HeaderLinks(props: { secondary: boolean; fixed?: boolean; onOpen?: (...args: any[]) => any }) {
 	const { secondary } = props;
 
 	const history = useHistory();
@@ -35,15 +35,18 @@ export default function HeaderLinks(props: { secondary: boolean }) {
 	);
 	return (
 		<Flex
-			w={{ sm: '100%', md: 'auto' }}
+			w={{ base: '100%', md: 'auto' }}
 			alignItems='center'
 			flexDirection='row'
+			gap={{ base: '6px', md: '0' }}
 			bg={menuBg}
 			flexWrap={secondary ? { base: 'wrap', md: 'nowrap' } : 'unset'}
-			p='10px'
+			p={{ base: '6px', sm: '10px' }}
 			borderRadius='30px'
 			boxShadow={shadow}>
 			<SearchBar
+				flex='1'
+				minW='0'
 				mb={() => {
 					if (secondary) {
 						const msPrimary: ResponsiveValue<string> = { base: '10px', md: 'unset' };
@@ -62,6 +65,8 @@ export default function HeaderLinks(props: { secondary: boolean }) {
 				color="red.500"
 				fontWeight="600"
 				borderRadius="24px"
+				px={{ base: '10px', sm: '16px' }}
+				fontSize={{ base: 'sm', md: 'md' }}
 				_hover={{ bg: "red.100" }}
 			>
 				Salir

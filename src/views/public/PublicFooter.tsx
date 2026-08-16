@@ -28,7 +28,7 @@ export default function PublicFooter() {
         justify="space-between"
         gap={{ base: '18px', lg: '28px' }}
       >
-        <Flex align="center" gap="12px" minW="fit-content">
+        <Flex align="center" gap="12px" minW="0">
           <Flex
             bg={logoBg}
             color="white"

@@ -105,8 +105,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
         <Flex gap="12px" align="center">
           <Flex w={{ base: '44px', md: '52px' }} h={{ base: '44px', md: '52px' }} flex="0 0 auto" borderRadius="full" align="center" justify="center" bg="whiteAlpha.200" border="1px solid" borderColor="cyan.200" fontSize={{ base: '25px', md: '30px' }}>🧑‍🚀</Flex>
           <Stack spacing="2px">
-            <Badge w="fit-content" borderRadius="full" bg="cyan.300" color="navy.900" fontSize="9px">DESCUBRÍ ALGO CERCA</Badge>
-            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de nuestra comunidad</Heading>
+            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Descubre nuestra comunidad</Heading>
             {!compact && <Text color="whiteAlpha.800" fontSize="sm">Una galaxia de comercios locales te espera en el centro comercial virtual.</Text>}
           </Stack>
         </Flex>
@@ -134,8 +133,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
                 </Flex>
                 <Stack spacing="3px" minW="0">
                   <Text fontWeight="900" fontSize="sm" noOfLines={2} lineHeight="1.08">{business.name || 'Negocio local'}</Text>
-                  <Badge w="fit-content" maxW="100%" colorScheme="purple" borderRadius="full" fontSize="8px" noOfLines={1}>{business.category}</Badge>
-                  <Text color="brand.500" fontSize="9px" fontWeight="900">VER ESTACIÓN →</Text>
+                  <Text color="brand.500" fontSize="9px" fontWeight="900">VER ESTACIÓN</Text>
                 </Stack>
               </Flex>
             ))}
@@ -157,6 +155,7 @@ function CarouselButton({ direction, onClick }: { direction: 'previous' | 'next'
       aria-label={previous ? 'Ver negocios anteriores' : 'Ver más negocios'}
       icon={<Icon as={previous ? MdChevronLeft : MdChevronRight} boxSize="26px" />}
       flex="0 0 auto"
+      display={{ base: 'none', sm: 'inline-flex' }}
       w={{ base: '40px', md: '46px' }}
       h={{ base: '40px', md: '46px' }}
       minW={{ base: '40px', md: '46px' }}

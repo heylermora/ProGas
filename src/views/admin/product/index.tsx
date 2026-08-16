@@ -184,7 +184,7 @@ export default function Index() {
 
           {/* List (simple, Horizon card) */}
           <Card p="0px" overflow="hidden">
-            <Box px="18px" py="14px">
+            <Box display={{ base: 'none', md: 'block' }} px="18px" py="14px">
               <Flex align="center">
                 <Text flex="1" color={textColorSecondary} fontSize="sm" fontWeight="600">
                   DESCRIPCIÓN
@@ -209,7 +209,7 @@ export default function Index() {
                   _hover={{ bg: hoverBg }}
                   transition="background-color 0.2s"
                 >
-                  <Flex align="center" gap="12px">
+                  <Flex align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap={{ base: '10px', md: '12px' }}>
                     <Box flex="1" minW="0">
                       <Text color={textColor} fontWeight="700" noOfLines={1}>
                         {p.description}
@@ -220,8 +220,8 @@ export default function Index() {
                     </Box>
 
                     <Text
-                      w={{ base: '110px', md: '140px' }}
-                      textAlign="right"
+                      w={{ base: '100%', md: '140px' }}
+                      textAlign={{ base: 'left', md: 'right' }}
                       color={textColor}
                       fontWeight="700"
                     >
@@ -230,7 +230,7 @@ export default function Index() {
                         : (p.price as any)}
                     </Text>
 
-                    <HStack w={{ base: '140px', md: '180px' }} justify="flex-end" spacing="8px">
+                    <HStack w={{ base: '100%', md: '180px' }} justify={{ base: 'flex-start', md: 'flex-end' }} spacing="8px">
                       <IconButton
                         aria-label="Editar"
                         icon={<MdEdit />}

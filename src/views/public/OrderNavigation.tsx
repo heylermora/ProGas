@@ -62,14 +62,14 @@ export default function OrderNavigation({ currentStep, backLabel = 'Retroceder',
           })}
         </HStack>
 
-        <Flex direction="row" justify="space-between" gap="10px" align="center">
-          <Button variant="outline" leftIcon={<MdArrowBack />} onClick={onBack} isDisabled={!onBack} flex={{ base: 1, md: '0 0 auto' }} minW="0" whiteSpace="normal">
+        <Flex direction={{ base: 'column-reverse', sm: 'row' }} justify="space-between" gap="10px" align="center">
+          <Button variant="outline" leftIcon={<MdArrowBack />} onClick={onBack} isDisabled={!onBack} flex={{ base: '0 0 auto', sm: 1, md: '0 0 auto' }} w={{ base: '100%', sm: 'auto' }} minW="0" whiteSpace="normal">
             {backLabel}
           </Button>
           <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize="sm" textAlign="center" flexShrink={0}>
             Paso {currentStep} de {steps.length}
           </Text>
-          <Button colorScheme="brand" rightIcon={isFinal ? <MdCheckCircle /> : <MdArrowForward />} onClick={onContinue} isLoading={isContinueLoading} loadingText={continueLabel} flex={{ base: 1, md: '0 0 auto' }} minW="0" whiteSpace="normal">
+          <Button colorScheme="brand" rightIcon={isFinal ? <MdCheckCircle /> : <MdArrowForward />} onClick={onContinue} isLoading={isContinueLoading} loadingText={continueLabel} flex={{ base: '0 0 auto', sm: 1, md: '0 0 auto' }} w={{ base: '100%', sm: 'auto' }} minW="0" whiteSpace="normal">
             {continueLabel}
           </Button>
         </Flex>
