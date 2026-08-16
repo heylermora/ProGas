@@ -28,6 +28,13 @@ const renderPreview = () => render(
 );
 
 describe('MallPreview', () => {
+  beforeAll(() => {
+    Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
+      configurable: true,
+      value: () => undefined,
+    });
+  });
+
   beforeEach(() => {
     (SponsorService.getAll as jest.Mock).mockResolvedValue(businesses);
   });
