@@ -270,7 +270,7 @@ export default function Home() {
 
   return (
     <PublicPage maxW="1200px">
-      <Box h={{ base: '10px', md: '14px' }} />
+      <MallPreview />
       <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '18px', md: '28px' }}>
         <Stack spacing={{ base: '10px', md: '12px' }} maxW={{ base: '100%', lg: '680px' }}>
           <Text color="brand.500" fontWeight="900" letterSpacing="wide">GAS MEMO</Text>
@@ -303,8 +303,6 @@ export default function Home() {
           </SimpleGrid>
         </Stack>
       </Box>
-      <MallPreview />
-      <Box h={{ base: '14px', md: '18px' }} />
       <DonationBanner />
       <Box h={{ base: '14px', md: '18px' }} />
     </PublicPage>
