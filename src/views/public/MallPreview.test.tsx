@@ -31,7 +31,11 @@ describe('MallPreview', () => {
   beforeAll(() => {
     Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
       configurable: true,
-      value: () => undefined,
+      value: jest.fn(),
+    });
+    Object.defineProperty(HTMLElement.prototype, 'scrollBy', {
+      configurable: true,
+      value: jest.fn(),
     });
   });
 
