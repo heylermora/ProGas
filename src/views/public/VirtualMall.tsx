@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { keyframes } from '@emotion/react';
 import {
   Badge,
@@ -138,7 +138,7 @@ export default function VirtualMall() {
   const travelTimer = useRef();
   const panelBg = useColorModeValue('white', 'navy.800');
 
-  const loadBusinesses = () => {
+  const loadBusinesses = useCallback(() => {
     setLoadStatus('loading');
     SponsorService.getAll()
       .then((data) => {
@@ -161,12 +161,12 @@ export default function VirtualMall() {
         setLoadStatus('success');
       })
       .catch(() => { setBusinesses([]); setLoadStatus('error'); });
-  };
+  }, [location.search]);
 
   useEffect(() => {
     loadBusinesses();
     return () => clearTimeout(travelTimer.current);
-  }, []);
+  }, [loadBusinesses]);
 
   const activeBusinesses = useMemo(() => businesses.filter((business) => business.active !== false), [businesses]);
   const categoryBusinesses = useMemo(
@@ -271,7 +271,7 @@ export default function VirtualMall() {
       <Modal isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" isCentered>
         <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(8px)" />
         <ModalContent bg="navy.900" color="white" borderRadius="24px" overflow="hidden" mx="12px">
-              <ModalHeader>{arrivedBusiness?.name || 'Video del negocio'}</ModalHeader>
+          <ModalHeader>{arrivedBusiness?.name || 'Video del negocio'}</ModalHeader>
           <ModalCloseButton />
           <ModalBody p={{ base: '12px', md: '20px' }}>
             {isDirectVideo(arrivedBusiness?.videoUrl || '') ? (
