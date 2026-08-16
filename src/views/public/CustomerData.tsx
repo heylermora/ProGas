@@ -13,10 +13,13 @@ import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
 export default function CustomerData() {
   const history = useHistory();
   const [message, setMessage] = useState('');
+  const [isChecking, setIsChecking] = useState(false);
   const [form, setForm] = useState({ nationalId: '', phone: '' });
   const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleContinue = async () => {
+    if (isChecking) return;
+    setMessage('');
     const nationalId = onlyDigits(form.nationalId);
     const phoneDigits = onlyDigits(form.phone);
 
@@ -31,6 +34,7 @@ export default function CustomerData() {
     }
 
     try {
+      setIsChecking(true);
       const existingClient = await ClientService.getByNationalId(nationalId);
 
       if (existingClient) {
@@ -63,13 +67,15 @@ export default function CustomerData() {
       history.push('/customer/info');
     } catch (error) {
       setMessage('No se pudo verificar el cliente. Intente nuevamente.');
+    } finally {
+      setIsChecking(false);
     }
   };
 
   return (
     <PublicPage
       title="Verificación del cliente"
-      description="Primero consultamos nuestros registros por cédula. Solo si el cliente no existe usamos la API externa para sugerir el nombre."
+      description="Ingresá tu cédula y teléfono para identificarte y continuar con el pedido. Si ya sos cliente, usá el mismo teléfono que registraste anteriormente."
       maxW="900px"
     >
       <Box h={{ base: '8px', md: '12px' }} />
@@ -92,7 +98,7 @@ export default function CustomerData() {
               <FormHelperText>Debe tener al menos 8 dígitos.</FormHelperText>
             </FormControl>
           </SimpleGrid>
-          <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel="Verificar y continuar" onBack={() => history.replace('/')} onContinue={handleContinue} />
+          <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel={isChecking ? 'Verificando…' : 'Verificar y continuar'} onBack={() => history.replace('/')} onContinue={handleContinue} isContinueLoading={isChecking} />
         </Stack>
       </PublicCard>
       <MallPreview compact />

@@ -24,6 +24,8 @@ export default function Products() {
   const [catalog, setCatalog] = useState([]);
   const [items, setItems] = useState<ProductItem[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdOrderCode, setCreatedOrderCode] = useState('');
   const [message, setMessage] = useState('');
   const [useCustomerAddress, setUseCustomerAddress] = useState(Boolean(defaultAddress));
   const [hasTransport, setHasTransport] = useState(false);
@@ -74,6 +76,8 @@ export default function Products() {
   };
 
   const submitOrder = async () => {
+    if (isSubmitting) return;
+    setMessage('');
     if (!draft.nationalId || !draft.phone) {
       setMessage('Primero debe verificar cédula y teléfono.');
       return;
@@ -82,29 +86,42 @@ export default function Products() {
       setMessage('Agregue al menos un producto al pedido.');
       return;
     }
+    if (!effectiveAddress.trim()) {
+      setMessage('Ingresá una dirección de entrega antes de confirmar.');
+      return;
+    }
     const locationUrl = effectiveLocationUrl || mapsSearchUrl(effectiveCoordinates || effectiveAddress);
 
     saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: effectiveCoordinates, locationUrl } });
 
-    await orderService.create({
-      orderCode: nano(),
-      status: 'Nuevo',
-      requestDate: new Date().toISOString(),
-      client: draft.name || draft.nickname || draft.nationalId,
-      clientId: draft.nationalId,
-      phone: draft.phone,
-      location: {
-        address: effectiveAddress,
-        coordinates: effectiveCoordinates,
-        locationUrl,
-      },
-      paymentMethod: orderForm.paymentMethod,
-      transport: hasTransport ? orderForm.transport : '',
-      comment: orderForm.comment,
-      items,
-      totalAmount,
-    });
-    setShowModal(true);
+    const orderCode = nano();
+    try {
+      setIsSubmitting(true);
+      await orderService.create({
+        orderCode,
+        status: 'Nuevo',
+        requestDate: new Date().toISOString(),
+        client: draft.name || draft.nickname || draft.nationalId,
+        clientId: draft.nationalId,
+        phone: draft.phone,
+        location: {
+          address: effectiveAddress,
+          coordinates: effectiveCoordinates,
+          locationUrl,
+        },
+        paymentMethod: orderForm.paymentMethod,
+        transport: hasTransport ? orderForm.transport : '',
+        comment: orderForm.comment,
+        items,
+        totalAmount,
+      });
+      setCreatedOrderCode(orderCode);
+      setShowModal(true);
+    } catch {
+      setMessage('No pudimos crear el pedido. Revisá tu conexión e intentá nuevamente; no se realizó ningún cobro.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -184,12 +201,12 @@ export default function Products() {
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option value="Efectivo">Efectivo</option><option value="SINPE">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
           </SimpleGrid>
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
-          <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel="Confirmar pedido" isFinal onBack={() => history.replace('/customer/info')} onContinue={submitOrder} />
+          <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel={isSubmitting ? 'Confirmando…' : 'Confirmar pedido'} isFinal onBack={() => history.replace('/customer/info')} onContinue={submitOrder} isContinueLoading={isSubmitting} />
         </Stack>
       </PublicCard>
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
-      {showModal && <OkModal message="Pedido creado correctamente." isOpen={showModal} onClose={() => setShowModal(false)} />}
+      {showModal && <OkModal message={`Pedido creado correctamente. Guardá este código para consultar su estado: ${createdOrderCode}`} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
     </PublicPage>
   );
 }
