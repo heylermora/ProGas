@@ -29,12 +29,9 @@ import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/Spons
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import AddButton from 'components/button/AddButton';
 
-const BUSINESS_TYPE_LABEL = 'Categoría';
-
 export default function SponsorsAdmin() {
   const [sponsors, setSponsors] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
-  const [selectedBusinessId, setSelectedBusinessId] = useState('');
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
@@ -51,19 +48,9 @@ export default function SponsorsAdmin() {
     return SponsorService.getAll()
       .then((data) => {
         setSponsors(data);
-
-        setSelectedBusinessId((current) => {
-          const activeOfType = data.filter(
-            (sponsor) => sponsor.active !== false && sponsor.category === selectedCategory
-          );
-
-          return activeOfType.some((sponsor) => sponsor.id === current)
-            ? current
-            : activeOfType[0]?.id || '';
-        });
       })
       .finally(() => setLoading(false));
-  }, [selectedCategory]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
@@ -79,14 +66,10 @@ export default function SponsorsAdmin() {
     slot: index + 1,
     sponsor: currentBusinesses[index] || null,
   }));
-  const activeCurrentSponsors = currentBusinesses.filter((sponsor) => sponsor.active !== false);
-  const selectedBusiness = activeCurrentSponsors.find((sponsor) => sponsor.id === selectedBusinessId) || activeCurrentSponsors[0];
 
   const selectType = (index) => {
     const nextType = BUSINESS_CATEGORIES[index];
     setSelectedCategory(nextType);
-    const firstActive = (sponsorsByCategory[nextType] || []).find((sponsor) => sponsor.active !== false);
-    setSelectedBusinessId(firstActive?.id || '');
   };
 
   const toggleActive = async (s) => {
@@ -235,7 +218,6 @@ export default function SponsorsAdmin() {
             borderColor={s && draggedSponsorId === s.id ? 'brand.300' : draggedSponsorId && dropTargetIndex === index ? 'brand.500' : s ? 'transparent' : 'brand.200'}
             borderStyle={s ? 'solid' : 'dashed'}
             bg={s && draggedSponsorId === s.id ? dropBg : undefined}
-            onClick={() => s?.active !== false && s?.id && setSelectedBusinessId(s.id)}
             onDragStart={(event) => startDrag(event, s?.id)}
             onDragEnd={finishDrag}
             onDragEnter={(event) => { event.preventDefault(); if (draggedSponsorId) setDropTargetIndex(index); }}
