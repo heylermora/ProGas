@@ -2,18 +2,21 @@ import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import SponsorService from 'services/SponsorService';
 import MallPreview from './MallPreview';
 
 jest.mock('services/SponsorService', () => ({
   __esModule: true,
   default: {
-    getAll: jest.fn().mockResolvedValue([
-      { id: '1', name: 'Café Central', category: 'Cafeterías', active: true, order: 1, logoUrl: '', links: [] },
-      { id: '2', name: 'Tienda Local', category: 'Tiendas', active: true, order: 2, logoUrl: '', links: [] },
-      { id: '3', name: 'Negocio oculto', category: 'Otros', active: false, order: 3, logoUrl: '', links: [] },
-    ]),
+    getAll: jest.fn(),
   },
 }));
+
+const businesses = [
+  { id: '1', name: 'Café Central', category: 'Cafeterías', active: true, order: 1, logoUrl: '', links: [] },
+  { id: '2', name: 'Tienda Local', category: 'Tiendas', active: true, order: 2, logoUrl: '', links: [] },
+  { id: '3', name: 'Negocio oculto', category: 'Otros', active: false, order: 3, logoUrl: '', links: [] },
+];
 
 const renderPreview = () => render(
   <ChakraProvider>
@@ -24,6 +27,10 @@ const renderPreview = () => render(
 );
 
 describe('MallPreview', () => {
+  beforeEach(() => {
+    (SponsorService.getAll as jest.Mock).mockResolvedValue(businesses);
+  });
+
   it('shows active businesses, supports categories and links to the mall', async () => {
     renderPreview();
 
