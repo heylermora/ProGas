@@ -30,7 +30,9 @@ describe('Home', () => {
     renderHome();
 
     expect(screen.getByRole('heading', { name: /pedí tu gas en minutos/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /hacer pedido/i }).getAttribute('href')).toBe('/customer/data');
+    const orderLinks = screen.getAllByRole('link', { name: /hacer pedido/i });
+    expect(orderLinks).toHaveLength(1);
+    expect(orderLinks[0].getAttribute('href')).toBe('/customer/data');
     expect(screen.getByRole('link', { name: /ver pedido/i }).getAttribute('href')).toBe('/customer/view-order');
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
     expect(screen.getByRole('link', { name: /explorar el mapa/i }).getAttribute('href')).toBe('/mall');
