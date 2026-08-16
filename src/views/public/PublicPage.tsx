@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Container, Stack, Text, Heading, useColorModeValue } from '@chakra-ui/react';
 import Card from 'components/card/Card';
 import PublicFooter from './PublicFooter';
+import PublicHeader from './PublicHeader';
 
 type PublicPageProps = {
   title?: string;
@@ -16,6 +17,7 @@ export function PublicPage({ title, description, maxW = '1200px', children }: Pu
   return (
     <Box bg={bg} minH="100vh" py={{ base: '20px', md: '32px' }}>
       <Container maxW={maxW} px={{ base: '16px', sm: '20px', lg: '24px' }}>
+        <PublicHeader />
         {(title || description) && (
           <Stack spacing={{ base: '8px', md: '10px' }} mb={{ base: '20px', md: '28px' }}>
             {title && <Heading fontSize={{ base: '28px', md: '36px' }}>{title}</Heading>}

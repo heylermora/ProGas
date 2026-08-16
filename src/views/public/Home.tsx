@@ -17,7 +17,7 @@ import {
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdEmail, MdFavorite } from 'react-icons/md';
-import SponsorStrip from './SponsorStrip';
+import MallPreview from './MallPreview';
 import { PublicPage } from './PublicPage';
 
 const gasMemoLogo = `${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`;
@@ -265,7 +265,6 @@ function SocialLogoHub() {
 export default function Home() {
   return (
     <PublicPage maxW="1200px">
-      <SponsorStrip type="VIP" max={2} title="Patrocinadores" />
       <Box h={{ base: '10px', md: '14px' }} />
       <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '18px', md: '28px' }}>
         <Stack spacing={{ base: '10px', md: '12px' }} maxW={{ base: '100%', lg: '680px' }}>
@@ -279,9 +278,10 @@ export default function Home() {
         </Stack>
         <SocialLogoHub />
       </Flex>
+      <MallPreview />
+      <Box h={{ base: '14px', md: '18px' }} />
       <DonationBanner />
       <Box h={{ base: '14px', md: '18px' }} />
-      <SponsorStrip type="VIP" max={2} offset={2} title="Patrocinadores" />
     </PublicPage>
   );
 }
