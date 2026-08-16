@@ -2,6 +2,7 @@ import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import type SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
 import MallPreview from './MallPreview';
 
@@ -12,7 +13,7 @@ jest.mock('services/SponsorService', () => ({
   },
 }));
 
-const businesses = [
+const businesses: SponsorItem[] = [
   { id: '1', name: 'Café Central', category: 'Cafeterías', active: true, order: 1, logoUrl: '', links: [] },
   { id: '2', name: 'Tienda Local', category: 'Tiendas', active: true, order: 2, logoUrl: '', links: [] },
   { id: '3', name: 'Negocio oculto', category: 'Otros', active: false, order: 3, logoUrl: '', links: [] },
