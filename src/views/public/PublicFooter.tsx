@@ -55,7 +55,7 @@ export default function PublicFooter() {
               Inicio
             </Button>
           )}
-          {location.pathname !== '/customer/data' && (
+          {location.pathname !== '/' && location.pathname !== '/customer/data' && (
             <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" bg={actionBg} colorScheme="brand" size="sm" borderRadius="full" px="16px">
               Hacer pedido
             </Button>
