@@ -1,7 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Badge,
   Box,
   Button,
   Flex,
