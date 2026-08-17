@@ -10,6 +10,7 @@ type OrderNavigationProps = {
   isFinal?: boolean;
   onBack?: () => void;
   onContinue?: () => void;
+  isContinueLoading?: boolean;
 };
 
 const steps = [
@@ -18,7 +19,7 @@ const steps = [
   { step: 3, label: 'Pedido', shortLabel: 'Pedido', route: '/customer/products' },
 ];
 
-export default function OrderNavigation({ currentStep, backLabel = 'Retroceder', continueLabel = 'Continuar', isFinal = false, onBack, onContinue }: OrderNavigationProps) {
+export default function OrderNavigation({ currentStep, backLabel = 'Retroceder', continueLabel = 'Continuar', isFinal = false, onBack, onContinue, isContinueLoading = false }: OrderNavigationProps) {
   const history = useHistory();
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const muted = useColorModeValue('gray.500', 'gray.400');
@@ -61,14 +62,14 @@ export default function OrderNavigation({ currentStep, backLabel = 'Retroceder',
           })}
         </HStack>
 
-        <Flex direction="row" justify="space-between" gap="10px" align="center">
-          <Button variant="outline" leftIcon={<MdArrowBack />} onClick={onBack} isDisabled={!onBack} flex={{ base: 1, md: '0 0 auto' }} minW="0" whiteSpace="normal">
+        <Flex direction={{ base: 'column-reverse', sm: 'row' }} justify="space-between" gap="10px" align="center">
+          <Button variant="outline" leftIcon={<MdArrowBack />} onClick={onBack} isDisabled={!onBack} flex={{ base: '0 0 auto', sm: 1, md: '0 0 auto' }} w={{ base: '100%', sm: 'auto' }} minW="0" whiteSpace="normal">
             {backLabel}
           </Button>
           <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize="sm" textAlign="center" flexShrink={0}>
             Paso {currentStep} de {steps.length}
           </Text>
-          <Button colorScheme="brand" rightIcon={isFinal ? <MdCheckCircle /> : <MdArrowForward />} onClick={onContinue} flex={{ base: 1, md: '0 0 auto' }} minW="0" whiteSpace="normal">
+          <Button colorScheme="brand" rightIcon={isFinal ? <MdCheckCircle /> : <MdArrowForward />} onClick={onContinue} isLoading={isContinueLoading} loadingText={continueLabel} flex={{ base: '0 0 auto', sm: 1, md: '0 0 auto' }} w={{ base: '100%', sm: 'auto' }} minW="0" whiteSpace="normal">
             {continueLabel}
           </Button>
         </Flex>

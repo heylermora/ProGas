@@ -29,11 +29,15 @@ describe('Home', () => {
   it('renders the main conversion copy and customer actions', () => {
     renderHome();
 
+    const mallPreview = screen.getByTestId('mall-preview');
+    const mainHeading = screen.getByRole('heading', { name: /pedí tu gas en minutos/i });
+
+    expect(mallPreview.compareDocumentPosition(mainHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByRole('heading', { name: /pedí tu gas en minutos/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /hacer pedido/i }).getAttribute('href')).toBe('/customer/data');
     expect(screen.getAllByRole('link', { name: /hacer pedido/i })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /ver pedido/i }).getAttribute('href')).toBe('/customer/view-order');
-    expect(screen.getByTestId('mall-preview')).toBeTruthy();
+    expect(mallPreview).toBeTruthy();
     expect(screen.getByRole('link', { name: /explorar el mapa/i }).getAttribute('href')).toBe('/mall');
   });
 

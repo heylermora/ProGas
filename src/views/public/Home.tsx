@@ -12,11 +12,12 @@ import {
   Stack,
   Text,
   Tooltip,
+  SimpleGrid,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdFavorite } from 'react-icons/md';
+import { MdEmail, MdFavorite, MdLocationOn, MdReceiptLong, MdShoppingBasket } from 'react-icons/md';
 import MallPreview from './MallPreview';
 import { PublicPage } from './PublicPage';
 
@@ -263,14 +264,18 @@ function SocialLogoHub() {
 }
 
 export default function Home() {
+  const mutedText = useColorModeValue('gray.600', 'gray.300');
+  const stepBg = useColorModeValue('white', 'navy.800');
+  const stepBorder = useColorModeValue('gray.200', 'whiteAlpha.200');
+
   return (
     <PublicPage maxW="1200px">
-      <Box h={{ base: '10px', md: '14px' }} />
+      <MallPreview />
       <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '18px', md: '28px' }}>
         <Stack spacing={{ base: '10px', md: '12px' }} maxW={{ base: '100%', lg: '680px' }}>
           <Text color="brand.500" fontWeight="900" letterSpacing="wide">GAS MEMO</Text>
           <Heading fontSize={{ base: '34px', md: '48px', xl: '56px' }} lineHeight="1.05">Pedí tu gas en minutos.</Heading>
-          <Text color={useColorModeValue('gray.600', 'gray.300')} fontSize={{ base: 'md', md: 'lg' }}>Tu pedido fácil, rápido y sin llamadas.</Text>
+          <Text color={mutedText} fontSize={{ base: 'md', md: 'lg' }}>Elegí tus productos, confirmá dónde entregarlos y recibí un código para consultar el avance. Sin llamadas.</Text>
           <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px" pt="12px" w={{ base: '100%', sm: 'auto' }}>
             <Button as={RLink} to="/customer/data" colorScheme="brand" size="lg" w={{ base: '100%', sm: 'auto' }}>Hacer pedido</Button>
             <Button as={RLink} to="/customer/view-order" variant="outline" size="lg" w={{ base: '100%', sm: 'auto' }}>Ver pedido</Button>
@@ -278,8 +283,26 @@ export default function Home() {
         </Stack>
         <SocialLogoHub />
       </Flex>
-      <MallPreview />
-      <Box h={{ base: '14px', md: '18px' }} />
+      <Box as="section" aria-labelledby="how-it-works-title" mb={{ base: '20px', md: '28px' }}>
+        <Stack spacing="14px">
+          <Box>
+            <Text color="brand.500" fontSize="sm" fontWeight="900" letterSpacing="wide">SIMPLE Y CLARO</Text>
+            <Heading id="how-it-works-title" fontSize={{ base: '24px', md: '30px' }}>¿Cómo funciona?</Heading>
+          </Box>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing="12px">
+            {[
+              { icon: MdShoppingBasket, title: '1. Hacé tu pedido', text: 'Verificá tus datos y agregá uno o varios productos.' },
+              { icon: MdLocationOn, title: '2. Indicá la entrega', text: 'Usá tu dirección guardada o elegí otra para este pedido.' },
+              { icon: MdReceiptLong, title: '3. Consultá el avance', text: 'Guardá el código del pedido para revisar su estado cuando querás.' },
+            ].map((item) => (
+              <Flex key={item.title} bg={stepBg} border="1px solid" borderColor={stepBorder} borderRadius="20px" p="16px" gap="12px" boxShadow="sm">
+                <Flex bg="brand.50" color="brand.500" borderRadius="14px" w="44px" h="44px" flexShrink={0} align="center" justify="center"><Icon as={item.icon} boxSize="24px" /></Flex>
+                <Box><Text fontWeight="900">{item.title}</Text><Text mt="3px" color={mutedText} fontSize="sm">{item.text}</Text></Box>
+              </Flex>
+            ))}
+          </SimpleGrid>
+        </Stack>
+      </Box>
       <DonationBanner />
       <Box h={{ base: '14px', md: '18px' }} />
     </PublicPage>

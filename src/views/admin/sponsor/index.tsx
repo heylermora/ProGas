@@ -227,7 +227,7 @@ export default function SponsorsAdmin() {
             {s ? (
               <Stack spacing="12px" h="100%">
                 <Flex align="center" justify="space-between" gap="10px">
-                  <HStack spacing="8px" minW="0">
+                  <HStack spacing="8px" minW="0" flexWrap="wrap">
                     <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" pointerEvents="none" />
                     <Badge colorScheme="brand">Posición #{slot}</Badge>
                     <Badge colorScheme="brand">{s.category}</Badge>
