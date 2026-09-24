@@ -358,16 +358,15 @@ export default function NewOrder() {
       totalAmount: products.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 0), 0),
     };
 
-    orderService
-      .create(newOrder)
-      .then((response: { id: string }) => {
-        console.log("Orden creada con ID de Firebase:", response.id);
-        setShowModal(true);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        if (error?.response?.status !== 400) setIsError(true);
-      });
+    try {
+      await productService.discountStock(products);
+      const response = await orderService.create(newOrder);
+      console.log("Orden creada con ID de Firebase:", response.id);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Error:", error);
+      setIsError(true);
+    }
   };
 
   const closeModalAndRedirect = () => {

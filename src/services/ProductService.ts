@@ -13,7 +13,7 @@ const ProductService = {
         const data = await fetchAllData('Products', {
           searchFields,
           searchTerm: upperSearchTerm
-        });
+        }, 250);
 
         resolve(data as ProductItem[]);
       } catch (err) {
@@ -50,6 +50,38 @@ const ProductService = {
         reject(err);
       }
     }),
+
+  adjustStock: async (key: string, quantity: number) => {
+    const product = await ProductService.get(key);
+    const nextStock = Math.max(0, Number(product.stock ?? 0) + quantity);
+    await updateData('Products', key, {
+      stock: nextStock,
+      updatedAt: new Date().toISOString(),
+    });
+    return nextStock;
+  },
+
+  discountStock: async (items: Array<{ productId?: string; quantity: number }>) => {
+    const trackedItems = items.filter(item => item.productId && Number(item.quantity) > 0);
+    const currentProducts = await Promise.all(
+      trackedItems.map(item => ProductService.get(item.productId!))
+    );
+
+    currentProducts.forEach((product, index) => {
+      const requested = Number(trackedItems[index].quantity);
+      if (product.active === false) throw new Error(`${product.description} está inactivo`);
+      if (Number(product.stock ?? 0) < requested) {
+        throw new Error(`Stock insuficiente para ${product.description}`);
+      }
+    });
+
+    await Promise.all(currentProducts.map((product, index) =>
+      updateData('Products', product.id, {
+        stock: Number(product.stock ?? 0) - Number(trackedItems[index].quantity),
+        updatedAt: new Date().toISOString(),
+      })
+    ));
+  },
 
   delete: (key: string) =>
     new Promise<void>(async (resolve, reject) => {
