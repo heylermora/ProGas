@@ -1,4 +1,4 @@
-import { getPaymentMethods, isOrderLocked, normalizeOrderStatus } from './order';
+import { getPaymentMethods, isOrderLocked, isOrderPaid, normalizeOrderStatus } from './order';
 import { OrderItem } from 'interfaces/OrderItem';
 
 const order = (patch: Partial<OrderItem> = {}): OrderItem => ({
@@ -18,6 +18,16 @@ test('considera bloqueado un pedido marcado o liquidado', () => {
   expect(isOrderLocked(order({ status: 'Liquidado' }))).toBe(true);
   expect(isOrderLocked(order())).toBe(false);
 });
+
+test.each(['Pagado', 'Liquidado', 'Completado', 'Completada', 'completed'])(
+  'considera %s como un estado pagado para los reportes',
+  status => expect(isOrderPaid(status)).toBe(true),
+);
+
+test.each(['Pendiente', 'En ruta', 'Entregado', 'Cancelado', undefined])(
+  'no considera %s como un estado pagado para los reportes',
+  status => expect(isOrderPaid(status)).toBe(false),
+);
 
 test('obtiene métodos de pago únicos', () => {
   expect(getPaymentMethods(order({ paymentMethod: 'Efectivo', payments: [

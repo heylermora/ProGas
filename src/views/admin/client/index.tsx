@@ -46,7 +46,11 @@ export default function Clients() {
     }
     setSaving(true);
     try {
-      if (editing) await ClientService.edit(editing.id, { ...editing, ...form });
+      if (editing) {
+        const updatedClient = { ...editing, ...form };
+        if (updatedClient.address === undefined) delete updatedClient.address;
+        await ClientService.edit(editing.id, updatedClient);
+      }
       else await ClientService.create(form);
       toast({ status: 'success', title: editing ? 'Cliente actualizado' : 'Cliente creado' });
       reset(); await load();
