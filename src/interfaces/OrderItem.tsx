@@ -1,8 +1,18 @@
 export interface ProductItem {
+    productId?: string;
     gasType: string;
     quantity: number;
     price: number;
     comment?: string;
+}
+
+export type OrderStatus = 'Pendiente' | 'En ruta' | 'Entregado' | 'Pagado' | 'Liquidado' | 'Cancelado';
+
+export interface OrderPayment {
+    method: 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
+    amount: number;
+    reference?: string | null;
+    note?: string | null;
 }
 
 export interface OrderItem {
@@ -16,9 +26,15 @@ export interface OrderItem {
         lat?: number;
         lng?: number;
     }
-    status: string;
+    status: OrderStatus | string;
     comment: string;
     items: ProductItem[];
     totalAmount: number;
+    paymentMethod?: string;
+    payments?: OrderPayment[];
+    totalPaid?: number;
+    paidAt?: string;
+    paymentNote?: string | null;
+    locked?: boolean;
     onStatusChange?: (id: string, status: string) => void;
 }
