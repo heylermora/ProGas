@@ -18,6 +18,11 @@ export const normalizeOrderStatus = (status?: string): OrderStatus =>
 export const isOrderLocked = (order: Pick<OrderItem, 'locked' | 'status'>) =>
   Boolean(order.locked) || normalizeOrderStatus(order.status) === 'Liquidado';
 
+export const isOrderPaid = (status?: string | null) => {
+  const normalizedStatus = String(status || '').trim().toLocaleLowerCase('es');
+  return ['pagado', 'liquidado', 'completado', 'completada', 'completed'].includes(normalizedStatus);
+};
+
 export const getPaymentMethods = (order: OrderItem) => {
   const methods = (order.payments || []).map(payment => payment.method);
   if (order.paymentMethod) methods.push(order.paymentMethod);
