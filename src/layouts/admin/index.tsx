@@ -38,8 +38,9 @@ export default function Dashboard(props: { [x: string]: any }) {
     const validLayouts = ['/admin', '/customer'];
     return routes.map((route: RoutesType, key: any) => {
       if (validLayouts.includes(route.layout)) {
-        return <Route path={route.layout + route.path} key={key} render={(routeProps) =>
-          hasRole(route.roles) ? <route.component {...routeProps} /> : <Unauthorized />
+        const RouteComponent = route.component;
+        return <Route path={route.layout + route.path} key={key} render={() =>
+          hasRole(route.roles) ? <RouteComponent /> : <Unauthorized />
         } />;
       } else {
         return null;
