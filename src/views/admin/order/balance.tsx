@@ -31,6 +31,7 @@ import OrderItem from 'interfaces/OrderItem';
 import Error from 'components/exceptions/Error';
 import Empty from 'components/exceptions/Empty';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
+import { isOrderPaid } from 'utils/order';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
 
@@ -71,12 +72,6 @@ export default function Balance() {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
-  };
-
-  const isCompletedStatus = (status?: string | null) => {
-    if (!status) return false;
-    const s = status.toLowerCase();
-    return s === 'completado' || s === 'completada' || s === 'completed';
   };
 
   const normalizeMethod = (m: any): PaymentMethod => {
@@ -127,7 +122,7 @@ export default function Balance() {
 
           const key = getLocalDateKey(dateObj);
           const totalAmount = getOrderTotalAmount(order);
-          const completed = isCompletedStatus(order.status);
+          const completed = isOrderPaid(order.status);
 
           if (!mapByDate[key]) {
             mapByDate[key] = {

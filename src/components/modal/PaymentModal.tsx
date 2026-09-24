@@ -49,7 +49,7 @@ function PaymentModal(props: {
   totalToPay: number; // ✅ total a pagar
   isOpen: boolean;
   onClose: () => void;
-  onSaved?: (payload: any) => void;
+  onSaved?: (payload: any) => void | Promise<void>;
 }) {
   const { title = 'Añadir pago', id, totalToPay, isOpen, onClose, onSaved, onSave } = props;
 
@@ -137,8 +137,8 @@ function PaymentModal(props: {
       if (onSave) await onSave(payload);
       else console.log('PAYMENT PAYLOAD:', payload);
 
+      await onSaved?.(payload);
       toast({ status: 'success', title: 'Pago guardado', duration: 1800, isClosable: true });
-      onSaved?.(payload);
       handleClose();
     } catch (e) {
       console.error(e);

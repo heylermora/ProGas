@@ -152,6 +152,7 @@ export default function ItemCard(props: any) {
     } catch (err) {
       setLocalStatus(prev);
       console.error('Error updating order:', err);
+      throw err;
     } finally {
       setIsSavingStatus(false);
     }
@@ -168,16 +169,14 @@ export default function ItemCard(props: any) {
       return;
     }
 
-    updateOrder(next);
+    void updateOrder(next).catch(() => undefined);
   };
 
   const handlePaymentSaved = async (paymentPayload: any) => {
-    onPayClose();
-
     if (pendingStatus) {
       const toApply = pendingStatus;
-      setPendingStatus(null);
       await updateOrder(toApply, paymentPayload);
+      setPendingStatus(null);
     }
   };
 
