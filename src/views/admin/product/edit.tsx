@@ -1,116 +1,15 @@
-// @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-
-import Form from 'components/form/Form';
-import OkModal from 'components/modal/OkModal';
-import Error from 'components/exceptions/Error';
-
+import React, { useEffect, useState } from 'react';
+import { Center, Spinner, useToast } from '@chakra-ui/react';
+import { useParams } from 'react-router-dom';
+import ProductForm from 'components/product/ProductForm';
 import productService from 'services/ProductService';
-import type { Product } from 'interfaces/Product';
-import type FormField from 'interfaces/FormField';
+import { Product } from 'interfaces/ProductItem';
 
 export default function EditProduct() {
-  const history = useHistory();
-  const params = useParams<{ id: string }>();
-  const id = params.id;
-
-  const [showModal, setShowModal] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState<number>(0);
-
-  useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      try {
-        setIsLoading(true);
-        const data = await productService.get(id);
-        if (!mounted) return;
-
-        setDescription((data?.description ?? '').toString());
-        setPrice(Number(data?.price ?? 0));
-      } catch (error) {
-        console.error('Error fetching product:', error);
-        if (error?.response?.status !== 400) setIsError(true);
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [id]);
-
-  const fields: FormField[] = useMemo(
-    () => [
-      {
-        label: 'Descripción',
-        name: 'description',
-        type: 'text',
-        value: description,
-        validation: { required: true },
-        onChange: (v: string) => setDescription(v),
-        isDisabled: isLoading,
-      },
-      {
-        label: 'Precio (CRC)',
-        name: 'price',
-        type: 'number',
-        value: price,
-        validation: { required: true, min: 1 },
-        onChange: (v: any) => setPrice(Number(v)),
-        isDisabled: isLoading,
-      },
-    ],
-    [description, price, isLoading]
-  );
-
-  const handleFormSubmit = async (fieldValues: { [key: string]: any }) => {
-    try {
-      const edited: Product = {
-        id,
-        description: (fieldValues.description ?? '').trim(),
-        price: Number(fieldValues.price ?? 0),
-      };
-
-      await productService.edit(id, edited);
-      setShowModal(true);
-    } catch (error) {
-      console.error('Error updating product:', error);
-      if (error?.response?.status !== 400) setIsError(true);
-    }
-  };
-
-  const closeModalAndRedirect = () => {
-    setShowModal(false);
-    history.push('/admin/product/index');
-  };
-
-  if (isError) return <Error />;
-
-  return (
-    <>
-      <Form
-        title="Editar Producto"
-        button="Guardar Cambios"
-        back="/admin/product/index"
-        fields={fields}
-        onSubmit={handleFormSubmit}
-        isDisabled={isLoading}
-      />
-
-      {showModal && (
-        <OkModal
-          message="Producto actualizado correctamente."
-          isOpen={showModal}
-          onClose={closeModalAndRedirect}
-        />
-      )}
-    </>
-  );
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product>();
+  const toast = useToast();
+  useEffect(() => { productService.get(id).then(data => setProduct(data as Product)).catch(() => toast({ title: 'No pudimos cargar el producto', status: 'error' })); }, [id, toast]);
+  if (!product) return <Center pt="160px"><Spinner size="xl" color="brand.500" /></Center>;
+  return <ProductForm key={product.id} product={product} />;
 }
