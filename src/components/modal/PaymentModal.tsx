@@ -138,7 +138,7 @@ function PaymentModal(props: {
       else console.log('PAYMENT PAYLOAD:', payload);
 
       toast({ status: 'success', title: 'Pago guardado', duration: 1800, isClosable: true });
-      onSaved?.();
+      onSaved?.(payload);
       handleClose();
     } catch (e) {
       console.error(e);

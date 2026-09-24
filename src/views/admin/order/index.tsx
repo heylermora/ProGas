@@ -9,6 +9,9 @@ import {
   IconButton,
   Spinner,
   Center,
+  Input,
+  Select,
+  Text,
 } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
 import { Link as RLink, useParams, useHistory } from 'react-router-dom';
@@ -20,8 +23,9 @@ import Error from 'components/exceptions/Error';
 import orderService from 'services/OrderService';
 import OrderItem from 'interfaces/OrderItem';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
+import { getPaymentMethods, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
 
-const STATUS_MENU = ['Nuevo', 'En proceso', 'Completado', 'Todos'] as const;
+const STATUS_MENU = [...ORDER_STATUSES, 'Todos'] as const;
 
 export default function Index() {
   const params = useParams<{ search?: string }>();
@@ -36,6 +40,7 @@ export default function Index() {
   const [activeStatus, setActiveStatus] = useState<(typeof STATUS_MENU)[number]>('Todos');
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [filters, setFilters] = useState({ date: '', client: '', status: 'Todos', product: '', payment: '' });
 
   // Fetch: NO filtra por status (solo por search si aplica)
   useEffect(() => {
@@ -69,10 +74,18 @@ export default function Index() {
   );
 
   // Filtro en frontend (quemado)
-  const visibleOrders = useMemo(() => {
-    if (activeStatus === 'Todos') return orders;
-    return orders.filter((o) => o?.status === activeStatus);
-  }, [orders, activeStatus]);
+  const products = useMemo(() => Array.from(new Set(orders.flatMap(order => order.items || []).map(item => item.gasType).filter(Boolean))).sort(), [orders]);
+  const visibleOrders = useMemo(() => orders.filter(order => {
+    const status = normalizeOrderStatus(order.status);
+    const selectedStatus = filters.status === 'Todos' ? activeStatus : filters.status;
+    const date = order.requestDate ? order.requestDate.slice(0, 10) : '';
+    const clientTerm = filters.client.trim().toLocaleLowerCase('es');
+    return (selectedStatus === 'Todos' || status === selectedStatus)
+      && (!filters.date || date === filters.date)
+      && (!clientTerm || `${order.client} ${order.clientId || ''}`.toLocaleLowerCase('es').includes(clientTerm))
+      && (!filters.product || (order.items || []).some(item => item.gasType === filters.product))
+      && (!filters.payment || getPaymentMethods(order).includes(filters.payment));
+  }), [orders, activeStatus, filters]);
 
   // Cuando un card cambia status, actualiza el estado local => el filtro reacciona
   const handleOrderStatusChange = useCallback((id: string, next: string) => {
@@ -83,6 +96,16 @@ export default function Index() {
 
   return (
     <Box w="100%" pt={topPt}>
+      <Box bg="white" borderRadius="xl" p={4} mb={4} boxShadow="sm">
+        <Text fontWeight="800" mb={3}>Filtros de pedidos</Text>
+        <SimpleGrid columns={{ base: 1, md: 5 }} gap={3}>
+          <Input aria-label="Filtrar por fecha" type="date" value={filters.date} onChange={e => setFilters(f => ({ ...f, date: e.target.value }))} />
+          <Input aria-label="Filtrar por cliente" placeholder="Cliente o cédula" value={filters.client} onChange={e => setFilters(f => ({ ...f, client: e.target.value }))} />
+          <Select aria-label="Filtrar por estado" value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}><option>Todos</option>{ORDER_STATUSES.map(value => <option key={value}>{value}</option>)}</Select>
+          <Select aria-label="Filtrar por producto" value={filters.product} onChange={e => setFilters(f => ({ ...f, product: e.target.value }))}><option value="">Todos los productos</option>{products.map(value => <option key={value}>{value}</option>)}</Select>
+          <Select aria-label="Filtrar por método de pago" value={filters.payment} onChange={e => setFilters(f => ({ ...f, payment: e.target.value }))}><option value="">Todos los métodos</option>{['Efectivo', 'Sinpe', 'Tarjeta', 'Otro'].map(value => <option key={value}>{value}</option>)}</Select>
+        </SimpleGrid>
+      </Box>
       {isError ? (
         <Error />
       ) : isLoading ? (
@@ -173,6 +196,7 @@ export default function Index() {
 
               return (
                 <ItemCard
+                  {...order}
                   key={order.id}
                   id={order.id}
                   client={order.client}
@@ -182,7 +206,7 @@ export default function Index() {
                   requestDate={order.requestDate}
                   itemsCount={itemsCount}
                   totalAmount={totalAmount}
-                  location={order.location || ''}
+                  location={order.location || { address: '' }}
                   clientCed={(order as any).clientId || (order as any).cedula || undefined}
                   onStatusChange={(id: string, next: string) => handleOrderStatusChange(id, next)}
                 />

@@ -24,6 +24,9 @@ import FormField from "interfaces/FormField";
 import Error from "components/exceptions/Error";
 import { useOrderRefresh } from "contexts/OrderRefreshContext";
 import { handleNationalIdLookup } from "utils/nationalId";
+import { useAuth } from "contexts/AuthContext";
+import { isOrderLocked } from "utils/order";
+import Unauthorized from "components/exceptions/Unauthorized";
 
 const renderProductItem = (item: ProductItem) => (
   <Box>
@@ -44,6 +47,7 @@ export default function Edit() {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const { triggerRefresh } = useOrderRefresh();
+  const { hasRole } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -459,6 +463,8 @@ export default function Edit() {
       </Center>
     );
   }
+
+  if (isOrderLocked(existingOrderData) && !hasRole(['admin'])) return <Unauthorized />;
 
   return (
     <>
