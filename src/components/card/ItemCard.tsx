@@ -23,28 +23,23 @@ import Menu from 'components/menu/MainMenu';
 import { formatValue } from 'utils/formatValue';
 import OrderService from 'services/OrderService';
 import PaymentModal from 'components/modal/PaymentModal';
+import { OrderStatus } from 'interfaces/OrderItem';
+import { isOrderLocked, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
+import { useAuth } from 'contexts/AuthContext';
 
-type OrderStatus = 'Nuevo' | 'En proceso' | 'Completado';
-
-const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: 'Nuevo', label: 'Nuevo' },
-  { value: 'En proceso', label: 'En proceso' },
-  { value: 'Completado', label: 'Completado' },
-];
-
-function normalizeStatus(value: string | undefined | null): OrderStatus {
-  if (value === 'Nuevo' || value === 'En proceso' || value === 'Completado') return value;
-  return 'Nuevo';
-}
+const STATUS_OPTIONS = ORDER_STATUSES.map(value => ({ value, label: value }));
 
 function getStatusProps(status: OrderStatus) {
   switch (status) {
-    case 'Nuevo':
+    case 'Pendiente':
       return { colorScheme: 'blue', icon: '📌' };
-    case 'En proceso':
+    case 'En ruta':
       return { colorScheme: 'yellow', icon: '⏳' };
-    case 'Completado':
+    case 'Entregado':
       return { colorScheme: 'green', icon: '✅' };
+    case 'Pagado': return { colorScheme: 'teal', icon: '💳' };
+    case 'Liquidado': return { colorScheme: 'purple', icon: '🔒' };
+    case 'Cancelado': return { colorScheme: 'red', icon: '✖' };
   }
 }
 
@@ -68,14 +63,16 @@ export default function ItemCard(props: any) {
     onStatusChange,
   } = props;
 
-  const [localStatus, setLocalStatus] = useState<OrderStatus>(() => normalizeStatus(status));
+  const { hasRole } = useAuth();
+  const lockedForUser = isOrderLocked(props) && !hasRole(['admin']);
+  const [localStatus, setLocalStatus] = useState<OrderStatus>(() => normalizeOrderStatus(status));
   const [isSavingStatus, setIsSavingStatus] = useState(false);
 
   const { isOpen: isPayOpen, onOpen: onPayOpen, onClose: onPayClose } = useDisclosure();
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
 
   useEffect(() => {
-    setLocalStatus(normalizeStatus(status));
+    setLocalStatus(normalizeOrderStatus(status));
   }, [status]);
 
   const cardBg = useColorModeValue('white', 'navy.800');
@@ -155,6 +152,7 @@ export default function ItemCard(props: any) {
     } catch (err) {
       setLocalStatus(prev);
       console.error('Error updating order:', err);
+      throw err;
     } finally {
       setIsSavingStatus(false);
     }
@@ -164,22 +162,21 @@ export default function ItemCard(props: any) {
     if (isSavingStatus) return;
     if (next === localStatus) return;
 
-    if (next === 'Completado') {
+    if (lockedForUser) return;
+    if (next === 'Pagado') {
       setPendingStatus(next);
       onPayOpen();
       return;
     }
 
-    updateOrder(next);
+    void updateOrder(next).catch(() => undefined);
   };
 
   const handlePaymentSaved = async (paymentPayload: any) => {
-    onPayClose();
-
     if (pendingStatus) {
       const toApply = pendingStatus;
-      setPendingStatus(null);
       await updateOrder(toApply, paymentPayload);
+      setPendingStatus(null);
     }
   };
 
@@ -224,7 +221,7 @@ export default function ItemCard(props: any) {
               </Text>
             </Flex>
 
-            <Menu id={id} name={client} text={message} />
+            <Menu id={id} name={client} text={message} canModify={!lockedForUser} />
           </Flex>
 
           <Box minW={0}>
@@ -334,6 +331,7 @@ export default function ItemCard(props: any) {
                 borderWidth="1px"
                 borderColor={chipBorder}
                 isLoading={isSavingStatus}
+                isDisabled={lockedForUser}
                 loadingText="Actualizando..."
                 _hover={{ borderColor: hoverBorderColor }}
                 _active={{ transform: 'translateY(1px)' }}
@@ -359,6 +357,7 @@ export default function ItemCard(props: any) {
               </MenuList>
             </ChakraMenu>
           </Box>
+          {lockedForUser && <Text fontSize="xs" color="orange.500" textAlign="center">Pedido bloqueado: solo un administrador puede modificarlo.</Text>}
 
           <Box mt="auto">
             <Link to={`/admin/order/details/${id}`}>

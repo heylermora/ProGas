@@ -6,6 +6,7 @@ const COLLECTION = 'Clients';
 const clean = (value?: string) => String(value || '').replace(/\D/g, '');
 
 const ClientService = {
+  getAll: async () => fetchAllData<ClientItem>(COLLECTION, undefined, 250),
   getByNationalId: async (nationalId: string) => {
     const term = clean(nationalId);
     if (!term) return null;

@@ -6,6 +6,8 @@ import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 import routes from 'routes/routes';
 import { useState } from 'react';
 import Navbar from 'components/navbar/Navbar';
+import { useAuth } from 'contexts/AuthContext';
+import Unauthorized from 'components/exceptions/Unauthorized';
 
 export default function Dashboard(props: { [x: string]: any }) {
   const { ...rest } = props;
@@ -13,6 +15,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const { onOpen } = useDisclosure();
+  const { hasRole } = useAuth();
 
   const currentPath = window.location.href;
 
@@ -35,14 +38,17 @@ export default function Dashboard(props: { [x: string]: any }) {
     const validLayouts = ['/admin', '/customer'];
     return routes.map((route: RoutesType, key: any) => {
       if (validLayouts.includes(route.layout)) {
-        return <Route path={route.layout + route.path} component={route.component} key={key} />;
+        const RouteComponent = route.component;
+        return <Route path={route.layout + route.path} key={key} render={() =>
+          hasRole(route.roles) ? <RouteComponent /> : <Unauthorized />
+        } />;
       } else {
         return null;
       }
     });
   };
 
-  const shouldShowBox = currentPath.includes('/order/index') || currentPath.includes('/product/index') || currentPath.includes('/sponsor/index') || currentPath.includes('/order/balance') ||  currentPath.includes('/dashboard/index');
+  const shouldShowBox = currentPath.includes('/order/index') || currentPath.includes('/product/index') || currentPath.includes('/sponsor/index') || currentPath.includes('/client/index') || currentPath.includes('/order/balance') ||  currentPath.includes('/dashboard/index');
   const size = currentPath.includes('/expense/index') ? '4xl' : 'lg';
   const adminPadding: ResponsiveValue<string> = { base: '16px', md: '28px', xl: '32px' };
 

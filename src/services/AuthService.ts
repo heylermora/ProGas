@@ -14,7 +14,8 @@ export const registerUser = (email: string, password: string) => {
             addData("users", {
             userId: userId,
             name: name,  // Agregar el nombre del usuario
-            roles: ["customer", "admin"],  // Guardamos los roles como una lista
+            // El alta pública nunca debe conceder permisos internos.
+            roles: ["customer"],
             createdAt: new Date().toISOString(),
             })
         }).then((user) => {

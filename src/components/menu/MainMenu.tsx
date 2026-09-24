@@ -31,7 +31,7 @@ type BannerProps = {
   [key: string]: any;
 };
 
-export default function Banner({ id, name, text, ...rest }: BannerProps) {
+export default function Banner({ id, name, text, canModify = true, ...rest }: BannerProps) {
   const history = useHistory();
   const { triggerRefresh } = useOrderRefresh();
 
@@ -116,7 +116,7 @@ export default function Banner({ id, name, text, ...rest }: BannerProps) {
             p="15px"
             zIndex="dropdown"
           >
-            <MenuItem
+            {canModify && <MenuItem
               as={Link}
               to={`/admin/order/edit/${id}`}
               transition="0.2s linear"
@@ -134,7 +134,7 @@ export default function Banner({ id, name, text, ...rest }: BannerProps) {
                   Editar
                 </Text>
               </Flex>
-            </MenuItem>
+            </MenuItem>}
 
             <MenuItem
               transition="0.2s linear"
@@ -155,7 +155,7 @@ export default function Banner({ id, name, text, ...rest }: BannerProps) {
               </Flex>
             </MenuItem>
 
-            <MenuItem
+            {canModify && <MenuItem
               transition="0.2s linear"
               p="0px"
               borderRadius="8px"
@@ -172,7 +172,7 @@ export default function Banner({ id, name, text, ...rest }: BannerProps) {
                   Eliminar
                 </Text>
               </Flex>
-            </MenuItem>
+            </MenuItem>}
           </MenuList>
         </Portal>
       </Menu>

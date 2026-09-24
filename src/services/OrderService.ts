@@ -9,7 +9,7 @@ const OrderService = {
                     ?.map(t => t?.trim())
                     ?.filter(Boolean)
                     ?.map(t => t!.toUpperCase());
-                const data = await fetchAllData('Orders', { searchFields, searchTerm: upperSearchTerm });
+                const data = await fetchAllData('Orders', { searchFields, searchTerm: upperSearchTerm }, 250);
                 resolve(data as OrderItem[]);
             } catch (err) {
                 reject(err);
