@@ -30,7 +30,7 @@ export interface OrderItem {
     comment: string;
     items: ProductItem[];
     totalAmount: number;
-    paymentMethod?: string;
+    paymentMethod?: OrderPayment['method'];
     payments?: OrderPayment[];
     totalPaid?: number;
     paidAt?: string;
