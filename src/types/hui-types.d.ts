@@ -12,6 +12,7 @@ declare global {
 		icon?: JSX.Element | string | null;
 		path: string;
 		secondary?: boolean;
+		fullLayout?: boolean;
 		roles?: ('admin' | 'colaborador' | 'customer')[];
 	}
 }

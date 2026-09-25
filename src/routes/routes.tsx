@@ -1,6 +1,7 @@
 import { Icon } from '@chakra-ui/react';
-import { MdHome, MdAssessment, MdInventory, MdCampaign, MdPeople, MdPointOfSale } from 'react-icons/md';
+import { MdHome, MdAssessment, MdInventory, MdCampaign, MdPeople, MdPointOfSale, MdManageAccounts } from 'react-icons/md';
 import Clients from 'views/admin/client';
+import Users from 'views/admin/user';
 
 // Order Imports
 import Orders from 'views/admin/order';
@@ -36,6 +37,14 @@ import ViewOrder from 'views/public/ViewOrder';
 import VirtualMall from 'views/public/VirtualMall';
 
 const routes: RoutesType[] = [
+  {
+    name: 'Colaboradores',
+    layout: '/admin',
+    path: '/user/index',
+    icon: <Icon as={MdManageAccounts} width="20px" height="20px" />,
+    component: Users,
+    roles: ['admin'],
+  },
   {
     name: 'Clientes',
     layout: '/admin',
@@ -192,6 +201,7 @@ const routes: RoutesType[] = [
     path: '/dashboard/index',
     component: Dashboard,
     secondary: true,
+    fullLayout: true,
   },
   {
     name: 'Salir',
