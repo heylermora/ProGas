@@ -14,7 +14,7 @@ jest.mock('services/SponsorService', () => ({
 }));
 
 const businesses: SponsorItem[] = [
-  { id: '1', name: 'Café Central', category: 'Cafeterías', active: true, order: 1, logoUrl: '', links: [] },
+  { id: '1', name: 'Café Central', category: 'Cafeterías', active: true, order: 1, logoUrl: '', links: ['https://instagram.com/cafe-central', 'cafe@example.com'] },
   { id: '2', name: 'Tienda Local', category: 'Tiendas', active: true, order: 2, logoUrl: '', links: [] },
   { id: '3', name: 'Negocio oculto', category: 'Otros', active: false, order: 3, logoUrl: '', links: [] },
 ];
@@ -43,18 +43,25 @@ describe('MallPreview', () => {
     (SponsorService.getAll as jest.Mock).mockResolvedValue(businesses);
   });
 
-  it('shows active businesses, supports categories and links to the mall', async () => {
+  it('shows all active businesses without category filters and links to the mall', async () => {
     renderPreview();
 
     expect(await screen.findByText('Café Central')).toBeTruthy();
     expect(screen.getByText('Tienda Local')).toBeTruthy();
     expect(screen.queryByText('Negocio oculto')).toBeNull();
-    expect(screen.getByRole('link', { name: /explorar el mapa/i }).getAttribute('href')).toBe('/mall');
-    expect(screen.getByRole('link', { name: /ver estación de café central/i }).getAttribute('href')).toBe('/mall?business=1');
+    expect(screen.getByRole('link', { name: /explorar todos los negocios/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.queryByRole('button', { name: 'Cafeterías' })).toBeNull();
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cafeterías' }));
+  it('opens contact bubbles in place and pauses the carousel', async () => {
+    renderPreview();
 
-    expect(screen.getByText('Café Central')).toBeTruthy();
-    expect(screen.queryByText('Tienda Local')).toBeNull();
+    const business = await screen.findByRole('button', { name: /ver contactos de café central/i });
+    fireEvent.click(business);
+
+    expect(screen.getByRole('button', { name: /ocultar contactos de café central/i }).getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
+    expect(screen.getByText(/carrusel está pausado/i)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /ver estación de café central/i })).toBeNull();
   });
 });
