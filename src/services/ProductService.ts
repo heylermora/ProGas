@@ -1,7 +1,8 @@
-import { fetchAllData, fetchDataById, addData, updateData, deleteData } from 'apiConfig';
+import { fetchAllData, fetchAllPages, fetchDataById, addData, updateData, deleteData } from 'apiConfig';
 import ProductItem from 'interfaces/ProductItem';
 
 const ProductService = {
+  getAllPages: () => fetchAllPages<ProductItem>('Products'),
   getAll: (searchFields?: string[], searchTerm?: string[]) =>
     new Promise<ProductItem[]>(async (resolve, reject) => {
       try {

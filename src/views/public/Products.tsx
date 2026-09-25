@@ -70,6 +70,7 @@ export default function Products() {
         gasType: selectedProduct.description,
         quantity: Number(orderForm.quantity || 1),
         price: Number(selectedProduct.price || 0),
+        unitCost: Number(selectedProduct.costPrice || 0),
         comment: orderForm.cylinderDetails,
       },
     ]);

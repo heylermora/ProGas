@@ -9,6 +9,7 @@ export interface ExpenseItem {
   shift?: string;
   createdBy?: string;
   createdAt: string;
+  closingId?: string;
 }
 
 export interface CylinderLine {
@@ -26,6 +27,8 @@ export interface ClosingItem {
   status: 'confirmed';
   orderIds: string[];
   orderCodes: string[];
+  orderFingerprints: Record<string, string>;
+  expenseIds: string[];
   from: string;
   to: string;
   totalSales: number;

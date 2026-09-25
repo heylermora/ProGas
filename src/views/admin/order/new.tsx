@@ -135,6 +135,7 @@ export default function NewOrder() {
           gasType: p.description,
           quantity: productForm.quantity,
           price: Number(p.price ?? 0),
+          unitCost: Number(p.costPrice ?? 0),
           comment: productForm.comment,
         },
       ];

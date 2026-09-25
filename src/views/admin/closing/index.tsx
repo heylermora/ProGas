@@ -11,7 +11,7 @@ import { Product } from 'interfaces/ProductItem';
 import ClosingService from 'services/ClosingService';
 import OrderService from 'services/OrderService';
 import ProductService from 'services/ProductService';
-import { availableOrders, cylinderSummary, expenseTotal, orderTotal, paymentTotals } from 'utils/closing';
+import { availableExpenses, availableOrders, cylinderSummary, orderFingerprint, orderTotal, paymentTotals } from 'utils/closing';
 
 const crc = (amount: number) => `₡${amount.toLocaleString('es-CR')}`;
 const nowLocal = () => {
@@ -48,7 +48,7 @@ export default function Closings() {
     setLoading(true);
     try {
       const [ordersData, productsData, expensesData, closingsData] = await Promise.all([
-        OrderService.getAll(), ProductService.getAll(), ClosingService.getExpenses(), ClosingService.getAll(),
+        OrderService.getAllPages(), ProductService.getAllPages(), ClosingService.getExpenses(), ClosingService.getAll(),
       ]);
       setOrders(ordersData); setProducts(productsData); setExpenses(expensesData);
       setHistory(closingsData.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
@@ -60,17 +60,18 @@ export default function Closings() {
   useEffect(() => { load(); }, [load]);
   const periodOrders = useMemo(() => availableOrders(orders, from, to), [orders, from, to]);
   const included = useMemo(() => type === 'cylinder'
-    ? periodOrders.filter((order) => order.items.some((item) => products.some((product) => product.id === item.productId && product.category === 'Cilindros')))
+    ? periodOrders.filter((order) => cylinderSummary([order], products).length > 0)
     : periodOrders, [periodOrders, products, type]);
   const payments = useMemo(() => paymentTotals(included), [included]);
   const sales = included.reduce((sum, order) => sum + orderTotal(order), 0);
-  const expensesInPeriod = expenseTotal(expenses, from, to);
+  const includedExpenses = useMemo(() => availableExpenses(expenses, from, to), [expenses, from, to]);
+  const expensesInPeriod = includedExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
   const cylinders = useMemo(() => cylinderSummary(included, products), [included, products]);
   const cylinderCost = cylinders.reduce((sum, line) => sum + line.totalCost, 0);
   const allCost = included.reduce((sum, order) => sum + order.items.reduce((itemSum, item) => {
-    const product = products.find((candidate) => candidate.id === item.productId);
-    return itemSum + Number(product?.costPrice || 0) * Number(item.quantity || 0);
+    return itemSum + Number(item.unitCost || 0) * Number(item.quantity || 0);
   }, 0), 0);
+  const hasMissingCosts = included.some((order) => order.items.some((item) => item.unitCost == null));
   const expected = type === 'shift' ? payments.cash - expensesInPeriod : type === 'profit' ? sales - allCost - expensesInPeriod : cylinderCost;
   const declaredAmount = Number(declared || 0);
   const difference = declaredAmount - expected;
@@ -90,15 +91,22 @@ export default function Closings() {
   const confirm = async () => {
     if (!included.length) { toast({ title: 'No hay pedidos disponibles en el periodo.', status: 'warning' }); return; }
     if (type === 'profit' && !isAdmin) { toast({ title: 'Solo un administrador puede cerrar utilidades.', status: 'error' }); return; }
+    if (type === 'profit' && hasMissingCosts) { toast({ title: 'Hay pedidos antiguos sin costo de venta registrado; deben migrarse antes de cerrar utilidades.', status: 'error' }); return; }
     if (type === 'cylinder' && !canCloseCylinders) { toast({ title: 'No tiene autorización para este corte.', status: 'error' }); return; }
     if (difference !== 0 && !note.trim()) { toast({ title: 'Explique la diferencia de caja antes de confirmar.', status: 'warning' }); return; }
     setSaving(true);
+    const optionalFields = {
+      ...(note.trim() ? { differenceNote: note.trim() } : {}),
+      ...(type === 'cylinder' ? { cylinderLines: cylinders } : {}),
+    };
     const closing: ClosingItem = {
       type, status: 'confirmed', orderIds: included.map((order) => order.id), orderCodes: included.map((order) => order.orderCode),
+      orderFingerprints: Object.fromEntries(included.map((order) => [order.id, orderFingerprint(order)])),
+      expenseIds: type === 'cylinder' ? [] : includedExpenses.map((item) => item.id).filter((id): id is string => Boolean(id)),
       from: new Date(from).toISOString(), to: new Date(to).toISOString(), totalSales: sales, cashTotal: payments.cash,
-      sinpeTotal: payments.sinpe, otherTotal: payments.other, expenseTotal: expensesInPeriod, costTotal: type === 'cylinder' ? cylinderCost : allCost,
-      expectedAmount: expected, declaredAmount, difference, differenceNote: note.trim() || undefined,
-      cylinderLines: type === 'cylinder' ? cylinders : undefined, createdAt: new Date().toISOString(), createdBy: user?.uid || '',
+      sinpeTotal: payments.sinpe, otherTotal: payments.other, expenseTotal: type === 'cylinder' ? 0 : expensesInPeriod, costTotal: type === 'cylinder' ? cylinderCost : allCost,
+      expectedAmount: expected, declaredAmount, difference, ...optionalFields,
+      createdAt: new Date().toISOString(), createdBy: user?.uid || '',
     };
     try {
       await ClosingService.confirm(closing); toast({ title: 'Corte confirmado y pedidos bloqueados.', status: 'success' });

@@ -1,7 +1,8 @@
-import { fetchAllData, fetchDataById, addData, updateData, deleteData } from 'apiConfig'; // Funciones auxiliares para Firestore
+import { fetchAllData, fetchAllPages, fetchDataById, addData, updateData, deleteData } from 'apiConfig'; // Funciones auxiliares para Firestore
 import {OrderItem} from 'interfaces/OrderItem';
 
 const OrderService = {
+    getAllPages: () => fetchAllPages<OrderItem>('Orders'),
     getAll: (searchFields?: string[], searchTerm?: string[]) => new Promise<OrderItem[]>(
         async (resolve, reject) => {
             try {

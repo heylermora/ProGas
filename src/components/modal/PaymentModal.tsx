@@ -59,7 +59,12 @@ function PaymentModal(props: {
   const border = useColorModeValue('blackAlpha.200', 'whiteAlpha.200');
 
   const [rows, setRows] = useState<PaymentRow[]>([{ method: 'Efectivo', amount: '' }]);
-  const [paidAt, setPaidAt] = useState(() => new Date().toISOString().slice(0, 10)); // yyyy-mm-dd
+  const localNow = () => {
+    const value = new Date();
+    value.setMinutes(value.getMinutes() - value.getTimezoneOffset());
+    return value.toISOString().slice(0, 16);
+  };
+  const [paidAt, setPaidAt] = useState(localNow);
   const [generalNote, setGeneralNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -67,7 +72,7 @@ function PaymentModal(props: {
   useEffect(() => {
     if (isOpen) {
       setRows([{ method: 'Efectivo', amount: '' }]);
-      setPaidAt(new Date().toISOString().slice(0, 10));
+      setPaidAt(localNow());
       setGeneralNote('');
       setIsSaving(false);
     }
@@ -118,7 +123,7 @@ function PaymentModal(props: {
 
     const payload = {
       entityId: id,
-      paidAt,
+      paidAt: new Date(paidAt).toISOString(),
       totalToPay,
       totalPaid,
       change: hasChange ? diff : 0,
@@ -164,7 +169,7 @@ function PaymentModal(props: {
             <HStack spacing={3} align="flex-end" flexWrap={{ base: 'wrap', md: 'nowrap' }}>
               <FormControl>
                 <FormLabel>Fecha de pago</FormLabel>
-                <Input type="date" value={paidAt} onChange={e => setPaidAt(e.target.value)} />
+                <Input type="datetime-local" value={paidAt} onChange={e => setPaidAt(e.target.value)} />
               </FormControl>
 
               <FormControl>

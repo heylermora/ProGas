@@ -35,6 +35,7 @@ ReactDOM.render(
 							<PrivateRoute path={`/admin/product`} roles={['admin', 'colaborador']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/sponsor`} roles={['admin']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/client`} roles={['admin']} component={AdminLayout} />
+							<PrivateRoute path={`/admin/closing`} roles={['admin', 'colaborador']} component={AdminLayout} />
 							<Route path={`/customer/order`} component={AdminLayout} />
 							<Redirect to='/' />
 						</Switch>

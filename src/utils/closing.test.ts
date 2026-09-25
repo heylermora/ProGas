@@ -13,3 +13,25 @@ test('summarizes only cylinder products at cost', () => {
   const lines = cylinderSummary([order], [{ id: 'p1', description: 'Cilindro Tropigas', category: 'Cilindros', costPrice: 5000 } as any]);
   expect(lines[0]).toMatchObject({ quantity: 2, unitCost: 5000, totalCost: 10000 });
 });
+
+test('treats date-only payments as local dates and excludes Liquidado orders', () => {
+  const paidOnDate = { ...order, paidAt: '2026-09-24' };
+  expect(availableOrders([paidOnDate], '2026-09-24T00:00', '2026-09-24T23:59')).toHaveLength(1);
+  expect(availableOrders([{ ...paidOnDate, status: 'Liquidado' }], '2026-09-24T00:00', '2026-09-24T23:59')).toHaveLength(0);
+});
+
+test('supports legacy split payments and subtracts cash change', () => {
+  const legacy = {
+    ...order,
+    payments: undefined,
+    paymentMethods: [{ method: 'Efectivo', amount: 20000 }, { method: 'Sinpe', amount: 5000 }],
+    change: 5000,
+  };
+  expect(paymentTotals([legacy])).toEqual({ cash: 15000, sinpe: 5000, other: 0 });
+});
+
+test('uses the sale-time unit cost for cylinder summaries', () => {
+  const sold = { ...order, items: [{ ...order.items[0], unitCost: 4200 }] };
+  const lines = cylinderSummary([sold], [{ id: 'p1', description: 'Cilindro Tropigas', category: 'Cilindros', costPrice: 9000 } as any]);
+  expect(lines[0].totalCost).toBe(8400);
+});
