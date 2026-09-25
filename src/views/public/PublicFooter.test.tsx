@@ -21,4 +21,16 @@ describe('PublicFooter', () => {
     expect(screen.getByText(/emprendimiento necesita una presencia digital/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /explorar comercios/i })).toBeNull();
   });
+
+  it('does not duplicate the primary order action on the home page', () => {
+    render(
+      <ChakraProvider>
+        <MemoryRouter initialEntries={['/']}>
+          <PublicFooter />
+        </MemoryRouter>
+      </ChakraProvider>,
+    );
+
+    expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
+  });
 });

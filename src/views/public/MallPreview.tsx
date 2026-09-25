@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip, usePrefersReducedMotion } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
@@ -47,23 +47,25 @@ const contactBurst = keyframes`
   to { opacity: 1; scale: 1; }
 `;
 
+const emailPattern = /^[^\s@/:]+@[^\s@/:]+\.[^\s@/:]+$/;
 const linkMeta = (link = '') => {
   const value = link.toLowerCase();
   if (value.includes('facebook.com')) return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
   if (value.includes('instagram.com')) return { label: 'Instagram', icon: FaInstagram, bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' };
   if (value.includes('whatsapp.com') || value.includes('wa.me')) return { label: 'WhatsApp', icon: FaWhatsapp, bg: '#25D366' };
   if (value.includes('tiktok.com')) return { label: 'TikTok', icon: FaTiktok, bg: '#111111' };
-  if (value.startsWith('mailto:') || value.includes('@')) return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
+  if (value.startsWith('mailto:') || emailPattern.test(link.trim())) return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
   if (value.startsWith('http')) return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
   return { label: 'Contacto', icon: MdLink, bg: '#64748B' };
 };
 
-const hrefFor = (link = '') => link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
+const hrefFor = (link = '') => emailPattern.test(link.trim()) ? `mailto:${link.trim()}` : link;
 
 type MallPreviewProps = { compact?: boolean };
 
 export default function MallPreview({ compact = false }: MallPreviewProps) {
   const location = useLocation();
+  const prefersReducedMotion = usePrefersReducedMotion();
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
   const [loading, setLoading] = useState(!cachedBusinesses);
   const [selectedBusinessId, setSelectedBusinessId] = useState('');
@@ -101,7 +103,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
       </Flex>
 
       <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Flex w="max-content" py="6px" animation={previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} animationPlayState={selectedBusinessId ? 'paused' : 'running'} _motionReduce={{ animation: 'none' }}>
+        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} animationPlayState={selectedBusinessId ? 'paused' : 'running'}>
           {[0, 1].map((copy) => (
           <Flex key={copy} gap="14px" pr="14px" aria-hidden={copy === 1 ? true : undefined} pointerEvents={copy === 1 ? 'none' : 'auto'}>
             {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="92px" borderRadius="16px" bg="whiteAlpha.100" opacity={1 - item * .16} />)}

@@ -20,7 +20,7 @@ export default function PublicFooter() {
           <Text color="whiteAlpha.700" fontSize="sm" lineHeight="1.7" maxW="520px">Una plataforma creada para comprar fácil, apoyar lo local y conectar a los emprendimientos de Acosta con más personas.</Text>
           <Flex wrap="wrap" gap="8px">
             {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" bg="whiteAlpha.100" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Inicio</Button>}
-            {location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" bg="whiteAlpha.100" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
+            {location.pathname !== '/' && location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" bg="whiteAlpha.100" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
           </Flex>
         </Stack>
 

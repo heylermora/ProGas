@@ -14,7 +14,7 @@ jest.mock('services/SponsorService', () => ({
 }));
 
 const businesses: SponsorItem[] = [
-  { id: '1', name: 'Café Central', category: 'Cafeterías', active: true, order: 1, logoUrl: '', links: ['https://instagram.com/cafe-central', 'cafe@example.com'] },
+  { id: '1', name: 'Café Central', category: 'Cafeterías', active: true, order: 1, logoUrl: '', links: ['https://instagram.com/cafe-central', 'https://www.tiktok.com/@cafe-central', 'cafe@example.com'] },
   { id: '2', name: 'Tienda Local', category: 'Tiendas', active: true, order: 2, logoUrl: '', links: [] },
   { id: '3', name: 'Negocio oculto', category: 'Otros', active: false, order: 3, logoUrl: '', links: [] },
 ];
@@ -63,6 +63,8 @@ describe('MallPreview', () => {
 
     expect(screen.getByRole('button', { name: /ocultar contactos de café central/i }).getAttribute('aria-expanded')).toBe('true');
     expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
+    expect(screen.getByLabelText(/tiktok de café central/i).getAttribute('href')).toBe('https://www.tiktok.com/@cafe-central');
+    expect(screen.getByLabelText(/correo de café central/i).getAttribute('href')).toBe('mailto:cafe@example.com');
     expect(screen.getByText(/carrusel está pausado/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /ver estación de café central/i })).toBeNull();
   });
