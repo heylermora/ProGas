@@ -52,7 +52,11 @@ export default function Portfolio() {
                 <Text color={index === 0 ? 'cyan.200' : 'brand.500'} fontSize="xs" fontWeight="900" letterSpacing=".08em">{project.type}</Text>
                 <Heading fontSize="2xl">{project.name}</Heading>
                 <Text color={index === 0 ? 'whiteAlpha.800' : muted} fontSize="sm" lineHeight="1.65" flex="1">{project.description}</Text>
-                <Button as={project.to ? RLink : 'a'} to={project.to} href={project.href} target={project.href ? '_blank' : undefined} rel={project.href ? 'noopener noreferrer' : undefined} alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
+                {project.to ? (
+                  <Button as={RLink} to={project.to} alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
+                ) : (
+                  <Button as="a" href={project.href} target="_blank" rel="noopener noreferrer" alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
+                )}
               </Stack>
             ))}
           </SimpleGrid>
