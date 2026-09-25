@@ -34,9 +34,9 @@ export default function Portfolio() {
             <Heading as="h1" fontSize={{ base: '36px', md: '58px' }} lineHeight="1.02" letterSpacing="-.04em">Johel Mora</Heading>
             <Text fontSize={{ base: 'lg', md: '2xl' }} fontWeight="700">Desarrollador de software enfocado en soluciones que sí se usan.</Text>
             <Text color="whiteAlpha.800" fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.7" maxW="650px">Soy Johel, desarrollador de Acosta. Combino tecnología, diseño y conocimiento del entorno local para convertir procesos complejos en herramientas sencillas para negocios y organizaciones.</Text>
-            <Flex direction={{ base: 'column', sm: 'row' }} gap="10px" pt="8px">
-              <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} bg="white" color="brand.800" borderRadius="full" size="lg" _hover={{ bg: 'brand.100', transform: 'translateY(-2px)' }}>Conversemos por WhatsApp</Button>
-              <Button as={RLink} to="/" leftIcon={<MdArrowBack />} variant="ghost" color="white" borderRadius="full" size="lg" _hover={{ bg: 'whiteAlpha.200' }}>Volver a Gas Memo</Button>
+            <Flex direction={{ base: 'column', md: 'row' }} wrap="wrap" gap="10px" pt="8px" w="100%">
+              <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} bg="white" color="brand.800" borderRadius="full" size="lg" w={{ base: '100%', md: 'auto' }} maxW="100%" h="auto" py="12px" _hover={{ bg: 'brand.100', transform: 'translateY(-2px)' }}>Conversemos por WhatsApp</Button>
+              <Button as={RLink} to="/" leftIcon={<MdArrowBack />} variant="ghost" color="white" borderRadius="full" size="lg" w={{ base: '100%', md: 'auto' }} maxW="100%" h="auto" py="12px" _hover={{ bg: 'whiteAlpha.200' }}>Volver a Gas Memo</Button>
             </Flex>
           </Stack>
         </Box>
