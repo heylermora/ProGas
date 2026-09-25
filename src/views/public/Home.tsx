@@ -289,18 +289,21 @@ export default function Home() {
             <Text color="brand.500" fontSize="sm" fontWeight="900" letterSpacing="wide">SIMPLE Y CLARO</Text>
             <Heading id="how-it-works-title" fontSize={{ base: '24px', md: '30px' }}>¿Cómo funciona?</Heading>
           </Box>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing="12px">
+          <Box position="relative" mt={{ base: '4px', md: '12px' }} px={{ base: '0', md: '18px' }} py={{ base: '4px', md: '12px' }}>
+            <Box aria-hidden="true" position="absolute" left={{ base: '25px', md: '16%' }} right={{ base: 'auto', md: '16%' }} top={{ base: '28px', md: '42px' }} bottom={{ base: '28px', md: 'auto' }} w={{ base: '3px', md: 'auto' }} h={{ base: 'auto', md: '3px' }} bgGradient={{ base: 'linear(to-b, brand.200, brand.500, brand.400)', md: 'linear(to-r, brand.200, brand.500, brand.400)' }} borderRadius="full" />
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: '18px', md: '28px' }} position="relative">
             {[
-              { icon: MdShoppingBasket, title: '1. Hacé tu pedido', text: 'Verificá tus datos y agregá uno o varios productos.' },
-              { icon: MdLocationOn, title: '2. Indicá la entrega', text: 'Usá tu dirección guardada o elegí otra para este pedido.' },
-              { icon: MdReceiptLong, title: '3. Consultá el avance', text: 'Guardá el código del pedido para revisar su estado cuando querás.' },
-            ].map((item) => (
-              <Flex key={item.title} bg={stepBg} border="1px solid" borderColor={stepBorder} borderRadius="20px" p="16px" gap="12px" boxShadow="sm">
-                <Flex bg="brand.50" color="brand.500" borderRadius="14px" w="44px" h="44px" flexShrink={0} align="center" justify="center"><Icon as={item.icon} boxSize="24px" /></Flex>
-                <Box><Text fontWeight="900">{item.title}</Text><Text mt="3px" color={mutedText} fontSize="sm">{item.text}</Text></Box>
+              { icon: MdShoppingBasket, title: 'Hacé tu pedido', text: 'Verificá tus datos y agregá los productos que necesitás.' },
+              { icon: MdLocationOn, title: 'Indicá la entrega', text: 'Confirmá el lugar exacto donde querés recibirlo.' },
+              { icon: MdReceiptLong, title: 'Seguí el recorrido', text: 'Guardá tu código y consultá el avance cuando querás.' },
+            ].map((item, index) => (
+              <Flex key={item.title} direction={{ base: 'row', md: 'column' }} align={{ base: 'flex-start', md: 'center' }} textAlign={{ base: 'left', md: 'center' }} gap={{ base: '14px', md: '12px' }}>
+                <Flex position="relative" zIndex={1} bg="brand.500" color="white" borderRadius="full" w="54px" h="54px" minW="54px" align="center" justify="center" boxShadow="0 0 0 7px rgba(233,227,255,.95), 0 8px 20px rgba(66,42,251,.24)"><Icon as={item.icon} boxSize="24px" /><Flex position="absolute" right="-4px" top="-5px" w="20px" h="20px" align="center" justify="center" borderRadius="full" bg="white" color="brand.600" fontSize="10px" fontWeight="900" border="2px solid" borderColor="brand.100">{index + 1}</Flex></Flex>
+                <Box bg={stepBg} border="1px solid" borderColor={stepBorder} borderRadius="18px" p={{ base: '14px', md: '16px' }} w="100%" minH={{ md: '116px' }} boxShadow="sm"><Text fontWeight="900" fontSize="md">{item.title}</Text><Text mt="5px" color={mutedText} fontSize="sm" lineHeight="1.55">{item.text}</Text></Box>
               </Flex>
             ))}
-          </SimpleGrid>
+            </SimpleGrid>
+          </Box>
         </Stack>
       </Box>
       <DonationBanner />

@@ -16,8 +16,9 @@ describe('PublicFooter', () => {
     );
 
     expect(screen.getByText(`Versión ${packageInfo.version}`)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /ver portafolio profesional/i }).getAttribute('href')).toContain('github.com/heylermora');
+    expect(screen.getByRole('link', { name: /ver portafolio profesional/i }).getAttribute('href')).toBe('/portfolio');
     expect(screen.getByRole('link', { name: /acceso administrativo/i }).getAttribute('href')).toBe('/auth/sign-in');
     expect(screen.getByText(/emprendimiento necesita una presencia digital/i)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /explorar comercios/i })).toBeNull();
   });
 });

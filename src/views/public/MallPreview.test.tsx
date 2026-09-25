@@ -51,6 +51,8 @@ describe('MallPreview', () => {
     expect(screen.queryByText('Negocio oculto')).toBeNull();
     expect(screen.getByRole('link', { name: /explorar todos los negocios/i }).getAttribute('href')).toBe('/mall');
     expect(screen.queryByRole('button', { name: 'Cafeterías' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /ver negocios anteriores/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /ver más negocios/i })).toBeNull();
   });
 
   it('opens contact bubbles in place and pauses the carousel', async () => {

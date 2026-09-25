@@ -1,16 +1,13 @@
 import { Box, Button, Flex, Icon, Link, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
-import { FaGithub } from 'react-icons/fa';
-import { MdArrowForward, MdCode, MdHome, MdLogin, MdShoppingCart, MdStorefront } from 'react-icons/md';
+import { MdArrowForward, MdCode, MdHome, MdLogin, MdShoppingCart, MdWork } from 'react-icons/md';
 import packageInfo from '../../../package.json';
-
-const portfolioUrl = 'https://github.com/heylermora';
 
 export default function PublicFooter() {
   const location = useLocation();
 
   return (
-    <Box as="footer" mt={{ base: '36px', md: '56px' }} overflow="hidden" bg="linear-gradient(135deg, #080D22 0%, #111A3D 58%, #24206B 100%)" color="white" borderRadius={{ base: '22px', md: '30px' }} boxShadow="0 20px 50px rgba(15, 23, 42, .18)" border="1px solid" borderColor="whiteAlpha.200">
+    <Box as="footer" mt={{ base: '36px', md: '56px' }} overflow="hidden" bg="linear-gradient(135deg, #11047A 0%, #3311DB 52%, #7551FF 100%)" color="white" borderRadius={{ base: '22px', md: '30px' }} boxShadow="0 20px 50px rgba(51, 17, 219, .22)" border="1px solid" borderColor="whiteAlpha.300">
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap={{ base: '26px', lg: '56px' }} px={{ base: '20px', md: '32px' }} py={{ base: '26px', md: '34px' }}>
         <Stack spacing="18px">
           <Flex align="center" gap="12px">
@@ -24,7 +21,6 @@ export default function PublicFooter() {
           <Flex wrap="wrap" gap="8px">
             {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" bg="whiteAlpha.100" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Inicio</Button>}
             {location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" bg="whiteAlpha.100" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
-            {location.pathname !== '/mall' && <Button as={RLink} to={{ pathname: '/mall', state: { from: location.pathname, fromLabel: 'Volver' } }} leftIcon={<MdStorefront />} bg="white" color="navy.900" size="sm" borderRadius="full" _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>Explorar comercios</Button>}
           </Flex>
         </Stack>
 
@@ -33,7 +29,7 @@ export default function PublicFooter() {
           <Flex align="center" gap="8px" color="cyan.200" mb="8px"><Icon as={MdCode} /><Text fontSize="xs" fontWeight="900" letterSpacing=".1em">HECHO EN ACOSTA</Text></Flex>
           <Text fontWeight="900" fontSize={{ base: 'lg', md: 'xl' }} lineHeight="1.25">¿Tu emprendimiento necesita una presencia digital que venda?</Text>
           <Text mt="8px" color="whiteAlpha.700" fontSize="sm" lineHeight="1.6">Conocé el trabajo de <Box as="span" color="white" fontWeight="800">Johel Mora</Box> y llevemos tu idea local al siguiente nivel.</Text>
-          <Button as="a" href={portfolioUrl} target="_blank" rel="noopener noreferrer" mt="16px" rightIcon={<MdArrowForward />} leftIcon={<FaGithub />} size="sm" borderRadius="full" bg="cyan.300" color="navy.900" fontWeight="900" _hover={{ bg: 'cyan.200', transform: 'translateX(2px)' }}>Ver portafolio profesional</Button>
+          <Button as={RLink} to="/portfolio" mt="16px" rightIcon={<MdArrowForward />} leftIcon={<MdWork />} size="sm" borderRadius="full" bg="white" color="brand.800" fontWeight="900" _hover={{ bg: 'brand.100', transform: 'translateX(2px)' }}>Ver portafolio profesional</Button>
         </Box>
       </SimpleGrid>
 
