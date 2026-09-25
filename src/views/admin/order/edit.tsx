@@ -206,6 +206,7 @@ export default function Edit() {
                 quantity: (it.quantity || 0) + (productForm.quantity || 0),
                 comment: productForm.comment || it.comment,
                 price: Number(p.price ?? it.price ?? 0),
+                unitCost: it.unitCost ?? Number(p.costPrice ?? 0),
               }
             : it
         );
@@ -218,6 +219,7 @@ export default function Edit() {
           gasType: p.description,
           quantity: productForm.quantity,
           price: Number(p.price ?? 0),
+          unitCost: Number(p.costPrice ?? 0),
           comment: productForm.comment,
         },
       ];

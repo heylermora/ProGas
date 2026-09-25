@@ -16,7 +16,7 @@ const firebaseConfig = {
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
 // Obtener la instancia de autenticación
 export const auth = getAuth(app);
@@ -104,6 +104,20 @@ export const fetchAllData = async <T>(
       }`
     );
   }
+};
+
+/** Fetch every page using the same stable document-id ordering. */
+export const fetchAllPages = async <T>(collectionName: string, pageSize = 250): Promise<T[]> => {
+  const results: T[] = [];
+  let cursor: QueryDocumentSnapshot | undefined;
+  do {
+    let q = query(collection(db, collectionName), orderBy('__name__'), limit(pageSize));
+    if (cursor) q = query(q, startAfter(cursor));
+    const snapshot = await getDocs(q);
+    results.push(...snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as T));
+    cursor = snapshot.docs.length === pageSize ? snapshot.docs[snapshot.docs.length - 1] : undefined;
+  } while (cursor);
+  return results;
 };
 
 export const fetchDataById = async (collectionName: string, id: string) => {

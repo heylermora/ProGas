@@ -3,6 +3,8 @@ export interface ProductItem {
     gasType: string;
     quantity: number;
     price: number;
+    /** Immutable unit cost captured when the item is added to the order. */
+    unitCost?: number;
     comment?: string;
 }
 
@@ -32,8 +34,11 @@ export interface OrderItem {
     totalAmount: number;
     paymentMethod?: OrderPayment['method'];
     payments?: OrderPayment[];
+    paymentMethods?: OrderPayment[];
+    paymentDetails?: OrderPayment[];
     totalPaid?: number;
     paidAt?: string;
+    change?: number;
     paymentNote?: string | null;
     locked?: boolean;
     onStatusChange?: (id: string, status: string) => void;

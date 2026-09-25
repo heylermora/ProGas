@@ -1,5 +1,5 @@
 import { Icon } from '@chakra-ui/react';
-import { MdHome, MdAssessment, MdInventory, MdCampaign, MdPeople } from 'react-icons/md';
+import { MdHome, MdAssessment, MdInventory, MdCampaign, MdPeople, MdPointOfSale } from 'react-icons/md';
 import Clients from 'views/admin/client';
 
 // Order Imports
@@ -21,6 +21,7 @@ import EditProduct from 'views/admin/product/edit';
 
 // Dashboard Imports
 import Dashboard from 'views/admin/dashboard';
+import Closings from 'views/admin/closing';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
@@ -122,6 +123,14 @@ const routes: RoutesType[] = [
     path: '/order/balance',
     icon: <Icon as={MdAssessment} width="20px" height="20px" />,
     component: Balance,
+  },
+  {
+    name: 'Gastos y cortes',
+    layout: '/admin',
+    path: '/closing/index',
+    icon: <Icon as={MdPointOfSale} width="20px" height="20px" />,
+    component: Closings,
+    roles: ['admin', 'colaborador'],
   },
 
   {
