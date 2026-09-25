@@ -7,7 +7,7 @@ import {
 import { MdAdd, MdClose, MdEdit, MdManageAccounts, MdSearch } from 'react-icons/md';
 import Card from 'components/card/Card';
 import UserItem from 'interfaces/UserItem';
-import UserService from 'services/UserService';
+import UserService, { CollaboratorRollbackError } from 'services/UserService';
 
 type FormState = { name: string; email: string; password: string; active: boolean };
 const EMPTY_FORM: FormState = { name: '', email: '', password: '', active: true };
@@ -75,9 +75,19 @@ export default function Users() {
       close();
       await load();
     } catch (error) {
-      const message = error instanceof Error && error.message.includes('email-already-in-use')
-        ? 'Ese correo ya está registrado' : 'No se pudo guardar el colaborador';
-      toast({ status: 'error', title: message });
+      if (error instanceof CollaboratorRollbackError) {
+        toast({
+          status: 'error',
+          duration: null,
+          isClosable: true,
+          title: 'La creación quedó incompleta',
+          description: `Eliminá en Firebase Authentication la cuenta con UID ${error.userId} antes de volver a intentarlo.`,
+        });
+      } else {
+        const message = error instanceof Error && error.message.includes('email-already-in-use')
+          ? 'Ese correo ya está registrado' : 'No se pudo guardar el colaborador';
+        toast({ status: 'error', title: message });
+      }
     } finally { setSaving(false); }
   };
 

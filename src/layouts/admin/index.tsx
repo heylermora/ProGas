@@ -50,8 +50,8 @@ export default function Dashboard(props: { [x: string]: any }) {
 
   const shouldShowBox = routes.some(route =>
     route.layout === '/admin' &&
-    Boolean(route.icon) &&
-    currentPath.includes(route.layout + route.path.replace(/\/\:.*/, ''))
+    (Boolean(route.icon) || route.fullLayout) &&
+    currentPath.includes(route.layout + route.path.replace(/\/:.*/, ''))
   );
   const size = currentPath.includes('/expense/index') ? '4xl' : 'lg';
   const adminPadding: ResponsiveValue<string> = { base: '16px', md: '28px', xl: '32px' };

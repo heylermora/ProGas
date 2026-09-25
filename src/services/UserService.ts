@@ -9,6 +9,16 @@ export type CollaboratorInput = Pick<UserItem, 'name' | 'email' | 'active'> & { 
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
+export class CollaboratorRollbackError extends Error {
+  readonly userId: string;
+
+  constructor(userId: string) {
+    super(`No se pudo eliminar la cuenta de Authentication creada con UID ${userId}.`);
+    this.name = 'CollaboratorRollbackError';
+    this.userId = userId;
+  }
+}
+
 const UserService = {
   getAll: async () => fetchAllPages<UserItem>(COLLECTION),
 
@@ -36,7 +46,14 @@ const UserService = {
     } catch (error) {
       // Avoid leaving an Auth account without its authorization profile when
       // Firestore rejects the second step of the operation.
-      if (credential) await deleteUser(credential.user).catch(() => undefined);
+      if (credential) {
+        try {
+          await deleteUser(credential.user);
+        } catch (rollbackError) {
+          console.error('[UserService] No se pudo revertir la cuenta de Authentication:', rollbackError);
+          throw new CollaboratorRollbackError(credential.user.uid);
+        }
+      }
       throw error;
     } finally {
       await deleteApp(secondaryApp);
@@ -47,7 +64,6 @@ const UserService = {
     updateData(COLLECTION, id, {
       name: data.name.trim(),
       active: data.active,
-      roles: ['colaborador'],
       updatedAt: new Date().toISOString(),
     }),
 };
