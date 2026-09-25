@@ -1,7 +1,8 @@
 // AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth, fetchAllData } from "apiConfig"; // el mismo auth que usas en authService
+import { collection, limit, onSnapshot, query, where } from "firebase/firestore";
+import { auth, db } from "apiConfig"; // el mismo auth que usas en authService
 
 export type AppRole = 'admin' | 'colaborador' | 'customer';
 
@@ -33,33 +34,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubscribeProfile: (() => void) | undefined;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      unsubscribeProfile?.();
+      unsubscribeProfile = undefined;
       setUser(firebaseUser);
       setRoles([]);
       setAccessEnabled(false);
 
       if (firebaseUser) {
-        try {
-          const profiles = await fetchAllData<UserProfile>(
-            'users',
-            { searchFields: ['userId'], searchTerm: [firebaseUser.uid] },
-            1
-          );
+        setLoading(true);
+        const profileQuery = query(
+          collection(db, 'users'),
+          where('userId', '==', firebaseUser.uid),
+          limit(1)
+        );
+
+        unsubscribeProfile = onSnapshot(profileQuery, (snapshot) => {
+          const profile = snapshot.docs[0]?.data() as UserProfile | undefined;
           // Missing `active` keeps backwards compatibility with existing users;
-          // explicitly disabled collaborators lose access immediately on login.
-          const profile = profiles[0];
+          // explicitly disabled collaborators lose access as soon as their profile changes.
           const enabled = Boolean(profile) && profile.active !== false;
           setAccessEnabled(enabled);
           setRoles(enabled ? (profile.roles || []) : []);
-        } catch (error) {
+          setLoading(false);
+        }, (error) => {
           console.error('[AuthContext] No se pudieron cargar los roles del usuario:', error);
-        }
+          setRoles([]);
+          setAccessEnabled(false);
+          setLoading(false);
+        });
+        return;
       }
 
       setLoading(false);
     });
 
-    return () => unsub();
+    return () => {
+      unsubscribeProfile?.();
+      unsubscribeAuth();
+    };
   }, []);
 
   return (
