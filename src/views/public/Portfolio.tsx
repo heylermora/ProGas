@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge, Box, Button, Flex, Heading, Icon, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { MdArrowBack, MdDevices, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
-import { FaWhatsapp } from 'react-icons/fa';
+import { FaGithub, FaWhatsapp } from 'react-icons/fa';
 import { PublicPage } from './PublicPage';
 
 const whatsappUrl = 'https://wa.me/50683508585?text=' + encodeURIComponent('Hola Johel, vi tu portafolio en Gas Memo y me gustaría conversar sobre una solución digital para mi emprendimiento.');
@@ -11,6 +11,12 @@ const services = [
   { icon: MdDevices, title: 'Sitios y aplicaciones web', text: 'Experiencias rápidas, claras y adaptadas a celulares, tabletas y computadoras.' },
   { icon: MdStorefront, title: 'Presencia para negocios', text: 'Catálogos, pedidos y espacios digitales pensados para acercar emprendimientos a sus clientes.' },
   { icon: MdSupportAgent, title: 'Acompañamiento cercano', text: 'Soluciones prácticas, soporte y mejoras continuas según las necesidades de cada proyecto.' },
+];
+
+const projects = [
+  { name: 'Gas Memo', type: 'Pedidos y logística local', description: 'Experiencia pública para solicitar productos, indicar la entrega y consultar el avance de cada pedido.', action: 'Probar la experiencia', to: '/' },
+  { name: 'Centro Comercial Virtual', type: 'Comercio local', description: 'Un mapa interactivo que conecta a las personas con negocios de Acosta y sus canales de contacto.', action: 'Explorar comercios', to: '/mall' },
+  { name: 'ProGest', type: 'Gestión operativa', description: 'Herramientas administrativas para centralizar pedidos, clientes, productos, facturación y operación diaria.', action: 'Ver código', href: 'https://github.com/heylermora/ProGas' },
 ];
 
 export default function Portfolio() {
@@ -23,11 +29,11 @@ export default function Portfolio() {
       <Stack spacing={{ base: '18px', md: '28px' }}>
         <Box position="relative" overflow="hidden" borderRadius={{ base: '24px', md: '34px' }} bg="linear-gradient(135deg, #11047A 0%, #422AFB 56%, #7551FF 100%)" color="white" px={{ base: '22px', md: '52px' }} py={{ base: '34px', md: '58px' }}>
           <Box position="absolute" right={{ base: '-65px', md: '4%' }} top={{ base: '-30px', md: '18px' }} w={{ base: '180px', md: '260px' }} h={{ base: '180px', md: '260px' }} borderRadius="full" bg="whiteAlpha.100" />
-          <Stack position="relative" spacing="14px" maxW="700px">
+          <Stack position="relative" spacing="14px" maxW="720px">
             <Badge alignSelf="flex-start" px="12px" py="5px" borderRadius="full" bg="whiteAlpha.200" color="white" letterSpacing=".08em">DESARROLLO DIGITAL DESDE ACOSTA</Badge>
             <Heading as="h1" fontSize={{ base: '36px', md: '58px' }} lineHeight="1.02" letterSpacing="-.04em">Johel Mora</Heading>
-            <Text fontSize={{ base: 'lg', md: '2xl' }} fontWeight="700">Ideas locales convertidas en experiencias digitales útiles.</Text>
-            <Text color="whiteAlpha.800" fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.7" maxW="620px">Ayudo a emprendimientos y organizaciones a presentar sus servicios, simplificar sus procesos y conectar con más personas mediante tecnología fácil de usar.</Text>
+            <Text fontSize={{ base: 'lg', md: '2xl' }} fontWeight="700">Desarrollador de software enfocado en soluciones que sí se usan.</Text>
+            <Text color="whiteAlpha.800" fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.7" maxW="650px">Soy Johel, desarrollador de Acosta. Combino tecnología, diseño y conocimiento del entorno local para convertir procesos complejos en herramientas sencillas para negocios y organizaciones.</Text>
             <Flex direction={{ base: 'column', sm: 'row' }} gap="10px" pt="8px">
               <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} bg="white" color="brand.800" borderRadius="full" size="lg" _hover={{ bg: 'brand.100', transform: 'translateY(-2px)' }}>Conversemos por WhatsApp</Button>
               <Button as={RLink} to="/" leftIcon={<MdArrowBack />} variant="ghost" color="white" borderRadius="full" size="lg" _hover={{ bg: 'whiteAlpha.200' }}>Volver a Gas Memo</Button>
@@ -35,15 +41,22 @@ export default function Portfolio() {
           </Stack>
         </Box>
 
-        <Flex position="relative" overflow="hidden" direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" borderRadius={{ base: '22px', md: '28px' }} bg="linear-gradient(120deg, #FACC15 0%, #FFE86A 50%, #FFFFFF 100%)" color="navy.900" px={{ base: '20px', md: '34px' }} py={{ base: '22px', md: '28px' }} boxShadow="0 18px 45px rgba(250,204,21,.28)" border="2px solid" borderColor="yellow.300">
-          <Box position="absolute" right="-30px" top="-54px" fontSize={{ base: '130px', md: '170px' }} opacity=".12" transform="rotate(-12deg)">🚀</Box>
-          <Stack position="relative" spacing="4px" maxW="650px">
-            <Text fontWeight="900" color="brand.700" fontSize="xs" letterSpacing=".12em">PROYECTO DESTACADO</Text>
-            <Heading fontSize={{ base: '26px', md: '36px' }}>Gas Memo: tecnología que impulsa lo local</Heading>
-            <Text fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.6">Pedidos, seguimiento y una vitrina para comercios de la comunidad reunidos en una experiencia real.</Text>
-          </Stack>
-          <Button as={RLink} to="/mall" position="relative" flexShrink={0} w={{ base: '100%', md: 'auto' }} colorScheme="brand" size="lg" borderRadius="full" rightIcon={<MdRocketLaunch />} boxShadow="0 12px 25px rgba(66,42,251,.28)">Ver proyecto en acción</Button>
-        </Flex>
+        <Box as="section" aria-labelledby="projects-title">
+          <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'flex-start', sm: 'flex-end' }} justify="space-between" gap="12px">
+            <Box><Text color="brand.500" fontWeight="900" fontSize="sm" letterSpacing=".1em">EN LO QUE ESTOY TRABAJANDO</Text><Heading id="projects-title" mt="3px" fontSize={{ base: '28px', md: '38px' }}>Proyectos actuales</Heading></Box>
+            <Button as="a" href="https://github.com/heylermora" target="_blank" rel="noopener noreferrer" leftIcon={<FaGithub />} variant="outline" colorScheme="brand" borderRadius="full" size="sm">Ver perfil en GitHub</Button>
+          </Flex>
+          <SimpleGrid columns={{ base: 1, md: 3 }} gap="14px" mt="18px">
+            {projects.map((project, index) => (
+              <Stack key={project.name} position="relative" overflow="hidden" bg={index === 0 ? 'brand.700' : surface} color={index === 0 ? 'white' : undefined} border="1px solid" borderColor={index === 0 ? 'brand.500' : border} borderRadius="24px" p={{ base: '20px', md: '24px' }} spacing="12px" boxShadow={index === 0 ? '0 16px 38px rgba(66,42,251,.24)' : '0 10px 28px rgba(66,42,251,.07)'}>
+                <Text color={index === 0 ? 'cyan.200' : 'brand.500'} fontSize="xs" fontWeight="900" letterSpacing=".08em">{project.type}</Text>
+                <Heading fontSize="2xl">{project.name}</Heading>
+                <Text color={index === 0 ? 'whiteAlpha.800' : muted} fontSize="sm" lineHeight="1.65" flex="1">{project.description}</Text>
+                <Button as={project.to ? RLink : 'a'} to={project.to} href={project.href} target={project.href ? '_blank' : undefined} rel={project.href ? 'noopener noreferrer' : undefined} alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
+              </Stack>
+            ))}
+          </SimpleGrid>
+        </Box>
 
         <Box as="section" aria-labelledby="services-title">
           <Text color="brand.500" fontWeight="900" fontSize="sm" letterSpacing=".1em">SERVICIOS</Text>
