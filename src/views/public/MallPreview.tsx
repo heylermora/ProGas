@@ -99,11 +99,11 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
             {!compact && <Text color="whiteAlpha.700" fontSize="sm">Descubrí emprendimientos de Acosta. Tocá uno para ver cómo contactarlo.</Text>}
           </Stack>
         </Flex>
-        <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} size="lg" borderRadius="full" bgGradient="linear(135deg, #FFF2A8 0%, #FACC15 48%, #E98A00 100%)" color="#281900" fontWeight="900" px="26px" animation={`${ctaPulse} 2.3s ease-in-out infinite`} _motionReduce={{ animation: 'none' }} _hover={{ transform: 'translateY(-3px) scale(1.03)', filter: 'brightness(1.04)', textDecoration: 'none' }}>Explorar todos los negocios{compact ? ' ↗' : ''}</Button>
+        <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} size="lg" borderRadius="full" bgGradient="linear(135deg, #FFF2A8 0%, #FACC15 48%, #E98A00 100%)" color="#281900" fontWeight="900" px="26px" animation={prefersReducedMotion ? undefined : `${ctaPulse} 2.3s ease-in-out infinite`} _hover={{ transform: 'translateY(-3px) scale(1.03)', filter: 'brightness(1.04)', textDecoration: 'none' }}>Explorar todos los negocios{compact ? ' ↗' : ''}</Button>
       </Flex>
 
       <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} animationPlayState={selectedBusinessId ? 'paused' : 'running'}>
+        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessId ? 'paused' : 'running' }}>
           {[0, 1].map((copy) => (
           <Flex key={copy} gap="14px" pr="14px" aria-hidden={copy === 1 ? true : undefined} pointerEvents={copy === 1 ? 'none' : 'auto'}>
             {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="92px" borderRadius="16px" bg="whiteAlpha.100" opacity={1 - item * .16} />)}

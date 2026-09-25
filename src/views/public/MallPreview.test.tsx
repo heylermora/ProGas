@@ -46,8 +46,8 @@ describe('MallPreview', () => {
   it('shows all active businesses without category filters and links to the mall', async () => {
     renderPreview();
 
-    expect(await screen.findByText('Café Central')).toBeTruthy();
-    expect(screen.getByText('Tienda Local')).toBeTruthy();
+    expect((await screen.findAllByText('Café Central')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Tienda Local').length).toBeGreaterThan(0);
     expect(screen.queryByText('Negocio oculto')).toBeNull();
     expect(screen.getByRole('link', { name: /explorar todos los negocios/i }).getAttribute('href')).toBe('/mall');
     expect(screen.queryByRole('button', { name: 'Cafeterías' })).toBeNull();
