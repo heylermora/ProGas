@@ -1,18 +1,10 @@
 // @ts-nocheck
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Icon,
-  IconButton,
-  Image,
-  Stack,
-  Text,
-} from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip, usePrefersReducedMotion } from '@chakra-ui/react';
+import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
-import { MdChevronLeft, MdChevronRight, MdExplore, MdStorefront } from 'react-icons/md';
+import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
+import { MdEmail, MdExplore, MdLink, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
 
@@ -41,16 +33,42 @@ const getPreviewBusinesses = () => {
   return businessesRequest;
 };
 
-type MallPreviewProps = {
-  compact?: boolean;
+const ctaPulse = keyframes`
+  0%, 100% { box-shadow: 0 12px 28px rgba(250, 204, 21, .28), 0 0 0 0 rgba(253, 224, 71, .35); }
+  50% { box-shadow: 0 16px 34px rgba(250, 204, 21, .42), 0 0 0 8px rgba(253, 224, 71, 0); }
+`;
+const marquee = keyframes`
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+`;
+const contactBurst = keyframes`
+  from { opacity: 0; scale: .2; }
+  70% { opacity: 1; scale: 1.14; }
+  to { opacity: 1; scale: 1; }
+`;
+
+const emailPattern = /^[^\s@/:]+@[^\s@/:]+\.[^\s@/:]+$/;
+const linkMeta = (link = '') => {
+  const value = link.toLowerCase();
+  if (value.includes('facebook.com')) return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
+  if (value.includes('instagram.com')) return { label: 'Instagram', icon: FaInstagram, bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' };
+  if (value.includes('whatsapp.com') || value.includes('wa.me')) return { label: 'WhatsApp', icon: FaWhatsapp, bg: '#25D366' };
+  if (value.includes('tiktok.com')) return { label: 'TikTok', icon: FaTiktok, bg: '#111111' };
+  if (value.startsWith('mailto:') || emailPattern.test(link.trim())) return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
+  if (value.startsWith('http')) return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
+  return { label: 'Contacto', icon: MdLink, bg: '#64748B' };
 };
+
+const hrefFor = (link = '') => emailPattern.test(link.trim()) ? `mailto:${link.trim()}` : link;
+
+type MallPreviewProps = { compact?: boolean };
 
 export default function MallPreview({ compact = false }: MallPreviewProps) {
   const location = useLocation();
+  const prefersReducedMotion = usePrefersReducedMotion();
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(!cachedBusinesses);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const [selectedBusinessKey, setSelectedBusinessKey] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -61,113 +79,70 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
     return () => { mounted = false; };
   }, []);
 
-  const move = (direction: number) => trackRef.current?.scrollBy({ left: direction * 250, behavior: 'smooth' });
-  const categories = Array.from(new Set(businesses.map((business) => business.category).filter(Boolean))).sort((a, b) => a.localeCompare(b));
-  const previewBusinesses = businesses
-    .filter((business) => !selectedCategory || business.category === selectedCategory)
-    .slice(0, 12);
-  const chooseCategory = (category: string) => {
-    setSelectedCategory(category);
-    trackRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
-  };
+  const previewBusinesses = businesses;
   const originLabels: Record<string, string> = {
-    '/': 'Volver al inicio',
-    '/customer/data': 'Volver a verificación',
-    '/customer/info': 'Volver al cliente',
-    '/customer/products': 'Volver al pedido',
-    '/customer/view-order': 'Volver a consultar pedido',
+    '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
+    '/customer/products': 'Volver al pedido', '/customer/view-order': 'Volver a consultar pedido',
   };
   const mallDestination = { pathname: '/mall', state: { from: location.pathname, fromLabel: originLabels[location.pathname] || 'Volver' } };
-  const stationDestination = (business: SponsorItem) => ({
-    pathname: '/mall',
-    search: `?business=${encodeURIComponent(business.id || '')}`,
-    state: { from: location.pathname, fromLabel: originLabels[location.pathname] || 'Volver' },
-  });
   const secondaryWindow = compact ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+  const toggleBusiness = (key: string) => setSelectedBusinessKey((current) => current === key ? '' : key);
 
   return (
-    <Box
-      as="section"
-      aria-labelledby="mall-preview-title"
-      position="relative"
-      overflow="hidden"
-      borderRadius={{ base: '22px', md: '28px' }}
-      bg="radial-gradient(circle at 86% 18%, #4338CA 0%, #172554 42%, #070B1F 100%)"
-      color="white"
-      p={{ base: '16px', md: compact ? '18px' : '24px' }}
-      boxShadow="0 18px 44px rgba(15, 23, 42, .18)"
-      border="1px solid"
-      borderColor="whiteAlpha.200"
-    >
-      <Box position="absolute" inset="0" opacity=".55" pointerEvents="none" bgImage="radial-gradient(circle at 12% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 2px)" bgSize="44px 44px, 61px 61px" />
-      <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="12px" direction={{ base: 'column', md: 'row' }} mb="14px">
+    <Box as="section" aria-labelledby="mall-preview-title" position="relative" overflow="hidden" borderRadius={{ base: '22px', md: '28px' }} bg="linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)" color="white" p={{ base: '16px', md: compact ? '18px' : '24px' }} boxShadow="0 16px 38px rgba(15, 23, 42, .16)" border="1px solid" borderColor="whiteAlpha.200">
+      <Box position="absolute" inset="0" opacity=".18" pointerEvents="none" bgImage="radial-gradient(circle at 25% 25%, #fff 0 1px, transparent 1.5px)" bgSize="54px 54px" />
+      <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="14px" direction={{ base: 'column', md: 'row' }} mb={{ base: '18px', md: '20px' }}>
         <Flex gap="12px" align="center">
-          <Flex w={{ base: '44px', md: '52px' }} h={{ base: '44px', md: '52px' }} flex="0 0 auto" borderRadius="full" align="center" justify="center" bg="whiteAlpha.200" border="1px solid" borderColor="cyan.200" fontSize={{ base: '25px', md: '30px' }}>🧑‍🚀</Flex>
+          <Flex w={{ base: '42px', md: '48px' }} h={{ base: '42px', md: '48px' }} flex="0 0 auto" borderRadius="16px" align="center" justify="center" bg="whiteAlpha.100" border="1px solid" borderColor="whiteAlpha.300" fontSize={{ base: '23px', md: '27px' }}>🧑‍🚀</Flex>
           <Stack spacing="2px">
-            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Descubre nuestra comunidad</Heading>
-            {!compact && <Text color="whiteAlpha.800" fontSize="sm">Una galaxia de comercios locales te espera en el centro comercial virtual.</Text>}
+            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de nuestra comunidad</Heading>
+            {!compact && <Text color="whiteAlpha.700" fontSize="sm">Descubrí emprendimientos de Acosta. Tocá uno para ver cómo contactarlo.</Text>}
           </Stack>
         </Flex>
-        <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} borderRadius="full" bgGradient="linear(135deg, #FFE29F 0%, #D4AF37 48%, #8A5A00 100%)" color="white" boxShadow="0 12px 24px rgba(184,134,11,.34)" _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.06)' }}>Explorar el mapa{compact ? ' ↗' : ''}</Button>
+        <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} size="lg" borderRadius="full" bgGradient="linear(135deg, #FFF2A8 0%, #FACC15 48%, #E98A00 100%)" color="#281900" fontWeight="900" px="26px" animation={prefersReducedMotion ? undefined : `${ctaPulse} 2.3s ease-in-out infinite`} _hover={{ transform: 'translateY(-3px) scale(1.03)', filter: 'brightness(1.04)', textDecoration: 'none' }}>Explorar todos los negocios{compact ? ' ↗' : ''}</Button>
       </Flex>
 
-      {!loading && categories.length > 1 && (
-        <Flex position="relative" gap="7px" mb="12px" overflowX="auto" pb="2px" scrollSnapType="x proximity" sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
-          <Button aria-pressed={!selectedCategory} onClick={() => chooseCategory('')} flex="0 0 auto" scrollSnapAlign="start" size="xs" px="13px" borderRadius="full" bg={!selectedCategory ? 'cyan.300' : 'whiteAlpha.150'} color={!selectedCategory ? 'navy.900' : 'white'} border="1px solid" borderColor={!selectedCategory ? 'cyan.200' : 'whiteAlpha.300'} _hover={{ bg: !selectedCategory ? 'cyan.200' : 'whiteAlpha.250' }}>Todos</Button>
-          {categories.map((category) => (
-            <Button key={category} aria-pressed={selectedCategory === category} onClick={() => chooseCategory(category)} flex="0 0 auto" scrollSnapAlign="start" size="xs" px="13px" borderRadius="full" bg={selectedCategory === category ? 'cyan.300' : 'whiteAlpha.150'} color={selectedCategory === category ? 'navy.900' : 'white'} border="1px solid" borderColor={selectedCategory === category ? 'cyan.200' : 'whiteAlpha.300'} _hover={{ bg: selectedCategory === category ? 'cyan.200' : 'whiteAlpha.250' }}>{category}</Button>
+      <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
+        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
+          {[0, 1].map((copy) => (
+          <Flex key={copy} gap="14px" pr="14px">
+            {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="92px" borderRadius="16px" bg="whiteAlpha.100" opacity={1 - item * .16} />)}
+            {!loading && previewBusinesses.map((business) => {
+              const businessKey = `${copy}:${business.id}`;
+              const selected = selectedBusinessKey === businessKey;
+              const contacts = (business.links || []).filter(Boolean).slice(0, 5);
+              return (
+                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} h={{ base: '142px', md: '150px' }} pt="22px">
+                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
+                    <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
+                      {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
+                    </Flex>
+                    <Stack spacing="4px" minW="0">
+                      <Text fontWeight="800" fontSize="sm" noOfLines={2} lineHeight="1.12">{business.name || 'Negocio local'}</Text>
+                      <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'ELEGÍ UNA RED' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
+                    </Stack>
+                  </Flex>
+                  {selected && contacts.length > 0 && (
+                    <Box position="absolute" inset="0" zIndex={4} pointerEvents="none">
+                      {contacts.map((contact, index) => { const meta = linkMeta(contact); const positions = [
+                        { left: '8px', top: '0' }, { left: '50%', top: '0', transform: 'translateX(-50%)' }, { right: '8px', top: '0' },
+                        { left: '34px', bottom: '0' }, { right: '34px', bottom: '0' },
+                      ]; return (
+                        <Tooltip key={contact} label={meta.label} hasArrow>
+                          <IconButton as={Link} href={hrefFor(contact)} isExternal={!hrefFor(contact).startsWith('mailto:')} aria-label={`${meta.label} de ${business.name}`} icon={<Icon as={meta.icon} boxSize="16px" />} position="absolute" {...positions[index]} pointerEvents="auto" minW="36px" minH="36px" maxW="36px" maxH="36px" w="36px" h="36px" p="0" flexShrink={0} borderRadius="full" color="white" border="2px solid" borderColor="white" boxShadow="0 8px 18px rgba(0,0,0,.28)" sx={{ background: meta.bg, aspectRatio: '1 / 1' }} animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} _hover={{ marginTop: '-3px', textDecoration: 'none', filter: 'brightness(1.08)' }} />
+                        </Tooltip>
+                      ); })}
+                    </Box>
+                  )}
+                </Box>
+              );
+            })}
+            {!loading && !previewBusinesses.length && <Flex flex="1" minH="86px" p="14px" borderRadius="16px" border="1px dashed" borderColor="whiteAlpha.300" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color="cyan.200" /><Text fontSize="sm" color="whiteAlpha.700">Muy pronto encontrarás negocios locales en este espacio.</Text></Flex>}
+          </Flex>
           ))}
         </Flex>
-      )}
-
-      <Flex align="center" gap={{ base: '7px', md: '10px' }}>
-        {!loading && previewBusinesses.length > 1 && <CarouselButton direction="previous" onClick={() => move(-1)} />}
-        <Box flex="1" minW="0" overflow="hidden">
-          <Flex ref={trackRef} gap="10px" overflowX="auto" scrollSnapType="x mandatory" pb="3px" sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
-            {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="96px" borderRadius="18px" bg="whiteAlpha.200" opacity={1 - item * .14} />)}
-            {!loading && previewBusinesses.map((business) => (
-              <Flex key={business.id} as={RLink} to={stationDestination(business)} {...secondaryWindow} aria-label={`Ver estación de ${business.name || 'negocio local'}`} scrollSnapAlign="start" flex={{ base: '0 0 178px', md: '0 0 210px' }} minW="0" minH={{ base: '94px', md: '104px' }} p="10px" gap="10px" align="center" borderRadius="18px" bg="rgba(255,255,255,.94)" color="navy.900" border="2px solid" borderColor="white" boxShadow="0 10px 24px rgba(0,0,0,.22)" transition="transform .2s ease, box-shadow .2s ease" _hover={{ textDecoration: 'none', transform: 'translateY(-3px)', boxShadow: '0 15px 30px rgba(0,0,0,.30)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}>
-                <Flex w={{ base: '54px', md: '62px' }} h={{ base: '54px', md: '62px' }} flex="0 0 auto" borderRadius="16px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
-                  {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}
-                </Flex>
-                <Stack spacing="3px" minW="0">
-                  <Text fontWeight="900" fontSize="sm" noOfLines={2} lineHeight="1.08">{business.name || 'Negocio local'}</Text>
-                  <Text color="brand.500" fontSize="9px" fontWeight="900">VER ESTACIÓN</Text>
-                </Stack>
-              </Flex>
-            ))}
-            {!loading && !previewBusinesses.length && (
-              <Flex flex="1" minH="86px" p="14px" borderRadius="18px" border="1px dashed" borderColor="whiteAlpha.400" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color="cyan.200" /><Text fontSize="sm" color="whiteAlpha.800">Muy pronto encontrarás negocios locales en este mapa.</Text></Flex>
-            )}
-          </Flex>
-        </Box>
-        {!loading && previewBusinesses.length > 1 && <CarouselButton direction="next" onClick={() => move(1)} />}
-      </Flex>
+        {selectedBusinessKey && <Text textAlign="center" color="whiteAlpha.600" fontSize="10px">El carrusel está pausado mientras revisás los contactos.</Text>}
+      </Box>
     </Box>
-  );
-}
-
-function CarouselButton({ direction, onClick }: { direction: 'previous' | 'next'; onClick: () => void }) {
-  const previous = direction === 'previous';
-  return (
-    <IconButton
-      aria-label={previous ? 'Ver negocios anteriores' : 'Ver más negocios'}
-      icon={<Icon as={previous ? MdChevronLeft : MdChevronRight} boxSize="26px" />}
-      flex="0 0 auto"
-      display={{ base: 'none', sm: 'inline-flex' }}
-      w={{ base: '40px', md: '46px' }}
-      h={{ base: '40px', md: '46px' }}
-      minW={{ base: '40px', md: '46px' }}
-      borderRadius="full"
-      bg="rgba(8,14,38,.90)"
-      color="yellow.200"
-      border="1px solid"
-      borderColor="yellow.300"
-      boxShadow="0 10px 24px rgba(0,0,0,.38), 0 0 0 4px rgba(250,204,21,.10)"
-      backdropFilter="blur(10px)"
-      onClick={onClick}
-      _hover={{ bg: 'yellow.400', color: 'navy.900', transform: 'scale(1.06)' }}
-      _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}
-    />
   );
 }

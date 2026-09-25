@@ -5,7 +5,13 @@ export const buttonStyles = {
 			baseStyle: {
 				borderRadius: '14px',
 				minH: '44px',
+				minW: 0,
+				maxW: '100%',
 				fontWeight: '700',
+				lineHeight: '1.25',
+				textAlign: 'center',
+				whiteSpace: 'normal',
+				overflowWrap: 'anywhere',
 				boxShadow: '45px 76px 113px 7px rgba(112, 144, 176, 0.08)',
 				transition: '.25s all ease',
 				boxSizing: 'border-box',

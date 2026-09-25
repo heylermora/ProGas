@@ -94,7 +94,11 @@ export const globalStyles = {
 				color: mode('navy.700', 'white')(props)
 			},
 			'*, *::before, *::after': {
-				boxSizing: 'border-box'
+				boxSizing: 'border-box',
+				minWidth: 0
+			},
+			'p, h1, h2, h3, h4, h5, h6, a, button': {
+				overflowWrap: 'anywhere'
 			},
 			'a, button, [role=button], input, select, textarea': {
 				_focusVisible: {
