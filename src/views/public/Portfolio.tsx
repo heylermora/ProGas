@@ -1,8 +1,11 @@
 import React from 'react';
 import { Badge, Box, Button, Flex, Heading, Icon, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { MdArrowBack, MdDevices, MdEmail, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
+import { MdArrowBack, MdDevices, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
+import { FaWhatsapp } from 'react-icons/fa';
 import { PublicPage } from './PublicPage';
+
+const whatsappUrl = 'https://wa.me/50683508585?text=' + encodeURIComponent('Hola Johel, vi tu portafolio en Gas Memo y me gustaría conversar sobre una solución digital para mi emprendimiento.');
 
 const services = [
   { icon: MdDevices, title: 'Sitios y aplicaciones web', text: 'Experiencias rápidas, claras y adaptadas a celulares, tabletas y computadoras.' },
@@ -26,11 +29,21 @@ export default function Portfolio() {
             <Text fontSize={{ base: 'lg', md: '2xl' }} fontWeight="700">Ideas locales convertidas en experiencias digitales útiles.</Text>
             <Text color="whiteAlpha.800" fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.7" maxW="620px">Ayudo a emprendimientos y organizaciones a presentar sus servicios, simplificar sus procesos y conectar con más personas mediante tecnología fácil de usar.</Text>
             <Flex direction={{ base: 'column', sm: 'row' }} gap="10px" pt="8px">
-              <Button as="a" href="mailto:johelmora@gmail.com?subject=Quiero%20impulsar%20mi%20emprendimiento" leftIcon={<MdEmail />} bg="white" color="brand.800" borderRadius="full" size="lg" _hover={{ bg: 'brand.100', transform: 'translateY(-2px)' }}>Conversemos sobre tu idea</Button>
+              <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} bg="white" color="brand.800" borderRadius="full" size="lg" _hover={{ bg: 'brand.100', transform: 'translateY(-2px)' }}>Conversemos por WhatsApp</Button>
               <Button as={RLink} to="/" leftIcon={<MdArrowBack />} variant="ghost" color="white" borderRadius="full" size="lg" _hover={{ bg: 'whiteAlpha.200' }}>Volver a Gas Memo</Button>
             </Flex>
           </Stack>
         </Box>
+
+        <Flex position="relative" overflow="hidden" direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" borderRadius={{ base: '22px', md: '28px' }} bg="linear-gradient(120deg, #FACC15 0%, #FFE86A 50%, #FFFFFF 100%)" color="navy.900" px={{ base: '20px', md: '34px' }} py={{ base: '22px', md: '28px' }} boxShadow="0 18px 45px rgba(250,204,21,.28)" border="2px solid" borderColor="yellow.300">
+          <Box position="absolute" right="-30px" top="-54px" fontSize={{ base: '130px', md: '170px' }} opacity=".12" transform="rotate(-12deg)">🚀</Box>
+          <Stack position="relative" spacing="4px" maxW="650px">
+            <Text fontWeight="900" color="brand.700" fontSize="xs" letterSpacing=".12em">PROYECTO DESTACADO</Text>
+            <Heading fontSize={{ base: '26px', md: '36px' }}>Gas Memo: tecnología que impulsa lo local</Heading>
+            <Text fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.6">Pedidos, seguimiento y una vitrina para comercios de la comunidad reunidos en una experiencia real.</Text>
+          </Stack>
+          <Button as={RLink} to="/mall" position="relative" flexShrink={0} w={{ base: '100%', md: 'auto' }} colorScheme="brand" size="lg" borderRadius="full" rightIcon={<MdRocketLaunch />} boxShadow="0 12px 25px rgba(66,42,251,.28)">Ver proyecto en acción</Button>
+        </Flex>
 
         <Box as="section" aria-labelledby="services-title">
           <Text color="brand.500" fontWeight="900" fontSize="sm" letterSpacing=".1em">SERVICIOS</Text>
@@ -48,7 +61,7 @@ export default function Portfolio() {
 
         <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" bg={surface} border="1px solid" borderColor={border} borderRadius="24px" p={{ base: '22px', md: '30px' }}>
           <Flex gap="14px" align="center"><Flex w="50px" h="50px" borderRadius="full" bg="brand.500" color="white" align="center" justify="center"><Icon as={MdRocketLaunch} boxSize="26px" /></Flex><Box><Heading fontSize={{ base: 'xl', md: '2xl' }}>¿Tenés una idea?</Heading><Text color={muted}>Démosle forma y pongámosla al alcance de tus clientes.</Text></Box></Flex>
-          <Button as="a" href="mailto:johelmora@gmail.com?subject=Nuevo%20proyecto" colorScheme="brand" borderRadius="full" size="lg" flexShrink={0} w={{ base: '100%', md: 'auto' }}>Iniciar un proyecto</Button>
+          <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} colorScheme="brand" borderRadius="full" size="lg" flexShrink={0} w={{ base: '100%', md: 'auto' }}>Escribirme por WhatsApp</Button>
         </Flex>
       </Stack>
     </PublicPage>

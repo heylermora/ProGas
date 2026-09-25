@@ -68,7 +68,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
   const [loading, setLoading] = useState(!cachedBusinesses);
-  const [selectedBusinessId, setSelectedBusinessId] = useState('');
+  const [selectedBusinessKey, setSelectedBusinessKey] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -86,7 +86,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
   };
   const mallDestination = { pathname: '/mall', state: { from: location.pathname, fromLabel: originLabels[location.pathname] || 'Volver' } };
   const secondaryWindow = compact ? { target: '_blank', rel: 'noopener noreferrer' } : {};
-  const toggleBusiness = (id: string) => setSelectedBusinessId((current) => current === id ? '' : id);
+  const toggleBusiness = (key: string) => setSelectedBusinessKey((current) => current === key ? '' : key);
 
   return (
     <Box as="section" aria-labelledby="mall-preview-title" position="relative" overflow="hidden" borderRadius={{ base: '22px', md: '28px' }} bg="linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)" color="white" p={{ base: '16px', md: compact ? '18px' : '24px' }} boxShadow="0 16px 38px rgba(15, 23, 42, .16)" border="1px solid" borderColor="whiteAlpha.200">
@@ -103,16 +103,17 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
       </Flex>
 
       <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessId ? 'paused' : 'running' }}>
+        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
           {[0, 1].map((copy) => (
-          <Flex key={copy} gap="14px" pr="14px" aria-hidden={copy === 1 ? true : undefined} pointerEvents={copy === 1 ? 'none' : 'auto'}>
+          <Flex key={copy} gap="14px" pr="14px">
             {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="92px" borderRadius="16px" bg="whiteAlpha.100" opacity={1 - item * .16} />)}
             {!loading && previewBusinesses.map((business) => {
-              const selected = copy === 0 && selectedBusinessId === business.id;
+              const businessKey = `${copy}:${business.id}`;
+              const selected = selectedBusinessKey === businessKey;
               const contacts = (business.links || []).filter(Boolean).slice(0, 5);
               return (
                 <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} h={{ base: '142px', md: '150px' }} pt="22px">
-                  <Flex as="button" type="button" tabIndex={copy === 1 ? -1 : 0} aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => copy === 0 && toggleBusiness(business.id)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
+                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
                     <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                       {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
                     </Flex>
@@ -128,7 +129,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
                         { left: '34px', bottom: '0' }, { right: '34px', bottom: '0' },
                       ]; return (
                         <Tooltip key={contact} label={meta.label} hasArrow>
-                          <IconButton as={Link} href={hrefFor(contact)} isExternal={!hrefFor(contact).startsWith('mailto:')} aria-label={`${meta.label} de ${business.name}`} icon={<Icon as={meta.icon} boxSize="16px" />} position="absolute" {...positions[index]} pointerEvents="auto" minW="36px" w="36px" h="36px" p="0" borderRadius="50%" color="white" border="2px solid" borderColor="white" boxShadow="0 8px 18px rgba(0,0,0,.28)" sx={{ background: meta.bg }} animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} _hover={{ marginTop: '-3px', textDecoration: 'none', filter: 'brightness(1.08)' }} />
+                          <IconButton as={Link} href={hrefFor(contact)} isExternal={!hrefFor(contact).startsWith('mailto:')} aria-label={`${meta.label} de ${business.name}`} icon={<Icon as={meta.icon} boxSize="16px" />} position="absolute" {...positions[index]} pointerEvents="auto" minW="36px" minH="36px" maxW="36px" maxH="36px" w="36px" h="36px" p="0" flexShrink={0} borderRadius="full" color="white" border="2px solid" borderColor="white" boxShadow="0 8px 18px rgba(0,0,0,.28)" sx={{ background: meta.bg, aspectRatio: '1 / 1' }} animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} _hover={{ marginTop: '-3px', textDecoration: 'none', filter: 'brightness(1.08)' }} />
                         </Tooltip>
                       ); })}
                     </Box>
@@ -140,7 +141,7 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
           </Flex>
           ))}
         </Flex>
-        {selectedBusinessId && <Text textAlign="center" color="whiteAlpha.600" fontSize="10px">El carrusel está pausado mientras revisás los contactos.</Text>}
+        {selectedBusinessKey && <Text textAlign="center" color="whiteAlpha.600" fontSize="10px">El carrusel está pausado mientras revisás los contactos.</Text>}
       </Box>
     </Box>
   );

@@ -58,7 +58,7 @@ describe('MallPreview', () => {
   it('opens contact bubbles in place and pauses the carousel', async () => {
     renderPreview();
 
-    const business = await screen.findByRole('button', { name: /ver contactos de café central/i });
+    const [business] = await screen.findAllByRole('button', { name: /ver contactos de café central/i });
     fireEvent.click(business);
 
     expect(screen.getByRole('button', { name: /ocultar contactos de café central/i }).getAttribute('aria-expanded')).toBe('true');
