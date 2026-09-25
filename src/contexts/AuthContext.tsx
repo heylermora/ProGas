@@ -9,6 +9,7 @@ type UserProfile = {
   id?: string;
   userId?: string;
   roles?: AppRole[];
+  active?: boolean;
 };
 
 type AuthContextType = {
@@ -28,12 +29,14 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [accessEnabled, setAccessEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       setRoles([]);
+      setAccessEnabled(false);
 
       if (firebaseUser) {
         try {
@@ -42,7 +45,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             { searchFields: ['userId'], searchTerm: [firebaseUser.uid] },
             1
           );
-          setRoles(profiles[0]?.roles || []);
+          // Missing `active` keeps backwards compatibility with existing users;
+          // explicitly disabled collaborators lose access immediately on login.
+          const profile = profiles[0];
+          const enabled = Boolean(profile) && profile.active !== false;
+          setAccessEnabled(enabled);
+          setRoles(enabled ? (profile.roles || []) : []);
         } catch (error) {
           console.error('[AuthContext] No se pudieron cargar los roles del usuario:', error);
         }
@@ -56,7 +64,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, roles, loading, hasRole: (allowedRoles) => {
-      if (!allowedRoles?.length) return !!user;
+      if (!user || !accessEnabled) return false;
+      if (!allowedRoles?.length) return true;
       return allowedRoles.some((role) => roles.includes(role));
     } }}>
       {children}

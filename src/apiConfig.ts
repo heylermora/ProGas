@@ -4,7 +4,7 @@ import { getFirestore, collection, getDoc, getDocs, addDoc, doc, updateDoc, dele
 import { getAuth } from "firebase/auth";
 
 // Tu configuración de Firebase
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: "AIzaSyCmu7161B_rRoXn4_eLLW64s5EzaOVlCvA",
     authDomain: "progasdb-8c0e4.firebaseapp.com",
     projectId: "progasdb-8c0e4",
