@@ -201,6 +201,7 @@ const routes: RoutesType[] = [
     path: '/dashboard/index',
     component: Dashboard,
     secondary: true,
+    fullLayout: true,
   },
   {
     name: 'Salir',
