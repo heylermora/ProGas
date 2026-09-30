@@ -8,7 +8,6 @@ import {
 import { MdArrowBack, MdCheck, MdInventory2, MdLocalOffer, MdPayments, MdWarning } from 'react-icons/md';
 import Card from 'components/card/Card';
 import HelpLabel from 'components/form/HelpLabel';
-import PageHeader from 'components/layout/PageHeader';
 import productService from 'services/ProductService';
 import { Product, ProductCategory } from 'interfaces/ProductItem';
 import useCategories from 'hooks/useCategories';
@@ -37,6 +36,8 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   const muted = useColorModeValue('gray.600', 'gray.400');
   const subtleBg = useColorModeValue('gray.50', 'whiteAlpha.50');
   const border = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const heroBg = useColorModeValue('linear(to-r, white, brand.50)', 'linear(to-r, navy.800, navy.700)');
+  const actionBg = useColorModeValue('rgba(255,255,255,.94)', 'rgba(17,25,54,.94)');
 
   const set = (key: keyof ProductDraft, value: any) => setValues((current) => ({ ...current, [key]: value }));
   const invalid = !values.description.trim() || !values.category || values.price <= 0 || values.costPrice < 0 || values.stock < 0 || Number(values.lowStockThreshold) < 0;
@@ -62,13 +63,21 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   };
 
   return (
-    <Box pt={{ base: '130px', md: '80px' }} maxW="1180px" mx="auto" pb="40px">
-      <Button leftIcon={<MdArrowBack />} variant="ghost" mb="12px" onClick={goBack}>Volver al inventario</Button>
-      <PageHeader
-        title={product ? 'Editar producto' : 'Nuevo producto'}
-        description={product ? 'Actualizá la información comercial sin perder de vista su impacto en el inventario.' : 'Agregá la información necesaria para vender y controlar este producto.'}
-        action={<Badge px="12px" py="7px" borderRadius="full" colorScheme={values.active ? 'green' : 'gray'}>{values.active ? 'Producto activo' : 'Producto inactivo'}</Badge>}
-      />
+    <Box pt={{ base: '120px', md: '78px' }} maxW="1180px" mx="auto" pb="48px">
+      <Card mb="20px" p={{ base: '18px', md: '24px' }} overflow="hidden" position="relative" bgGradient={heroBg}>
+        <Box position="absolute" right="-45px" top="-60px" boxSize="180px" borderRadius="full" bg="brand.400" opacity="0.08" />
+        <Flex position="relative" justify="space-between" align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap={5}>
+          <HStack spacing={4} align="flex-start">
+            <Button aria-label="Volver al inventario" leftIcon={<MdArrowBack />} variant="outline" borderRadius="xl" onClick={goBack}>Volver</Button>
+            <Box>
+              <Text color="brand.500" fontWeight="900" fontSize="xs" letterSpacing=".08em" textTransform="uppercase">Inventario · {product ? 'Edición' : 'Nuevo registro'}</Text>
+              <Heading color={textColor} fontSize={{ base: '26px', md: '34px' }} mt={1}>{product ? values.description || 'Editar producto' : 'Nuevo producto'}</Heading>
+              <Text color={muted} mt={2} maxW="680px">{product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'}</Text>
+            </Box>
+          </HStack>
+          <Badge px="13px" py="8px" borderRadius="full" colorScheme={values.active ? 'green' : 'gray'} flexShrink={0}>{values.active ? 'Producto activo' : 'Producto inactivo'}</Badge>
+        </Flex>
+      </Card>
 
       <SimpleGrid columns={{ base: 1, lg: 3 }} spacing="20px" alignItems="start">
         <Stack gridColumn={{ lg: 'span 2' }} spacing="18px">
@@ -144,9 +153,9 @@ export default function ProductForm({ product, isLoading = false }: Props) {
         </Card>
       </SimpleGrid>
 
-      <Flex mt="24px" justify="flex-end" direction={{ base: 'column-reverse', sm: 'row' }} gap="10px">
-        <Button variant="ghost" onClick={goBack} isDisabled={saving}>Cancelar</Button>
-        <Button leftIcon={<MdCheck />} colorScheme="brand" size="lg" px="28px" isLoading={saving || isLoading} loadingText="Guardando" onClick={save}>{product ? 'Guardar cambios' : 'Crear producto'}</Button>
+      <Flex mt="24px" p={{ base: 3, md: 4 }} bg={actionBg} borderWidth="1px" borderColor={border} borderRadius="2xl" boxShadow="lg" position="sticky" bottom="12px" zIndex={5} justify="space-between" align={{ base: 'stretch', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap="10px" backdropFilter="blur(12px)">
+        <Text color={muted} fontSize="sm">{invalid ? 'Revisá los campos obligatorios antes de guardar.' : 'Todo listo para guardar los cambios.'}</Text>
+        <HStack justify={{ base: 'stretch', sm: 'flex-end' }}><Button flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={goBack} isDisabled={saving}>Cancelar</Button><Button flex={{ base: 1, sm: 'initial' }} leftIcon={<MdCheck />} colorScheme="brand" size="lg" px="28px" isLoading={saving || isLoading} loadingText="Guardando" onClick={save}>{product ? 'Guardar cambios' : 'Crear producto'}</Button></HStack>
       </Flex>
     </Box>
   );

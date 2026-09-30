@@ -119,9 +119,19 @@ export default function Users() {
       {loading ? <AsyncContent isLoading loadingLabel="Cargando colaboradores" /> : visible.length === 0 ? (
         <EmptyState icon={MdManageAccounts} title={query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'} description={query ? 'Probá con otro nombre o correo.' : 'Agregá a la primera persona de tu equipo.'} actionLabel={!query ? 'Agregar colaborador' : undefined} actionIcon={<MdAdd />} onAction={!query ? openCreate : undefined} />
       ) : (
-        <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4}>{visible.map(user => (
-          <Card key={user.id} p={5} _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }} transition="all .2s ease">
-            <Flex align="center" gap={3}><Avatar name={user.name} bg="brand.500" color="white" /><Box minW={0} flex="1"><Flex align="center" gap={2}><Text fontWeight="800" noOfLines={1}>{user.name || 'Sin nombre'}</Text><Badge colorScheme={user.active === false ? 'gray' : 'green'} borderRadius="full">{user.active === false ? 'Inactivo' : 'Activo'}</Badge></Flex><Text color={muted} fontSize="sm" noOfLines={1}>{user.email}</Text></Box><Button size="sm" variant="ghost" colorScheme="brand" leftIcon={<MdEdit />} onClick={() => openEdit(user)}>Editar</Button></Flex>
+        <SimpleGrid columns={{ base: 1, lg: 2, '2xl': 3 }} spacing={4}>{visible.map(user => (
+          <Card key={user.id} p={{ base: 4, md: 5 }} borderWidth="1px" borderColor="blackAlpha.100" _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg', borderColor: 'brand.200' }} transition="all .2s ease">
+            <Flex align="flex-start" gap={4}>
+              <Avatar name={user.name} size="lg" bg="brand.500" color="white" flexShrink={0} />
+              <Box minW={0} flex="1">
+                <Flex align="center" justify="space-between" gap={3} wrap="wrap">
+                  <Text fontWeight="900" fontSize="lg" lineHeight="short" wordBreak="break-word">{user.name || 'Sin nombre'}</Text>
+                  <Badge colorScheme={user.active === false ? 'gray' : 'green'} borderRadius="full" px={3} py={1}>{user.active === false ? 'Inactivo' : 'Activo'}</Badge>
+                </Flex>
+                <Text color={muted} fontSize="sm" mt={2} wordBreak="break-all">{user.email}</Text>
+                <Button mt={4} size="sm" variant="outline" colorScheme="brand" leftIcon={<MdEdit />} onClick={() => openEdit(user)}>Editar acceso</Button>
+              </Box>
+            </Flex>
           </Card>
         ))}</SimpleGrid>
       )}

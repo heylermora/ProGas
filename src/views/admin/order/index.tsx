@@ -123,21 +123,19 @@ export default function Index() {
         </SimpleGrid>
         {hasAdvancedFilters && <Flex justify="flex-end" mt={3}><Button size="sm" variant="ghost" onClick={clearFilters}>Limpiar filtros</Button></Flex>}
       </Box>
-      <Flex flexWrap="wrap" align="center" gap={2} mb={5}>
-        {STATUS_MENU.map((status) => (
-          <Button
-            key={status}
-            size="sm"
-            variant={activeStatus === status ? 'solid' : 'outline'}
-            colorScheme={activeStatus === status ? 'brand' : 'gray'}
-            borderRadius="full"
-            onClick={() => handleStatusClick(status)}
-          >
-            {status} <Badge ml={2} borderRadius="full" colorScheme={activeStatus === status ? 'whiteAlpha' : 'gray'}>{statusCounts[status] || 0}</Badge>
-          </Button>
-        ))}
-        <IconButton ml="auto" colorScheme="brand" aria-label="Crear pedido" icon={<MdAdd />} as={RLink as any} borderRadius="full" to="/admin/order/new" />
-      </Flex>
+      <Box bg="white" borderRadius="2xl" p={{ base: 3, md: 4 }} mb={5} boxShadow="sm" borderWidth="1px" borderColor="blackAlpha.100">
+        <Flex align="center" justify="space-between" gap={3} mb={3}>
+          <Box><Text fontWeight="900">Estado de los pedidos</Text><Text fontSize="sm" color="gray.500">Elegí un estado para acotar el listado.</Text></Box>
+          <IconButton colorScheme="brand" aria-label="Crear pedido" icon={<MdAdd />} as={RLink as any} borderRadius="full" to="/admin/order/new" flexShrink={0} />
+        </Flex>
+        <SimpleGrid columns={{ base: 2, sm: 3, lg: 4, xl: 7 }} gap={2}>
+          {STATUS_MENU.map((status) => (
+            <Button key={status} minW={0} w="100%" justifyContent="space-between" size="sm" px={3} variant={activeStatus === status ? 'solid' : 'outline'} colorScheme={activeStatus === status ? 'brand' : 'gray'} borderRadius="xl" onClick={() => handleStatusClick(status)}>
+              <Text as="span" noOfLines={1}>{status}</Text><Badge ml={2} flexShrink={0} borderRadius="full" colorScheme={activeStatus === status ? 'whiteAlpha' : 'gray'}>{statusCounts[status] || 0}</Badge>
+            </Button>
+          ))}
+        </SimpleGrid>
+      </Box>
       {isError ? (
         <Error />
       ) : isLoading ? (

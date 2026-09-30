@@ -92,12 +92,16 @@ export default function Products() {
       </SimpleGrid>
 
       <Card p="0" overflow="hidden">
-        <Flex p="20px" gap="12px" wrap="wrap" align="center">
-          <Text flex="1" color={muted} fontSize="sm">Use el buscador superior para filtrar por nombre o SKU.</Text>
-          <Select value={category} onChange={e => setCategory(e.target.value)} maxW={{ base: '100%', md: '210px' }}><option value="">Todas las categorías</option>{availableCategories.map(item => <option key={item}>{item}</option>)}</Select>
-          <Button leftIcon={<MdSettings />} variant="outline" onClick={categoryManager.onOpen}>Categorías</Button>
-          <Select value={status} onChange={e => setStatus(e.target.value)} maxW={{ base: '100%', md: '170px' }}><option value="">Todos los estados</option><option value="active">Activos</option><option value="inactive">Inactivos</option></Select>
-        </Flex>
+        <Box p={{ base: '16px', md: '20px' }}>
+          <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap={3} mb={4}>
+            <Box><Text fontWeight="900" color={text}>Filtros del inventario</Text><Text color={muted} fontSize="sm" mt={1}>El buscador superior filtra por nombre o SKU.</Text></Box>
+            <Button leftIcon={<MdSettings />} variant="outline" borderRadius="xl" onClick={categoryManager.onOpen}>Administrar categorías</Button>
+          </Flex>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
+            <Box><Text fontSize="xs" color={muted} fontWeight="800" mb={2} textTransform="uppercase">Categoría</Text><Select value={category} onChange={e => setCategory(e.target.value)}><option value="">Todas las categorías</option>{availableCategories.map(item => <option key={item}>{item}</option>)}</Select></Box>
+            <Box><Text fontSize="xs" color={muted} fontWeight="800" mb={2} textTransform="uppercase">Estado</Text><Select value={status} onChange={e => setStatus(e.target.value)}><option value="">Todos los estados</option><option value="active">Activos</option><option value="inactive">Inactivos</option></Select></Box>
+          </SimpleGrid>
+        </Box>
         <Divider borderColor={border} />
         {loading ? <AsyncContent isLoading loadingLabel="Cargando inventario" /> : filtered.length === 0 ? <Center py="70px" flexDirection="column"><Icon as={MdInventory2} boxSize="44px" color="gray.300" /><Text fontWeight="700" mt="12px" color={text}>No encontramos productos</Text><Text color={muted} fontSize="sm">Cambie los filtros o agregue un producto nuevo.</Text></Center> : (
           <Box overflowX="auto"><Table variant="simple">
