@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Box, Text, Input, Select, Flex } from "@chakra-ui/react";
 import { customAlphabet } from "nanoid";
 import { useHistory } from "react-router-dom";
@@ -18,6 +17,8 @@ import { handleNationalIdLookup } from "utils/nationalId";
 const nano = customAlphabet("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789", 6);
 
 export default function NewOrder() {
+  const requestId = useRef(crypto.randomUUID());
+  const orderCode = useRef(nano());
   const [showModal, setShowModal] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -348,7 +349,8 @@ export default function NewOrder() {
 
   const handleFormSubmit = async (fieldValues: { [key: string]: any }) => {
     const newOrder: Omit<OrderItem, "id"> = {
-      orderCode: nano(),
+      orderCode: orderCode.current,
+      requestId: requestId.current,
       status: "Nuevo",
       requestDate: fieldValues.requestDateTime,
       client: fieldValues.clientName,
@@ -360,8 +362,7 @@ export default function NewOrder() {
     };
 
     try {
-      await productService.discountStock(products);
-      const response = await orderService.create(newOrder);
+      const response = await orderService.createWithStock(newOrder);
       console.log("Orden creada con ID de Firebase:", response.id);
       setShowModal(true);
     } catch (error) {

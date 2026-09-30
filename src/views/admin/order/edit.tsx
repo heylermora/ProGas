@@ -1,10 +1,7 @@
-// @ts-nocheck
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 
 import {
-  Center,
-  Spinner,
   useColorModeValue,
   Box,
   Text,
@@ -27,6 +24,7 @@ import { handleNationalIdLookup } from "utils/nationalId";
 import { useAuth } from "contexts/AuthContext";
 import { isOrderLocked } from "utils/order";
 import Unauthorized from "components/exceptions/Unauthorized";
+import AsyncContent from "components/dataDisplay/AsyncContent";
 
 const renderProductItem = (item: ProductItem) => (
   <Box>
@@ -43,7 +41,6 @@ const renderProductItem = (item: ProductItem) => (
 );
 
 export default function Edit() {
-  const spinnerColor = useColorModeValue("brand.700", "white");
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const { triggerRefresh } = useOrderRefresh();
@@ -459,11 +456,7 @@ export default function Edit() {
   if (isError) return <Error />;
 
   if (isLoading || !existingOrderData) {
-    return (
-      <Center>
-        <Spinner size="xl" color={spinnerColor} />
-      </Center>
-    );
+    return <AsyncContent isLoading loadingLabel="Cargando pedido" />;
   }
 
   if (isOrderLocked(existingOrderData) && !hasRole(['admin'])) return <Unauthorized />;

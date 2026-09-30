@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import {
   Alert,
@@ -22,7 +21,7 @@ import { MdSearch, MdShoppingBag } from 'react-icons/md';
 import orderService from 'services/OrderService';
 import { PublicCard, PublicPage } from './PublicPage';
 import MallPreview from './MallPreview';
-import { onlyDigits } from 'utils/phone';
+import type { OrderItem } from 'interfaces/OrderItem';
 
 const statusColor = (status = '') => {
   if (status === 'Completado') return 'green';
@@ -38,7 +37,7 @@ const formatDate = (value?: string) => {
 
 export default function ViewOrder() {
   const [search, setSearch] = useState('');
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<OrderItem[]>([]);
   const [message, setMessage] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +48,7 @@ export default function ViewOrder() {
     event?.preventDefault();
     const term = search.trim().toUpperCase();
     if (!term) {
-      setMessage('Ingresá el código que recibiste al confirmar o el teléfono del pedido.');
+      setMessage('Ingresá el código que recibiste al confirmar el pedido.');
       return;
     }
 
@@ -58,8 +57,7 @@ export default function ViewOrder() {
     setHasSearched(true);
     setIsLoading(true);
     try {
-      const phone = onlyDigits(term);
-      const results = await orderService.getAll(['orderCode', 'phone'], [term, phone || term]);
+      const results = await orderService.getByCode(term);
       setOrders(results || []);
     } catch {
       setMessage('No pudimos consultar los pedidos en este momento. Revisá tu conexión e intentá de nuevo.');
@@ -69,18 +67,18 @@ export default function ViewOrder() {
   };
 
   return (
-    <PublicPage title="Consultá tu pedido" description="Revisá el estado y el resumen de tu compra con el código del pedido o el teléfono usado al solicitarlo." maxW="760px">
+    <PublicPage title="Consultá tu pedido" description="Revisá el estado y el resumen de tu compra con el código entregado al confirmar." maxW="760px">
       <PublicCard>
         <Stack spacing="20px">
           <Box>
             <Heading fontSize={{ base: 'xl', md: '2xl' }}>Buscá tu pedido</Heading>
-            <Text mt="5px" color="gray.500" fontSize="sm">El código tiene 6 caracteres y aparece al finalizar el pedido.</Text>
+            <Text mt="5px" color="gray.500" fontSize="sm">El código tiene 12 caracteres y aparece al finalizar el pedido.</Text>
           </Box>
           <Box as="form" onSubmit={handleSearch}>
             <FormControl isRequired>
-              <FormLabel>Código de pedido o teléfono</FormLabel>
+              <FormLabel>Código de pedido</FormLabel>
               <Flex gap="10px" direction={{ base: 'column', sm: 'row' }}>
-                <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Ej. AB12CD o 8888-8888" autoComplete="tel" />
+                <Input value={search} onChange={(event) => setSearch(event.target.value.toUpperCase())} placeholder="Ej. AB12CD34EF56" autoComplete="off" maxLength={12} />
                 <Button type="submit" colorScheme="brand" leftIcon={<MdSearch />} isLoading={isLoading} loadingText="Buscando" flexShrink={0}>Consultar</Button>
               </Flex>
               <FormHelperText>No necesitás iniciar sesión.</FormHelperText>
@@ -109,7 +107,7 @@ export default function ViewOrder() {
                 </Stack>
                 <Divider />
                 <SimpleGrid columns={{ base: 1, sm: 2 }} spacing="8px">
-                  <Box><Text color="gray.500" fontSize="xs">Entrega</Text><Text fontWeight="700">{order.location?.address || 'Por coordinar'}</Text></Box>
+                  <Box><Text color="gray.500" fontSize="xs">Entrega</Text><Text fontWeight="700">Información protegida</Text></Box>
                   <Box textAlign={{ base: 'left', sm: 'right' }}><Text color="gray.500" fontSize="xs">Total</Text><Text fontWeight="900" fontSize="lg">₡{Number(order.totalAmount || 0).toLocaleString('es-CR')}</Text></Box>
                 </SimpleGrid>
               </Stack>

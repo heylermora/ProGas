@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar, Badge, Box, Button, Center, Flex, FormControl, FormHelperText,
-  FormLabel, Input, SimpleGrid, Spinner,
+  Avatar, Badge, Box, Button, Flex, FormControl, FormHelperText,
+  FormLabel, Input, SimpleGrid,
   Switch, Text, useColorModeValue, useToast,
 } from '@chakra-ui/react';
 import { MdAdd, MdEdit, MdManageAccounts } from 'react-icons/md';
@@ -12,6 +12,7 @@ import { usePageSearch } from 'contexts/PageSearchContext';
 import PageHeader from 'components/layout/PageHeader';
 import FormPanel from 'components/form/FormPanel';
 import EmptyState from 'components/dataDisplay/EmptyState';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 
 type FormState = { name: string; email: string; password: string; active: boolean };
 const EMPTY_FORM: FormState = { name: '', email: '', password: '', active: true };
@@ -115,7 +116,7 @@ export default function Users() {
 
       <Text mb={5} textAlign="right" color={muted} fontSize="sm">{visible.length} {visible.length === 1 ? 'colaborador' : 'colaboradores'}</Text>
 
-      {loading ? <Center py={16}><Spinner size="xl" color="brand.500" /></Center> : visible.length === 0 ? (
+      {loading ? <AsyncContent isLoading loadingLabel="Cargando colaboradores" /> : visible.length === 0 ? (
         <EmptyState icon={MdManageAccounts} title={query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'} description={query ? 'Probá con otro nombre o correo.' : 'Agregá a la primera persona de tu equipo.'} actionLabel={!query ? 'Agregar colaborador' : undefined} actionIcon={<MdAdd />} onAction={!query ? openCreate : undefined} />
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4}>{visible.map(user => (

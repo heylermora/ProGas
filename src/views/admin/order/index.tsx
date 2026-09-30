@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
@@ -6,8 +5,6 @@ import {
   useColorModeValue,
   SimpleGrid,
   IconButton,
-  Spinner,
-  Center,
   Input,
   Select,
   Text,
@@ -22,10 +19,11 @@ import ItemCard from 'components/card/ItemCard';
 import Empty from 'components/exceptions/Empty';
 import Error from 'components/exceptions/Error';
 import orderService from 'services/OrderService';
-import OrderItem from 'interfaces/OrderItem';
+import { OrderItem } from 'interfaces/OrderItem';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
 import { getPaymentMethods, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
 import { usePageSearch } from 'contexts/PageSearchContext';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 
 const STATUS_MENU = [...ORDER_STATUSES, 'Todos'] as const;
 
@@ -33,7 +31,6 @@ export default function Index() {
   const { query: search } = usePageSearch();
 
   const history = useHistory();
-  const spinnerColor = useColorModeValue('brand.700', 'white');
   const { refreshKey } = useOrderRefresh();
 
   const [orders, setorders] = useState<OrderItem[]>([]);
@@ -145,9 +142,7 @@ export default function Index() {
       {isError ? (
         <Error />
       ) : isLoading ? (
-        <Center>
-          <Spinner size="xl" variant={'darkBrand' as any} color={spinnerColor as any} />
-        </Center>
+        <AsyncContent isLoading loadingLabel="Cargando pedidos" />
       ) : visibleOrders.length === 0 ? (
         <Empty message="No hay pedidos que coincidan con los filtros seleccionados." />
       ) : (

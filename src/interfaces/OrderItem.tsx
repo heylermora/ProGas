@@ -20,6 +20,7 @@ export interface OrderPayment {
 export interface OrderItem {
     id: string;
     orderCode: string;
+    requestId?: string;
     client: string;
     clientId?: string; // cédula / identificación del cliente (opcional)
     requestDate: string;
@@ -27,11 +28,15 @@ export interface OrderItem {
         address: string;
         lat?: number;
         lng?: number;
+        coordinates?: string;
+        locationUrl?: string;
     }
     status: OrderStatus | string;
     comment: string;
     items: ProductItem[];
     totalAmount: number;
+    phone?: string;
+    transport?: string;
     paymentMethod?: OrderPayment['method'];
     payments?: OrderPayment[];
     paymentMethods?: OrderPayment[];

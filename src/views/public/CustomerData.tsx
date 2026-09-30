@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { Alert, AlertIcon, Box, FormControl, FormHelperText, FormLabel, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
@@ -15,7 +14,7 @@ export default function CustomerData() {
   const [message, setMessage] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [form, setForm] = useState({ nationalId: '', phone: '' });
-  const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const set = (key: keyof typeof form, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleContinue = async () => {
     if (isChecking) return;
@@ -40,7 +39,7 @@ export default function CustomerData() {
       if (existingClient) {
         const savedPhone = onlyDigits(existingClient.phone || existingClient.telefono);
         if (savedPhone && savedPhone !== phoneDigits) {
-          setMessage('El teléfono no coincide con el registrado para esta cédula.');
+          setMessage('No pudimos verificar los datos ingresados. Revisalos e intentá nuevamente.');
           return;
         }
 

@@ -21,6 +21,31 @@ export const db = getFirestore(app);
 // Obtener la instancia de autenticación
 export const auth = getAuth(app);
 
+export type DataPage<T> = {
+  items: T[];
+  lastVisible?: QueryDocumentSnapshot;
+  hasMore: boolean;
+};
+
+export const fetchPage = async <T>(
+  collectionName: string,
+  pageSize = 10,
+  lastVisibleDoc?: QueryDocumentSnapshot,
+): Promise<DataPage<T>> => {
+  if (!collectionName.trim()) throw new Error('El nombre de la colección es requerido');
+  if (!Number.isInteger(pageSize) || pageSize <= 0) throw new Error('El tamaño de página debe ser un entero positivo');
+  let pageQuery = query(collection(db, collectionName), orderBy('__name__'), limit(pageSize + 1));
+  if (lastVisibleDoc) pageQuery = query(pageQuery, startAfter(lastVisibleDoc));
+  const snapshot = await getDocs(pageQuery);
+  const hasMore = snapshot.docs.length > pageSize;
+  const visibleDocs = snapshot.docs.slice(0, pageSize);
+  return {
+    items: visibleDocs.map(item => ({ id: item.id, ...item.data() }) as T),
+    lastVisible: visibleDocs[visibleDocs.length - 1],
+    hasMore,
+  };
+};
+
 // Exportar funciones para interactuar con Firestore
 export const fetchAllData = async <T>(
   collectionName: string,
@@ -42,14 +67,7 @@ export const fetchAllData = async <T>(
 
     // ✅ CASO 1: SIN FILTROS -> query normal con paginación
     if (!hasFilters) {
-      let q = query(colRef, orderBy('__name__'), limit(pageSize)); // orderBy estable
-
-      if (lastVisibleDoc) {
-        q = query(q, startAfter(lastVisibleDoc));
-      }
-
-      const snap = await getDocs(q);
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as T[];
+      return (await fetchPage<T>(collectionName, pageSize, lastVisibleDoc)).items;
     }
 
     // ✅ CASO 2: CON FILTROS (OR multi-campo) -> queries separadas y merge
@@ -87,15 +105,15 @@ export const fetchAllData = async <T>(
     const map = new Map<string, any>();
     for (const s of snaps) {
       for (const d of s.docs) {
-        if (!map.set(d.id, { id: d.id, ...(d.data() as DocumentData) })) {
-          // Handle duplicate IDs if needed
-        }
+        map.set(d.id, { id: d.id, ...(d.data() as DocumentData) });
       }
     }
 
     // Firestore no garantiza orden al mezclar; devolvemos como venga.
     // Si querés ordenar, hacelo por un campo (createdAt, requestDate, etc.)
-    return Array.from(map.values()) as T[];
+    return Array.from(map.values())
+      .sort((left, right) => String(left.id).localeCompare(String(right.id)))
+      .slice(0, pageSize) as T[];
   } catch (error) {
     console.error(`[fetchAllData] Error en colección ${collectionName}:`, error);
     throw new Error(

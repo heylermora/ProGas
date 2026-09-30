@@ -1,10 +1,9 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
   AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
   Badge, Box, Button, Center, Flex, FormControl, FormLabel, HStack, Icon, Image,
-  SimpleGrid, Spinner, Stack, Switch, Tab, TabList, Tabs, Text, Textarea,
+  SimpleGrid, Stack, Switch, Tab, TabList, Tabs, Text, Textarea,
   useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
@@ -13,26 +12,27 @@ import Card from 'components/card/Card';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import PageHeader from 'components/layout/PageHeader';
 import SponsorService from 'services/SponsorService';
-import { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import useCategories from 'hooks/useCategories';
 import CategoryManager from 'components/category/CategoryManager';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 
 export default function SponsorsAdmin() {
   const { query } = usePageSearch();
   const { categories, reload: reloadCategories } = useCategories('sponsors');
-  const [sponsors, setSponsors] = useState([]);
+  const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
   const [availableCopy, setAvailableCopy] = useState(defaultSponsorDisplaySettings);
   const [savingAvailableCopy, setSavingAvailableCopy] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState<SponsorItem | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const categoryManager = useDisclosure();
-  const cancelRef = useRef();
+  const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
   const textColor = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.500', 'gray.400');
@@ -145,7 +145,7 @@ export default function SponsorsAdmin() {
         </Tabs>
       </Card>
 
-      {loading ? <Center py="70px"><Spinner size="xl" color="brand.500" /></Center> : visibleBusinesses.length === 0 ? (
+      {loading ? <AsyncContent isLoading loadingLabel="Cargando patrocinadores" /> : visibleBusinesses.length === 0 ? (
         <EmptyState icon={MdStorefront} title={searchTerm ? 'No hay coincidencias' : 'Esta categoría está vacía'} description={searchTerm ? 'Probá con otro nombre o limpiá la búsqueda superior.' : 'Usá “Nuevo patrocinador” para agregar el primero a esta categoría.'} />
       ) : (
         <Stack spacing="10px" mb="18px">

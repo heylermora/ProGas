@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import {
   AspectRatio,
@@ -24,6 +23,7 @@ import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-i
 import { MdAddBusiness, MdEmail, MdLink, MdOpenInFull, MdPlayCircleFilled, MdStar } from 'react-icons/md';
 import SponsorService from 'services/SponsorService';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
+import SponsorItem, { SponsorType } from 'interfaces/SponsorItem';
 
 
 const getVideoEmbedSrc = (value = '') => {
@@ -63,25 +63,40 @@ const sponsorActionButtonStyles = {
 
 const sponsorActionIconSize = { base: '20px', md: '22px' };
 
+type SponsorInput = Partial<SponsorItem> & Pick<SponsorItem, 'id' | 'name' | 'active' | 'links'>;
+
 type SponsorStripProps = {
-  type: string;
+  type: SponsorType;
   max?: number;
   title?: string;
   offset?: number;
-  sponsors?: any[];
-  previewSponsor?: any;
+  sponsors?: SponsorInput[];
+  previewSponsor?: SponsorInput;
 };
 
-const makeAvailableSponsor = (type, index) => ({
+type DisplaySponsor = SponsorItem & { isAvailable?: boolean };
+
+const toDisplaySponsor = (sponsor: SponsorInput): DisplaySponsor => ({
+  category: 'Otros',
+  order: 0,
+  logoUrl: '',
+  ...sponsor,
+});
+
+const makeAvailableSponsor = (type: SponsorType, index: number): DisplaySponsor => ({
   id: `available-${type}-${index}`,
   type,
+  category: 'Otros',
   name: 'Disponible',
   description: 'Reservá este espacio publicitario para que tu negocio aparezca aquí.',
   isAvailable: true,
   active: true,
+  order: index,
+  logoUrl: '',
+  links: [],
 });
 
-const sponsorVisual = (type = 'General', hasVideo = false) => {
+const sponsorVisual = (type: SponsorType = 'General', hasVideo = false) => {
   if (type === 'VIP') {
     return {
       card: {
@@ -135,7 +150,7 @@ const sponsorVisual = (type = 'General', hasVideo = false) => {
   };
 };
 
-const logoSize = (variant) => {
+const logoSize = (variant: string) => {
   if (variant === 'hero') return { h: { base: '104px', md: '132px' }, placeholderH: { base: '108px', md: '136px' }, icon: { base: '38px', md: '42px' } };
   if (variant === 'featured') return { h: { base: '54px', md: '70px' }, placeholderH: { base: '54px', md: '70px' }, icon: { base: '34px', md: '38px' } };
   return { h: { base: '48px', md: '58px' }, placeholderH: { base: '48px', md: '58px' }, icon: { base: '32px', md: '34px' } };
@@ -150,7 +165,7 @@ const bubblePlacements = [
 
 const normalizeHref = (link = '') => (link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link);
 
-function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
+function SponsorLogoHub({ sponsor, visual, muted, links = [] }: { sponsor: DisplaySponsor; visual: any; muted: string; links?: string[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const cleanLinks = links.filter(Boolean);
   const hasLinks = cleanLinks.length > 0;
@@ -231,7 +246,7 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }) {
   );
 }
 
-function SponsorVideoPlayer({ sponsor }) {
+function SponsorVideoPlayer({ sponsor }: { sponsor: DisplaySponsor }) {
   if (shouldRenderIframeVideo(sponsor.videoUrl)) {
     return (
       <Box
@@ -248,7 +263,7 @@ function SponsorVideoPlayer({ sponsor }) {
   return <Box as="video" src={sponsor.videoUrl} controls playsInline />;
 }
 
-function SponsorVideoFrame({ sponsor, onBack }) {
+function SponsorVideoFrame({ sponsor, onBack }: { sponsor: DisplaySponsor; onBack: () => void }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!sponsor?.videoUrl) return null;
@@ -307,7 +322,7 @@ function SponsorVideoFrame({ sponsor, onBack }) {
   );
 }
 
-function SponsorCard({ sponsor, visual, linkMax, muted }) {
+function SponsorCard({ sponsor, visual, linkMax = 4, muted }: { sponsor: DisplaySponsor; visual: any; linkMax?: number; muted: string }) {
   const [showVideo, setShowVideo] = useState(false);
   const hasVideo = Boolean(sponsor.videoUrl);
   const { _hover, minH, ...cardStyles } = visual.card;
@@ -356,20 +371,20 @@ function SponsorCard({ sponsor, visual, linkMax, muted }) {
 export default function SponsorStrip({ type, max, title, offset = 0, sponsors: injectedSponsors, previewSponsor, availableCopy }: SponsorStripProps & { availableCopy?: typeof defaultSponsorDisplaySettings }) {
   const normalizedMax = Math.max(1, Number(max || SPONSOR_CAPACITY[type] || 1));
   const normalizedOffset = Math.max(0, Number(offset || 0));
-  const [sponsors, setSponsors] = useState([]);
+  const [sponsors, setSponsors] = useState<DisplaySponsor[]>([]);
   const [displaySettings, setDisplaySettings] = useState(defaultSponsorDisplaySettings);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.400');
 
   useEffect(() => {
     if (previewSponsor) {
-      setSponsors([previewSponsor]);
+      setSponsors([toDisplaySponsor(previewSponsor)]);
       return;
     }
 
     if (injectedSponsors) {
       const activeSponsors = injectedSponsors.filter(Boolean).filter((sponsor) => sponsor.active !== false).slice(normalizedOffset, normalizedOffset + normalizedMax);
-      setSponsors(activeSponsors);
+      setSponsors(activeSponsors.map(toDisplaySponsor));
       return;
     }
 
@@ -398,7 +413,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
   ];
   const columns = { base: 1, sm: 2, md: Math.min(slotCount || normalizedMax, 4) };
 
-  const renderAvailableCard = (sponsor) => (
+  const renderAvailableCard = (sponsor: DisplaySponsor) => (
     <Box
       key={sponsor.id}
       as={RLink}
@@ -449,10 +464,10 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     </Box>
   );
 
-  const renderSponsorCard = (sponsor) => {
+  const renderSponsorCard = (sponsor: DisplaySponsor) => {
     if (!sponsor) return null;
     if (sponsor.isAvailable) return renderAvailableCard(sponsor);
-    const sponsorType = sponsor?.type || type;
+    const sponsorType: SponsorType = sponsor?.type || type;
     const linkMax = sponsorType === 'General' ? 1 : 4;
     const visual = sponsorVisual(sponsorType, Boolean(sponsor.videoUrl));
 

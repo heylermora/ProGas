@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, FormControl, FormHelperText, FormLabel, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import { customAlphabet } from 'nanoid';
 import { useHistory } from 'react-router-dom';
@@ -8,28 +7,44 @@ import DeviceLocationMap from 'components/form/DeviceLocationMap';
 import OkModal from 'components/modal/OkModal';
 import orderService from 'services/OrderService';
 import productService from 'services/ProductService';
-import type { ProductItem } from 'interfaces/OrderItem';
+import type { OrderPayment, ProductItem } from 'interfaces/OrderItem';
+import type { Product } from 'interfaces/ProductItem';
 import { PublicCard, PublicPage } from './PublicPage';
 import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
 import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import { mapsSearchUrl } from 'utils/location';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 
-const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 6);
+const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 12);
 
 export default function Products() {
   const history = useHistory();
   const draft = getCustomerDraft();
+  const requestId = useRef(crypto.randomUUID());
+  const orderCode = useRef(nano());
   const defaultAddress = addressToText(draft.address);
-  const [catalog, setCatalog] = useState([]);
+  const [catalog, setCatalog] = useState<Product[]>([]);
   const [items, setItems] = useState<ProductItem[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdOrderCode, setCreatedOrderCode] = useState('');
   const [message, setMessage] = useState('');
+  const [isCatalogLoading, setIsCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState('');
   const [useCustomerAddress, setUseCustomerAddress] = useState(Boolean(defaultAddress));
   const [hasTransport, setHasTransport] = useState(false);
-  const [orderForm, setOrderForm] = useState({
+  const [orderForm, setOrderForm] = useState<{
+    productId: string;
+    quantity: number;
+    cylinderDetails: string;
+    address: string;
+    coordinates: string;
+    locationUrl: string;
+    transport: string;
+    paymentMethod: OrderPayment['method'];
+    comment: string;
+  }>({
     productId: '',
     quantity: 1,
     cylinderDetails: '',
@@ -42,18 +57,20 @@ export default function Products() {
   });
 
   useEffect(() => {
+    setIsCatalogLoading(true);
     productService.getAll().then((products) => {
       const list = products || [];
       setCatalog(list);
       if (list[0]) setOrderForm((prev) => ({ ...prev, productId: list[0].id }));
-    }).catch(() => setMessage('No se pudo cargar el catálogo de productos.'));
+    }).catch(() => setCatalogError('No se pudo cargar el catálogo de productos.'))
+      .finally(() => setIsCatalogLoading(false));
   }, []);
 
   const selectedProduct = useMemo(() => catalog.find((product) => product.id === orderForm.productId), [catalog, orderForm.productId]);
   const totalAmount = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
-  const set = (key, value) => setOrderForm((prev) => ({ ...prev, [key]: value }));
+  const set = <K extends keyof typeof orderForm>(key: K, value: typeof orderForm[K]) => setOrderForm((prev) => ({ ...prev, [key]: value }));
 
-  const removeItem = (indexToRemove) => {
+  const removeItem = (indexToRemove: number) => {
     setItems((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
@@ -63,12 +80,22 @@ export default function Products() {
 
   const addItem = () => {
     if (!selectedProduct) return;
+    const quantity = Number(orderForm.quantity);
+    if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 99) {
+      setMessage('La cantidad debe ser un número entero entre 1 y 99.');
+      return;
+    }
+    if (selectedProduct.active === false || Number(selectedProduct.stock ?? 0) < quantity) {
+      setMessage('El producto no está disponible en la cantidad solicitada.');
+      return;
+    }
+    setMessage('');
     setItems((prev) => [
       ...prev,
       {
         productId: selectedProduct.id,
         gasType: selectedProduct.description,
-        quantity: Number(orderForm.quantity || 1),
+        quantity,
         price: Number(selectedProduct.price || 0),
         unitCost: Number(selectedProduct.costPrice || 0),
         comment: orderForm.cylinderDetails,
@@ -95,11 +122,11 @@ export default function Products() {
 
     saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: effectiveCoordinates, locationUrl } });
 
-    const orderCode = nano();
     try {
       setIsSubmitting(true);
-      await orderService.create({
-        orderCode,
+      await orderService.createWithStock({
+        orderCode: orderCode.current,
+        requestId: requestId.current,
         status: 'Nuevo',
         requestDate: new Date().toISOString(),
         client: draft.name || draft.nickname || draft.nationalId,
@@ -116,7 +143,7 @@ export default function Products() {
         items,
         totalAmount,
       });
-      setCreatedOrderCode(orderCode);
+      setCreatedOrderCode(orderCode.current);
       setShowModal(true);
     } catch {
       setMessage('No pudimos crear el pedido. Revisá tu conexión e intentá nuevamente; no se realizó ningún cobro.');
@@ -128,6 +155,7 @@ export default function Products() {
   return (
     <PublicPage title="Productos y pedido" description="Confirme productos, pago y ubicación. La dirección viene por defecto desde el cliente, pero puede ajustarse para este pedido.">
       <Box h={{ base: '8px', md: '12px' }} />
+      {(isCatalogLoading || catalogError) ? <AsyncContent isLoading={isCatalogLoading} error={catalogError} loadingLabel="Cargando productos" /> :
       <PublicCard>
         <Stack spacing="16px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
@@ -142,7 +170,7 @@ export default function Products() {
               </Flex>
               <SimpleGrid columns={{ base: 1, lg: 3 }} spacing="12px">
                 <FormControl isRequired><FormLabel>Producto</FormLabel><Select bg="white" value={orderForm.productId} onChange={(e) => set('productId', e.target.value)}>{catalog.map((product) => <option key={product.id} value={product.id}>{product.description}</option>)}</Select></FormControl>
-                <FormControl isRequired><FormLabel>Cantidad</FormLabel><Input bg="white" type="number" min="1" value={orderForm.quantity} onChange={(e) => set('quantity', e.target.value)} /></FormControl>
+                <FormControl isRequired><FormLabel>Cantidad</FormLabel><Input bg="white" type="number" min="1" value={orderForm.quantity} onChange={(e) => set('quantity', Number(e.target.value))} /></FormControl>
                 <FormControl><FormLabel>Datos del cilindro</FormLabel><Input bg="white" value={orderForm.cylinderDetails} onChange={(e) => set('cylinderDetails', e.target.value)} placeholder="Tipo / tamaño si aplica" /></FormControl>
               </SimpleGrid>
               <Button leftIcon={<MdAdd />} alignSelf={{ base: 'stretch', md: 'flex-start' }} onClick={addItem} isDisabled={!selectedProduct}>Agregar producto</Button>
@@ -199,12 +227,13 @@ export default function Products() {
               <FormHelperText>Marcá esta opción si el pedido necesita entrega, ruta especial o coordinación de transporte.</FormHelperText>
               {hasTransport && <Input mt="10px" value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Detalle del transporte" />}
             </FormControl>
-            <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}><option value="Efectivo">Efectivo</option><option value="SINPE">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
+            <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value as OrderPayment['method'])}><option value="Efectivo">Efectivo</option><option value="Sinpe">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
           </SimpleGrid>
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
           <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel={isSubmitting ? 'Confirmando…' : 'Confirmar pedido'} isFinal onBack={() => history.replace('/customer/info')} onContinue={submitOrder} isContinueLoading={isSubmitting} />
         </Stack>
       </PublicCard>
+      }
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
       {showModal && <OkModal message={`Pedido creado correctamente. Guardá este código para consultar su estado: ${createdOrderCode}`} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}

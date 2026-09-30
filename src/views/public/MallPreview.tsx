@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip, usePrefersReducedMotion } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';

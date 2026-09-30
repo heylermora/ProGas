@@ -1,6 +1,5 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, FormControl, FormLabel, Input, Select, SimpleGrid, Stack } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
 import ClientService from 'services/ClientService';
 import DeviceLocationMap from 'components/form/DeviceLocationMap';
@@ -10,7 +9,9 @@ import OrderNavigation from './OrderNavigation';
 import { getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import { mapsSearchUrl } from 'utils/location';
 
-const locationOptions = {
+type LocationOptions = Record<string, Record<string, Record<string, string[]>>>;
+
+const locationOptions: LocationOptions = {
   'San José': {
     Acosta: {
       'San Ignacio': ['Centro', 'Turrujal', 'Chirraca'],
@@ -51,6 +52,8 @@ const locationOptions = {
 export default function CustomerInfo() {
   const history = useHistory();
   const draft = getCustomerDraft();
+  const [message, setMessage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
     name: draft.name || '',
     nickname: draft.nickname || '',
@@ -79,11 +82,25 @@ export default function CustomerInfo() {
     }
   }, [cantons, form.canton, form.district, form.neighborhood, form.province]);
 
-  const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const set = <K extends keyof typeof form>(key: K, value: typeof form[K]) => setForm((prev) => ({ ...prev, [key]: value }));
 
 
 
   const saveAndContinue = async () => {
+    if (isSaving) return;
+    setMessage('');
+    if (!draft.nationalId || !draft.phone) {
+      setMessage('Primero verificá tu cédula y teléfono.');
+      return;
+    }
+    if (!form.name.trim() || !form.details.trim()) {
+      setMessage('Completá el nombre y las señas de entrega.');
+      return;
+    }
+    if (form.name.trim().length > 120 || form.nickname.trim().length > 60 || form.details.trim().length > 300) {
+      setMessage('Revisá la longitud del nombre, apodo y señas de entrega.');
+      return;
+    }
     const addressQuery = [form.province, form.canton, form.district, form.neighborhood, form.details].filter(Boolean).join(', ');
     const address = {
       province: form.province,
@@ -95,27 +112,28 @@ export default function CustomerInfo() {
       locationUrl: form.locationUrl || mapsSearchUrl(form.coordinates || addressQuery),
     };
 
-    let clientRecordId = draft.clientRecordId;
-    if (!draft.isExistingClient && draft.nationalId) {
-      const created = await ClientService.create({
-        nationalId: draft.nationalId,
-        phone: draft.phone || '',
-        name: form.name,
-        nickname: form.nickname,
-        active: true,
-        address,
-      });
-      clientRecordId = created.id;
-    }
+    try {
+      setIsSaving(true);
+      let clientRecordId = draft.clientRecordId;
+      if (!draft.isExistingClient) {
+        const created = await ClientService.createPublic({
+          nationalId: draft.nationalId,
+          phone: draft.phone,
+          name: form.name.trim(),
+          nickname: form.nickname.trim(),
+          active: true,
+          address,
+        });
+        clientRecordId = created.id;
+      }
 
-    saveCustomerDraft({
-      clientRecordId,
-      isExistingClient: true,
-      name: form.name,
-      nickname: form.nickname,
-      address,
-    });
-    history.push('/customer/products');
+      saveCustomerDraft({ clientRecordId, isExistingClient: true, name: form.name.trim(), nickname: form.nickname.trim(), address });
+      history.push('/customer/products');
+    } catch {
+      setMessage('No pudimos guardar la información. Verificá los datos e intentá nuevamente.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -123,6 +141,7 @@ export default function CustomerInfo() {
       <Box h={{ base: '20px', md: '28px' }} />
       <PublicCard>
         <Stack spacing="16px">
+          {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input value={form.name} onChange={(e) => set('name', e.target.value)} /></FormControl>
             <FormControl><FormLabel>Apodo</FormLabel><Input value={form.nickname} onChange={(e) => set('nickname', e.target.value)} /></FormControl>
@@ -140,7 +159,7 @@ export default function CustomerInfo() {
               onLocation={(location) => setForm((prev) => ({ ...prev, ...location }))}
             />
           </FormControl>
-          <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel="Continuar al pedido" onBack={() => history.replace('/customer/data')} onContinue={saveAndContinue} />
+          <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel={isSaving ? 'Guardando…' : 'Continuar al pedido'} onBack={() => history.replace('/customer/data')} onContinue={saveAndContinue} isContinueLoading={isSaving} />
         </Stack>
       </PublicCard>
       <MallPreview compact />

@@ -1,11 +1,8 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import {
   Box,
   Flex,
   useColorModeValue,
-  Spinner,
-  Center,
   Text,
   Stat,
   StatLabel,
@@ -27,10 +24,11 @@ import { Link as RLink } from 'react-router-dom';
 import { MdAdd } from 'react-icons/md';
 
 import orderService from 'services/OrderService';
-import OrderItem from 'interfaces/OrderItem';
+import { OrderItem } from 'interfaces/OrderItem';
 import Error from 'components/exceptions/Error';
 import Empty from 'components/exceptions/Empty';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 import { isOrderPaid } from 'utils/order';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
@@ -53,7 +51,6 @@ type DailySummary = {
 const METHODS: PaymentMethod[] = ['Efectivo', 'Sinpe', 'Tarjeta', 'Otro'];
 
 export default function Balance() {
-  const spinnerColor = useColorModeValue('brand.700', 'white');
   const cardBg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('secondaryGray.800', 'white');
   const subtleText = useColorModeValue('secondaryGray.500', 'secondaryGray.400');
@@ -184,9 +181,7 @@ export default function Balance() {
       {isError ? (
         <Error />
       ) : isLoading ? (
-        <Center>
-          <Spinner size="xl" variant={'darkBrand' as any} color={spinnerColor as any} />
-        </Center>
+        <AsyncContent isLoading loadingLabel="Calculando balance" />
       ) : summaries.length === 0 ? (
         <>
           <IconButton

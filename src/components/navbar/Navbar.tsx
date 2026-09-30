@@ -1,4 +1,3 @@
-/* eslint-disable */
 // Chakra Imports
 import { Box, Flex, Link, useColorModeValue } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';

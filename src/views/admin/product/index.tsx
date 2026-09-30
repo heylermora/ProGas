@@ -3,7 +3,7 @@ import {
   Badge, Box, Button, Center, Divider, Flex, Heading, HStack, Icon, IconButton,
   Input, Menu, MenuButton, MenuItem, MenuList, Modal,
   ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay,
-  Select, SimpleGrid, Spinner, Stat, StatLabel, StatNumber, Switch, Table, Tbody, Td,
+  Select, SimpleGrid, Stat, StatLabel, StatNumber, Switch, Table, Tbody, Td,
   Text, Th, Thead, Tr, useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { Product } from 'interfaces/ProductItem';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import useCategories from 'hooks/useCategories';
 import CategoryManager from 'components/category/CategoryManager';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 
 const money = (value: number) => new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 }).format(value || 0);
 
@@ -98,7 +99,7 @@ export default function Products() {
           <Select value={status} onChange={e => setStatus(e.target.value)} maxW={{ base: '100%', md: '170px' }}><option value="">Todos los estados</option><option value="active">Activos</option><option value="inactive">Inactivos</option></Select>
         </Flex>
         <Divider borderColor={border} />
-        {loading ? <Center py="70px"><Spinner size="xl" color="brand.500" /></Center> : filtered.length === 0 ? <Center py="70px" flexDirection="column"><Icon as={MdInventory2} boxSize="44px" color="gray.300" /><Text fontWeight="700" mt="12px" color={text}>No encontramos productos</Text><Text color={muted} fontSize="sm">Cambie los filtros o agregue un producto nuevo.</Text></Center> : (
+        {loading ? <AsyncContent isLoading loadingLabel="Cargando inventario" /> : filtered.length === 0 ? <Center py="70px" flexDirection="column"><Icon as={MdInventory2} boxSize="44px" color="gray.300" /><Text fontWeight="700" mt="12px" color={text}>No encontramos productos</Text><Text color={muted} fontSize="sm">Cambie los filtros o agregue un producto nuevo.</Text></Center> : (
           <Box overflowX="auto"><Table variant="simple">
             <Thead><Tr><Th>Producto</Th><Th>Categoría</Th><Th isNumeric>Precio venta</Th><Th isNumeric>Costo</Th><Th>Disponible</Th><Th>Estado</Th><Th w="55px" /></Tr></Thead>
             <Tbody>{filtered.map(product => {
@@ -117,7 +118,7 @@ export default function Products() {
         <Flex p="16px 20px" borderTopWidth="1px" borderColor={border} justify="space-between"><Text fontSize="sm" color={muted}>Mostrando {filtered.length} de {normalized.length} productos</Text></Flex>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered><ModalOverlay /><ModalContent><ModalHeader>Ajustar inventario</ModalHeader><ModalCloseButton /><ModalBody><Text fontWeight="700" color={text}>{adjusting?.description}</Text><Text color={muted} fontSize="sm" mb="20px">Existencia actual: {adjusting?.stock || 0} unidades</Text><Text fontSize="sm" fontWeight="600" mb="8px">Cantidad del ajuste</Text><Input type="number" value={adjustment} onChange={e => setAdjustment(Number(e.target.value))} /><HStack mt="12px" spacing="8px"><Button size="sm" leftIcon={<MdArrowUpward />} onClick={() => setAdjustment(Math.abs(adjustment || 1))}>Entrada</Button><Button size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(adjustment || 1))}>Salida</Button></HStack><Text fontSize="sm" color={muted} mt="16px">Nuevo total: <b>{Math.max(0, Number(adjusting?.stock || 0) + adjustment)} unidades</b></Text></ModalBody><ModalFooter><Button variant="ghost" mr="8px" onClick={onClose}>Cancelar</Button><Button colorScheme="brand" isDisabled={adjustment === 0} isLoading={saving} onClick={saveAdjustment}>Guardar ajuste</Button></ModalFooter></ModalContent></Modal>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered><ModalOverlay /><ModalContent><ModalHeader>Ajustar inventario</ModalHeader><ModalCloseButton /><ModalBody><Text fontWeight="700" color={text}>{adjusting?.description}</Text><Text color={muted} fontSize="sm" mb="20px">Existencia actual: {adjusting?.stock || 0} unidades</Text><Text fontSize="sm" fontWeight="600" mb="8px">Cantidad del ajuste</Text><Input type="number" step="1" value={adjustment} onChange={e => setAdjustment(Number(e.target.value))} /><HStack mt="12px" spacing="8px"><Button size="sm" leftIcon={<MdArrowUpward />} onClick={() => setAdjustment(Math.abs(Math.trunc(adjustment) || 1))}>Entrada</Button><Button size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(Math.trunc(adjustment) || 1))}>Salida</Button></HStack><Text fontSize="sm" color={Number(adjusting?.stock || 0) + adjustment < 0 ? 'red.500' : muted} mt="16px">Nuevo total: <b>{Number(adjusting?.stock || 0) + adjustment} unidades</b></Text></ModalBody><ModalFooter><Button variant="ghost" mr="8px" onClick={onClose}>Cancelar</Button><Button colorScheme="brand" isDisabled={!Number.isInteger(adjustment) || adjustment === 0 || Number(adjusting?.stock || 0) + adjustment < 0} isLoading={saving} onClick={saveAdjustment}>Guardar ajuste</Button></ModalFooter></ModalContent></Modal>
       <CategoryManager kind="products" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
     </Box>
   );

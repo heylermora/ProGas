@@ -1,9 +1,9 @@
 export type CustomerDraftAddress = {
-  province: string;
-  canton: string;
-  district: string;
-  neighborhood: string;
-  details: string;
+  province?: string;
+  canton?: string;
+  district?: string;
+  neighborhood?: string;
+  details?: string;
   coordinates?: string;
   locationUrl?: string;
 };

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { keyframes } from '@emotion/react';
 import {
@@ -39,6 +38,7 @@ import useCategories from 'hooks/useCategories';
 import SponsorService from 'services/SponsorService';
 import { useLocation } from 'react-router-dom';
 import { PublicPage } from './PublicPage';
+import SponsorItem from 'interfaces/SponsorItem';
 
 const categoryEmoji = ['🍽️', '🍔', '🍕', '☕', '🍦', '🍷', '🛒', '🛍️', '💎', '👟', '💈', '💇', '🐾', '💊', '🔨', '🌱', '💪', '🏍️', '🔧', '🛡️', '✨'];
 const shortLabels = ['Restaurantes', 'Rápidas', 'Pizzerías', 'Cafeterías', 'Heladerías', 'Licoreras', 'Súperes', 'Tiendas', 'Joyerías', 'Zapaterías', 'Barberías', 'Belleza', 'Veterinarias', 'Farmacias', 'Ferreterías', 'Agro', 'Gimnasios', 'Motos', 'Mecánicos', 'Fumigadoras', 'Otros'];
@@ -131,7 +131,7 @@ const businessPosition = (index, total) => {
 export default function VirtualMall() {
   const { categories } = useCategories('sponsors');
   const location = useLocation();
-  const [businesses, setBusinesses] = useState([]);
+  const [businesses, setBusinesses] = useState<SponsorItem[]>([]);
   const [loadStatus, setLoadStatus] = useState('loading');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBusinessId, setSelectedBusinessId] = useState('');
@@ -297,7 +297,7 @@ export default function VirtualMall() {
   );
 }
 
-function SimpleMall({ categories, businesses, selectedCategory, onCategory, search, onSearch }) {
+function SimpleMall({ categories, businesses, selectedCategory, onCategory, search, onSearch }: { categories: string[]; businesses: SponsorItem[]; selectedCategory: string; onCategory: (category: string) => void; search: string; onSearch: (search: string) => void }) {
   const muted = useColorModeValue('gray.600', 'gray.400');
   const border = useColorModeValue('gray.200', 'whiteAlpha.200');
   const surface = useColorModeValue('white', 'navy.800');
@@ -327,7 +327,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
   );
 }
 
-function CategoryMap({ categories, businesses, mobileSector, onSectorChange, onSelect }) {
+function CategoryMap({ categories, businesses, mobileSector, onSectorChange, onSelect }: { categories: string[]; businesses: SponsorItem[]; mobileSector: number; onSectorChange: (sector: number) => void; onSelect: (category: string) => void }) {
   const sectorCount = Math.max(1, Math.ceil(categories.length / CATEGORIES_PER_SECTOR));
   const previousSector = () => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount);
   const nextSector = () => onSectorChange((mobileSector + 1) % sectorCount);
@@ -363,7 +363,7 @@ function CategoryMap({ categories, businesses, mobileSector, onSectorChange, onS
   );
 }
 
-function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, sector, sectorCount, onSectorChange, onBack, onSelect }) {
+function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, sector, sectorCount, onSectorChange, onBack, onSelect }: { businesses: SponsorItem[]; totalBusinesses: number; category: string; categoryIcon: string; selectedId?: string; sector: number; sectorCount: number; onSectorChange: (sector: number) => void; onBack: () => void; onSelect: (id: string) => void }) {
   return (
     <>
       <Button aria-label={`Volver al mapa principal desde ${category}`} onClick={onBack} position="absolute" left="50%" top="49%" transform="translate(-50%, -50%)" w={{ base: '108px', md: '146px' }} h={{ base: '108px', md: '146px' }} minW={{ base: '108px', md: '146px' }} p={{ base: '10px', md: '14px' }} variant="unstyled" borderRadius="full" bg="yellow.300" border={{ base: '6px solid', md: '9px solid' }} borderColor="yellow.100" color="navy.800" boxShadow="0 0 35px rgba(250,204,21,.45)" display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={1} transition="transform .2s ease, box-shadow .2s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.06)', boxShadow: '0 0 48px rgba(250,204,21,.68)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
@@ -398,7 +398,7 @@ function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, sele
   );
 }
 
-function MapStatus({ icon, title, description, action, onAction }) {
+function MapStatus({ icon, title, description, action, onAction }: { icon: React.ReactNode; title: string; description: string; action?: string; onAction?: () => void }) {
   return (
     <Stack position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" zIndex={7} align="center" textAlign="center" color="white" w="82%" spacing="7px">
       <Text fontSize="48px" animation={`${astronautFloat} 1.5s ease-in-out infinite`}>{icon}</Text>
@@ -409,7 +409,7 @@ function MapStatus({ icon, title, description, action, onAction }) {
   );
 }
 
-function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, businesses }) {
+function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, businesses }: { selectedCategory: string; selectedCategoryIndex: number; selectedBusiness?: SponsorItem; businesses: SponsorItem[] }) {
   let position = selectedCategory ? [50, 49] : [50, 50];
   if (!selectedCategory) position = [50, 50];
   else if (selectedBusiness) position = businessPosition(Math.max(0, businesses.findIndex((item) => item.id === selectedBusiness.id)), Math.min(businesses.length, 16));
@@ -425,7 +425,7 @@ function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, 
   );
 }
 
-function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onContacts, onVideo }) {
+function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onContacts, onVideo }: { business: SponsorItem; contactsOpen: boolean; contactLinks: string[]; onClose: () => void; onContacts: () => void; onVideo: () => void }) {
   return (
     <Box position="absolute" zIndex={8} right={{ base: '8px', md: '18px' }} bottom={{ base: '8px', md: '18px' }} w={{ base: 'calc(100% - 16px)', md: '430px' }} maxH={{ base: '260px', md: 'calc(100% - 36px)' }} overflowY="auto" p={{ base: '12px', md: '14px' }} borderRadius={{ base: '22px', md: '26px' }} bg="rgba(8, 14, 38, .94)" color="white" border="1px solid" borderColor="cyan.300" boxShadow="0 24px 65px rgba(0,0,0,.52), inset 0 0 28px rgba(34,211,238,.05)" backdropFilter="blur(16px)" animation={`${panelArrival} .24s ease-out`}>
       <Flex align="center" justify="space-between" mb={{ base: '6px', md: '8px' }}>
@@ -459,7 +459,7 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
   );
 }
 
-function BusinessContactHub({ business, links, isOpen, onToggle }) {
+function BusinessContactHub({ business, links, isOpen, onToggle }: { business: SponsorItem; links: string[]; isOpen: boolean; onToggle: () => void }) {
   const hasLinks = links.length > 0;
   return (
     <Box position="relative" w={{ base: '88px', md: '104px' }} h={{ base: '86px', md: '100px' }} flex="0 0 auto" overflow="visible">

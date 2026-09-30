@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Box, Button, Flex, Icon, IconButton, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink, useHistory, useLocation } from 'react-router-dom';

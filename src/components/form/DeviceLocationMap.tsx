@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { Alert, AlertIcon, Box, Button, FormHelperText, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react';
 import { MdMyLocation } from 'react-icons/md';

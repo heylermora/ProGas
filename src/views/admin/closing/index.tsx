@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert, AlertIcon, Badge, Box, Button, FormControl, FormLabel, Heading, Input, Select,
-  SimpleGrid, Spinner, Stat, StatLabel, StatNumber, Tab, TabList, TabPanel, TabPanels,
+  SimpleGrid, Stat, StatLabel, StatNumber, Tab, TabList, TabPanel, TabPanels,
   Table, Tbody, Td, Text, Textarea, Th, Thead, Tr, Tabs, useToast,
 } from '@chakra-ui/react';
 import { useAuth } from 'contexts/AuthContext';
@@ -13,6 +13,7 @@ import OrderService from 'services/OrderService';
 import ProductService from 'services/ProductService';
 import { availableExpenses, availableOrders, cylinderSummary, orderFingerprint, orderTotal, paymentTotals } from 'utils/closing';
 import HelpLabel from 'components/form/HelpLabel';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 import PageHeader from 'components/layout/PageHeader';
 
 const crc = (amount: number) => `₡${amount.toLocaleString('es-CR')}`;
@@ -116,7 +117,7 @@ export default function Closings() {
     } catch { toast({ title: 'No se pudo confirmar el corte.', status: 'error' }); } finally { setSaving(false); }
   };
 
-  if (loading) return <Box pt="20"><Spinner size="xl" /></Box>;
+  if (loading) return <AsyncContent isLoading loadingLabel="Cargando cortes" />;
   return <Box w="100%" pt={{ base: '180px', md: '80px' }}>
     <PageHeader title="Gastos y cortes" description="Registrá salidas de dinero y cerrá periodos de trabajo con una comparación clara entre lo esperado y lo recibido." />
     <Alert status="info" mb="5" borderRadius="xl"><AlertIcon /><Box><Text fontWeight="800">¿Por dónde empezar?</Text><Text fontSize="sm">Primero registrá los gastos. Al terminar un turno, abrí “Corte nuevo”, elegí el periodo, contá el dinero recibido y escribí ese valor en “Monto declarado”.</Text></Box></Alert>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   Modal,
@@ -49,6 +48,7 @@ function PaymentModal(props: {
   totalToPay: number; // ✅ total a pagar
   isOpen: boolean;
   onClose: () => void;
+  onSave?: (payload: any) => void | Promise<void>;
   onSaved?: (payload: any) => void | Promise<void>;
 }) {
   const { title = 'Añadir pago', id, totalToPay, isOpen, onClose, onSaved, onSave } = props;

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Avatar, Badge, Box, Button, Center, Flex, FormControl, FormLabel, Icon, IconButton,
-  Input, SimpleGrid, Spinner, Switch, Text, Tooltip,
+  Input, SimpleGrid, Switch, Text, Tooltip,
   useColorModeValue, useToast,
 } from '@chakra-ui/react';
 import { MdAdd, MdBadge, MdEdit, MdLocationOn, MdPeople, MdPhone } from 'react-icons/md';
@@ -12,6 +12,7 @@ import { usePageSearch } from 'contexts/PageSearchContext';
 import PageHeader from 'components/layout/PageHeader';
 import FormPanel from 'components/form/FormPanel';
 import EmptyState from 'components/dataDisplay/EmptyState';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 
 const EMPTY_CLIENT: Omit<ClientItem, 'id'> = {
   nationalId: '', name: '', nickname: '', phone: '', active: true,
@@ -129,7 +130,7 @@ export default function Clients() {
       <Text mb={5} textAlign="right" color={mutedColor} fontSize="sm">{visible.length} {visible.length === 1 ? 'resultado' : 'resultados'}</Text>
 
       {loading ? (
-        <Center py={16}><Spinner size="xl" color="brand.500" /></Center>
+        <AsyncContent isLoading loadingLabel="Cargando clientes" />
       ) : visible.length === 0 ? (
         <EmptyState icon={MdPeople} title={query ? 'No encontramos clientes' : 'Aún no hay clientes'} description={query ? 'Probá con otro nombre, cédula o teléfono.' : 'Creá el primer cliente para comenzar.'} actionLabel={!query ? 'Nuevo cliente' : undefined} actionIcon={<MdAdd />} onAction={!query ? create : undefined} />
       ) : (

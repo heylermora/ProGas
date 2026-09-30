@@ -8,7 +8,6 @@ import Users from 'views/admin/user';
 import Orders from 'views/admin/order';
 import DetailsOrder from 'views/admin/order/details';
 import NewAdminOrder from 'views/admin/order/new';
-import NewCustomerOrder from 'views/customer/order/new';
 import EditOrder from 'views/admin/order/edit';
 
 // Sponsor Imports
@@ -186,13 +185,6 @@ const routes: RoutesType[] = [
     layout: '/admin',
     path: '/product/edit/:id',
     component: EditProduct,
-    secondary: true,
-  },
-  {
-    name: 'Nuevo Pedido',
-    layout: '/customer',
-    path: '/order/new',
-    component: NewCustomerOrder,
     secondary: true,
   },
   {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
@@ -38,7 +37,7 @@ export default function SponsorForm() {
   const history = useHistory();
   const [sponsor, setSponsor] = useState(empty);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState<string | null>(null);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.500', 'gray.400');
   const sectionBg = useColorModeValue('gray.50', 'whiteAlpha.50');
