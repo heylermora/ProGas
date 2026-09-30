@@ -10,12 +10,14 @@ import {
   Icon,
   IconButton,
   Image,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  SimpleGrid,
   Stack,
   Text,
   useColorModeValue,
@@ -30,6 +32,8 @@ import {
   MdMyLocation,
   MdPlayArrow,
   MdStorefront,
+  MdViewList,
+  MdMap,
 } from 'react-icons/md';
 import useCategories from 'hooks/useCategories';
 import SponsorService from 'services/SponsorService';
@@ -136,6 +140,9 @@ export default function VirtualMall() {
   const [videoOpen, setVideoOpen] = useState(false);
   const [mobileSector, setMobileSector] = useState(0);
   const [businessSector, setBusinessSector] = useState(0);
+  const [simpleView, setSimpleView] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches));
+  const [simpleCategory, setSimpleCategory] = useState('');
+  const [simpleSearch, setSimpleSearch] = useState('');
   const travelTimer = useRef();
   const panelBg = useColorModeValue('white', 'navy.800');
 
@@ -215,14 +222,17 @@ export default function VirtualMall() {
       <Stack spacing={{ base: '16px', md: '22px' }}>
         <Box borderRadius={{ base: '24px', md: '34px' }} overflow="hidden" p={{ base: '20px', md: '30px' }} bgGradient="linear(135deg, #111827 0%, #312E81 48%, #0284C7 100%)" color="white" position="relative">
           <Box position="absolute" right="-25px" top="-60px" fontSize={{ base: '140px', md: '190px' }} opacity=".11">🕹️</Box>
-          <Stack spacing="8px" maxW="760px" position="relative">
+          <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" direction={{ base: 'column', md: 'row' }}>
+          <Stack spacing="8px" maxW="760px">
             <Badge w="fit-content" px="10px" py="4px" borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MODO EXPLORACIÓN</Badge>
             <Heading fontSize={{ base: '29px', md: '48px' }} lineHeight="1.04">Centro Comercial Virtual</Heading>
             <Text fontSize={{ base: 'sm', md: 'lg' }} color="whiteAlpha.900">Viajá por el mapa, entrá a una categoría y descubrí cada negocio en su propia estación.</Text>
           </Stack>
+          <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="lg" flexShrink={0} onClick={() => setSimpleView((value) => !value)} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
+          </Flex>
         </Box>
 
-        <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
+        {simpleView ? <SimpleMall categories={categories} businesses={activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
               <Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa galáctico</Heading>
@@ -266,7 +276,7 @@ export default function VirtualMall() {
               />
             )}
           </Box>
-        </Box>
+        </Box>}
       </Stack>
 
       <Modal isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" isCentered>
@@ -284,6 +294,36 @@ export default function VirtualMall() {
         </ModalContent>
       </Modal>
     </PublicPage>
+  );
+}
+
+function SimpleMall({ categories, businesses, selectedCategory, onCategory, search, onSearch }) {
+  const muted = useColorModeValue('gray.600', 'gray.400');
+  const border = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const surface = useColorModeValue('white', 'navy.800');
+  const term = search.trim().toLocaleLowerCase('es');
+  const visible = businesses.filter((business) => (!selectedCategory || business.category === selectedCategory)
+    && (!term || [business.name, business.description, business.category].some((value) => String(value || '').toLocaleLowerCase('es').includes(term))));
+  return (
+    <Box bg={surface} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '18px', md: '26px' }} boxShadow="lg">
+      <Stack spacing="20px">
+        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Elegí una categoría o escribí el nombre de un negocio. No necesitás usar el mapa.</Text></Box>
+        <Input aria-label="Buscar negocio" size="lg" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Buscar negocio o servicio" />
+        <Flex gap="8px" wrap="wrap">
+          <Button size="sm" borderRadius="full" colorScheme={!selectedCategory ? 'brand' : 'gray'} variant={!selectedCategory ? 'solid' : 'outline'} onClick={() => onCategory('')}>Todos</Button>
+          {categories.map((category) => <Button key={category} size="sm" borderRadius="full" colorScheme={selectedCategory === category ? 'brand' : 'gray'} variant={selectedCategory === category ? 'solid' : 'outline'} onClick={() => onCategory(category)}>{category}</Button>)}
+        </Flex>
+        <Text fontWeight="700">{visible.length} {visible.length === 1 ? 'negocio encontrado' : 'negocios encontrados'}</Text>
+        {visible.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px">{visible.map((business) => {
+          const links = (business.links || []).filter(Boolean).slice(0, 4);
+          return <Box key={business.id} border="1px solid" borderColor={border} borderRadius="20px" p={{ base: '16px', md: '18px' }}>
+            <Flex gap="14px" align="center"><Flex w="64px" h="64px" borderRadius="16px" bg="gray.50" align="center" justify="center" p="8px" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}</Flex><Box minW={0}><Heading fontSize="lg">{business.name || 'Negocio local'}</Heading><Badge mt="5px" colorScheme="purple">{business.category}</Badge></Box></Flex>
+            {business.description && <Text color={muted} fontSize="sm" lineHeight="1.6" mt="12px">{business.description}</Text>}
+            {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <Button key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" size="sm" leftIcon={<Icon as={meta.icon} />} colorScheme="brand" variant="outline">{meta.label}</Button>; })}</Flex>}
+          </Box>;
+        })}</SimpleGrid> : <Box textAlign="center" py="40px"><Icon as={MdStorefront} boxSize="42px" color="gray.300" /><Text fontWeight="800" mt="10px">No encontramos negocios</Text><Text color={muted}>Probá con otra categoría o borrá la búsqueda.</Text></Box>}
+      </Stack>
+    </Box>
   );
 }
 
