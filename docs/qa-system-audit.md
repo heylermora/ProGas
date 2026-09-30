@@ -4,7 +4,7 @@
 **Versión revisada:** `1.1.0`  
 **Alcance:** frontend React/TypeScript, navegación pública y administrativa, autenticación/autorización, acceso a Firestore, reglas de negocio, inventario, cierres, mantenibilidad, accesibilidad, pruebas y cadena de entrega.
 
-> Este documento es un diagnóstico y una hoja de ruta. La primera ronda de correcciones abordó los defectos que podían resolverse de forma segura en el cliente; los hallazgos de seguridad que dependen de Firebase deben confirmarse contra las reglas desplegadas, ya que el repositorio no contiene `firestore.rules`, `storage.rules` ni configuración de emuladores.
+> Este documento es un diagnóstico y una hoja de ruta. La primera ronda de correcciones abordó los defectos que podían resolverse de forma segura en el cliente. El repositorio ya contiene reglas de Firestore restrictivas, pero todavía deben probarse con emuladores y desplegarse; no hay backend ni configuración de emuladores versionados.
 
 ## 1. Resumen ejecutivo
 
@@ -361,3 +361,34 @@ npm run test:e2e
 ## 10. Orden recomendado del backlog
 
 `QA-001` → `QA-002` → `QA-003` → `QA-004` → `QA-007` → `QA-008` → `QA-005`/`QA-006`/`QA-009` → automatización (`QA-010`, `QA-016`) → deuda técnica y accesibilidad restante.
+
+## 11. Gate explícito para declarar GO en producción
+
+El sistema continúa en **NO-GO**. No basta con que el frontend compile: para cambiar la decisión a **GO**, todos los controles P0 siguientes deben contar con evidencia verificable en el entorno que se publicará.
+
+### P0 — Obligatorios antes del GO
+
+- [ ] **Contención inmediata:** desplegar `firestore.rules` y comprobar desde una sesión anónima que `Orders`, `Clients`, `Expenses`, `Closings`, `Dashboard`, `ExchangeRate` y `users` no permiten acceso no autorizado. La regla universal anterior debe dejar de estar activa.
+- [ ] **Migración y bootstrap de identidad:** respaldar la base, migrar cada perfil histórico a `/users/{uid}`, verificar roles/estado y definir un procedimiento seguro para crear o recuperar el primer administrador. No desplegar las reglas nuevas antes de validar esta migración en staging.
+- [ ] **Backend confiable:** implementar con Admin SDK/Cloud Functions la creación idempotente de pedido y reserva de stock, consulta pública por token, alta/verificación de cliente, alta de colaboradores/asignación de roles y confirmación de cierres. El navegador no debe ser autoridad de precio, costo, inventario, rol ni transición financiera.
+- [ ] **Compatibilidad funcional con las reglas:** retirar el acceso directo anónimo actual a `Clients` y `Orders` solo después de conectar el frontend al backend. Las reglas restrictivas actuales bloquean deliberadamente esos recorridos; desplegarlas sin backend dejaría roto el pedido y seguimiento públicos.
+- [ ] **Catálogo público seguro:** publicar una proyección que excluya `costPrice`, stock interno y cualquier metadato privado. Firestore autoriza documentos completos y no puede ocultar campos individuales del documento `Products`.
+- [ ] **Token y protección antiabuso:** usar un token criptográfico de al menos 128 bits, almacenarlo de forma no reversible cuando sea viable, definir expiración/revocación y proteger endpoints públicos con App Check, rate limiting y respuestas que no permitan enumeración.
+- [ ] **Pruebas de reglas:** ejecutar en Firebase Emulator Suite la matriz anónimo/customer/colaborador/admin para `get/list/create/update/delete`, escalada de rol, campos inesperados, usuarios inactivos y recursos ajenos. Deben ejecutarse obligatoriamente en CI.
+- [ ] **Pruebas de integridad:** demostrar concurrencia, rollback e idempotencia: pedidos simultáneos nunca generan stock negativo, un fallo no deja escritura parcial y repetir la misma clave con payload distinto produce conflicto.
+- [ ] **E2E de recorridos críticos:** aprobar RF-01 a RF-09 en staging con servicios Firebase reales o emulados, incluyendo pedido público, seguimiento, autenticación, permisos, inventario, cierre y recuperación de errores.
+- [ ] **Pipeline del commit de release:** `npm ci`, lint, typecheck, unit/integration, cobertura con umbral, rules tests, E2E smoke, SCA y build deben finalizar en verde sobre el mismo SHA que se despliega.
+- [ ] **Privacidad:** aprobar inventario y minimización de PII, consentimiento de ubicación, política de retención/borrado y redacción de logs. No registrar cédula, teléfono, dirección, tokens ni información de pago.
+- [ ] **Operación y recuperación:** habilitar monitoreo/alertas sin PII, crear backup previo, probar restauración, documentar rollback de aplicación/reglas/funciones y asignar responsables para incidentes y conciliación pedido–stock–cierre.
+
+### P1 — Requeridos para una salida estable
+
+- [ ] Separar configuración Firebase por desarrollo, staging y producción; restringir dominios autorizados y verificar que CI no despliegue por accidente al proyecto equivocado.
+- [ ] Completar paginación de búsquedas OR, índices compuestos y campos normalizados, con pruebas sobre duplicados y cambios entre páginas.
+- [ ] Ejecutar pruebas de accesibilidad con axe, teclado y zoom; corregir todos los defectos críticos/serios.
+- [ ] Establecer presupuestos de rendimiento y probar el p75 móvil con datos representativos.
+- [ ] Sustituir el README genérico por arquitectura, variables, despliegue, migraciones, rollback, soporte y runbooks de incidentes.
+
+### Evidencia mínima para firmar el GO
+
+La aprobación debe adjuntar: SHA liberado, enlace al pipeline verde, reporte de reglas/E2E/SCA, versión y fecha de despliegue de reglas y funciones, resultado de smoke en producción, respaldo/restauración comprobados, lista de migraciones aplicadas y firma de producto, QA y responsable técnico. Si cualquiera de los P0 carece de evidencia, la decisión permanece **NO-GO**.
