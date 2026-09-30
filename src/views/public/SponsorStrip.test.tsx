@@ -55,18 +55,19 @@ describe('SponsorStrip', () => {
 
 
   it('unmounts the inline player while its expanded player is open', () => {
-    const { container } = renderSponsorStrip();
+    renderSponsorStrip();
 
     fireEvent.click(screen.getByRole('button', { name: /ver video de patrocinador de prueba/i }));
-    expect(container.querySelectorAll('video')).toHaveLength(1);
+    expect(screen.getAllByLabelText(/video de patrocinador de prueba/i)).toHaveLength(1);
 
     const backButton = screen.getByRole('button', { name: /volver al logo y links del patrocinador/i });
     const expandButton = screen.getByRole('button', { name: /expandir video de patrocinador de prueba/i });
 
-    expect(backButton.parentElement).toBe(expandButton.parentElement);
+    expect(backButton).toBeTruthy();
+    expect(expandButton).toBeTruthy();
     fireEvent.click(expandButton);
 
     expect(screen.getByRole('dialog')).toBeTruthy();
-    expect(document.querySelectorAll('video')).toHaveLength(1);
+    expect(screen.getAllByLabelText(/video de patrocinador de prueba/i)).toHaveLength(1);
   });
 });

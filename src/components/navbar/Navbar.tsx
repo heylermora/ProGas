@@ -1,6 +1,5 @@
 // Chakra Imports
 import { Box, Flex, Link, useColorModeValue } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
 import AdminNavbarLinks from 'components/navbar/NavbarLinksAdmin';
 
 export default function AdminNavbar(props: {
@@ -10,16 +9,6 @@ export default function AdminNavbar(props: {
 	fixed: boolean;
 	onOpen: (...args: any[]) => any;
 }) {
-	const [ scrolled, setScrolled ] = useState(false);
-
-	useEffect(() => {
-		window.addEventListener('scroll', changeNavbar);
-
-		return () => {
-			window.removeEventListener('scroll', changeNavbar);
-		};
-	});
-
 	const { secondary,  brandText } = props;
 
 	// Here are all the props that may change depending on navbar's type or state.(secondary, variant, scrolled)
@@ -33,14 +22,6 @@ export default function AdminNavbar(props: {
 	let secondaryMargin = '0px';
 	let paddingX = '15px';
 	let gap = '0px';
-	const changeNavbar = () => {
-		if (window.scrollY > 1) {
-			setScrolled(true);
-		} else {
-			setScrolled(false);
-		}
-	};
-
 	return (
 		<Box
 			position={navbarPosition}

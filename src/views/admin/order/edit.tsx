@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 
 import {
-  useColorModeValue,
   Box,
   Text,
   Input,

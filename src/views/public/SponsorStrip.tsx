@@ -260,7 +260,7 @@ function SponsorVideoPlayer({ sponsor }: { sponsor: DisplaySponsor }) {
     );
   }
 
-  return <Box as="video" src={sponsor.videoUrl} controls playsInline />;
+  return <Box as="video" aria-label={`Video de ${sponsor.name || 'patrocinador'}`} src={sponsor.videoUrl} controls playsInline />;
 }
 
 function SponsorVideoFrame({ sponsor, onBack }: { sponsor: DisplaySponsor; onBack: () => void }) {

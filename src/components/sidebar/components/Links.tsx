@@ -73,6 +73,7 @@ export function SidebarLinks(props: {
 						</NavLink>
 					);
 				}
+				return null;
 			}
 		);
 	};
