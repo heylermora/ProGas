@@ -15,7 +15,7 @@ import {
   Badge,
 } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
-import { Link as RLink, useParams, useHistory } from 'react-router-dom';
+import { Link as RLink, useHistory } from 'react-router-dom';
 import { MdAdd } from 'react-icons/md';
 
 import ItemCard from 'components/card/ItemCard';
@@ -25,12 +25,12 @@ import orderService from 'services/OrderService';
 import OrderItem from 'interfaces/OrderItem';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
 import { getPaymentMethods, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
+import { usePageSearch } from 'contexts/PageSearchContext';
 
 const STATUS_MENU = [...ORDER_STATUSES, 'Todos'] as const;
 
 export default function Index() {
-  const params = useParams<{ search?: string }>();
-  const search = params.search ?? null;
+  const { query: search } = usePageSearch();
 
   const history = useHistory();
   const spinnerColor = useColorModeValue('brand.700', 'white');
@@ -42,25 +42,35 @@ export default function Index() {
   const [isError, setIsError] = useState(false);
   const [filters, setFilters] = useState({ date: '', client: '', product: '', payment: '' });
 
-  // Fetch: NO filtra por status (solo por search si aplica)
+  // La búsqueda se resuelve en Firestore para no limitar los resultados a la primera página.
   useEffect(() => {
     setIsLoading(true);
     setIsError(false);
 
-    const promise: Promise<OrderItem[]> =
-      search === null || search === ':search'
-        ? orderService.getAll()
-        : orderService.getAll(['client', 'orderCode'], [search, search]);
+    let active = true;
+    const term = search.trim();
+    const timeout = window.setTimeout(() => {
+      const promise: Promise<OrderItem[]> = term
+        ? orderService.getAll(['client', 'clientId', 'orderCode'], [term, term, term])
+        : orderService.getAllPages();
 
-    promise
-      .then((ordersData: OrderItem[]) => {
-        setorders(ordersData);
-      })
-      .catch((error) => {
-        console.error('Error fetching orders:', error);
-        setIsError(true);
-      })
-      .finally(() => setIsLoading(false));
+      promise
+        .then((ordersData: OrderItem[]) => {
+          if (active) setorders(ordersData);
+        })
+        .catch((error) => {
+          console.error('Error fetching orders:', error);
+          if (active) setIsError(true);
+        })
+        .finally(() => {
+          if (active) setIsLoading(false);
+        });
+    }, term ? 300 : 0);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
   }, [search, refreshKey]);
 
   const handleStatusClick = useCallback(
@@ -79,12 +89,14 @@ export default function Index() {
     const status = normalizeOrderStatus(order.status);
     const date = order.requestDate ? order.requestDate.slice(0, 10) : '';
     const clientTerm = filters.client.trim().toLocaleLowerCase('es');
+    const searchTerm = search.trim().toLocaleLowerCase('es');
     return (activeStatus === 'Todos' || status === activeStatus)
+      && (!searchTerm || `${order.client} ${order.clientId || ''} ${order.orderCode || ''}`.toLocaleLowerCase('es').includes(searchTerm))
       && (!filters.date || date === filters.date)
       && (!clientTerm || `${order.client} ${order.clientId || ''}`.toLocaleLowerCase('es').includes(clientTerm))
       && (!filters.product || (order.items || []).some(item => item.gasType === filters.product))
       && (!filters.payment || getPaymentMethods(order).includes(filters.payment));
-  }), [orders, activeStatus, filters]);
+  }), [orders, activeStatus, filters, search]);
 
   const statusCounts = useMemo(() => orders.reduce<Record<string, number>>((counts, order) => {
     const status = normalizeOrderStatus(order.status);

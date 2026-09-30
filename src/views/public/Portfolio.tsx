@@ -1,8 +1,8 @@
 import React from 'react';
 import { Badge, Box, Button, Flex, Heading, Icon, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { MdArrowBack, MdDevices, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
-import { FaGithub, FaWhatsapp } from 'react-icons/fa';
+import { MdArrowBack, MdArrowForward, MdCheckCircle, MdDevices, MdInsights, MdLocalShipping, MdMap, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
+import { FaWhatsapp } from 'react-icons/fa';
 import { PublicPage } from './PublicPage';
 
 const whatsappUrl = 'https://wa.me/50683508585?text=' + encodeURIComponent('Hola Johel, vi tu portafolio en Gas Memo y me gustaría conversar sobre una solución digital para mi emprendimiento.');
@@ -14,9 +14,36 @@ const services = [
 ];
 
 const projects = [
-  { name: 'Gas Memo', type: 'Pedidos y logística local', description: 'Experiencia pública para solicitar productos, indicar la entrega y consultar el avance de cada pedido.', action: 'Probar la experiencia', to: '/' },
-  { name: 'Centro Comercial Virtual', type: 'Comercio local', description: 'Un mapa interactivo que conecta a las personas con negocios de Acosta y sus canales de contacto.', action: 'Explorar comercios', to: '/mall' },
-  { name: 'ProGest', type: 'Gestión operativa', description: 'Herramientas administrativas para centralizar pedidos, clientes, productos, facturación y operación diaria.', action: 'Ver código', href: 'https://github.com/heylermora/ProGas' },
+  {
+    name: 'Gas Memo',
+    type: 'Pedidos y logística local',
+    icon: MdLocalShipping,
+    description: 'Una experiencia de compra sencilla que permite pedir gas desde cualquier dispositivo, compartir la ubicación de entrega y consultar el avance sin llamadas.',
+    highlights: ['Pedido guiado', 'Seguimiento claro', 'Diseño móvil'],
+    result: 'Menos pasos para pedir y más claridad durante la entrega.',
+    action: 'Probar la experiencia',
+    to: '/',
+  },
+  {
+    name: 'Centro Comercial Virtual',
+    type: 'Comercio local',
+    icon: MdMap,
+    description: 'Una vitrina digital que reúne negocios de Acosta por categoría y facilita descubrir sus servicios, promociones y medios de contacto.',
+    highlights: ['Directorio visual', 'Comercios por categoría', 'Contacto directo'],
+    result: 'Mayor visibilidad para emprendimientos y una búsqueda más fácil para la comunidad.',
+    action: 'Explorar comercios',
+    to: '/mall',
+  },
+  {
+    name: 'ProGest',
+    type: 'Gestión operativa',
+    icon: MdInsights,
+    description: 'Un espacio administrativo que organiza pedidos, clientes, inventario y operación diaria para que la información importante esté siempre a mano.',
+    highlights: ['Control centralizado', 'Inventario y clientes', 'Decisiones con datos'],
+    result: 'Una operación más ordenada, rápida y preparada para crecer.',
+    action: 'Quiero una solución similar',
+    href: whatsappUrl,
+  },
 ];
 
 export default function Portfolio() {
@@ -41,21 +68,31 @@ export default function Portfolio() {
           </Stack>
         </Box>
 
-        <Box as="section" aria-labelledby="projects-title">
-          <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'flex-start', sm: 'flex-end' }} justify="space-between" gap="12px">
-            <Box><Text color="brand.500" fontWeight="900" fontSize="sm" letterSpacing=".1em">EN LO QUE ESTOY TRABAJANDO</Text><Heading id="projects-title" mt="3px" fontSize={{ base: '28px', md: '38px' }}>Proyectos actuales</Heading></Box>
-            <Button as="a" href="https://github.com/heylermora" target="_blank" rel="noopener noreferrer" leftIcon={<FaGithub />} variant="outline" colorScheme="brand" borderRadius="full" size="sm">Ver perfil en GitHub</Button>
-          </Flex>
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap="14px" mt="18px">
+        <Box as="section" aria-labelledby="projects-title" py={{ base: '4px', md: '12px' }}>
+          <Box maxW="720px">
+            <Text color="brand.500" fontWeight="900" fontSize="sm" letterSpacing=".1em">PROYECTOS CON PROPÓSITO</Text>
+            <Heading id="projects-title" mt="3px" fontSize={{ base: '28px', md: '38px' }}>Soluciones pensadas para personas reales</Heading>
+            <Text color={muted} mt="10px" lineHeight="1.7">Cada proyecto nace de una necesidad concreta. Esta es una mirada breve a lo que resuelve, cómo se siente usarlo y el valor que aporta.</Text>
+          </Box>
+          <SimpleGrid columns={{ base: 1, lg: 3 }} gap={{ base: '16px', md: '20px' }} mt="22px">
             {projects.map((project, index) => (
-              <Stack key={project.name} position="relative" overflow="hidden" bg={index === 0 ? 'brand.700' : surface} color={index === 0 ? 'white' : undefined} border="1px solid" borderColor={index === 0 ? 'brand.500' : border} borderRadius="24px" p={{ base: '20px', md: '24px' }} spacing="12px" boxShadow={index === 0 ? '0 16px 38px rgba(66,42,251,.24)' : '0 10px 28px rgba(66,42,251,.07)'}>
-                <Text color={index === 0 ? 'cyan.200' : 'brand.500'} fontSize="xs" fontWeight="900" letterSpacing=".08em">{project.type}</Text>
+              <Stack key={project.name} position="relative" overflow="hidden" bg={index === 0 ? 'brand.700' : surface} color={index === 0 ? 'white' : undefined} border="1px solid" borderColor={index === 0 ? 'brand.500' : border} borderRadius="26px" p={{ base: '22px', md: '26px' }} spacing="14px" boxShadow={index === 0 ? '0 20px 45px rgba(66,42,251,.24)' : '0 12px 32px rgba(66,42,251,.08)'} transition="transform .2s ease, box-shadow .2s ease" _hover={{ transform: 'translateY(-4px)', boxShadow: '0 20px 45px rgba(66,42,251,.16)' }}>
+                <Flex align="center" justify="space-between">
+                  <Flex w="48px" h="48px" borderRadius="16px" bg={index === 0 ? 'whiteAlpha.200' : 'brand.100'} color={index === 0 ? 'white' : 'brand.600'} align="center" justify="center"><Icon as={project.icon} boxSize="25px" /></Flex>
+                  <Text color={index === 0 ? 'cyan.200' : 'brand.500'} fontSize="xs" fontWeight="900" letterSpacing=".08em" textAlign="right">{project.type}</Text>
+                </Flex>
                 <Heading fontSize="2xl">{project.name}</Heading>
-                <Text color={index === 0 ? 'whiteAlpha.800' : muted} fontSize="sm" lineHeight="1.65" flex="1">{project.description}</Text>
+                <Text color={index === 0 ? 'whiteAlpha.800' : muted} fontSize="sm" lineHeight="1.7">{project.description}</Text>
+                <Stack spacing="7px" aria-label={`Características de ${project.name}`}>
+                  {project.highlights.map((highlight) => <Flex key={highlight} align="center" gap="8px"><Icon as={MdCheckCircle} color={index === 0 ? 'cyan.200' : 'green.400'} boxSize="17px" /><Text fontSize="sm" fontWeight="700">{highlight}</Text></Flex>)}
+                </Stack>
+                <Box borderTop="1px solid" borderColor={index === 0 ? 'whiteAlpha.300' : border} pt="13px" flex="1">
+                  <Text color={index === 0 ? 'whiteAlpha.900' : muted} fontSize="sm" fontStyle="italic" lineHeight="1.6">{project.result}</Text>
+                </Box>
                 {project.to ? (
-                  <Button as={RLink} to={project.to} alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
+                  <Button as={RLink} to={project.to} rightIcon={<MdArrowForward />} alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
                 ) : (
-                  <Button as="a" href={project.href} target="_blank" rel="noopener noreferrer" alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
+                  <Button as="a" href={project.href} target="_blank" rel="noopener noreferrer" rightIcon={<MdArrowForward />} alignSelf="flex-start" size="sm" borderRadius="full" bg="brand.100" color="brand.800" _hover={{ bg: 'brand.200' }}>{project.action}</Button>
                 )}
               </Stack>
             ))}

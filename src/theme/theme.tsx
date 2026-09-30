@@ -10,6 +10,7 @@ import { switchStyles } from './components/switch';
 import { linkStyles } from './components/link';
 import { breakpoints } from './foundations/breakpoints';
 import { globalStyles } from './styles';
+import { formStyles } from './components/form';
 
 export default extendTheme(
 	{ breakpoints }, // Breakpoints
@@ -20,6 +21,7 @@ export default extendTheme(
 	progressStyles, // progress styles
 	sliderStyles, // slider styles
 	inputStyles, // input styles
+	formStyles, // labels, helper text and accordion styles
 	textareaStyles, // textarea styles
 	switchStyles, // switch styles
 	CardComponent // card component

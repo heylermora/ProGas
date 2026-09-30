@@ -10,12 +10,14 @@ import {
   Icon,
   IconButton,
   Image,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  SimpleGrid,
   Stack,
   Text,
   useColorModeValue,
@@ -30,8 +32,10 @@ import {
   MdMyLocation,
   MdPlayArrow,
   MdStorefront,
+  MdViewList,
+  MdMap,
 } from 'react-icons/md';
-import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
+import useCategories from 'hooks/useCategories';
 import SponsorService from 'services/SponsorService';
 import { useLocation } from 'react-router-dom';
 import { PublicPage } from './PublicPage';
@@ -125,6 +129,7 @@ const businessPosition = (index, total) => {
 };
 
 export default function VirtualMall() {
+  const { categories } = useCategories('sponsors');
   const location = useLocation();
   const [businesses, setBusinesses] = useState([]);
   const [loadStatus, setLoadStatus] = useState('loading');
@@ -135,6 +140,9 @@ export default function VirtualMall() {
   const [videoOpen, setVideoOpen] = useState(false);
   const [mobileSector, setMobileSector] = useState(0);
   const [businessSector, setBusinessSector] = useState(0);
+  const [simpleView, setSimpleView] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches));
+  const [simpleCategory, setSimpleCategory] = useState('');
+  const [simpleSearch, setSimpleSearch] = useState('');
   const travelTimer = useRef();
   const panelBg = useColorModeValue('white', 'navy.800');
 
@@ -177,7 +185,7 @@ export default function VirtualMall() {
   const businessSectorCount = Math.max(1, Math.ceil(categoryBusinesses.length / BUSINESSES_PER_SECTOR));
   const visibleBusinesses = categoryBusinesses.slice(businessSector * BUSINESSES_PER_SECTOR, (businessSector + 1) * BUSINESSES_PER_SECTOR);
   const arrivedBusiness = arrivedBusinessId === selectedBusinessId ? selectedBusiness : undefined;
-  const selectedCategoryIndex = BUSINESS_CATEGORIES.indexOf(selectedCategory);
+  const selectedCategoryIndex = categories.indexOf(selectedCategory);
   const categoryIcon = categoryEmoji[selectedCategoryIndex] || '🪐';
   const contactLinks = (selectedBusiness?.links || []).filter(Boolean).slice(0, 4);
 
@@ -214,14 +222,17 @@ export default function VirtualMall() {
       <Stack spacing={{ base: '16px', md: '22px' }}>
         <Box borderRadius={{ base: '24px', md: '34px' }} overflow="hidden" p={{ base: '20px', md: '30px' }} bgGradient="linear(135deg, #111827 0%, #312E81 48%, #0284C7 100%)" color="white" position="relative">
           <Box position="absolute" right="-25px" top="-60px" fontSize={{ base: '140px', md: '190px' }} opacity=".11">🕹️</Box>
-          <Stack spacing="8px" maxW="760px" position="relative">
+          <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" direction={{ base: 'column', md: 'row' }}>
+          <Stack spacing="8px" maxW="760px">
             <Badge w="fit-content" px="10px" py="4px" borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MODO EXPLORACIÓN</Badge>
             <Heading fontSize={{ base: '29px', md: '48px' }} lineHeight="1.04">Centro Comercial Virtual</Heading>
             <Text fontSize={{ base: 'sm', md: 'lg' }} color="whiteAlpha.900">Viajá por el mapa, entrá a una categoría y descubrí cada negocio en su propia estación.</Text>
           </Stack>
+          <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="lg" flexShrink={0} onClick={() => setSimpleView((value) => !value)} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
+          </Flex>
         </Box>
 
-        <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
+        {simpleView ? <SimpleMall categories={categories} businesses={activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
               <Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa galáctico</Heading>
@@ -238,7 +249,7 @@ export default function VirtualMall() {
             {loadStatus === 'success' && (
               <Box key={selectedCategory || 'galaxy'} position="absolute" inset="0" animation={`${mapArrival} .38s ease-out`}>
                 {!selectedCategory ? (
-                  <CategoryMap businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
+                  <CategoryMap categories={categories} businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
                 ) : (
                   <BusinessMap businesses={visibleBusinesses} totalBusinesses={categoryBusinesses.length} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} sector={businessSector} sectorCount={businessSectorCount} onSectorChange={changeBusinessSector} onBack={returnToGalaxy} onSelect={selectBusiness} />
                 )}
@@ -265,7 +276,7 @@ export default function VirtualMall() {
               />
             )}
           </Box>
-        </Box>
+        </Box>}
       </Stack>
 
       <Modal isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" isCentered>
@@ -286,8 +297,38 @@ export default function VirtualMall() {
   );
 }
 
-function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
-  const sectorCount = Math.ceil(BUSINESS_CATEGORIES.length / CATEGORIES_PER_SECTOR);
+function SimpleMall({ categories, businesses, selectedCategory, onCategory, search, onSearch }) {
+  const muted = useColorModeValue('gray.600', 'gray.400');
+  const border = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const surface = useColorModeValue('white', 'navy.800');
+  const term = search.trim().toLocaleLowerCase('es');
+  const visible = businesses.filter((business) => (!selectedCategory || business.category === selectedCategory)
+    && (!term || [business.name, business.description, business.category].some((value) => String(value || '').toLocaleLowerCase('es').includes(term))));
+  return (
+    <Box bg={surface} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '18px', md: '26px' }} boxShadow="lg">
+      <Stack spacing="20px">
+        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Elegí una categoría o escribí el nombre de un negocio. No necesitás usar el mapa.</Text></Box>
+        <Input aria-label="Buscar negocio" size="lg" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Buscar negocio o servicio" />
+        <Flex gap="8px" wrap="wrap">
+          <Button size="sm" borderRadius="full" colorScheme={!selectedCategory ? 'brand' : 'gray'} variant={!selectedCategory ? 'solid' : 'outline'} onClick={() => onCategory('')}>Todos</Button>
+          {categories.map((category) => <Button key={category} size="sm" borderRadius="full" colorScheme={selectedCategory === category ? 'brand' : 'gray'} variant={selectedCategory === category ? 'solid' : 'outline'} onClick={() => onCategory(category)}>{category}</Button>)}
+        </Flex>
+        <Text fontWeight="700">{visible.length} {visible.length === 1 ? 'negocio encontrado' : 'negocios encontrados'}</Text>
+        {visible.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px">{visible.map((business) => {
+          const links = (business.links || []).filter(Boolean).slice(0, 4);
+          return <Box key={business.id} border="1px solid" borderColor={border} borderRadius="20px" p={{ base: '16px', md: '18px' }}>
+            <Flex gap="14px" align="center"><Flex w="64px" h="64px" borderRadius="16px" bg="gray.50" align="center" justify="center" p="8px" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}</Flex><Box minW={0}><Heading fontSize="lg">{business.name || 'Negocio local'}</Heading><Badge mt="5px" colorScheme="purple">{business.category}</Badge></Box></Flex>
+            {business.description && <Text color={muted} fontSize="sm" lineHeight="1.6" mt="12px">{business.description}</Text>}
+            {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <Button key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" size="sm" leftIcon={<Icon as={meta.icon} />} colorScheme="brand" variant="outline">{meta.label}</Button>; })}</Flex>}
+          </Box>;
+        })}</SimpleGrid> : <Box textAlign="center" py="40px"><Icon as={MdStorefront} boxSize="42px" color="gray.300" /><Text fontWeight="800" mt="10px">No encontramos negocios</Text><Text color={muted}>Probá con otra categoría o borrá la búsqueda.</Text></Box>}
+      </Stack>
+    </Box>
+  );
+}
+
+function CategoryMap({ categories, businesses, mobileSector, onSectorChange, onSelect }) {
+  const sectorCount = Math.max(1, Math.ceil(categories.length / CATEGORIES_PER_SECTOR));
   const previousSector = () => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount);
   const nextSector = () => onSectorChange((mobileSector + 1) % sectorCount);
 
@@ -304,16 +345,16 @@ function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
         <Text color="white" fontSize="xs" fontWeight="800">{mobileSector + 1} de {sectorCount}</Text>
       </Stack>
 
-      {BUSINESS_CATEGORIES.map((category, index) => {
+      {categories.map((category, index) => {
         const total = businesses.filter((business) => business.category === category).length;
         const categorySector = Math.floor(index / CATEGORIES_PER_SECTOR);
         const mobileIndex = index % CATEGORIES_PER_SECTOR;
-        const [desktopLeft, desktopTop] = categoryPositions[index];
+        const [desktopLeft, desktopTop] = categoryPositions[index] || businessPosition(index, categories.length);
         const [mobileLeft, mobileTop] = mobileCategoryPositions[mobileIndex];
         return (
           <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position="absolute" left={{ base: `${mobileLeft}%`, md: `${desktopLeft}%` }} top={{ base: `${mobileTop}%`, md: `${desktopTop}%` }} transform="translate(-50%, -50%)" w={{ base: '82px', md: '94px' }} h={{ base: '72px', md: '78px' }} minW={{ base: '82px', md: '94px' }} p="7px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="3px solid white" borderRadius="20px" boxShadow="0 0 16px rgba(255,255,255,.45)" onClick={() => onSelect(category)} display={{ base: categorySector === mobileSector ? 'flex' : 'none', md: 'flex' }} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} transition="all .2s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.09)', boxShadow: '0 0 26px rgba(103,232,249,.9)' }}>
             <Text fontSize={{ base: '25px', md: '28px' }} lineHeight="1">{categoryEmoji[index]}</Text>
-            <Text mt="4px" w="100%" noOfLines={1} fontSize="10px" fontWeight="900">{shortLabels[index]}</Text>
+            <Text mt="4px" w="100%" noOfLines={1} fontSize="10px" fontWeight="900">{shortLabels[index] || category}</Text>
             {total > 0 && <Badge position="absolute" right="-4px" top="-5px" minW="22px" fontSize="8px" borderRadius="full" colorScheme="purple">{total}</Badge>}
           </Button>
         );

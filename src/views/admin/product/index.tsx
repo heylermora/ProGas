@@ -1,34 +1,38 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Badge, Box, Button, Center, Divider, Flex, Heading, HStack, Icon, IconButton,
-  Input, InputGroup, InputLeftElement, Menu, MenuButton, MenuItem, MenuList, Modal,
+  Input, Menu, MenuButton, MenuItem, MenuList, Modal,
   ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay,
   Select, SimpleGrid, Spinner, Stat, StatLabel, StatNumber, Switch, Table, Tbody, Td,
   Text, Th, Thead, Tr, useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { MdAdd, MdArrowDownward, MdArrowUpward, MdEdit, MdInventory2, MdMoreVert, MdSearch, MdWarning } from 'react-icons/md';
+import { MdAdd, MdArrowDownward, MdArrowUpward, MdEdit, MdInventory2, MdMoreVert, MdSettings, MdWarning } from 'react-icons/md';
 import Card from 'components/card/Card';
 import productService from 'services/ProductService';
-import { Product, PRODUCT_CATEGORIES } from 'interfaces/ProductItem';
+import { Product } from 'interfaces/ProductItem';
+import { usePageSearch } from 'contexts/PageSearchContext';
+import useCategories from 'hooks/useCategories';
+import CategoryManager from 'components/category/CategoryManager';
 
 const money = (value: number) => new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 }).format(value || 0);
 
 export default function Products() {
+  const { query: search } = usePageSearch();
+  const { categories, reload: reloadCategories } = useCategories('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
   const [adjusting, setAdjusting] = useState<Product>();
   const [adjustment, setAdjustment] = useState(0);
   const [saving, setSaving] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const categoryManager = useDisclosure();
   const toast = useToast();
   const text = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.600', 'gray.400');
   const border = useColorModeValue('gray.200', 'whiteAlpha.200');
-  const surface = useColorModeValue('white', 'navy.800');
   const hover = useColorModeValue('gray.50', 'whiteAlpha.50');
 
   const load = useCallback(async () => {
@@ -43,6 +47,7 @@ export default function Products() {
     ...product, category: product.category || 'Otros', costPrice: Number(product.costPrice || 0),
     stock: Number(product.stock || 0), active: product.active !== false,
   } as Product)), [products]);
+  const availableCategories = useMemo(() => Array.from(new Set([...categories, ...normalized.map(product => product.category).filter(Boolean)])), [categories, normalized]);
   const filtered = useMemo(() => normalized.filter(product => {
     const term = search.toLocaleLowerCase();
     return (!term || product.description.toLocaleLowerCase().includes(term) || product.sku?.toLocaleLowerCase().includes(term))
@@ -87,8 +92,9 @@ export default function Products() {
 
       <Card p="0" overflow="hidden">
         <Flex p="20px" gap="12px" wrap="wrap" align="center">
-          <InputGroup flex="1" minW={{ base: '100%', md: '280px' }}><InputLeftElement pointerEvents="none"><MdSearch color="#A0AEC0" /></InputLeftElement><Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nombre o SKU..." bg={surface} /></InputGroup>
-          <Select value={category} onChange={e => setCategory(e.target.value)} maxW={{ base: '100%', md: '210px' }}><option value="">Todas las categorías</option>{PRODUCT_CATEGORIES.map(item => <option key={item}>{item}</option>)}</Select>
+          <Text flex="1" color={muted} fontSize="sm">Use el buscador superior para filtrar por nombre o SKU.</Text>
+          <Select value={category} onChange={e => setCategory(e.target.value)} maxW={{ base: '100%', md: '210px' }}><option value="">Todas las categorías</option>{availableCategories.map(item => <option key={item}>{item}</option>)}</Select>
+          <Button leftIcon={<MdSettings />} variant="outline" onClick={categoryManager.onOpen}>Categorías</Button>
           <Select value={status} onChange={e => setStatus(e.target.value)} maxW={{ base: '100%', md: '170px' }}><option value="">Todos los estados</option><option value="active">Activos</option><option value="inactive">Inactivos</option></Select>
         </Flex>
         <Divider borderColor={border} />
@@ -112,6 +118,7 @@ export default function Products() {
       </Card>
 
       <Modal isOpen={isOpen} onClose={onClose} isCentered><ModalOverlay /><ModalContent><ModalHeader>Ajustar inventario</ModalHeader><ModalCloseButton /><ModalBody><Text fontWeight="700" color={text}>{adjusting?.description}</Text><Text color={muted} fontSize="sm" mb="20px">Existencia actual: {adjusting?.stock || 0} unidades</Text><Text fontSize="sm" fontWeight="600" mb="8px">Cantidad del ajuste</Text><Input type="number" value={adjustment} onChange={e => setAdjustment(Number(e.target.value))} /><HStack mt="12px" spacing="8px"><Button size="sm" leftIcon={<MdArrowUpward />} onClick={() => setAdjustment(Math.abs(adjustment || 1))}>Entrada</Button><Button size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(adjustment || 1))}>Salida</Button></HStack><Text fontSize="sm" color={muted} mt="16px">Nuevo total: <b>{Math.max(0, Number(adjusting?.stock || 0) + adjustment)} unidades</b></Text></ModalBody><ModalFooter><Button variant="ghost" mr="8px" onClick={onClose}>Cancelar</Button><Button colorScheme="brand" isDisabled={adjustment === 0} isLoading={saving} onClick={saveAdjustment}>Guardar ajuste</Button></ModalFooter></ModalContent></Modal>
+      <CategoryManager kind="products" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
     </Box>
   );
 }
