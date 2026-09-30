@@ -130,11 +130,11 @@ const routes: RoutesType[] = [
     layout: '/admin',
     path: '/order/balance',
     component: Balance,
-    icon: <Icon as={MdPointOfSale} width="20px" height="20px" />,
+    secondary: true,
     roles: ['admin', 'colaborador'],
   },
   {
-    name: 'Gastos y cortes',
+    name: 'Finanzas',
     layout: '/admin',
     path: '/closing/index',
     icon: <Icon as={MdPointOfSale} width="20px" height="20px" />,

@@ -13,8 +13,8 @@ const ClosingService = {
     await runTransaction(db, async (transaction) => {
       const orderRefs = closing.orderIds.map((orderId) => doc(db, 'Orders', orderId));
       const snapshots = await Promise.all(orderRefs.map((orderRef) => transaction.get(orderRef)));
-      if (snapshots.some((snapshot) => !snapshot.exists() || isOrderLocked(snapshot.data() as any))) {
-        throw new Error('Uno o más pedidos ya fueron liquidados. Actualice la previsualización.');
+      if (snapshots.some((snapshot) => !snapshot.exists() || (closing.type === 'cylinder' ? Boolean(snapshot.data().cylinderClosingId) : isOrderLocked(snapshot.data() as any)))) {
+        throw new Error(closing.type === 'cylinder' ? 'Uno o más pedidos ya fueron incluidos en otro corte de cilindros.' : 'Uno o más pedidos ya fueron liquidados. Actualice la previsualización.');
       }
       snapshots.forEach((snapshot) => {
         const current = { id: snapshot.id, ...snapshot.data() } as any;
@@ -28,7 +28,10 @@ const ClosingService = {
         throw new Error('Uno o más gastos ya fueron incluidos en otro corte.');
       }
       transaction.set(closingRef, closing);
-      orderRefs.forEach((orderRef) => transaction.update(orderRef, {
+      orderRefs.forEach((orderRef) => transaction.update(orderRef, closing.type === 'cylinder' ? {
+        cylinderClosingId: closingRef.id,
+        cylinderClosedAt: closing.createdAt,
+      } : {
         locked: true,
         status: 'Liquidado',
         closingId: closingRef.id,

@@ -18,6 +18,7 @@ import {
   SimpleGrid,
   Tag,
   HStack,
+  Table, Tbody, Td, Th, Thead, Tr,
 } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
@@ -30,6 +31,8 @@ import Empty from 'components/exceptions/Empty';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import { isOrderPaid } from 'utils/order';
+import ClosingService from 'services/ClosingService';
+import { ClosingItem } from 'interfaces/ClosingItem';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
 
@@ -50,7 +53,7 @@ type WeeklySummary = {
 
 const METHODS: PaymentMethod[] = ['Efectivo', 'Sinpe', 'Tarjeta', 'Otro'];
 
-export default function Balance() {
+export default function Balance({ embedded = false }: { embedded?: boolean }) {
   const cardBg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('secondaryGray.800', 'white');
   const subtleText = useColorModeValue('secondaryGray.500', 'secondaryGray.400');
@@ -61,8 +64,9 @@ export default function Balance() {
   const [summaries, setSummaries] = useState<WeeklySummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [shiftClosings, setShiftClosings] = useState<ClosingItem[]>([]);
 
-  const topPt: ResponsiveValue<string> = { base: '180px', md: '80px', xl: '80px' };
+  const topPt: ResponsiveValue<string> = embedded ? '0' : { base: '180px', md: '80px', xl: '80px' };
 
   const getLocalDateKey = (date: Date) => {
     const monday = new Date(date);
@@ -104,9 +108,9 @@ export default function Balance() {
     setIsLoading(true);
     setIsError(false);
 
-    orderService
-      .getAll()
-      .then((ordersData: OrderItem[]) => {
+    Promise.all([orderService.getAll(), ClosingService.getAll()])
+      .then(([ordersData, closingsData]: [OrderItem[], ClosingItem[]]) => {
+        setShiftClosings(closingsData.filter(closing => closing.type === 'shift').sort((a, b) => b.from.localeCompare(a.from)));
         if (!ordersData || ordersData.length === 0) {
           setSummaries([]);
           return;
@@ -202,6 +206,11 @@ export default function Balance() {
         </>
       ) : (
         <Flex flexDirection="column" w="100%" maxW="1100px" mx="auto">
+          <Box bg={cardBg} borderRadius="2xl" p={{ base: 3, md: 5 }} mb="18px" overflowX="auto">
+            <Text fontWeight="900" fontSize="lg" mb="3">Desglose por día y turno</Text>
+            <Table size="sm"><Thead><Tr><Th>Día</Th><Th>Turno</Th><Th>Colaborador</Th><Th isNumeric>Ventas</Th><Th isNumeric>Costos</Th><Th isNumeric>Gastos</Th><Th isNumeric>Utilidad</Th></Tr></Thead><Tbody>{shiftClosings.map(closing => <Tr key={closing.id}><Td>{new Date(closing.from).toLocaleDateString('es-CR')}</Td><Td>{new Date(closing.from).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}–{new Date(closing.to).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}</Td><Td>{closing.createdByName || 'Sin nombre registrado'}</Td><Td isNumeric>{formatCRC(closing.totalSales)}</Td><Td isNumeric>{formatCRC(closing.costTotal)}</Td><Td isNumeric>{formatCRC(closing.expenseTotal)}</Td><Td isNumeric fontWeight="800">{formatCRC(closing.totalSales - closing.costTotal - closing.expenseTotal)}</Td></Tr>)}</Tbody></Table>
+            {!shiftClosings.length && <Text color={subtleText} py="5" textAlign="center">Confirmá el primer corte de turno para ver este desglose.</Text>}
+          </Box>
           <Flex align="center" mb="16px">
             <Box>
               <Text fontSize="sm" color={subtleText}>

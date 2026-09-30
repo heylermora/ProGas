@@ -19,9 +19,8 @@ export function SidebarLinks(props: {
 	const menuPriority: Record<string, number> = {
 		'/order/index/:search?': 10,
 		'/closing/index': 20,
-		'/order/balance': 30,
-		'/product/index/:search?': 40,
-		'/client/index': 50,
+		'/product/index/:search?': 30,
+		'/client/index': 40,
 		'/sponsor/index': 80,
 		'/user/index': 90,
 	};

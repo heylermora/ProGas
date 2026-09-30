@@ -46,5 +46,7 @@ export interface OrderItem {
     change?: number;
     paymentNote?: string | null;
     locked?: boolean;
+    cylinderClosingId?: string;
+    cylinderClosedAt?: string;
     onStatusChange?: (id: string, status: string) => void;
 }
