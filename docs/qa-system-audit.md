@@ -27,6 +27,7 @@ Se registraron **17 hallazgos**:
 
 | Hallazgo | Estado | Cambio aplicado |
 | --- | --- | --- |
+| QA-001 | Parcial urgente | Se confirmó que producción permite lectura/escritura universal. Se versionó una política restrictiva con denegación por defecto; falta desplegarla, migrar perfiles y cubrirla con pruebas de emulador |
 | QA-002 | Parcial | Se eliminó la búsqueda por teléfono, se exige coincidencia exacta del código y ya no se muestra la dirección; sigue pendiente rate limiting/App Check y un token server-side |
 | QA-003 | Parcial | Pedido y stock comparten una transacción idempotente por `requestId`, validan disponibilidad y recalculan precios; sigue pendiente mover la autoridad a backend/reglas |
 | QA-004 | Corregido en cliente | El registro espera la creación del perfil y retorna el usuario real |
@@ -63,10 +64,10 @@ Los hallazgos no incluidos en esta tabla continúan pendientes. “Corregido en 
 
 ### Limitaciones
 
-1. `npm ci` no puede reproducir el entorno porque `package.json` y `package-lock.json` no están sincronizados para npm 11 (`@types/react` y `yaml` faltan en el lockfile).
-2. Sin dependencias instaladas, Jest, TypeScript y el build no pudieron ejecutarse.
+1. `package.json` y `package-lock.json` están sincronizados y CI usa `npm ci`; la ejecución local más reciente no terminó porque la descarga de dependencias quedó bloqueada por el entorno.
+2. Al interrumpirse la instalación limpia no quedaron dependencias utilizables, por lo que Jest y el build no pudieron ejecutarse en esa revisión.
 3. `npm audit --package-lock-only` recibió HTTP 403 del endpoint del registro; no se pudo validar la exposición real a CVE.
-4. No hay credenciales, proyecto Firebase de QA, reglas de seguridad ni datos semilla. Por ello no se hicieron operaciones destructivas ni validaciones dinámicas de permisos.
+4. No hay credenciales, proyecto Firebase de QA ni datos semilla. Las reglas informadas del entorno permiten acceso universal; se añadió una política restrictiva, todavía sin validación dinámica ni despliegue confirmado.
 5. La revisión no incluyó backend: la aplicación accede a Firebase directamente y no hay funciones/cloud backend versionadas.
 
 ## 3. Aspectos positivos observados
@@ -81,21 +82,22 @@ Los hallazgos no incluidos en esta tabla continúan pendientes. “Corregido en 
 
 ## Bloqueantes
 
-### QA-001 — No existe evidencia versionada de autorización en Firestore
+### QA-001 — Firestore permite lectura y escritura universales
 
 **Área:** seguridad / autorización  
-**Evidencia:** `src/apiConfig.ts:12-25`, `src/apiConfig.ts:28-224`, `src/services/UserService.ts:29-75`; no existen `firestore.rules`, `storage.rules`, `firebase.json` ni pruebas de reglas en el repositorio.
+**Evidencia:** se confirmó que las reglas desplegadas contienen `allow read, write: if true`. Se añadieron `firestore.rules`, `firebase.json` y `firestore.indexes.json`, pero todavía no existen pruebas de reglas ni evidencia de su despliegue.
 
-**Resultado actual:** el navegador contiene utilidades genéricas para leer, crear, editar y borrar cualquier colección indicada. Los roles de React solo ocultan páginas; un usuario puede invocar el SDK sin pasar por `PrivateRoute`. Incluso la creación de cuentas de colaboradores y su documento de rol se ejecuta desde el cliente.
+**Resultado actual:** cualquier persona puede invocar el SDK sin pasar por `PrivateRoute` y leer, modificar o borrar la base completa. La política versionada nueva falla de forma cerrada, limita el catálogo público y liga los perfiles nuevos al UID; al desplegarla, los flujos públicos de pedido/cliente y el alta de colaboradores quedarán bloqueados hasta disponer de un backend confiable.
 
 **Riesgo:** si las reglas desplegadas son permisivas o confían en el documento escrito por el usuario, se podrían leer datos personales, alterar inventario/pedidos, asignar roles o borrar registros. La API key de Firebase en frontend es normal para Firebase y **no es por sí sola un secreto**; la barrera efectiva son las reglas, que aquí no son auditables.
 
 **Corrección propuesta:**
 
-1. Versionar `firebase.json`, `firestore.rules`, índices y tests del emulador.
-2. Denegar por defecto y validar por colección: identidad, rol obtenido de claims o documento no editable por el propio usuario, esquema, campos mutables y transiciones de estado.
-3. Mover alta de colaboradores, asignación de roles, cierres e inventario a Cloud Functions/Admin SDK o a operaciones protegidas por reglas estrictas.
-4. Impedir que una cuenta pública cree o modifique `users.roles`, `Products`, `Closings`, `Expenses` o pedidos de terceros.
+1. Desplegar de inmediato la política versionada y confirmar que reemplaza el acceso universal.
+2. Migrar los perfiles históricos para usar el UID como ID del documento; el registro y `AuthContext` ya usan esa convención.
+3. Añadir tests del emulador para identidad, roles, esquemas, campos mutables y transiciones de estado.
+4. Mover el alta de colaboradores, los flujos públicos, los cierres y el inventario a Cloud Functions/Admin SDK.
+5. Separar `costPrice` del documento público de producto: Firestore no puede ocultar campos individuales durante una lectura.
 
 **Pruebas de aceptación:** tests de emulador con matriz anónimo/customer/colaborador/admin para cada `get/list/create/update/delete`, incluyendo escalada de rol y campos adicionales inesperados.
 

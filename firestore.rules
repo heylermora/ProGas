@@ -1,0 +1,65 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function activeUser() { return signedIn() && profile().data.active == true; }
+    function hasRole(role) {
+      return activeUser() && profile().data.roles is list && role in profile().data.roles;
+    }
+    function isStaff() { return hasRole('admin') || hasRole('colaborador'); }
+
+    // Registration is restricted to the caller's least-privileged profile.
+    // Staff accounts and role changes must be handled by a trusted backend.
+    match /users/{userId} {
+      allow create: if signedIn()
+        && userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.roles == ['customer']
+        && request.resource.data.active == true;
+      allow read: if signedIn()
+        && (resource.data.userId == request.auth.uid || hasRole('admin'));
+      allow update, delete: if hasRole('admin');
+    }
+
+    // Public catalogue. Do not keep private/internal fields in these documents.
+    match /Products/{documentId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+    match /Sponsors/{documentId} {
+      allow read: if true;
+      allow write: if hasRole('admin');
+    }
+    match /CategorySettings/{documentId} {
+      allow read: if true;
+      allow write: if hasRole('admin');
+    }
+    match /SponsorDisplaySettings/{documentId} {
+      allow read: if true;
+      allow write: if hasRole('admin');
+    }
+
+    // These collections contain PII or financial/operational information.
+    // Anonymous creation and lookup must use a trusted backend that returns a
+    // safe projection rather than direct Firestore access.
+    match /Orders/{documentId} { allow read, write: if isStaff(); }
+    match /Clients/{documentId} { allow read, write: if isStaff(); }
+    match /Expenses/{documentId} { allow read, write: if isStaff(); }
+    match /Closings/{documentId} { allow read, write: if isStaff(); }
+    match /Dashboard/{documentId} {
+      allow read: if isStaff();
+      allow write: if false;
+    }
+    match /ExchangeRate/{documentId} {
+      allow read: if isStaff();
+      allow write: if hasRole('admin');
+    }
+
+    // Deny every collection that has not been explicitly reviewed above.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

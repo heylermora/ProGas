@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword, deleteUser, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth, addData } from "apiConfig";
+import { auth, upsertData } from "apiConfig";
 
 // Función para crear un nuevo usuario
 export const registerUser = async (email: string, password: string) => {
@@ -8,7 +8,7 @@ export const registerUser = async (email: string, password: string) => {
 
   try {
     // The registration is not complete until its authorization profile exists.
-    await addData("users", {
+    await upsertData("users", user.uid, {
       userId: user.uid,
       name: user.displayName || "",
       roles: ["customer"],
