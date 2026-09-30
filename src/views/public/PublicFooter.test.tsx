@@ -16,9 +16,9 @@ describe('PublicFooter', () => {
     );
 
     expect(screen.getByText(`Versión ${packageInfo.version}`)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /ver portafolio profesional/i }).getAttribute('href')).toBe('/portfolio');
+    expect(screen.getByRole('link', { name: /^portafolio$/i }).getAttribute('href')).toBe('/portfolio');
     expect(screen.getByRole('link', { name: /acceso administrativo/i }).getAttribute('href')).toBe('/auth/sign-in');
-    expect(screen.getByText(/emprendimiento necesita una presencia digital/i)).toBeTruthy();
+    expect(screen.getByText(/pedidos y comercios de acosta/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /explorar comercios/i })).toBeNull();
   });
 
@@ -43,8 +43,7 @@ describe('PublicFooter', () => {
       </ChakraProvider>,
     );
 
-    expect(screen.queryByRole('link', { name: /ver portafolio profesional/i })).toBeNull();
-    expect(screen.getByRole('link', { name: /conversar por whatsapp/i }).getAttribute('href')).toContain('wa.me/50683508585');
-    expect(screen.getByText(/próximo proyecto/i)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /^portafolio$/i })).toBeNull();
+    expect(screen.getByRole('link', { name: /contactar/i }).getAttribute('href')).toContain('wa.me/50683508585');
   });
 });
