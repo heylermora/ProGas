@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Avatar, Badge, Box, Button, Center, Flex, FormControl, FormHelperText,
-  FormLabel, Icon, Input, InputGroup, InputLeftElement, SimpleGrid, Spinner,
+  FormLabel, Input, SimpleGrid, Spinner,
   Switch, Text, useColorModeValue, useToast,
 } from '@chakra-ui/react';
-import { MdAdd, MdClose, MdEdit, MdManageAccounts, MdSearch } from 'react-icons/md';
+import { MdAdd, MdEdit, MdManageAccounts } from 'react-icons/md';
 import Card from 'components/card/Card';
 import UserItem from 'interfaces/UserItem';
 import UserService, { CollaboratorRollbackError } from 'services/UserService';
+import { usePageSearch } from 'contexts/PageSearchContext';
+import PageHeader from 'components/layout/PageHeader';
+import FormPanel from 'components/form/FormPanel';
+import EmptyState from 'components/dataDisplay/EmptyState';
 
 type FormState = { name: string; email: string; password: string; active: boolean };
 const EMPTY_FORM: FormState = { name: '', email: '', password: '', active: true };
@@ -15,9 +19,8 @@ const EMPTY_FORM: FormState = { name: '', email: '', password: '', active: true 
 export default function Users() {
   const toast = useToast();
   const muted = useColorModeValue('secondaryGray.600', 'secondaryGray.400');
-  const surface = useColorModeValue('white', 'navy.800');
+  const { query } = usePageSearch();
   const [users, setUsers] = useState<UserItem[]>([]);
-  const [query, setQuery] = useState('');
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editing, setEditing] = useState<UserItem | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -93,44 +96,27 @@ export default function Users() {
 
   return (
     <Box w="100%" pt={{ base: '110px', md: '80px' }} pb={8}>
-      <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} gap={4} mb={6} direction={{ base: 'column', md: 'row' }}>
-        <Box>
-          <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight="800">Colaboradores</Text>
-          <Text color={muted}>Agregá y administrá el acceso de tu equipo.</Text>
-        </Box>
-        <Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={openCreate}>Agregar colaborador</Button>
-      </Flex>
+      <PageHeader title="Colaboradores" description="Agregá y administrá el acceso de tu equipo." action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={openCreate}>Agregar colaborador</Button>} />
 
       {showForm && (
-        <Card p={{ base: 5, md: 6 }} mb={5} borderColor="brand.200">
-          <Flex justify="space-between" align="center" mb={5}>
-            <Box>
-              <Text fontSize="lg" fontWeight="800">{editing ? 'Editar colaborador' : 'Nuevo colaborador'}</Text>
-              <Text fontSize="sm" color={muted}>{editing ? 'Actualizá su nombre o acceso.' : 'Creá sus credenciales de acceso.'}</Text>
-            </Box>
-            <Button aria-label="Cerrar formulario" leftIcon={<MdClose />} size="sm" variant="ghost" onClick={close}>Cerrar</Button>
+        <FormPanel title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description={editing ? 'Actualizá su nombre o acceso.' : 'Creá sus credenciales de acceso.'} onClose={close} footer={
+          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
+            <FormControl display="flex" alignItems="center" w="auto"><Switch colorScheme="brand" isChecked={form.active} onChange={event => change('active', event.target.checked)} /><FormLabel mb="0" ml={3}>Acceso activo</FormLabel></FormControl>
+            <Flex gap={2}><Button variant="ghost" onClick={close}>Cancelar</Button><Button colorScheme="brand" px={7} isLoading={saving} loadingText="Guardando" onClick={save}>{editing ? 'Guardar cambios' : 'Crear acceso'}</Button></Flex>
           </Flex>
+        }>
           <SimpleGrid columns={{ base: 1, md: editing ? 2 : 3 }} spacing={4}>
             <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input autoComplete="name" value={form.name} onChange={event => change('name', event.target.value)} /></FormControl>
             <FormControl isRequired isDisabled={Boolean(editing)}><FormLabel>Correo electrónico</FormLabel><Input type="email" autoComplete="email" value={form.email} onChange={event => change('email', event.target.value)} /></FormControl>
             {!editing && <FormControl isRequired><FormLabel>Contraseña temporal</FormLabel><Input type="password" minLength={6} autoComplete="new-password" value={form.password} onChange={event => change('password', event.target.value)} /><FormHelperText>Al menos 6 caracteres.</FormHelperText></FormControl>}
           </SimpleGrid>
-          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} mt={6} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <FormControl display="flex" alignItems="center" w="auto"><Switch colorScheme="brand" isChecked={form.active} onChange={event => change('active', event.target.checked)} /><FormLabel mb="0" ml={3}>Acceso activo</FormLabel></FormControl>
-            <Flex gap={2}><Button variant="ghost" onClick={close}>Cancelar</Button><Button colorScheme="brand" px={7} isLoading={saving} loadingText="Guardando" onClick={save}>{editing ? 'Guardar cambios' : 'Crear acceso'}</Button></Flex>
-          </Flex>
-        </Card>
+        </FormPanel>
       )}
 
-      <Box bg={surface} borderRadius="2xl" p={{ base: 3, md: 4 }} mb={5} boxShadow="sm">
-        <Flex align={{ base: 'stretch', md: 'center' }} gap={3} direction={{ base: 'column', md: 'row' }}>
-          <InputGroup maxW={{ md: '520px' }}><InputLeftElement pointerEvents="none"><Icon as={MdSearch} color="gray.400" /></InputLeftElement><Input aria-label="Buscar colaboradores" placeholder="Buscar por nombre o correo" value={query} onChange={event => setQuery(event.target.value)} /></InputGroup>
-          <Text ml={{ md: 'auto' }} color={muted} fontSize="sm">{visible.length} {visible.length === 1 ? 'colaborador' : 'colaboradores'}</Text>
-        </Flex>
-      </Box>
+      <Text mb={5} textAlign="right" color={muted} fontSize="sm">{visible.length} {visible.length === 1 ? 'colaborador' : 'colaboradores'}</Text>
 
       {loading ? <Center py={16}><Spinner size="xl" color="brand.500" /></Center> : visible.length === 0 ? (
-        <Card py={14} align="center"><Center bg="secondaryGray.100" boxSize="56px" borderRadius="full" mb={3}><Icon as={MdManageAccounts} boxSize={7} color="secondaryGray.500" /></Center><Text fontWeight="700">{query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'}</Text><Text color={muted} fontSize="sm" textAlign="center" mt={1}>{query ? 'Probá con otro nombre o correo.' : 'Agregá a la primera persona de tu equipo.'}</Text>{!query && <Button mt={5} leftIcon={<MdAdd />} colorScheme="brand" onClick={openCreate}>Agregar colaborador</Button>}</Card>
+        <EmptyState icon={MdManageAccounts} title={query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'} description={query ? 'Probá con otro nombre o correo.' : 'Agregá a la primera persona de tu equipo.'} actionLabel={!query ? 'Agregar colaborador' : undefined} actionIcon={<MdAdd />} onAction={!query ? openCreate : undefined} />
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4}>{visible.map(user => (
           <Card key={user.id} p={5} _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }} transition="all .2s ease">

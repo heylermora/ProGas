@@ -2,17 +2,16 @@ import { Portal, Box, useDisclosure } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
 import Sidebar from 'components/sidebar/Sidebar';
 import { SidebarContext } from 'contexts/SidebarContext';
-import { Redirect, Route, Switch, useParams } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import routes from 'routes/routes';
 import { useState } from 'react';
 import Navbar from 'components/navbar/Navbar';
 import { useAuth } from 'contexts/AuthContext';
 import Unauthorized from 'components/exceptions/Unauthorized';
+import { PageSearchProvider } from 'contexts/PageSearchContext';
 
 export default function Dashboard(props: { [x: string]: any }) {
   const { ...rest } = props;
-  const { search } = useParams<{ search: string }>();
-
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const { onOpen } = useDisclosure();
   const { hasRole } = useAuth();
@@ -58,7 +57,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 
   return (
     <Box>
-		{shouldShowBox ? (
+		<PageSearchProvider>{shouldShowBox ? (
 			<SidebarContext.Provider value={{ toggleSidebar, setToggleSidebar }}>
 				<Sidebar routes={routes} display='none' {...rest} />
 					<Box
@@ -88,7 +87,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 						<Box mx='auto' p={adminPadding} minH='100vh' pt={{ base: '70px', md: '62px' }} maxW='1600px'>
 							<Switch>
 								{getRoutes(routes)}
-								<Redirect from='/' to={`/admin/order/index/${search}`} />
+								<Redirect from='/' to='/admin/order/index' />
 							</Switch>
 						</Box>
 					</Box>
@@ -100,7 +99,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 					<Redirect from='/' to='/admin/order/index' />
 				</Switch>
 			</Box>
-		)}
+		)}</PageSearchProvider>
     </Box>
   );
 }

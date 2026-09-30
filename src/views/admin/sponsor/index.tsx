@@ -28,8 +28,10 @@ import SponsorService from 'services/SponsorService';
 import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import AddButton from 'components/button/AddButton';
+import { usePageSearch } from 'contexts/PageSearchContext';
 
 export default function SponsorsAdmin() {
+  const { query } = usePageSearch();
   const [sponsors, setSponsors] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
@@ -60,11 +62,16 @@ export default function SponsorsAdmin() {
     [type]: sponsors.filter((sponsor) => sponsor.category === type),
   }), {}), [sponsors]);
 
-  const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-  const slotCount = Math.max(currentBusinesses.length, 1);
+  const searchTerm = query.trim().toLocaleLowerCase('es');
+  const matchesSearch = (sponsor) => !searchTerm || [sponsor.name, sponsor.description, sponsor.category]
+    .some((value) => String(value || '').toLocaleLowerCase('es').includes(searchTerm));
+  const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
+    .sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
+  const visibleBusinesses = currentBusinesses.filter(matchesSearch);
+  const slotCount = Math.max(visibleBusinesses.length, 1);
   const sponsorSlots = Array.from({ length: slotCount }, (_, index) => ({
     slot: index + 1,
-    sponsor: currentBusinesses[index] || null,
+    sponsor: visibleBusinesses[index] || null,
   }));
 
   const selectType = (index) => {
@@ -174,8 +181,8 @@ export default function SponsorsAdmin() {
                   <Stack spacing="8px">
                     <Text color={muted} fontSize="sm" fontWeight="700">Vista completa para el cliente</Text>
                     <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing="10px">
-                      {(sponsorsByCategory[type] || []).filter((business) => business.active !== false).map((business) => <Box key={business.id} p="10px" borderRadius="14px" border="1px solid" borderColor="brand.100"><Text fontWeight="800" noOfLines={1}>{business.name}</Text><Text fontSize="xs" color={muted} noOfLines={1}>{business.description || business.category}</Text></Box>)}
-                      {!(sponsorsByCategory[type] || []).some((business) => business.active !== false) && <Text color={muted} fontSize="sm">Aún no hay comercios activos en esta categoría.</Text>}
+                      {(sponsorsByCategory[type] || []).filter((business) => business.active !== false && matchesSearch(business)).map((business) => <Box key={business.id} p="10px" borderRadius="14px" border="1px solid" borderColor="brand.100"><Text fontWeight="800" noOfLines={1}>{business.name}</Text><Text fontSize="xs" color={muted} noOfLines={1}>{business.description || business.category}</Text></Box>)}
+                      {!(sponsorsByCategory[type] || []).some((business) => business.active !== false && matchesSearch(business)) && <Text color={muted} fontSize="sm">{query ? 'No hay comercios que coincidan con la búsqueda.' : 'Aún no hay comercios activos en esta categoría.'}</Text>}
                     </SimpleGrid>
                   </Stack>
                 </TabPanel>

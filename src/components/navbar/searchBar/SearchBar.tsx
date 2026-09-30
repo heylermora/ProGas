@@ -1,9 +1,9 @@
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 
 import { Input, InputGroup, InputLeftElement, useColorModeValue } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
-import { useHistory } from 'react-router-dom';
 import IconBox from 'components/icons/IconBox';
+import { usePageSearch } from 'contexts/PageSearchContext';
 
 
 export function SearchBar(props: {
@@ -20,11 +20,7 @@ export function SearchBar(props: {
 	const searchIconColor = useColorModeValue('gray.700', 'white');
 	const inputBg = useColorModeValue('secondaryGray.300', 'navy.900');
 	const inputText = useColorModeValue('gray.700', 'gray.100');
-	const history = useHistory();
-
-	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-		history.push(`/admin/order/index/${event.target.value}`);
-	};
+	const { query, setQuery, enabled, placeholder: pagePlaceholder } = usePageSearch();
 
 	return (
 		<InputGroup w={{ base: '100%', md: '200px' }} {...rest}>
@@ -40,6 +36,7 @@ export function SearchBar(props: {
 				}
 			/>
 			<Input
+				aria-label={pagePlaceholder}
 				variant='search'
 				fontSize='sm'
 				bg={background ? background : inputBg}
@@ -47,8 +44,10 @@ export function SearchBar(props: {
 				fontWeight='500'
 				_placeholder={{ color: 'gray.400', fontSize: '14px' }}
 				borderRadius={borderRadius ? borderRadius : '30px'}
-				placeholder={placeholder ? placeholder : 'Buscar'}
-				onChange={handleInputChange}
+				placeholder={placeholder || pagePlaceholder}
+				value={query}
+				disabled={!enabled}
+				onChange={(event) => setQuery(event.target.value)}
 			/>
 		</InputGroup>
 	);

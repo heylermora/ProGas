@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Avatar, Badge, Box, Button, Center, Flex, FormControl, FormLabel, Icon,
-  Input, InputGroup, InputLeftElement, SimpleGrid, Spinner, Switch, Text,
+  Input, SimpleGrid, Spinner, Switch, Text,
   useColorModeValue, useToast,
 } from '@chakra-ui/react';
-import { MdAdd, MdBadge, MdClose, MdEdit, MdPeople, MdPhone, MdSearch } from 'react-icons/md';
+import { MdAdd, MdBadge, MdEdit, MdPeople, MdPhone } from 'react-icons/md';
 import Card from 'components/card/Card';
 import ClientItem from 'interfaces/ClientItem';
 import ClientService from 'services/ClientService';
+import { usePageSearch } from 'contexts/PageSearchContext';
+import PageHeader from 'components/layout/PageHeader';
+import FormPanel from 'components/form/FormPanel';
+import EmptyState from 'components/dataDisplay/EmptyState';
 
 const EMPTY_CLIENT: Omit<ClientItem, 'id'> = {
   nationalId: '', name: '', nickname: '', phone: '', active: true,
@@ -23,9 +27,8 @@ const getAddress = (client: ClientItem) => [
 export default function Clients() {
   const toast = useToast();
   const mutedColor = useColorModeValue('secondaryGray.600', 'secondaryGray.400');
-  const toolbarBg = useColorModeValue('white', 'navy.800');
+  const { query } = usePageSearch();
   const [clients, setClients] = useState<ClientItem[]>([]);
-  const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<ClientItem | null>(null);
   const [form, setForm] = useState<Omit<ClientItem, 'id'>>(EMPTY_CLIENT);
   const [showForm, setShowForm] = useState(false);
@@ -90,15 +93,11 @@ export default function Clients() {
 
   return (
     <Box w="100%" pt={{ base: '110px', md: '80px' }} pb={8}>
-      <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} mb={6} gap={4} direction={{ base: 'column', md: 'row' }}>
-        <Box>
-          <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight="800">Clientes</Text>
-          <Text color={mutedColor}>Gestioná la información y disponibilidad de tus clientes.</Text>
-        </Box>
-        <Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={create}>
-          Nuevo cliente
-        </Button>
-      </Flex>
+      <PageHeader
+        title="Clientes"
+        description="Gestioná la información y disponibilidad de tus clientes."
+        action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={create}>Nuevo cliente</Button>}
+      />
 
       <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} mb={5} maxW="560px">
         <Card p={4} direction="row" align="center" gap={3}>
@@ -112,46 +111,27 @@ export default function Clients() {
       </SimpleGrid>
 
       {showForm && (
-        <Card p={{ base: 5, md: 6 }} mb={5} borderColor="brand.200">
-          <Flex justify="space-between" align="center" mb={5}>
-            <Box>
-              <Text fontSize="lg" fontWeight="800">{editing ? 'Editar cliente' : 'Registrar cliente'}</Text>
-              <Text fontSize="sm" color={mutedColor}>Los campos marcados son obligatorios.</Text>
-            </Box>
-            <Button leftIcon={<MdClose />} size="sm" variant="ghost" onClick={closeForm}>Cerrar</Button>
+        <FormPanel title={editing ? 'Editar cliente' : 'Registrar cliente'} description="Los campos marcados son obligatorios." onClose={closeForm} footer={
+          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
+            <FormControl display="flex" alignItems="center" w="auto"><Switch colorScheme="brand" isChecked={form.active !== false} onChange={e => change('active', e.target.checked)} /><FormLabel mb="0" ml={3}>Cliente activo</FormLabel></FormControl>
+            <Flex gap={2}><Button variant="ghost" onClick={closeForm}>Cancelar</Button><Button colorScheme="brand" px={7} isLoading={saving} loadingText="Guardando" onClick={save}>{editing ? 'Guardar cambios' : 'Crear cliente'}</Button></Flex>
           </Flex>
+        }>
           <SimpleGrid columns={{ base: 1, md: 2, xl: 4 }} spacing={4}>
             <FormControl isRequired><FormLabel>Cédula</FormLabel><Input placeholder="Ej. 1-2345-6789" value={form.nationalId} onChange={e => change('nationalId', e.target.value)} /></FormControl>
             <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input placeholder="Nombre y apellidos" value={form.name} onChange={e => change('name', e.target.value)} /></FormControl>
             <FormControl><FormLabel>Apodo</FormLabel><Input placeholder="Opcional" value={form.nickname || ''} onChange={e => change('nickname', e.target.value)} /></FormControl>
             <FormControl isRequired><FormLabel>Teléfono</FormLabel><Input type="tel" placeholder="Ej. 8888-8888" value={form.phone} onChange={e => change('phone', e.target.value)} /></FormControl>
           </SimpleGrid>
-          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} mt={6} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <FormControl display="flex" alignItems="center" w="auto"><Switch colorScheme="brand" isChecked={form.active !== false} onChange={e => change('active', e.target.checked)} /><FormLabel mb="0" ml={3}>Cliente activo</FormLabel></FormControl>
-            <Flex gap={2}><Button variant="ghost" onClick={closeForm}>Cancelar</Button><Button colorScheme="brand" px={7} isLoading={saving} loadingText="Guardando" onClick={save}>{editing ? 'Guardar cambios' : 'Crear cliente'}</Button></Flex>
-          </Flex>
-        </Card>
+        </FormPanel>
       )}
 
-      <Box bg={toolbarBg} borderRadius="2xl" p={{ base: 3, md: 4 }} mb={5} boxShadow="sm">
-        <Flex align={{ base: 'stretch', md: 'center' }} gap={3} direction={{ base: 'column', md: 'row' }}>
-          <InputGroup maxW={{ md: '520px' }}>
-            <InputLeftElement pointerEvents="none"><Icon as={MdSearch} color="gray.400" /></InputLeftElement>
-            <Input aria-label="Buscar clientes" placeholder="Buscar por nombre, cédula, apodo o teléfono" value={query} onChange={e => setQuery(e.target.value)} />
-          </InputGroup>
-          <Text ml={{ md: 'auto' }} color={mutedColor} fontSize="sm">{visible.length} {visible.length === 1 ? 'resultado' : 'resultados'}</Text>
-        </Flex>
-      </Box>
+      <Text mb={5} textAlign="right" color={mutedColor} fontSize="sm">{visible.length} {visible.length === 1 ? 'resultado' : 'resultados'}</Text>
 
       {loading ? (
         <Center py={16}><Spinner size="xl" color="brand.500" /></Center>
       ) : visible.length === 0 ? (
-        <Card py={14} align="center">
-          <Center bg="secondaryGray.100" boxSize="56px" borderRadius="full" mb={3}><Icon as={MdPeople} boxSize={7} color="secondaryGray.500" /></Center>
-          <Text fontWeight="700">{query ? 'No encontramos clientes' : 'Aún no hay clientes'}</Text>
-          <Text color={mutedColor} fontSize="sm" textAlign="center" mt={1}>{query ? 'Probá con otro nombre, cédula o teléfono.' : 'Creá el primer cliente para comenzar.'}</Text>
-          {!query && <Button mt={5} leftIcon={<MdAdd />} colorScheme="brand" onClick={create}>Nuevo cliente</Button>}
-        </Card>
+        <EmptyState icon={MdPeople} title={query ? 'No encontramos clientes' : 'Aún no hay clientes'} description={query ? 'Probá con otro nombre, cédula o teléfono.' : 'Creá el primer cliente para comenzar.'} actionLabel={!query ? 'Nuevo cliente' : undefined} actionIcon={<MdAdd />} onAction={!query ? create : undefined} />
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4}>
           {visible.map(client => {

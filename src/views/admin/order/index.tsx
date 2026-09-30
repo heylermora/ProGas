@@ -15,7 +15,7 @@ import {
   Badge,
 } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
-import { Link as RLink, useParams, useHistory } from 'react-router-dom';
+import { Link as RLink, useHistory } from 'react-router-dom';
 import { MdAdd } from 'react-icons/md';
 
 import ItemCard from 'components/card/ItemCard';
@@ -25,12 +25,12 @@ import orderService from 'services/OrderService';
 import OrderItem from 'interfaces/OrderItem';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
 import { getPaymentMethods, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
+import { usePageSearch } from 'contexts/PageSearchContext';
 
 const STATUS_MENU = [...ORDER_STATUSES, 'Todos'] as const;
 
 export default function Index() {
-  const params = useParams<{ search?: string }>();
-  const search = params.search ?? null;
+  const { query: search } = usePageSearch();
 
   const history = useHistory();
   const spinnerColor = useColorModeValue('brand.700', 'white');
@@ -47,10 +47,7 @@ export default function Index() {
     setIsLoading(true);
     setIsError(false);
 
-    const promise: Promise<OrderItem[]> =
-      search === null || search === ':search'
-        ? orderService.getAll()
-        : orderService.getAll(['client', 'orderCode'], [search, search]);
+    const promise: Promise<OrderItem[]> = orderService.getAll();
 
     promise
       .then((ordersData: OrderItem[]) => {
@@ -61,7 +58,7 @@ export default function Index() {
         setIsError(true);
       })
       .finally(() => setIsLoading(false));
-  }, [search, refreshKey]);
+  }, [refreshKey]);
 
   const handleStatusClick = useCallback(
     (status: (typeof STATUS_MENU)[number]) => {
@@ -79,12 +76,14 @@ export default function Index() {
     const status = normalizeOrderStatus(order.status);
     const date = order.requestDate ? order.requestDate.slice(0, 10) : '';
     const clientTerm = filters.client.trim().toLocaleLowerCase('es');
+    const searchTerm = search.trim().toLocaleLowerCase('es');
     return (activeStatus === 'Todos' || status === activeStatus)
+      && (!searchTerm || `${order.client} ${order.clientId || ''} ${order.orderCode || ''}`.toLocaleLowerCase('es').includes(searchTerm))
       && (!filters.date || date === filters.date)
       && (!clientTerm || `${order.client} ${order.clientId || ''}`.toLocaleLowerCase('es').includes(clientTerm))
       && (!filters.product || (order.items || []).some(item => item.gasType === filters.product))
       && (!filters.payment || getPaymentMethods(order).includes(filters.payment));
-  }), [orders, activeStatus, filters]);
+  }), [orders, activeStatus, filters, search]);
 
   const statusCounts = useMemo(() => orders.reduce<Record<string, number>>((counts, order) => {
     const status = normalizeOrderStatus(order.status);
