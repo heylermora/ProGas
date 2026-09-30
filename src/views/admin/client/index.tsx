@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar, Badge, Box, Button, Center, Flex, FormControl, FormLabel, Icon,
-  Input, SimpleGrid, Spinner, Switch, Text,
+  Avatar, Badge, Box, Button, Center, Flex, FormControl, FormLabel, Icon, IconButton,
+  Input, SimpleGrid, Spinner, Switch, Text, Tooltip,
   useColorModeValue, useToast,
 } from '@chakra-ui/react';
-import { MdAdd, MdBadge, MdEdit, MdPeople, MdPhone } from 'react-icons/md';
+import { MdAdd, MdBadge, MdEdit, MdLocationOn, MdPeople, MdPhone } from 'react-icons/md';
 import Card from 'components/card/Card';
 import ClientItem from 'interfaces/ClientItem';
 import ClientService from 'services/ClientService';
@@ -133,24 +133,29 @@ export default function Clients() {
       ) : visible.length === 0 ? (
         <EmptyState icon={MdPeople} title={query ? 'No encontramos clientes' : 'Aún no hay clientes'} description={query ? 'Probá con otro nombre, cédula o teléfono.' : 'Creá el primer cliente para comenzar.'} actionLabel={!query ? 'Nuevo cliente' : undefined} actionIcon={<MdAdd />} onAction={!query ? create : undefined} />
       ) : (
-        <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4}>
+        <SimpleGrid columns={{ base: 1, lg: 2, '2xl': 3 }} spacing={4}>
           {visible.map(client => {
             const address = getAddress(client);
             return (
-              <Card key={client.id} p={5} _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }} transition="all .2s ease">
+              <Card key={client.id} p={{ base: 4, md: 5 }} borderWidth="1px" borderColor="blackAlpha.50" _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg', borderColor: 'brand.100' }} transition="all .2s ease">
                 <Flex align="flex-start" gap={3}>
-                  <Avatar name={client.name} size="md" bg="brand.500" color="white" />
-                  <Box minW={0} flex="1">
-                    <Flex align="center" gap={2}><Text fontWeight="800" noOfLines={1}>{client.name}</Text><Badge colorScheme={client.active === false ? 'gray' : 'green'} borderRadius="full">{client.active === false ? 'Inactivo' : 'Activo'}</Badge></Flex>
-                    {client.nickname && <Text fontSize="sm" color={mutedColor} noOfLines={1}>“{client.nickname}”</Text>}
+                  <Avatar name={client.name} size="md" bg="brand.500" color="white" flexShrink={0} />
+                  <Box minW={0} flex="1" pt="2px">
+                    <Text fontWeight="800" fontSize="lg" lineHeight="1.25" wordBreak="break-word">{client.name}</Text>
+                    <Flex mt="6px" align="center" gap="7px" flexWrap="wrap">
+                      <Badge colorScheme={client.active === false ? 'gray' : 'green'} borderRadius="full" px="9px">{client.active === false ? 'Inactivo' : 'Activo'}</Badge>
+                      {client.nickname && <Text fontSize="sm" color={mutedColor}>“{client.nickname}”</Text>}
+                    </Flex>
                   </Box>
-                  <Button size="sm" variant="ghost" colorScheme="brand" leftIcon={<MdEdit />} onClick={() => edit(client)}>Editar</Button>
+                  <Tooltip label="Editar cliente" hasArrow>
+                    <IconButton aria-label={`Editar ${client.name}`} size="sm" variant="ghost" colorScheme="brand" borderRadius="full" icon={<MdEdit />} onClick={() => edit(client)} flexShrink={0} />
+                  </Tooltip>
                 </Flex>
-                <Box borderTopWidth="1px" borderColor="blackAlpha.100" mt={4} pt={4}>
-                  <Flex align="center" gap={2} mb={2}><Icon as={MdBadge} color={mutedColor} /><Text fontSize="sm">{client.nationalId}</Text></Flex>
-                  <Flex align="center" gap={2}><Icon as={MdPhone} color={mutedColor} /><Text fontSize="sm">{client.phone || client.telefono}</Text></Flex>
-                  {address && <Text fontSize="xs" color={mutedColor} mt={3} noOfLines={2}>{address}</Text>}
-                </Box>
+                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing="10px" borderTopWidth="1px" borderColor="blackAlpha.100" mt={4} pt={4}>
+                  <Flex align="center" gap="10px" minW={0}><Center boxSize="34px" borderRadius="lg" bg="brand.50" color="brand.500" flexShrink={0}><Icon as={MdBadge} /></Center><Box minW={0}><Text fontSize="xs" color={mutedColor}>Cédula</Text><Text fontSize="sm" fontWeight="700" wordBreak="break-word">{client.nationalId}</Text></Box></Flex>
+                  <Flex align="center" gap="10px" minW={0}><Center boxSize="34px" borderRadius="lg" bg="brand.50" color="brand.500" flexShrink={0}><Icon as={MdPhone} /></Center><Box minW={0}><Text fontSize="xs" color={mutedColor}>Teléfono</Text><Text fontSize="sm" fontWeight="700">{client.phone || client.telefono}</Text></Box></Flex>
+                </SimpleGrid>
+                {address && <Flex align="flex-start" gap="8px" mt={4} p="10px" borderRadius="xl" bg="blackAlpha.50"><Icon as={MdLocationOn} color={mutedColor} mt="2px" flexShrink={0} /><Text fontSize="xs" color={mutedColor} lineHeight="1.5">{address}</Text></Flex>}
               </Card>
             );
           })}
