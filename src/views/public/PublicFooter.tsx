@@ -1,10 +1,14 @@
 import { Box, Button, Flex, Icon, Link, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
 import { MdArrowForward, MdCode, MdHome, MdLogin, MdShoppingCart, MdWork } from 'react-icons/md';
+import { FaWhatsapp } from 'react-icons/fa';
 import packageInfo from '../../../package.json';
+
+const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi tu portafolio y me gustaría conversar sobre un proyecto.')}`;
 
 export default function PublicFooter() {
   const location = useLocation();
+  const isPortfolio = location.pathname === '/portfolio';
 
   return (
     <Box as="footer" mt={{ base: '36px', md: '56px' }} overflow="hidden" bg="linear-gradient(135deg, #11047A 0%, #3311DB 52%, #7551FF 100%)" color="white" borderRadius={{ base: '22px', md: '30px' }} boxShadow="0 20px 50px rgba(51, 17, 219, .22)" border="1px solid" borderColor="whiteAlpha.300">
@@ -27,9 +31,13 @@ export default function PublicFooter() {
         <Flex direction="column" justify="center" bg="whiteAlpha.100" border="1px solid" borderColor="whiteAlpha.200" borderRadius="20px" p={{ base: '16px', md: '20px' }} position="relative" overflow="hidden">
           <Box position="absolute" right="-22px" top="-28px" w="100px" h="100px" borderRadius="full" bg="purple.400" opacity=".14" />
           <Flex align="center" gap="8px" color="cyan.200" mb="8px"><Icon as={MdCode} /><Text fontSize="xs" fontWeight="900" letterSpacing=".1em">HECHO EN ACOSTA</Text></Flex>
-          <Text fontWeight="900" fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.25">¿Tu emprendimiento necesita una presencia digital que venda?</Text>
-          <Text mt="6px" color="whiteAlpha.700" fontSize="xs" lineHeight="1.5">Conocé el trabajo de <Box as="span" color="white" fontWeight="800">Johel Mora</Box> y llevemos tu idea al siguiente nivel.</Text>
-          <Button as={RLink} to="/portfolio" mt="12px" alignSelf="flex-start" rightIcon={<MdArrowForward />} leftIcon={<MdWork />} size="sm" borderRadius="full" bg="white" color="brand.800" fontWeight="900" _hover={{ bg: 'brand.100', transform: 'translateX(2px)' }}>Ver portafolio profesional</Button>
+          <Text fontWeight="900" fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.25">{isPortfolio ? '¿Conversamos sobre tu próximo proyecto?' : '¿Tu emprendimiento necesita una presencia digital que venda?'}</Text>
+          <Text mt="6px" color="whiteAlpha.700" fontSize="xs" lineHeight="1.5">{isPortfolio ? 'Contame qué necesitás y exploremos una solución clara para tu negocio.' : <>Conocé el trabajo de <Box as="span" color="white" fontWeight="800">Johel Mora</Box> y llevemos tu idea al siguiente nivel.</>}</Text>
+          {isPortfolio ? (
+            <Button as="a" href={portfolioContactUrl} target="_blank" rel="noopener noreferrer" mt="12px" alignSelf="flex-start" leftIcon={<FaWhatsapp />} size="sm" borderRadius="full" bg="white" color="brand.800" fontWeight="900" _hover={{ bg: 'brand.100', transform: 'translateY(-1px)' }}>Conversar por WhatsApp</Button>
+          ) : (
+            <Button as={RLink} to="/portfolio" mt="12px" alignSelf="flex-start" rightIcon={<MdArrowForward />} leftIcon={<MdWork />} size="sm" borderRadius="full" bg="white" color="brand.800" fontWeight="900" _hover={{ bg: 'brand.100', transform: 'translateX(2px)' }}>Ver portafolio profesional</Button>
+          )}
         </Flex>
       </SimpleGrid>
 

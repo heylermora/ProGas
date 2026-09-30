@@ -33,4 +33,18 @@ describe('PublicFooter', () => {
 
     expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
   });
+
+  it('replaces the redundant portfolio link with a contact action on the portfolio page', () => {
+    render(
+      <ChakraProvider>
+        <MemoryRouter initialEntries={['/portfolio']}>
+          <PublicFooter />
+        </MemoryRouter>
+      </ChakraProvider>,
+    );
+
+    expect(screen.queryByRole('link', { name: /ver portafolio profesional/i })).toBeNull();
+    expect(screen.getByRole('link', { name: /conversar por whatsapp/i }).getAttribute('href')).toContain('wa.me/50683508585');
+    expect(screen.getByText(/próximo proyecto/i)).toBeTruthy();
+  });
 });
