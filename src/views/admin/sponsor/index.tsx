@@ -1,33 +1,20 @@
 // @ts-nocheck
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  HStack,
-  IconButton,
-  Image,
-  SimpleGrid,
-  Spinner,
-  Stack,
-  Switch,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-  Textarea,
-  useColorModeValue,
+  Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
+  AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
+  Badge, Box, Button, Center, Flex, FormControl, FormLabel, HStack, Icon, Image,
+  SimpleGrid, Spinner, Stack, Switch, Tab, TabList, Tabs, Text, Textarea,
+  useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { MdAddBusiness, MdDelete, MdDragIndicator, MdEdit } from 'react-icons/md';
+import { MdAdd, MdDelete, MdDragIndicator, MdEdit, MdStorefront, MdTune, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
+import EmptyState from 'components/dataDisplay/EmptyState';
+import PageHeader from 'components/layout/PageHeader';
 import SponsorService from 'services/SponsorService';
 import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
-import AddButton from 'components/button/AddButton';
 import { usePageSearch } from 'contexts/PageSearchContext';
 
 export default function SponsorsAdmin() {
@@ -39,20 +26,20 @@ export default function SponsorsAdmin() {
   const [savingOrder, setSavingOrder] = useState(false);
   const [availableCopy, setAvailableCopy] = useState(defaultSponsorDisplaySettings);
   const [savingAvailableCopy, setSavingAvailableCopy] = useState(false);
-  const [dropTargetIndex, setDropTargetIndex] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
+  const toast = useToast();
   const textColor = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.500', 'gray.400');
-  const dropBg = useColorModeValue('brand.50', 'whiteAlpha.100');
+  const subtleBg = useColorModeValue('gray.50', 'whiteAlpha.50');
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     setLoading(true);
-
-    return SponsorService.getAll()
-      .then((data) => {
-        setSponsors(data);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    try { setSponsors(await SponsorService.getAll()); }
+    catch { toast({ status: 'error', title: 'No se pudieron cargar los patrocinadores' }); }
+    finally { setLoading(false); }
+  }, [toast]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
@@ -63,209 +50,128 @@ export default function SponsorsAdmin() {
   }), {}), [sponsors]);
 
   const searchTerm = query.trim().toLocaleLowerCase('es');
-  const matchesSearch = (sponsor) => !searchTerm || [sponsor.name, sponsor.description, sponsor.category]
-    .some((value) => String(value || '').toLocaleLowerCase('es').includes(searchTerm));
   const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
     .sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-  const visibleBusinesses = currentBusinesses.filter(matchesSearch);
-  const sponsorSlots = visibleBusinesses.map((sponsor) => ({
-    slot: currentBusinesses.findIndex((business) => business.id === sponsor.id) + 1,
-    sponsor,
-  }));
-  if (!searchTerm && sponsorSlots.length === 0) sponsorSlots.push({ slot: 1, sponsor: null });
+  const matchesSearch = (sponsor) => [sponsor.name, sponsor.description, sponsor.category]
+    .some((value) => String(value || '').toLocaleLowerCase('es').includes(searchTerm));
+  const visibleBusinesses = searchTerm
+    ? sponsors.filter(matchesSearch).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order)
+    : currentBusinesses;
+  const activeCount = sponsors.filter((sponsor) => sponsor.active !== false).length;
+  const categoriesInUse = BUSINESS_CATEGORIES.filter((category) => sponsorsByCategory[category]?.length).length;
 
-  const selectType = (index) => {
-    const nextType = BUSINESS_CATEGORIES[index];
-    setSelectedCategory(nextType);
+  const toggleActive = async (sponsor) => {
+    const next = { ...sponsor, active: !sponsor.active };
+    setSponsors((items) => items.map((item) => item.id === sponsor.id ? next : item));
+    try { await SponsorService.edit(sponsor.id, next); }
+    catch {
+      setSponsors((items) => items.map((item) => item.id === sponsor.id ? sponsor : item));
+      toast({ status: 'error', title: 'No se pudo cambiar la visibilidad' });
+    }
   };
 
-  const toggleActive = async (s) => {
-    await SponsorService.edit(s.id, { ...s, active: !s.active });
-    load();
+  const requestDelete = (sponsor) => { setPendingDelete(sponsor); onOpen(); };
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    try {
+      await SponsorService.delete(pendingDelete.id);
+      toast({ status: 'success', title: 'Patrocinador eliminado' });
+      onClose();
+      setPendingDelete(null);
+      await load();
+    } catch { toast({ status: 'error', title: 'No se pudo eliminar el patrocinador' }); }
   };
 
-  const remove = async (id) => { await SponsorService.delete(id); load(); };
-
-  const reorderSponsors = async (targetSlotIndex, sponsorId = draggedSponsorId) => {
+  const reorderSponsors = async (targetIndex, sponsorId = draggedSponsorId) => {
     if (!sponsorId || savingOrder || searchTerm) return;
-
     const fromIndex = currentBusinesses.findIndex((sponsor) => sponsor.id === sponsorId);
-    if (fromIndex < 0) return;
-
+    if (fromIndex < 0 || fromIndex === targetIndex) return;
     const nextSponsors = [...currentBusinesses];
     const [moved] = nextSponsors.splice(fromIndex, 1);
-    const safeTargetIndex = Math.max(0, Math.min(Number(targetSlotIndex) || 0, nextSponsors.length));
-    nextSponsors.splice(safeTargetIndex, 0, moved);
-
+    nextSponsors.splice(Math.max(0, Math.min(targetIndex, nextSponsors.length)), 0, moved);
+    const ordered = nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1 }));
     setSavingOrder(true);
-    setSponsors((prev) => [
-      ...prev.filter((sponsor) => sponsor.category !== selectedCategory),
-      ...nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1, active: sponsor.active !== false })),
-    ].sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order || (a.name || '').localeCompare(b.name || '')));
-
-    Promise.all(nextSponsors.map((sponsor, index) => SponsorService.edit(sponsor.id, {
-      ...sponsor,
-      order: index + 1,
-      active: sponsor.active !== false,
-    })))
-      .catch(() => {})
-      .finally(() => {
-        setDraggedSponsorId('');
-        setDropTargetIndex(null);
-        setSavingOrder(false);
-        load();
-      });
-  };
-
-  const startDrag = (event, sponsorId) => {
-    if (!sponsorId) return;
-    // Firefox y algunos navegadores no inician el arrastre si dataTransfer no contiene datos.
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', sponsorId);
-    setDraggedSponsorId(sponsorId);
-  };
-
-  const finishDrag = () => {
-    setDraggedSponsorId('');
-    setDropTargetIndex(null);
+    setSponsors((items) => [...items.filter((item) => item.category !== selectedCategory), ...ordered]);
+    try {
+      await Promise.all(ordered.map((sponsor) => SponsorService.edit(sponsor.id, sponsor)));
+    } catch {
+      toast({ status: 'error', title: 'No se pudo guardar el nuevo orden' });
+      await load();
+    } finally {
+      setDraggedSponsorId('');
+      setSavingOrder(false);
+    }
   };
 
   const saveAvailableCopy = async () => {
     setSavingAvailableCopy(true);
     try {
       await SponsorDisplaySettingsService.save(availableCopy);
-      setAvailableCopy({
-        availableTitle: availableCopy.availableTitle.trim() || defaultSponsorDisplaySettings.availableTitle,
-        availableDescription: availableCopy.availableDescription.trim() || defaultSponsorDisplaySettings.availableDescription,
-      });
-    } finally {
-      setSavingAvailableCopy(false);
-    }
+      toast({ status: 'success', title: 'Mensaje público actualizado' });
+    } catch { toast({ status: 'error', title: 'No se pudo guardar el mensaje' }); }
+    finally { setSavingAvailableCopy(false); }
   };
 
-  if (loading) return <Flex pt={{ base: '80px', md: '120px' }} justify="center"><Spinner size="xl" /></Flex>;
-
   return (
-    <Box pt={{ base: '120px', md: '80px' }} px={{ base: '0px', md: '0px' }}>
-      <Flex align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', sm: 'row' }} mb="20px" gap="12px">
-        <Box flex="1" minW="0">
-          <Text color={textColor} fontSize={{ base: 'xl', md: '2xl' }} fontWeight="800">Patrocinadores</Text>
-          <Text color="gray.500" fontSize={{ base: 'sm', md: 'md' }}>Organizá los espacios por categoría, cambiá el orden con el mouse y previsualizá cómo se verán publicados.</Text>
-        </Box>
-        <Box alignSelf={{ base: 'flex-end', sm: 'center' }}><AddButton redirect="/admin/sponsor/new" /></Box>
-      </Flex>
+    <Box pt={{ base: '120px', md: '80px' }} pb="32px">
+      <PageHeader
+        title="Patrocinadores"
+        description="Administrá la visibilidad y el orden de los comercios publicados."
+        action={<Button as={RLink} to="/admin/sponsor/new" leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full">Nuevo patrocinador</Button>}
+      />
 
-      <Tabs index={BUSINESS_CATEGORIES.indexOf(selectedCategory)} onChange={selectType} colorScheme="brand" variant="soft-rounded">
-        <Card p={{ base: '14px', md: '18px' }} mb="20px" overflow="hidden">
-          <Stack spacing="16px">
-            <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="12px" direction={{ base: 'column', md: 'row' }}>
-              <Box>
-                <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Categorías comerciales</Text>
-                <Text color={muted} fontSize="sm">Seleccioná una categoría y arrastrá sus cards para definir la prioridad de aparición pública.</Text>
-              </Box>
-              {savingOrder && <Badge colorScheme="brand">Guardando orden...</Badge>}
-              {searchTerm && <Badge colorScheme="orange">Limpiá la búsqueda para reordenar</Badge>}
-            </Flex>
+      <SimpleGrid columns={{ base: 1, sm: 3 }} spacing="12px" mb="18px">
+        {[
+          { label: 'Registrados', value: sponsors.length, icon: MdStorefront },
+          { label: 'Visibles', value: activeCount, icon: MdVisibility },
+          { label: 'Categorías en uso', value: categoriesInUse, icon: MdTune },
+        ].map((stat) => <Card key={stat.label} p="16px" direction="row" align="center" gap="12px"><Center boxSize="42px" borderRadius="14px" bg="brand.50" color="brand.500"><Icon as={stat.icon} boxSize="22px" /></Center><Box><Text fontSize="xl" fontWeight="900" color={textColor}>{stat.value}</Text><Text fontSize="sm" color={muted}>{stat.label}</Text></Box></Card>)}
+      </SimpleGrid>
 
-            <TabList overflowX="auto" pb="4px" gap="8px">
-              {BUSINESS_CATEGORIES.map((type) => (
-                <Tab key={type} flexShrink={0} fontWeight="800">
-                  {type}
-                  <Badge ml="8px" colorScheme="brand">{sponsorsByCategory[type]?.length || 0}</Badge>
-                </Tab>
-              ))}
-            </TabList>
-
-            <TabPanels>
-              {BUSINESS_CATEGORIES.map((type) => (
-                <TabPanel key={type} px="0" pb="0">
-                  <Stack spacing="8px">
-                    <Text color={muted} fontSize="sm" fontWeight="700">Vista completa para el cliente</Text>
-                    <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing="10px">
-                      {(sponsorsByCategory[type] || []).filter((business) => business.active !== false && matchesSearch(business)).map((business) => <Box key={business.id} p="10px" borderRadius="14px" border="1px solid" borderColor="brand.100"><Text fontWeight="800" noOfLines={1}>{business.name}</Text><Text fontSize="xs" color={muted} noOfLines={1}>{business.description || business.category}</Text></Box>)}
-                      {!(sponsorsByCategory[type] || []).some((business) => business.active !== false && matchesSearch(business)) && <Text color={muted} fontSize="sm">{query ? 'No hay comercios que coincidan con la búsqueda.' : 'Aún no hay comercios activos en esta categoría.'}</Text>}
-                    </SimpleGrid>
-                  </Stack>
-                </TabPanel>
-              ))}
-            </TabPanels>
-          </Stack>
-        </Card>
-      </Tabs>
-
-      <Card p={{ base: '14px', md: '18px' }} mb="20px">
-        <Stack spacing="12px">
-          <Box>
-            <Text color={textColor} fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Texto de espacios disponibles</Text>
-            <Text color={muted} fontSize="sm">Personalizá el mensaje que aparece en las tarjetas sin patrocinador de las páginas públicas.</Text>
-          </Box>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px">
-            <Box>
-              <Text fontSize="sm" fontWeight="700" mb="6px">Título</Text>
-              <Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} resize="vertical" minH="44px" />
-            </Box>
-            <Box>
-              <Text fontSize="sm" fontWeight="700" mb="6px">Descripción</Text>
-              <Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} resize="vertical" minH="44px" />
-            </Box>
-          </SimpleGrid>
-          <Button alignSelf="flex-start" colorScheme="brand" onClick={saveAvailableCopy} isLoading={savingAvailableCopy} loadingText="Guardando">Guardar texto</Button>
-        </Stack>
+      <Card p={{ base: '14px', md: '18px' }} mb="18px">
+        <Tabs index={BUSINESS_CATEGORIES.indexOf(selectedCategory)} onChange={(index) => setSelectedCategory(BUSINESS_CATEGORIES[index])} colorScheme="brand" variant="soft-rounded">
+          <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="10px" mb="12px">
+            <Box><Text fontWeight="800" color={textColor}>Categoría</Text><Text color={muted} fontSize="sm">Elegí una para ver y ordenar sus patrocinadores.</Text></Box>
+            <HStack>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
+          </Flex>
+          <TabList overflowX="auto" gap="6px" pb="4px">
+            {BUSINESS_CATEGORIES.map((category) => <Tab key={category} flexShrink={0} fontSize="sm">{category}<Badge ml="7px" colorScheme="gray">{sponsorsByCategory[category]?.length || 0}</Badge></Tab>)}
+          </TabList>
+        </Tabs>
       </Card>
 
-      {searchTerm && sponsorSlots.length === 0 && <Card p="24px" mb="18px" textAlign="center"><Text color={muted}>No hay patrocinadores que coincidan con la búsqueda en esta categoría.</Text></Card>}
-      <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={{ base: '12px', md: '18px' }}>
-        {sponsorSlots.map(({ sponsor: s, slot }, index) => (
-          <Card
-            key={s?.id || `empty-${selectedCategory}-${slot}`}
-            p={{ base: '14px', md: '18px' }}
-            minW="0"
-            minH={{ base: '230px', md: '260px' }}
-            draggable={Boolean(s) && !searchTerm}
-            cursor={s && !searchTerm ? 'grab' : 'default'}
-            border="1px solid"
-            borderColor={s && draggedSponsorId === s.id ? 'brand.300' : draggedSponsorId && dropTargetIndex === index ? 'brand.500' : s ? 'transparent' : 'brand.200'}
-            borderStyle={s ? 'solid' : 'dashed'}
-            bg={s && draggedSponsorId === s.id ? dropBg : undefined}
-            onDragStart={(event) => { if (!searchTerm) startDrag(event, s?.id); }}
-            onDragEnd={finishDrag}
-            onDragEnter={(event) => { if (!searchTerm) { event.preventDefault(); if (draggedSponsorId) setDropTargetIndex(index); } }}
-            onDragOver={(event) => { if (!searchTerm) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; } }}
-            onDrop={(event) => { if (!searchTerm) { event.preventDefault(); const sponsorId = draggedSponsorId || event.dataTransfer.getData('text/plain'); if (sponsorId) setDraggedSponsorId(sponsorId); reorderSponsors(index, sponsorId); } }}
-          >
-            {s ? (
-              <Stack spacing="12px" h="100%">
-                <Flex align="center" justify="space-between" gap="10px">
-                  <HStack spacing="8px" minW="0" flexWrap="wrap">
-                    <IconButton aria-label="Arrastrar para ordenar" icon={<MdDragIndicator />} size="sm" variant="ghost" cursor="grab" pointerEvents="none" />
-                    <Badge colorScheme="brand">Posición #{slot}</Badge>
-                    <Badge colorScheme="brand">{s.category}</Badge>
-                  </HStack>
-                  <Badge colorScheme={s.active ? 'green' : 'gray'}>{s.active ? 'Activo' : 'Oculto'}</Badge>
-                </Flex>
-                {s.logoUrl ? <Image src={s.logoUrl} alt={s.name || 'Sponsor'} h={{ base: '72px', md: '92px' }} objectFit="contain" /> : <Box h={{ base: '72px', md: '92px' }} bg="gray.100" borderRadius="16px" />}
-                <Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }} noOfLines={2}>{s.name || 'Sin título'}</Text>
-                {s.description && <Text color="gray.500" noOfLines={2} fontSize="sm">{s.description}</Text>}
-                <Box flex="1" />
-                <HStack justify="space-between"><Text>Activo</Text><Switch isChecked={s.active} onChange={() => toggleActive(s)} /></HStack>
-                <HStack justify="flex-end">
-                  <IconButton aria-label="Editar" icon={<MdEdit />} as={RLink} to={`/admin/sponsor/edit/${s.id}`} />
-                  <IconButton aria-label="Eliminar" icon={<MdDelete />} onClick={() => remove(s.id)} />
+      {loading ? <Center py="70px"><Spinner size="xl" color="brand.500" /></Center> : visibleBusinesses.length === 0 ? (
+        <EmptyState icon={MdStorefront} title={searchTerm ? 'No hay coincidencias' : 'Esta categoría está vacía'} description={searchTerm ? 'Probá con otro nombre o limpiá la búsqueda superior.' : 'Usá “Nuevo patrocinador” para agregar el primero a esta categoría.'} />
+      ) : (
+        <Stack spacing="10px" mb="18px">
+          {visibleBusinesses.map((sponsor) => {
+            const categoryBusinesses = [...(sponsorsByCategory[sponsor.category] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
+            const position = categoryBusinesses.findIndex((item) => item.id === sponsor.id);
+            return <Card key={sponsor.id} p={{ base: '14px', md: '16px' }} draggable={!searchTerm} cursor={!searchTerm ? 'grab' : 'default'} onDragStart={(event) => { event.dataTransfer.setData('text/plain', sponsor.id); setDraggedSponsorId(sponsor.id); }} onDragOver={(event) => { if (!searchTerm) event.preventDefault(); }} onDrop={(event) => { if (!searchTerm) { event.preventDefault(); reorderSponsors(position, event.dataTransfer.getData('text/plain') || draggedSponsorId); } }}>
+              <Flex align={{ base: 'flex-start', md: 'center' }} gap="14px" direction={{ base: 'column', md: 'row' }}>
+                <HStack flex="1" minW="0" align="center" spacing="12px">
+                  <Center color={muted} flexShrink={0}><MdDragIndicator size="22px" /></Center>
+                  <Center boxSize="58px" borderRadius="14px" bg={subtleBg} overflow="hidden" flexShrink={0}>{sponsor.logoUrl ? <Image src={sponsor.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} color="gray.300" boxSize="26px" />}</Center>
+                  <Box minW="0"><HStack flexWrap="wrap"><Text fontWeight="800" color={textColor} noOfLines={1}>{sponsor.name || 'Sin nombre'}</Text><Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Visible' : 'Oculto'}</Badge>{searchTerm && <Badge colorScheme="purple">{sponsor.category}</Badge>}</HStack><Text color={muted} fontSize="sm" noOfLines={1}>{sponsor.description || 'Sin descripción'}</Text><Text color={muted} fontSize="xs" mt="2px">Posición {position + 1}</Text></Box>
                 </HStack>
-              </Stack>
-            ) : (
-              <Stack h="100%" align="center" justify="center" textAlign="center" spacing="10px" color={muted}>
-                <Box w="56px" h="56px" borderRadius="full" bg="brand.50" color="brand.500" display="flex" alignItems="center" justifyContent="center">
-                  <MdAddBusiness size="28px" />
-                </Box>
-                <Badge colorScheme="brand">Posición #{slot}</Badge>
-                <Text fontWeight="800" color={textColor}>Espacio disponible</Text>
-                <Text fontSize="sm">Arrastrá un patrocinador aquí para asignarlo a esta posición.</Text>
-              </Stack>
-            )}
-          </Card>
-        ))}
-      </SimpleGrid>
+                <HStack alignSelf={{ base: 'stretch', md: 'center' }} justify={{ base: 'space-between', md: 'flex-end' }}>
+                  <FormControl display="flex" alignItems="center" w="auto"><Switch aria-label={`Visibilidad de ${sponsor.name || 'patrocinador'}`} isChecked={sponsor.active} onChange={() => toggleActive(sponsor)} /><FormLabel mb="0" ml="8px" fontSize="sm">Visible</FormLabel></FormControl>
+                  <Button as={RLink} to={`/admin/sponsor/edit/${sponsor.id}`} size="sm" variant="ghost" leftIcon={<MdEdit />}>Editar</Button>
+                  <Button size="sm" variant="ghost" colorScheme="red" leftIcon={<MdDelete />} onClick={() => requestDelete(sponsor)}>Eliminar</Button>
+                </HStack>
+              </Flex>
+            </Card>;
+          })}
+        </Stack>
+      )}
+
+      <Accordion allowToggle>
+        <AccordionItem border="0">
+          <Card overflow="hidden"><AccordionButton px={{ base: '14px', md: '18px' }} py="14px"><Box flex="1" textAlign="left"><Text fontWeight="800">Configuración del espacio disponible</Text><Text color={muted} fontSize="sm">Mensaje que se muestra cuando todavía no hay un patrocinador.</Text></Box><AccordionIcon /></AccordionButton><AccordionPanel px={{ base: '14px', md: '18px' }} pb="18px"><SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px"><FormControl><FormLabel>Título</FormLabel><Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} /></FormControl><FormControl><FormLabel>Descripción</FormLabel><Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} /></FormControl></SimpleGrid><Button mt="14px" colorScheme="brand" onClick={saveAvailableCopy} isLoading={savingAvailableCopy}>Guardar configuración</Button></AccordionPanel></Card>
+        </AccordionItem>
+      </Accordion>
+
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} isCentered><AlertDialogOverlay><AlertDialogContent><AlertDialogHeader>Eliminar patrocinador</AlertDialogHeader><AlertDialogBody>¿Querés eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</AlertDialogBody><AlertDialogFooter><Button ref={cancelRef} onClick={onClose}>Cancelar</Button><Button colorScheme="red" ml={3} onClick={confirmDelete}>Eliminar</Button></AlertDialogFooter></AlertDialogContent></AlertDialogOverlay></AlertDialog>
     </Box>
   );
 }
