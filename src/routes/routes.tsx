@@ -129,7 +129,7 @@ const routes: RoutesType[] = [
     name: 'Balance semanal',
     layout: '/admin',
     path: '/order/balance',
-    component: Balance,
+    component: () => <Balance />,
     secondary: true,
     roles: ['admin', 'colaborador'],
   },
