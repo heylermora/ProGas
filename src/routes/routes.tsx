@@ -1,6 +1,5 @@
 import { Icon } from '@chakra-ui/react';
 import { MdHome, MdInventory, MdCampaign, MdPeople, MdPointOfSale, MdManageAccounts } from 'react-icons/md';
-import { Redirect } from 'react-router-dom';
 import Clients from 'views/admin/client';
 import Users from 'views/admin/user';
 
@@ -22,6 +21,7 @@ import EditProduct from 'views/admin/product/edit';
 // Dashboard Imports
 import Dashboard from 'views/admin/dashboard';
 import Closings from 'views/admin/closing';
+import Balance from 'views/admin/order/balance';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
@@ -126,11 +126,12 @@ const routes: RoutesType[] = [
     secondary: true,
   },
   {
-    name: 'Balance',
+    name: 'Balance semanal',
     layout: '/admin',
     path: '/order/balance',
-    component: () => <Redirect to="/admin/closing/index" />,
-    secondary: true,
+    component: Balance,
+    icon: <Icon as={MdPointOfSale} width="20px" height="20px" />,
+    roles: ['admin', 'colaborador'],
   },
   {
     name: 'Gastos y cortes',

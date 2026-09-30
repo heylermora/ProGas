@@ -33,7 +33,7 @@ import { isOrderPaid } from 'utils/order';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
 
-type DailySummary = {
+type WeeklySummary = {
   date: string;
   totalOrders: number;
   totalAmount: number;
@@ -58,16 +58,19 @@ export default function Balance() {
 
   const { refreshKey } = useOrderRefresh();
 
-  const [summaries, setSummaries] = useState<DailySummary[]>([]);
+  const [summaries, setSummaries] = useState<WeeklySummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
   const topPt: ResponsiveValue<string> = { base: '180px', md: '80px', xl: '80px' };
 
   const getLocalDateKey = (date: Date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
+    const monday = new Date(date);
+    const day = monday.getDay() || 7;
+    monday.setDate(monday.getDate() - day + 1);
+    const y = monday.getFullYear();
+    const m = String(monday.getMonth() + 1).padStart(2, '0');
+    const d = String(monday.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   };
 
@@ -109,7 +112,7 @@ export default function Balance() {
           return;
         }
 
-        const mapByDate: Record<string, DailySummary> = {};
+        const mapByDate: Record<string, WeeklySummary> = {};
 
         ordersData.forEach((order: any) => {
           if (!order.requestDate) return;
@@ -193,9 +196,9 @@ export default function Balance() {
             as={RLink as any}
             padding="0px 8px"
             borderRadius="100%"
-            to="/order/new"
+            to="/admin/order/new"
           />
-          <Empty message="Aún no hay datos para generar el balance diario." />
+          <Empty message="Aún no hay datos para generar el balance semanal." />
         </>
       ) : (
         <Flex flexDirection="column" w="100%" maxW="1100px" mx="auto">
@@ -213,17 +216,17 @@ export default function Balance() {
               as={RLink as any}
               padding="0px 8px"
               borderRadius="100%"
-              to="/order/new"
+              to="/admin/order/new"
             />
           </Flex>
 
           <Accordion allowMultiple defaultIndex={[0]}>
             {summaries.map((summary) => {
-              const prettyDate = new Date(summary.date).toLocaleDateString('es-CR', {
+              const prettyDate = `Semana del ${new Date(`${summary.date}T00:00`).toLocaleDateString('es-CR', {
                 year: 'numeric',
                 month: 'short',
                 day: '2-digit',
-              });
+              })}`;
 
               const hasPending = summary.pendingAmount > 0;
               const methodsTotal = METHODS.reduce(
@@ -290,7 +293,7 @@ export default function Balance() {
 
                         <Box flex="1">
                           <Stat>
-                            <StatLabel fontSize="xs">Vuelto del día</StatLabel>
+                            <StatLabel fontSize="xs">Vuelto de la semana</StatLabel>
                             <StatNumber fontSize="md">
                               {formatCRC(summary.changeTotal)}
                             </StatNumber>

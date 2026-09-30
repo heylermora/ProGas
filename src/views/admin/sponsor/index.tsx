@@ -3,7 +3,7 @@ import {
   Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
   AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
   Badge, Box, Button, Center, Flex, FormControl, FormLabel, HStack, Icon, Image,
-  SimpleGrid, Stack, Switch, Tab, TabList, Tabs, Text, Textarea,
+  Select, SimpleGrid, Stack, Switch, Text, Textarea,
   useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
@@ -133,16 +133,11 @@ export default function SponsorsAdmin() {
         ].map((stat) => <Card key={stat.label} p="16px" direction="row" align="center" gap="12px"><Center boxSize="42px" borderRadius="14px" bg="brand.50" color="brand.500"><Icon as={stat.icon} boxSize="22px" /></Center><Box><Text fontSize="xl" fontWeight="900" color={textColor}>{stat.value}</Text><Text fontSize="sm" color={muted}>{stat.label}</Text></Box></Card>)}
       </SimpleGrid>
 
-      <Card p={{ base: '14px', md: '18px' }} mb="18px">
-        <Tabs index={Math.max(0, availableCategories.indexOf(selectedCategory))} onChange={(index) => setSelectedCategory(availableCategories[index])} colorScheme="brand" variant="soft-rounded">
-          <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="10px" mb="12px">
-            <Box><Text fontWeight="800" color={textColor}>Categoría</Text><Text color={muted} fontSize="sm">Elegí una para ver y ordenar sus patrocinadores.</Text></Box>
-            <HStack><Button size="sm" variant="outline" leftIcon={<MdSettings />} onClick={categoryManager.onOpen}>Administrar</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
-          </Flex>
-          <TabList overflowX="auto" gap="6px" pb="4px">
-            {availableCategories.map((category) => <Tab key={category} flexShrink={0} fontSize="sm">{category}<Badge ml="7px" colorScheme="gray">{sponsorsByCategory[category]?.length || 0}</Badge></Tab>)}
-          </TabList>
-        </Tabs>
+      <Card p={{ base: '16px', md: '20px' }} mb="18px">
+        <Flex align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="14px">
+          <Box flex="1" maxW={{ md: '520px' }}><Text fontWeight="900" color={textColor}>Filtrar por categoría</Text><Text color={muted} fontSize="sm" mb="9px">Seleccioná una categoría; el buscador superior filtra por nombre y descripción.</Text><Select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} size="lg" borderRadius="xl">{availableCategories.map((category) => <option key={category} value={category}>{category} · {sponsorsByCategory[category]?.length || 0}</option>)}</Select></Box>
+          <HStack wrap="wrap"><Button variant="outline" leftIcon={<MdSettings />} onClick={categoryManager.onOpen}>Administrar categorías</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
+        </Flex>
       </Card>
 
       {loading ? <AsyncContent isLoading loadingLabel="Cargando patrocinadores" /> : visibleBusinesses.length === 0 ? (

@@ -12,20 +12,23 @@ import {
   FormLabel,
   Heading,
   Input,
-  SimpleGrid,
   Stack,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { MdSearch, MdShoppingBag } from 'react-icons/md';
+import { MdContentCopy, MdSearch, MdShoppingBag } from 'react-icons/md';
+import { FaWhatsapp } from 'react-icons/fa';
 import orderService from 'services/OrderService';
 import { PublicCard, PublicPage } from './PublicPage';
 import MallPreview from './MallPreview';
 import type { OrderItem } from 'interfaces/OrderItem';
+import { normalizeOrderStatus } from 'utils/order';
 
 const statusColor = (status = '') => {
-  if (status === 'Completado') return 'green';
-  if (status === 'En proceso') return 'orange';
+  if (status === 'Entregado' || status === 'Pagado') return 'green';
+  if (status === 'En ruta') return 'orange';
+  if (status === 'Liquidado') return 'purple';
+  if (status === 'Cancelado') return 'red';
   return 'blue';
 };
 
@@ -33,6 +36,16 @@ const formatDate = (value?: string) => {
   if (!value) return 'Fecha no disponible';
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('es-CR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+};
+
+const TRACKED_STATUSES = ['Pendiente', 'En ruta', 'Entregado', 'Pagado', 'Liquidado'] as const;
+const STATUS_DESCRIPTION: Record<string, string> = {
+  Pendiente: 'Recibimos tu solicitud y estamos preparando el pedido.',
+  'En ruta': 'Tu pedido salió y va camino a la ubicación indicada.',
+  Entregado: 'El pedido fue entregado; queda confirmar el pago.',
+  Pagado: 'El pago fue registrado correctamente.',
+  Liquidado: 'El pedido ya fue incluido en el cierre de turno.',
+  Cancelado: 'Este pedido fue cancelado. Escribinos si necesitás ayuda.',
 };
 
 export default function ViewOrder() {
@@ -91,10 +104,17 @@ export default function ViewOrder() {
           {orders.map((order) => (
             <Box key={order.id} border="1px solid" borderColor={borderColor} bg={cardBg} borderRadius="18px" p={{ base: '14px', md: '18px' }}>
               <Stack spacing="13px">
+                {(() => { const currentStatus = normalizeOrderStatus(order.status); const currentIndex = TRACKED_STATUSES.indexOf(currentStatus as typeof TRACKED_STATUSES[number]); return <>
                 <Flex justify="space-between" align="flex-start" gap="10px">
                   <Box><Text color="gray.500" fontSize="xs" fontWeight="800">CÓDIGO DEL PEDIDO</Text><Heading fontSize="xl">{order.orderCode || 'Sin código'}</Heading></Box>
-                  <Badge colorScheme={statusColor(order.status)} borderRadius="full" px="10px" py="5px">{order.status || 'Nuevo'}</Badge>
+                  <Button size="sm" variant="outline" leftIcon={<MdContentCopy />} onClick={() => navigator.clipboard.writeText(order.orderCode || '')}>Copiar código</Button>
                 </Flex>
+                <Box p={{ base: 4, md: 5 }} bg="white" borderRadius="2xl" borderWidth="1px" borderColor={borderColor}>
+                  <Flex justify="space-between" gap={1} mb={4}>{TRACKED_STATUSES.map((step, index) => <Flex key={step} flex="1" align="center"><Box boxSize={index === currentIndex ? '18px' : '12px'} borderRadius="full" bg={index <= currentIndex ? 'brand.500' : 'gray.200'} boxShadow={index === currentIndex ? '0 0 0 5px rgba(66, 42, 255, .14)' : undefined} /><Box h="3px" flex="1" bg={index < currentIndex ? 'brand.500' : 'gray.200'} display={index === TRACKED_STATUSES.length - 1 ? 'none' : 'block'} /></Flex>)}</Flex>
+                  <Badge colorScheme={statusColor(currentStatus)} borderRadius="full" px="12px" py="6px">{currentStatus}</Badge>
+                  <Heading fontSize={{ base: 'lg', md: 'xl' }} mt={3}>{currentStatus === 'Cancelado' ? 'Pedido cancelado' : `Tu pedido está ${currentStatus.toLocaleLowerCase('es')}`}</Heading>
+                  <Text color="gray.600" mt={2}>{STATUS_DESCRIPTION[currentStatus]}</Text>
+                </Box>
                 <Text color="gray.500" fontSize="sm">Solicitado: {formatDate(order.requestDate)}</Text>
                 <Divider />
                 <Stack spacing="8px">
@@ -106,10 +126,9 @@ export default function ViewOrder() {
                   ))}
                 </Stack>
                 <Divider />
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing="8px">
-                  <Box><Text color="gray.500" fontSize="xs">Entrega</Text><Text fontWeight="700">Información protegida</Text></Box>
-                  <Box textAlign={{ base: 'left', sm: 'right' }}><Text color="gray.500" fontSize="xs">Total</Text><Text fontWeight="900" fontSize="lg">₡{Number(order.totalAmount || 0).toLocaleString('es-CR')}</Text></Box>
-                </SimpleGrid>
+                <Box textAlign="right"><Text color="gray.500" fontSize="xs">Total</Text><Text fontWeight="900" fontSize="lg">₡{Number(order.totalAmount || 0).toLocaleString('es-CR')}</Text></Box>
+                <Button as="a" href={`https://wa.me/50683978524?text=${encodeURIComponent(`Hola, necesito más información sobre mi pedido ${order.orderCode}.`)}`} target="_blank" rel="noopener noreferrer" colorScheme="green" leftIcon={<FaWhatsapp />}>Consultar por WhatsApp</Button>
+                </>; })()}
               </Stack>
             </Box>
           ))}

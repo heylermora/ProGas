@@ -50,8 +50,11 @@ function PaymentModal(props: {
   onClose: () => void;
   onSave?: (payload: any) => void | Promise<void>;
   onSaved?: (payload: any) => void | Promise<void>;
+  initialPayments?: Array<{ method: PaymentMethod; amount: number; reference?: string | null; note?: string | null }>;
+  initialPaidAt?: string;
+  initialNote?: string | null;
 }) {
-  const { title = 'Añadir pago', id, totalToPay, isOpen, onClose, onSaved, onSave } = props;
+  const { title = 'Añadir pago', id, totalToPay, isOpen, onClose, onSaved, onSave, initialPayments, initialPaidAt, initialNote } = props;
 
   const toast = useToast();
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -71,12 +74,12 @@ function PaymentModal(props: {
   // reset cuando abre
   useEffect(() => {
     if (isOpen) {
-      setRows([{ method: 'Efectivo', amount: '' }]);
-      setPaidAt(localNow());
-      setGeneralNote('');
+      setRows(initialPayments?.length ? initialPayments.map(payment => ({ ...payment, amount: String(payment.amount), reference: payment.reference || '', note: payment.note || '' })) : [{ method: 'Efectivo', amount: '' }]);
+      setPaidAt(initialPaidAt ? new Date(initialPaidAt).toISOString().slice(0, 16) : localNow());
+      setGeneralNote(initialNote || '');
       setIsSaving(false);
     }
-  }, [isOpen]);
+  }, [initialNote, initialPaidAt, initialPayments, isOpen]);
 
   const totalPaid = useMemo(() => rows.reduce((sum, r) => sum + toNumber(r.amount), 0), [rows]);
   const diff = useMemo(() => totalPaid - (totalToPay || 0), [totalPaid, totalToPay]);

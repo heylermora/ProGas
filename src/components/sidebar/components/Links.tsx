@@ -16,6 +16,15 @@ export function SidebarLinks(props: {
 	const { hasRole } = useAuth();
 
 	const { routes } = props;
+	const menuPriority: Record<string, number> = {
+		'/order/index/:search?': 10,
+		'/closing/index': 20,
+		'/order/balance': 30,
+		'/product/index/:search?': 40,
+		'/client/index': 50,
+		'/sponsor/index': 80,
+		'/user/index': 90,
+	};
 
 	// verifies if routeName is the one active (in browser input)
 	const activeRoute = (routeName: string) => {
@@ -27,7 +36,7 @@ export function SidebarLinks(props: {
 	const createLinks = (
 		routes: RoutesType[], 
 	) => {
-		return routes.map(
+		return [...routes].sort((a, b) => (menuPriority[a.path] ?? 60) - (menuPriority[b.path] ?? 60)).map(
 			(
 				route: RoutesType,
 				index: number

@@ -30,6 +30,7 @@ const ClosingService = {
       transaction.set(closingRef, closing);
       orderRefs.forEach((orderRef) => transaction.update(orderRef, {
         locked: true,
+        status: 'Liquidado',
         closingId: closingRef.id,
         closedAt: closing.createdAt,
       }));

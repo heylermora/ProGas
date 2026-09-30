@@ -4,6 +4,10 @@ export const ORDER_STATUSES: OrderStatus[] = [
   'Pendiente', 'En ruta', 'Entregado', 'Pagado', 'Liquidado', 'Cancelado',
 ];
 
+export const SELECTABLE_ORDER_STATUSES: OrderStatus[] = [
+  'Pendiente', 'En ruta', 'Entregado', 'Pagado', 'Cancelado',
+];
+
 const LEGACY_STATUS: Record<string, OrderStatus> = {
   Nuevo: 'Pendiente',
   'En proceso': 'En ruta',
