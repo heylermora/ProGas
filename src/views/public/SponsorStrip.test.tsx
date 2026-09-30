@@ -58,7 +58,7 @@ describe('SponsorStrip', () => {
     renderSponsorStrip();
 
     fireEvent.click(screen.getByRole('button', { name: /ver video de patrocinador de prueba/i }));
-    expect(screen.getAllByLabelText(/^video de patrocinador de prueba$/i)).toHaveLength(1);
+    expect(screen.getAllByLabelText(/^video de patrocinador de prueba$/i, { selector: 'video' })).toHaveLength(1);
 
     const backButton = screen.getByRole('button', { name: /volver al logo y links del patrocinador/i });
     const expandButton = screen.getByRole('button', { name: /expandir video de patrocinador de prueba/i });
@@ -68,6 +68,6 @@ describe('SponsorStrip', () => {
     fireEvent.click(expandButton);
 
     expect(screen.getByRole('dialog')).toBeTruthy();
-    expect(screen.getAllByLabelText(/^video de patrocinador de prueba$/i)).toHaveLength(1);
+    expect(screen.getAllByLabelText(/^video de patrocinador de prueba$/i, { selector: 'video' })).toHaveLength(1);
   });
 });
