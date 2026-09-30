@@ -106,7 +106,9 @@ const OrderService = {
                 totalAmount: persistedItems.reduce<number>((total, item) => total + item.price * item.quantity, 0),
             });
         });
-        return { id: orderRef.id };
+        // The identifier is the validated idempotency key; returning it directly
+        // also keeps the result independent from the SDK DocumentReference shape.
+        return { id: requestId };
     },
     edit: (key: string, editedOrder: OrderItem) => new Promise<any>(
         async (resolve, reject) => {
