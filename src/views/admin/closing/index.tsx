@@ -12,6 +12,8 @@ import ClosingService from 'services/ClosingService';
 import OrderService from 'services/OrderService';
 import ProductService from 'services/ProductService';
 import { availableExpenses, availableOrders, cylinderSummary, orderFingerprint, orderTotal, paymentTotals } from 'utils/closing';
+import HelpLabel from 'components/form/HelpLabel';
+import PageHeader from 'components/layout/PageHeader';
 
 const crc = (amount: number) => `₡${amount.toLocaleString('es-CR')}`;
 const nowLocal = () => {
@@ -116,8 +118,8 @@ export default function Closings() {
 
   if (loading) return <Box pt="20"><Spinner size="xl" /></Box>;
   return <Box w="100%" pt={{ base: '180px', md: '80px' }}>
-    <Heading size="lg" mb="1">Gastos y cortes</Heading>
-    <Text color="gray.500" mb="6">Registre egresos, previsualice cada liquidación y consulte el historial.</Text>
+    <PageHeader title="Gastos y cortes" description="Registrá salidas de dinero y cerrá periodos de trabajo con una comparación clara entre lo esperado y lo recibido." />
+    <Alert status="info" mb="5" borderRadius="xl"><AlertIcon /><Box><Text fontWeight="800">¿Por dónde empezar?</Text><Text fontSize="sm">Primero registrá los gastos. Al terminar un turno, abrí “Corte nuevo”, elegí el periodo, contá el dinero recibido y escribí ese valor en “Monto declarado”.</Text></Box></Alert>
     <Tabs colorScheme="brand" isLazy>
       <TabList overflowX="auto"><Tab>Gastos</Tab><Tab>Corte nuevo</Tab><Tab>Historial</Tab></TabList>
       <TabPanels>
@@ -125,10 +127,10 @@ export default function Closings() {
           <Box bg="white" p="5" borderRadius="xl" mb="6">
             <Heading size="md" mb="4">Registrar gasto</Heading>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="4">
-              <FormControl isRequired><FormLabel>Descripción</FormLabel><Input value={expense.description} onChange={(e) => setExpense({ ...expense, description: e.target.value })} /></FormControl>
-              <FormControl><FormLabel>Categoría</FormLabel><Select value={expense.category} onChange={(e) => setExpense({ ...expense, category: e.target.value })}><option>Operación</option><option>Combustible</option><option>Mantenimiento</option><option>Otro</option></Select></FormControl>
-              <FormControl isRequired><FormLabel>Monto</FormLabel><Input type="number" min="0" value={expense.amount} onChange={(e) => setExpense({ ...expense, amount: e.target.value })} /></FormControl>
-              <FormControl isRequired><FormLabel>Fecha y hora</FormLabel><Input type="datetime-local" value={expense.occurredAt} onChange={(e) => setExpense({ ...expense, occurredAt: e.target.value })} /></FormControl>
+              <FormControl isRequired><HelpLabel help="Indicá en qué se utilizó el dinero; por ejemplo, combustible o mantenimiento." required>Descripción</HelpLabel><Input value={expense.description} onChange={(e) => setExpense({ ...expense, description: e.target.value })} /></FormControl>
+              <FormControl><HelpLabel help="Agrupa gastos similares para que el historial sea más fácil de revisar.">Categoría</HelpLabel><Select value={expense.category} onChange={(e) => setExpense({ ...expense, category: e.target.value })}><option>Operación</option><option>Combustible</option><option>Mantenimiento</option><option>Otro</option></Select></FormControl>
+              <FormControl isRequired><HelpLabel help="Monto exacto que salió de caja. Se resta del efectivo esperado en el corte." required>Monto</HelpLabel><Input type="number" min="0" value={expense.amount} onChange={(e) => setExpense({ ...expense, amount: e.target.value })} /></FormControl>
+              <FormControl isRequired><HelpLabel help="Momento real del gasto. Define en cuál corte será incluido." required>Fecha y hora</HelpLabel><Input type="datetime-local" value={expense.occurredAt} onChange={(e) => setExpense({ ...expense, occurredAt: e.target.value })} /></FormControl>
               <FormControl><FormLabel>Turno (opcional)</FormLabel><Input value={expense.shift} onChange={(e) => setExpense({ ...expense, shift: e.target.value })} placeholder="Ej. Mañana" /></FormControl>
             </SimpleGrid><Button mt="4" colorScheme="brand" isLoading={saving} onClick={saveExpense}>Guardar gasto</Button>
           </Box>
@@ -137,16 +139,16 @@ export default function Closings() {
         <TabPanel px="0">
           <Box bg="white" p="5" borderRadius="xl">
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing="4">
-              <FormControl><FormLabel>Tipo de corte</FormLabel><Select value={type} onChange={(e) => setType(e.target.value as ClosingType)}><option value="shift">Turno</option>{isAdmin && <option value="profit">Utilidades</option>}{canCloseCylinders && <option value="cylinder">Costo de cilindros</option>}</Select></FormControl>
-              <FormControl><FormLabel>Desde</FormLabel><Input type="datetime-local" value={from} onChange={(e) => setFrom(e.target.value)} /></FormControl>
-              <FormControl><FormLabel>Hasta</FormLabel><Input type="datetime-local" value={to} onChange={(e) => setTo(e.target.value)} /></FormControl>
+              <FormControl><HelpLabel help="Turno compara efectivo y gastos; Utilidades descuenta costos; Cilindros resume el costo del inventario vendido.">Tipo de corte</HelpLabel><Select value={type} onChange={(e) => setType(e.target.value as ClosingType)}><option value="shift">Turno</option>{isAdmin && <option value="profit">Utilidades</option>}{canCloseCylinders && <option value="cylinder">Costo de cilindros</option>}</Select></FormControl>
+              <FormControl><HelpLabel help="Inicio del periodo. Incluye pedidos pagados y gastos todavía no cerrados desde esta fecha.">Desde</HelpLabel><Input type="datetime-local" value={from} onChange={(e) => setFrom(e.target.value)} /></FormControl>
+              <FormControl><HelpLabel help="Fin del periodo. Revisá que no queden ventas del turno por fuera.">Hasta</HelpLabel><Input type="datetime-local" value={to} onChange={(e) => setTo(e.target.value)} /></FormControl>
             </SimpleGrid>
             <Heading size="md" mt="6" mb="3">Previsualización</Heading>
             <SimpleGrid columns={{ base: 2, lg: 4 }} spacing="3"><Metric label="Total vendido" value={sales} /><Metric label="Efectivo" value={payments.cash} /><Metric label="SINPE" value={payments.sinpe} /><Metric label="Otros métodos" value={payments.other} /><Metric label="Gastos" value={expensesInPeriod} />{type !== 'shift' && <Metric label="Costos" value={type === 'cylinder' ? cylinderCost : allCost} />}<Metric label="Monto esperado" value={expected} /><Metric label="Diferencia" value={difference} /></SimpleGrid>
             {type === 'cylinder' ? <CylinderTable lines={cylinders} /> : <OrderTable orders={included} />}
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="4" mt="5">
-              <FormControl isRequired><FormLabel>Monto declarado</FormLabel><Input type="number" value={declared} onChange={(e) => setDeclared(e.target.value)} /></FormControl>
-              <FormControl isRequired={difference !== 0}><FormLabel>Nota explicativa {difference !== 0 && '(obligatoria)'}</FormLabel><Textarea value={note} onChange={(e) => setNote(e.target.value)} /></FormControl>
+              <FormControl isRequired><HelpLabel help="Cantidad que realmente contaste en caja. Se compara con el monto esperado." required>Monto declarado</HelpLabel><Input type="number" value={declared} onChange={(e) => setDeclared(e.target.value)} /></FormControl>
+              <FormControl isRequired={difference !== 0}><HelpLabel help="Si falta o sobra dinero, explicá la razón para que quede registrada." required={difference !== 0}>Nota explicativa</HelpLabel><Textarea value={note} onChange={(e) => setNote(e.target.value)} /></FormControl>
             </SimpleGrid>
             <Alert status="info" mt="4"><AlertIcon />Al confirmar, los {included.length} pedidos quedarán bloqueados y no podrán incluirse en otro corte.</Alert>
             <Button colorScheme="brand" mt="4" onClick={confirm} isLoading={saving}>Confirmar corte</Button>

@@ -31,7 +31,7 @@ import {
   MdPlayArrow,
   MdStorefront,
 } from 'react-icons/md';
-import { BUSINESS_CATEGORIES } from 'interfaces/SponsorItem';
+import useCategories from 'hooks/useCategories';
 import SponsorService from 'services/SponsorService';
 import { useLocation } from 'react-router-dom';
 import { PublicPage } from './PublicPage';
@@ -125,6 +125,7 @@ const businessPosition = (index, total) => {
 };
 
 export default function VirtualMall() {
+  const { categories } = useCategories('sponsors');
   const location = useLocation();
   const [businesses, setBusinesses] = useState([]);
   const [loadStatus, setLoadStatus] = useState('loading');
@@ -177,7 +178,7 @@ export default function VirtualMall() {
   const businessSectorCount = Math.max(1, Math.ceil(categoryBusinesses.length / BUSINESSES_PER_SECTOR));
   const visibleBusinesses = categoryBusinesses.slice(businessSector * BUSINESSES_PER_SECTOR, (businessSector + 1) * BUSINESSES_PER_SECTOR);
   const arrivedBusiness = arrivedBusinessId === selectedBusinessId ? selectedBusiness : undefined;
-  const selectedCategoryIndex = BUSINESS_CATEGORIES.indexOf(selectedCategory);
+  const selectedCategoryIndex = categories.indexOf(selectedCategory);
   const categoryIcon = categoryEmoji[selectedCategoryIndex] || '🪐';
   const contactLinks = (selectedBusiness?.links || []).filter(Boolean).slice(0, 4);
 
@@ -238,7 +239,7 @@ export default function VirtualMall() {
             {loadStatus === 'success' && (
               <Box key={selectedCategory || 'galaxy'} position="absolute" inset="0" animation={`${mapArrival} .38s ease-out`}>
                 {!selectedCategory ? (
-                  <CategoryMap businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
+                  <CategoryMap categories={categories} businesses={activeBusinesses} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
                 ) : (
                   <BusinessMap businesses={visibleBusinesses} totalBusinesses={categoryBusinesses.length} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} sector={businessSector} sectorCount={businessSectorCount} onSectorChange={changeBusinessSector} onBack={returnToGalaxy} onSelect={selectBusiness} />
                 )}
@@ -286,8 +287,8 @@ export default function VirtualMall() {
   );
 }
 
-function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
-  const sectorCount = Math.ceil(BUSINESS_CATEGORIES.length / CATEGORIES_PER_SECTOR);
+function CategoryMap({ categories, businesses, mobileSector, onSectorChange, onSelect }) {
+  const sectorCount = Math.max(1, Math.ceil(categories.length / CATEGORIES_PER_SECTOR));
   const previousSector = () => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount);
   const nextSector = () => onSectorChange((mobileSector + 1) % sectorCount);
 
@@ -304,16 +305,16 @@ function CategoryMap({ businesses, mobileSector, onSectorChange, onSelect }) {
         <Text color="white" fontSize="xs" fontWeight="800">{mobileSector + 1} de {sectorCount}</Text>
       </Stack>
 
-      {BUSINESS_CATEGORIES.map((category, index) => {
+      {categories.map((category, index) => {
         const total = businesses.filter((business) => business.category === category).length;
         const categorySector = Math.floor(index / CATEGORIES_PER_SECTOR);
         const mobileIndex = index % CATEGORIES_PER_SECTOR;
-        const [desktopLeft, desktopTop] = categoryPositions[index];
+        const [desktopLeft, desktopTop] = categoryPositions[index] || businessPosition(index, categories.length);
         const [mobileLeft, mobileTop] = mobileCategoryPositions[mobileIndex];
         return (
           <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position="absolute" left={{ base: `${mobileLeft}%`, md: `${desktopLeft}%` }} top={{ base: `${mobileTop}%`, md: `${desktopTop}%` }} transform="translate(-50%, -50%)" w={{ base: '82px', md: '94px' }} h={{ base: '72px', md: '78px' }} minW={{ base: '82px', md: '94px' }} p="7px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="3px solid white" borderRadius="20px" boxShadow="0 0 16px rgba(255,255,255,.45)" onClick={() => onSelect(category)} display={{ base: categorySector === mobileSector ? 'flex' : 'none', md: 'flex' }} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} transition="all .2s ease" _hover={{ transform: 'translate(-50%, -50%) scale(1.09)', boxShadow: '0 0 26px rgba(103,232,249,.9)' }}>
             <Text fontSize={{ base: '25px', md: '28px' }} lineHeight="1">{categoryEmoji[index]}</Text>
-            <Text mt="4px" w="100%" noOfLines={1} fontSize="10px" fontWeight="900">{shortLabels[index]}</Text>
+            <Text mt="4px" w="100%" noOfLines={1} fontSize="10px" fontWeight="900">{shortLabels[index] || category}</Text>
             {total > 0 && <Badge position="absolute" right="-4px" top="-5px" minW="22px" fontSize="8px" borderRadius="full" colorScheme="purple">{total}</Badge>}
           </Button>
         );

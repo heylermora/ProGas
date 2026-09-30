@@ -5,7 +5,7 @@ export const BUSINESS_CATEGORIES = [
   'Gimnasios', 'Moto Repuestos', 'Mecánicos', 'Fumigadoras', 'Otros',
 ] as const;
 
-export type BusinessCategory = typeof BUSINESS_CATEGORIES[number];
+export type BusinessCategory = string;
 export const DEFAULT_BUSINESS_CATEGORY: BusinessCategory = 'Otros';
 // Conservado solo para leer registros históricos mientras se migran al centro comercial.
 export type SponsorType = 'VIP' | 'Premium' | 'General';

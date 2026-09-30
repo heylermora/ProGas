@@ -23,7 +23,7 @@ export function SearchBar(props: {
 	const { query, setQuery, enabled, placeholder: pagePlaceholder } = usePageSearch();
 
 	return (
-		<InputGroup w={{ base: '100%', md: '200px' }} {...rest}>
+		<InputGroup w={{ base: '100%', md: '300px', lg: '360px' }} maxW="100%" {...rest}>
 			<InputLeftElement
 				children={
 					<IconBox

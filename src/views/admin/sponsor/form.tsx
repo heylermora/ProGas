@@ -26,12 +26,14 @@ import { useHistory, useParams } from 'react-router-dom';
 import { MdArrowBack, MdInfoOutline, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
 import SponsorService from 'services/SponsorService';
-import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import useCategories from 'hooks/useCategories';
 
 const empty = { name: '', category: DEFAULT_BUSINESS_CATEGORY, active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
 const MAX_FIRESTORE_VIDEO_BYTES = 850 * 1024;
 
 export default function SponsorForm() {
+  const { categories } = useCategories('sponsors');
   const { id } = useParams();
   const history = useHistory();
   const [sponsor, setSponsor] = useState(empty);
@@ -132,7 +134,7 @@ export default function SponsorForm() {
             </FormControl>
             <FormControl>
               <FormLabel>Categoría comercial</FormLabel>
-              <Select value={sponsor.category} onChange={(e) => set('category', e.target.value)}>{BUSINESS_CATEGORIES.map((category) => <option key={category}>{category}</option>)}</Select>
+              <Select value={sponsor.category} onChange={(e) => set('category', e.target.value)}>{sponsor.category && !categories.includes(sponsor.category) && <option>{sponsor.category}</option>}{categories.map((category) => <option key={category}>{category}</option>)}</Select>
             </FormControl>
             <FormControl>
               <FormLabel>Orden</FormLabel>

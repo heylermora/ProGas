@@ -8,17 +8,20 @@ import {
   useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { MdAdd, MdDelete, MdDragIndicator, MdEdit, MdStorefront, MdTune, MdVisibility } from 'react-icons/md';
+import { MdAdd, MdDelete, MdDragIndicator, MdEdit, MdSettings, MdStorefront, MdTune, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import PageHeader from 'components/layout/PageHeader';
 import SponsorService from 'services/SponsorService';
-import { BUSINESS_CATEGORIES, DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import { usePageSearch } from 'contexts/PageSearchContext';
+import useCategories from 'hooks/useCategories';
+import CategoryManager from 'components/category/CategoryManager';
 
 export default function SponsorsAdmin() {
   const { query } = usePageSearch();
+  const { categories, reload: reloadCategories } = useCategories('sponsors');
   const [sponsors, setSponsors] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
@@ -28,6 +31,7 @@ export default function SponsorsAdmin() {
   const [savingAvailableCopy, setSavingAvailableCopy] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const categoryManager = useDisclosure();
   const cancelRef = useRef();
   const toast = useToast();
   const textColor = useColorModeValue('navy.700', 'white');
@@ -44,10 +48,11 @@ export default function SponsorsAdmin() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
 
-  const sponsorsByCategory = useMemo(() => BUSINESS_CATEGORIES.reduce((acc, type) => ({
+  const availableCategories = useMemo(() => Array.from(new Set([...categories, ...sponsors.map((sponsor) => sponsor.category).filter(Boolean)])), [categories, sponsors]);
+  const sponsorsByCategory = useMemo(() => availableCategories.reduce((acc, type) => ({
     ...acc,
     [type]: sponsors.filter((sponsor) => sponsor.category === type),
-  }), {}), [sponsors]);
+  }), {}), [availableCategories, sponsors]);
 
   const searchTerm = query.trim().toLocaleLowerCase('es');
   const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
@@ -58,7 +63,7 @@ export default function SponsorsAdmin() {
     ? sponsors.filter(matchesSearch).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order)
     : currentBusinesses;
   const activeCount = sponsors.filter((sponsor) => sponsor.active !== false).length;
-  const categoriesInUse = BUSINESS_CATEGORIES.filter((category) => sponsorsByCategory[category]?.length).length;
+  const categoriesInUse = availableCategories.filter((category) => sponsorsByCategory[category]?.length).length;
 
   const toggleActive = async (sponsor) => {
     const next = { ...sponsor, active: !sponsor.active };
@@ -129,13 +134,13 @@ export default function SponsorsAdmin() {
       </SimpleGrid>
 
       <Card p={{ base: '14px', md: '18px' }} mb="18px">
-        <Tabs index={BUSINESS_CATEGORIES.indexOf(selectedCategory)} onChange={(index) => setSelectedCategory(BUSINESS_CATEGORIES[index])} colorScheme="brand" variant="soft-rounded">
+        <Tabs index={Math.max(0, availableCategories.indexOf(selectedCategory))} onChange={(index) => setSelectedCategory(availableCategories[index])} colorScheme="brand" variant="soft-rounded">
           <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="10px" mb="12px">
             <Box><Text fontWeight="800" color={textColor}>Categoría</Text><Text color={muted} fontSize="sm">Elegí una para ver y ordenar sus patrocinadores.</Text></Box>
-            <HStack>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
+            <HStack><Button size="sm" variant="outline" leftIcon={<MdSettings />} onClick={categoryManager.onOpen}>Administrar</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
           </Flex>
           <TabList overflowX="auto" gap="6px" pb="4px">
-            {BUSINESS_CATEGORIES.map((category) => <Tab key={category} flexShrink={0} fontSize="sm">{category}<Badge ml="7px" colorScheme="gray">{sponsorsByCategory[category]?.length || 0}</Badge></Tab>)}
+            {availableCategories.map((category) => <Tab key={category} flexShrink={0} fontSize="sm">{category}<Badge ml="7px" colorScheme="gray">{sponsorsByCategory[category]?.length || 0}</Badge></Tab>)}
           </TabList>
         </Tabs>
       </Card>
@@ -171,6 +176,7 @@ export default function SponsorsAdmin() {
         </AccordionItem>
       </Accordion>
 
+      <CategoryManager kind="sponsors" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} isCentered><AlertDialogOverlay><AlertDialogContent><AlertDialogHeader>Eliminar patrocinador</AlertDialogHeader><AlertDialogBody>¿Querés eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</AlertDialogBody><AlertDialogFooter><Button ref={cancelRef} onClick={onClose}>Cancelar</Button><Button colorScheme="red" ml={3} onClick={confirmDelete}>Eliminar</Button></AlertDialogFooter></AlertDialogContent></AlertDialogOverlay></AlertDialog>
     </Box>
   );

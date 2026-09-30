@@ -1,5 +1,6 @@
 import { Icon } from '@chakra-ui/react';
-import { MdHome, MdAssessment, MdInventory, MdCampaign, MdPeople, MdPointOfSale, MdManageAccounts } from 'react-icons/md';
+import { MdHome, MdInventory, MdCampaign, MdPeople, MdPointOfSale, MdManageAccounts } from 'react-icons/md';
+import { Redirect } from 'react-router-dom';
 import Clients from 'views/admin/client';
 import Users from 'views/admin/user';
 
@@ -9,7 +10,6 @@ import DetailsOrder from 'views/admin/order/details';
 import NewAdminOrder from 'views/admin/order/new';
 import NewCustomerOrder from 'views/customer/order/new';
 import EditOrder from 'views/admin/order/edit';
-import Balance from 'views/admin/order/balance';
 
 // Sponsor Imports
 import SponsorsAdmin from 'views/admin/sponsor';
@@ -130,8 +130,8 @@ const routes: RoutesType[] = [
     name: 'Balance',
     layout: '/admin',
     path: '/order/balance',
-    icon: <Icon as={MdAssessment} width="20px" height="20px" />,
-    component: Balance,
+    component: () => <Redirect to="/admin/closing/index" />,
+    secondary: true,
   },
   {
     name: 'Gastos y cortes',

@@ -8,7 +8,8 @@ import {
 import { MdArrowBack, MdCheck } from 'react-icons/md';
 import Card from 'components/card/Card';
 import productService from 'services/ProductService';
-import { Product, PRODUCT_CATEGORIES, ProductCategory } from 'interfaces/ProductItem';
+import { Product, ProductCategory } from 'interfaces/ProductItem';
+import useCategories from 'hooks/useCategories';
 
 type ProductDraft = Omit<Product, 'id'>;
 
@@ -20,6 +21,7 @@ const defaults: ProductDraft = {
 };
 
 export default function ProductForm({ product, isLoading = false }: Props) {
+  const { categories } = useCategories('products');
   const history = useHistory();
   const toast = useToast();
   const [values, setValues] = useState<ProductDraft>(() => product ? {
@@ -65,7 +67,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
               <FormLabel>Nombre del producto</FormLabel><Input value={values.description} onChange={e => set('description', e.target.value)} placeholder="Ej. Cilindro de gas 25 lb" />
               <FormErrorMessage>Ingrese un nombre para el producto.</FormErrorMessage>
             </FormControl>
-            <FormControl><FormLabel>Categoría</FormLabel><Select value={values.category} onChange={e => set('category', e.target.value as ProductCategory)}>{PRODUCT_CATEGORIES.map(category => <option key={category}>{category}</option>)}</Select></FormControl>
+            <FormControl><FormLabel>Categoría</FormLabel><Select value={values.category} onChange={e => set('category', e.target.value as ProductCategory)}>{values.category && !categories.includes(values.category) && <option>{values.category}</option>}{categories.map(category => <option key={category}>{category}</option>)}</Select></FormControl>
             <FormControl><FormLabel>SKU / código</FormLabel><Input value={values.sku} onChange={e => set('sku', e.target.value)} placeholder="Ej. GAS-25" /></FormControl>
             <FormControl isInvalid={submitted && values.price <= 0}><FormLabel>Precio de venta</FormLabel><InputGroup><InputLeftAddon>₡</InputLeftAddon><Input type="number" min={1} value={values.price} onChange={e => set('price', Number(e.target.value))} /></InputGroup><FormErrorMessage>Debe ser mayor que cero.</FormErrorMessage></FormControl>
             <FormControl isInvalid={submitted && values.costPrice < 0}><FormLabel>Precio de costo</FormLabel><InputGroup><InputLeftAddon>₡</InputLeftAddon><Input type="number" min={0} value={values.costPrice} onChange={e => set('costPrice', Number(e.target.value))} /></InputGroup></FormControl>
