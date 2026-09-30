@@ -2,18 +2,18 @@ import { mode } from '@chakra-ui/theme-tools';
 
 export const formStyles = {
   components: {
-    FormLabel: {
-      baseStyle: {
-        fontSize: 'sm',
-        fontWeight: '700',
-        marginBottom: '7px',
-      },
-    },
-    FormHelperText: {
+    Form: {
       baseStyle: (props: any) => ({
-        color: mode('secondaryGray.600', 'secondaryGray.400')(props),
-        fontSize: 'xs',
-        marginTop: '6px',
+        label: {
+          fontSize: 'sm',
+          fontWeight: '700',
+          marginBottom: '7px',
+        },
+        helperText: {
+          color: mode('secondaryGray.600', 'secondaryGray.400')(props),
+          fontSize: 'xs',
+          marginTop: '6px',
+        },
       }),
     },
     Accordion: {

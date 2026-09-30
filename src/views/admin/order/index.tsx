@@ -42,23 +42,36 @@ export default function Index() {
   const [isError, setIsError] = useState(false);
   const [filters, setFilters] = useState({ date: '', client: '', product: '', payment: '' });
 
-  // Fetch: NO filtra por status (solo por search si aplica)
+  // La búsqueda se resuelve en Firestore para no limitar los resultados a la primera página.
   useEffect(() => {
     setIsLoading(true);
     setIsError(false);
 
-    const promise: Promise<OrderItem[]> = orderService.getAll();
+    let active = true;
+    const term = search.trim();
+    const timeout = window.setTimeout(() => {
+      const promise: Promise<OrderItem[]> = term
+        ? orderService.getAll(['client', 'clientId', 'orderCode'], [term, term, term])
+        : orderService.getAllPages();
 
-    promise
-      .then((ordersData: OrderItem[]) => {
-        setorders(ordersData);
-      })
-      .catch((error) => {
-        console.error('Error fetching orders:', error);
-        setIsError(true);
-      })
-      .finally(() => setIsLoading(false));
-  }, [refreshKey]);
+      promise
+        .then((ordersData: OrderItem[]) => {
+          if (active) setorders(ordersData);
+        })
+        .catch((error) => {
+          console.error('Error fetching orders:', error);
+          if (active) setIsError(true);
+        })
+        .finally(() => {
+          if (active) setIsLoading(false);
+        });
+    }, term ? 300 : 0);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
+  }, [search, refreshKey]);
 
   const handleStatusClick = useCallback(
     (status: (typeof STATUS_MENU)[number]) => {

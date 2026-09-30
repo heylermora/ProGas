@@ -68,11 +68,11 @@ export default function SponsorsAdmin() {
   const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
     .sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
   const visibleBusinesses = currentBusinesses.filter(matchesSearch);
-  const slotCount = Math.max(visibleBusinesses.length, 1);
-  const sponsorSlots = Array.from({ length: slotCount }, (_, index) => ({
-    slot: index + 1,
-    sponsor: visibleBusinesses[index] || null,
+  const sponsorSlots = visibleBusinesses.map((sponsor) => ({
+    slot: currentBusinesses.findIndex((business) => business.id === sponsor.id) + 1,
+    sponsor,
   }));
+  if (!searchTerm && sponsorSlots.length === 0) sponsorSlots.push({ slot: 1, sponsor: null });
 
   const selectType = (index) => {
     const nextType = BUSINESS_CATEGORIES[index];
@@ -87,7 +87,7 @@ export default function SponsorsAdmin() {
   const remove = async (id) => { await SponsorService.delete(id); load(); };
 
   const reorderSponsors = async (targetSlotIndex, sponsorId = draggedSponsorId) => {
-    if (!sponsorId || savingOrder) return;
+    if (!sponsorId || savingOrder || searchTerm) return;
 
     const fromIndex = currentBusinesses.findIndex((sponsor) => sponsor.id === sponsorId);
     if (fromIndex < 0) return;
@@ -164,6 +164,7 @@ export default function SponsorsAdmin() {
                 <Text color={muted} fontSize="sm">Seleccioná una categoría y arrastrá sus cards para definir la prioridad de aparición pública.</Text>
               </Box>
               {savingOrder && <Badge colorScheme="brand">Guardando orden...</Badge>}
+              {searchTerm && <Badge colorScheme="orange">Limpiá la búsqueda para reordenar</Badge>}
             </Flex>
 
             <TabList overflowX="auto" pb="4px" gap="8px">
@@ -212,6 +213,7 @@ export default function SponsorsAdmin() {
         </Stack>
       </Card>
 
+      {searchTerm && sponsorSlots.length === 0 && <Card p="24px" mb="18px" textAlign="center"><Text color={muted}>No hay patrocinadores que coincidan con la búsqueda en esta categoría.</Text></Card>}
       <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={{ base: '12px', md: '18px' }}>
         {sponsorSlots.map(({ sponsor: s, slot }, index) => (
           <Card
@@ -219,17 +221,17 @@ export default function SponsorsAdmin() {
             p={{ base: '14px', md: '18px' }}
             minW="0"
             minH={{ base: '230px', md: '260px' }}
-            draggable={Boolean(s)}
-            cursor={s ? 'grab' : 'default'}
+            draggable={Boolean(s) && !searchTerm}
+            cursor={s && !searchTerm ? 'grab' : 'default'}
             border="1px solid"
             borderColor={s && draggedSponsorId === s.id ? 'brand.300' : draggedSponsorId && dropTargetIndex === index ? 'brand.500' : s ? 'transparent' : 'brand.200'}
             borderStyle={s ? 'solid' : 'dashed'}
             bg={s && draggedSponsorId === s.id ? dropBg : undefined}
-            onDragStart={(event) => startDrag(event, s?.id)}
+            onDragStart={(event) => { if (!searchTerm) startDrag(event, s?.id); }}
             onDragEnd={finishDrag}
-            onDragEnter={(event) => { event.preventDefault(); if (draggedSponsorId) setDropTargetIndex(index); }}
-            onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }}
-            onDrop={(event) => { event.preventDefault(); const sponsorId = draggedSponsorId || event.dataTransfer.getData('text/plain'); if (sponsorId) setDraggedSponsorId(sponsorId); reorderSponsors(index, sponsorId); }}
+            onDragEnter={(event) => { if (!searchTerm) { event.preventDefault(); if (draggedSponsorId) setDropTargetIndex(index); } }}
+            onDragOver={(event) => { if (!searchTerm) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; } }}
+            onDrop={(event) => { if (!searchTerm) { event.preventDefault(); const sponsorId = draggedSponsorId || event.dataTransfer.getData('text/plain'); if (sponsorId) setDraggedSponsorId(sponsorId); reorderSponsors(index, sponsorId); } }}
           >
             {s ? (
               <Stack spacing="12px" h="100%">
