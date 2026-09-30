@@ -23,7 +23,7 @@ describe('SearchBar', () => {
 
     fireEvent.change(screen.getByRole('textbox', { name: 'Buscar clientes' }), { target: { value: 'Ana' } });
 
-    expect(screen.getByText('Ana')).toBeInTheDocument();
+    expect(screen.getByText('Ana')).toBeTruthy();
     expect(history.location.pathname).toBe('/admin/client/index');
     expect(history.length).toBe(1);
   });
@@ -38,6 +38,6 @@ describe('SearchBar', () => {
       </ChakraProvider>
     );
 
-    expect(screen.getByRole('textbox', { name: 'Búsqueda no disponible' })).toBeDisabled();
+    expect((screen.getByRole('textbox', { name: 'Búsqueda no disponible' }) as HTMLInputElement).disabled).toBe(true);
   });
 });

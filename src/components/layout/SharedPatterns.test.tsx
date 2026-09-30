@@ -9,9 +9,9 @@ describe('shared page patterns', () => {
   it('renders a consistent page heading and action', () => {
     render(<ChakraProvider><PageHeader title="Clientes" description="Administrá tus clientes." action={<Button>Nuevo cliente</Button>} /></ChakraProvider>);
 
-    expect(screen.getByRole('heading', { name: 'Clientes' })).toBeInTheDocument();
-    expect(screen.getByText('Administrá tus clientes.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Nuevo cliente' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Clientes' })).toBeTruthy();
+    expect(screen.getByText('Administrá tus clientes.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Nuevo cliente' })).toBeTruthy();
   });
 
   it('keeps form close and empty-state actions accessible', () => {
