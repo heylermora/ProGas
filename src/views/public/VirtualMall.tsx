@@ -118,7 +118,7 @@ const videoSource = (value = '') => {
   return source;
 };
 const isDirectVideo = (value = '') => value.startsWith('data:video') || /\.(mp4|webm|ogg)(?:\?|$)/i.test(value);
-const businessPosition = (index, total) => {
+const businessPosition = (index: number, total: number): number[] => {
   const ring = index < 8 ? 0 : 1;
   const ringIndex = ring ? index - 8 : index;
   const ringTotal = ring ? Math.max(1, total - 8) : Math.min(total, 8);
@@ -143,7 +143,7 @@ export default function VirtualMall() {
   const [simpleView, setSimpleView] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches));
   const [simpleCategory, setSimpleCategory] = useState('');
   const [simpleSearch, setSimpleSearch] = useState('');
-  const travelTimer = useRef();
+  const travelTimer = useRef<ReturnType<typeof setTimeout>>();
   const panelBg = useColorModeValue('white', 'navy.800');
 
   const loadBusinesses = useCallback(() => {
@@ -189,7 +189,7 @@ export default function VirtualMall() {
   const categoryIcon = categoryEmoji[selectedCategoryIndex] || '🪐';
   const contactLinks = (selectedBusiness?.links || []).filter(Boolean).slice(0, 4);
 
-  const enterCategory = (category) => {
+  const enterCategory = (category: string) => {
     setSelectedCategory(category);
     setSelectedBusinessId('');
     setArrivedBusinessId('');
@@ -203,14 +203,14 @@ export default function VirtualMall() {
     setContactsOpen(false);
     setBusinessSector(0);
   };
-  const selectBusiness = (id) => {
+  const selectBusiness = (id: string) => {
     clearTimeout(travelTimer.current);
     setSelectedBusinessId(id);
     setArrivedBusinessId('');
     setContactsOpen(false);
     travelTimer.current = setTimeout(() => setArrivedBusinessId(id), 480);
   };
-  const changeBusinessSector = (sector) => {
+  const changeBusinessSector = (sector: number) => {
     clearTimeout(travelTimer.current);
     setBusinessSector((sector + businessSectorCount) % businessSectorCount);
     setSelectedBusinessId('');
@@ -334,10 +334,10 @@ function CategoryMap({ categories, businesses, mobileSector, onSectorChange, onS
 
   return (
     <>
-      <Box display={{ base: 'block', md: 'none' }} position="absolute" left="8px" top="46%" zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out infinite`} _motionReduce={{ animation: 'none' }}>
+      <Box display={{ base: 'block', md: 'none' }} position="absolute" left="8px" top="46%" zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out infinite`}>
         <IconButton aria-label="Ver sector anterior" icon={<Icon as={MdChevronLeft} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="cyan.200" border="1px solid" borderColor="cyan.300" boxShadow="0 0 0 5px rgba(34,211,238,.10), 0 12px 25px rgba(0,0,0,.35)" backdropFilter="blur(10px)" onClick={previousSector} _hover={{ bg: 'rgba(14,116,144,.92)', transform: 'scale(1.06)' }} _active={{ transform: 'scale(.94)' }} />
       </Box>
-      <Box display={{ base: 'block', md: 'none' }} position="absolute" right="8px" top="46%" zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out .35s infinite`} _motionReduce={{ animation: 'none' }}>
+      <Box display={{ base: 'block', md: 'none' }} position="absolute" right="8px" top="46%" zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out .35s infinite`}>
         <IconButton aria-label="Ver sector siguiente" icon={<Icon as={MdChevronRight} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="cyan.200" border="1px solid" borderColor="cyan.300" boxShadow="0 0 0 5px rgba(34,211,238,.10), 0 12px 25px rgba(0,0,0,.35)" backdropFilter="blur(10px)" onClick={nextSector} _hover={{ bg: 'rgba(14,116,144,.92)', transform: 'scale(1.06)' }} _active={{ transform: 'scale(.94)' }} />
       </Box>
       <Stack display={{ base: 'flex', md: 'none' }} position="absolute" left="50%" bottom="15px" transform="translateX(-50%)" zIndex={6} spacing="0" align="center" minW="92px" px="13px" py="6px" borderRadius="full" bg="rgba(8,14,38,.78)" border="1px solid" borderColor="whiteAlpha.300" backdropFilter="blur(10px)">
@@ -373,10 +373,10 @@ function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, sele
       </Button>
       {sectorCount > 1 && (
         <>
-          <Box position="absolute" left={{ base: '10px', md: '18px' }} top={{ base: '12px', md: '18px' }} zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out infinite`} _motionReduce={{ animation: 'none' }}>
+          <Box position="absolute" left={{ base: '10px', md: '18px' }} top={{ base: '12px', md: '18px' }} zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out infinite`}>
             <IconButton aria-label="Ver ruta anterior de negocios" icon={<Icon as={MdChevronLeft} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="yellow.200" border="1px solid" borderColor="yellow.300" boxShadow="0 0 0 5px rgba(250,204,21,.10), 0 12px 25px rgba(0,0,0,.35)" onClick={() => onSectorChange(sector - 1)} />
           </Box>
-          <Box position="absolute" right={{ base: '10px', md: '18px' }} top={{ base: '12px', md: '18px' }} zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out .35s infinite`} _motionReduce={{ animation: 'none' }}>
+          <Box position="absolute" right={{ base: '10px', md: '18px' }} top={{ base: '12px', md: '18px' }} zIndex={6} animation={`${navigationFloat} 1.8s ease-in-out .35s infinite`}>
             <IconButton aria-label="Ver ruta siguiente de negocios" icon={<Icon as={MdChevronRight} boxSize="28px" />} w="48px" h="48px" borderRadius="full" bg="rgba(8,14,38,.88)" color="yellow.200" border="1px solid" borderColor="yellow.300" boxShadow="0 0 0 5px rgba(250,204,21,.10), 0 12px 25px rgba(0,0,0,.35)" onClick={() => onSectorChange(sector + 1)} />
           </Box>
           <Badge position="absolute" left="50%" bottom="15px" transform="translateX(-50%)" zIndex={6} px="12px" py="6px" borderRadius="full" bg="rgba(8,14,38,.82)" color="yellow.200" border="1px solid" borderColor="whiteAlpha.300">RUTA {sector + 1} DE {sectorCount} · {totalBusinesses} NEGOCIOS</Badge>
@@ -443,12 +443,12 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
           )}
           <Flex gap="10px" wrap="wrap" align="center">
             {business.videoUrl && (
-              <Box animation={`${actionInvite} 1.8s ease-in-out infinite`} _motionReduce={{ animation: 'none' }}>
+              <Box animation={`${actionInvite} 1.8s ease-in-out infinite`}>
                 <IconButton aria-label={`Abrir video de ${business.name || 'negocio'}`} icon={<Icon as={MdPlayArrow} boxSize="24px" />} w="48px" h="48px" minW="48px" borderRadius="full" {...goldenActionStyles} onClick={onVideo} />
               </Box>
             )}
             {contactLinks.length > 0 && (
-              <Box animation={`${actionInvite} 1.8s ease-in-out .3s infinite`} _motionReduce={{ animation: 'none' }}>
+              <Box animation={`${actionInvite} 1.8s ease-in-out .3s infinite`}>
                 <IconButton aria-label={`${contactsOpen ? 'Ocultar' : 'Abrir'} contactos de ${business.name || 'negocio'}`} aria-expanded={contactsOpen} icon={<Icon as={MdLink} boxSize="21px" />} w="48px" h="48px" minW="48px" borderRadius="full" {...goldenActionStyles} boxShadow={contactsOpen ? '0 0 0 5px rgba(250,204,21,.24), 0 14px 26px rgba(184,134,11,.42)' : goldenActionStyles.boxShadow} onClick={onContacts} />
               </Box>
             )}

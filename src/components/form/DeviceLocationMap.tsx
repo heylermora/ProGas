@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, AlertIcon, Box, Button, FormHelperText, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react';
 import { MdMyLocation } from 'react-icons/md';
-import { coordinatesToText, mapsEmbedUrl } from 'utils/location';
+import { coordinatesToText, mapsEmbedUrl, mapsSearchUrl } from 'utils/location';
 
 type DeviceLocationMapProps = {
   coordinates?: string;
@@ -40,7 +40,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
   return (
     <Stack spacing="10px">
       <SimpleGrid columns={{ base: 1, md: 1 }} spacing={{ base: '6px', md: '10px' }}>
-        <Button size={{ base: 'sm', md: 'md' }} px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
+        <Button size="md" px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
           <Text as="span">Usar mi ubicación</Text>        </Button>
       </SimpleGrid>
       <FormHelperText>Solo necesitás aceptar el permiso de ubicación.</FormHelperText>

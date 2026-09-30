@@ -3,7 +3,9 @@ import { Box, Button, Flex, Icon, IconButton, Text, useColorModeValue } from '@c
 import { Link as RLink, useHistory, useLocation } from 'react-router-dom';
 import { MdArrowBack, MdHome, MdReceiptLong } from 'react-icons/md';
 
-const backDestination = (pathname, state) => {
+type NavigationState = { from?: string; fromLabel?: string } | null | undefined;
+
+const backDestination = (pathname: string, state: NavigationState) => {
   if (pathname === '/customer/data') return { to: '/', label: 'Volver al inicio' };
   if (pathname === '/customer/info') return { to: '/customer/data', label: 'Volver a verificación' };
   if (pathname === '/customer/products') return { to: '/customer/info', label: 'Volver al cliente' };
@@ -15,7 +17,7 @@ const backDestination = (pathname, state) => {
 export default function PublicHeader() {
   const history = useHistory();
   const location = useLocation();
-  const navigation = backDestination(location.pathname, location.state);
+  const navigation = backDestination(location.pathname, location.state as NavigationState);
   const bg = useColorModeValue('rgba(255,255,255,.92)', 'rgba(10,18,45,.92)');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const muted = useColorModeValue('gray.600', 'gray.300');

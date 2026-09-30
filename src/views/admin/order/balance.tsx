@@ -90,8 +90,8 @@ export default function Balance() {
     if (typeof order?.totalAmount === 'number') return order.totalAmount;
     if (typeof order?.totalToPay === 'number') return order.totalToPay;
     return order?.items
-      ? order.items.reduce(
-          (sum, it) => sum + (it.price || 0) * (it.quantity || 0),
+        ? order.items.reduce(
+          (sum: number, it: { price?: number; quantity?: number }) => sum + (it.price || 0) * (it.quantity || 0),
           0
         )
       : 0;

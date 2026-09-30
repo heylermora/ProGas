@@ -25,19 +25,21 @@ import { useHistory, useParams } from 'react-router-dom';
 import { MdArrowBack, MdInfoOutline, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
 import SponsorService from 'services/SponsorService';
-import { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import useCategories from 'hooks/useCategories';
 
-const empty = { name: '', category: DEFAULT_BUSINESS_CATEGORY, active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
+type SponsorFormState = Omit<SponsorItem, 'id'>;
+type MessageState = { status: 'success' | 'warning' | 'error'; text: string };
+const empty: SponsorFormState = { name: '', category: DEFAULT_BUSINESS_CATEGORY, active: true, order: 1, logoUrl: '', videoUrl: '', links: ['', '', '', ''], description: '' };
 const MAX_FIRESTORE_VIDEO_BYTES = 850 * 1024;
 
 export default function SponsorForm() {
   const { categories } = useCategories('sponsors');
-  const { id } = useParams();
+  const { id } = useParams<{ id?: string }>();
   const history = useHistory();
   const [sponsor, setSponsor] = useState(empty);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<MessageState | null>(null);
   const cardBg = useColorModeValue('white', 'navy.800');
   const muted = useColorModeValue('gray.500', 'gray.400');
   const sectionBg = useColorModeValue('gray.50', 'whiteAlpha.50');
@@ -45,10 +47,10 @@ export default function SponsorForm() {
 
   useEffect(() => { if (id) SponsorService.get(id).then((s) => setSponsor({ ...empty, ...s, links: [...(s.links || []), '', '', '', ''].slice(0, 4) })); }, [id]);
 
-  const set = (key, value) => setSponsor((prev) => ({ ...prev, [key]: value }));
-  const showMessage = (status, text) => setMessage({ status, text });
+  const set = <K extends keyof SponsorFormState>(key: K, value: SponsorFormState[K]) => setSponsor((prev) => ({ ...prev, [key]: value }));
+  const showMessage = (status: MessageState['status'], text: string) => setMessage({ status, text });
 
-  const readFile = (key, file) => {
+  const readFile = (key: 'logoUrl' | 'videoUrl', file?: File) => {
     if (!file) return;
 
     if (key === 'videoUrl' && file.size > MAX_FIRESTORE_VIDEO_BYTES) {
@@ -58,7 +60,7 @@ export default function SponsorForm() {
 
     const reader = new FileReader();
     reader.onload = () => {
-      set(key, reader.result);
+      set(key, String(reader.result || ''));
       showMessage('success', key === 'videoUrl' ? 'Video cargado para previsualización. Guardá para aplicarlo.' : 'Archivo cargado para previsualización.');
     };
     reader.onerror = () => showMessage('error', 'No se pudo leer el archivo. Intentá nuevamente o usá un link.');
@@ -137,7 +139,7 @@ export default function SponsorForm() {
             </FormControl>
             <FormControl>
               <FormLabel>Orden</FormLabel>
-              <Input type="number" min="1" value={sponsor.order} onChange={(e) => set('order', e.target.value)} />
+              <Input type="number" min="1" value={sponsor.order} onChange={(e) => set('order', Number(e.target.value))} />
               <FormHelperText>Define la posición del negocio dentro de su categoría.</FormHelperText>
             </FormControl>
             <FormControl display="flex" alignItems="center" gap="10px" pt={{ base: 0, md: '30px' }}>

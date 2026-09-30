@@ -103,7 +103,7 @@ const OrderService = {
                 ...newOrder,
                 requestId,
                 items: persistedItems,
-                totalAmount: persistedItems.reduce((total, item) => total + item.price * item.quantity, 0),
+                totalAmount: persistedItems.reduce<number>((total, item) => total + item.price * item.quantity, 0),
             });
         });
         return { id: orderRef.id };

@@ -49,7 +49,7 @@ export default function SponsorsAdmin() {
   useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
 
   const availableCategories = useMemo(() => Array.from(new Set([...categories, ...sponsors.map((sponsor) => sponsor.category).filter(Boolean)])), [categories, sponsors]);
-  const sponsorsByCategory = useMemo(() => availableCategories.reduce((acc, type) => ({
+  const sponsorsByCategory = useMemo(() => availableCategories.reduce<Record<string, SponsorItem[]>>((acc, type) => ({
     ...acc,
     [type]: sponsors.filter((sponsor) => sponsor.category === type),
   }), {}), [availableCategories, sponsors]);
@@ -57,7 +57,7 @@ export default function SponsorsAdmin() {
   const searchTerm = query.trim().toLocaleLowerCase('es');
   const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
     .sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-  const matchesSearch = (sponsor) => [sponsor.name, sponsor.description, sponsor.category]
+  const matchesSearch = (sponsor: SponsorItem) => [sponsor.name, sponsor.description, sponsor.category]
     .some((value) => String(value || '').toLocaleLowerCase('es').includes(searchTerm));
   const visibleBusinesses = searchTerm
     ? sponsors.filter(matchesSearch).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order)
@@ -65,7 +65,7 @@ export default function SponsorsAdmin() {
   const activeCount = sponsors.filter((sponsor) => sponsor.active !== false).length;
   const categoriesInUse = availableCategories.filter((category) => sponsorsByCategory[category]?.length).length;
 
-  const toggleActive = async (sponsor) => {
+  const toggleActive = async (sponsor: SponsorItem) => {
     const next = { ...sponsor, active: !sponsor.active };
     setSponsors((items) => items.map((item) => item.id === sponsor.id ? next : item));
     try { await SponsorService.edit(sponsor.id, next); }
@@ -75,7 +75,7 @@ export default function SponsorsAdmin() {
     }
   };
 
-  const requestDelete = (sponsor) => { setPendingDelete(sponsor); onOpen(); };
+  const requestDelete = (sponsor: SponsorItem) => { setPendingDelete(sponsor); onOpen(); };
   const confirmDelete = async () => {
     if (!pendingDelete) return;
     try {
@@ -87,7 +87,7 @@ export default function SponsorsAdmin() {
     } catch { toast({ status: 'error', title: 'No se pudo eliminar el patrocinador' }); }
   };
 
-  const reorderSponsors = async (targetIndex, sponsorId = draggedSponsorId) => {
+  const reorderSponsors = async (targetIndex: number, sponsorId = draggedSponsorId) => {
     if (!sponsorId || savingOrder || searchTerm) return;
     const fromIndex = currentBusinesses.findIndex((sponsor) => sponsor.id === sponsorId);
     if (fromIndex < 0 || fromIndex === targetIndex) return;

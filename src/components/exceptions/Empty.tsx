@@ -1,7 +1,7 @@
 import { Box, Image, Text } from '@chakra-ui/react';
 import illustration from "assets/img/exceptions/empty.svg";
 
-const Empty = () => {
+const Empty = ({ message = '¡Sin datos disponibles!' }: { message?: string }) => {
     return (
         <Box textAlign="center">
             <Image
@@ -17,7 +17,7 @@ const Empty = () => {
                 fontSize="24px"
                 fontWeight="500"
             >
-                ¡Sin datos disponibles!
+                {message}
             </Text>
 
         </Box>

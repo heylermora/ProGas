@@ -485,7 +485,7 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
             <Text fontSize={{ base: 'sm', md: 'sm' }} color={muted} fontWeight="900" letterSpacing=".04em" textTransform="uppercase">{title}</Text>
           </Box>
         )}
-        {previewSponsor ? renderSponsorCard(visibleSponsors[0] || previewSponsor) : (
+        {previewSponsor ? renderSponsorCard(visibleSponsors[0] || toDisplaySponsor(previewSponsor)) : (
           <SimpleGrid columns={columns} spacing={{ base: '12px', md: '10px' }}>
             {sponsorsWithAvailableSlots.map(renderSponsorCard)}
           </SimpleGrid>

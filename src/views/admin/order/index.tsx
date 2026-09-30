@@ -19,7 +19,7 @@ import ItemCard from 'components/card/ItemCard';
 import Empty from 'components/exceptions/Empty';
 import Error from 'components/exceptions/Error';
 import orderService from 'services/OrderService';
-import { OrderItem } from 'interfaces/OrderItem';
+import { OrderItem, OrderPayment } from 'interfaces/OrderItem';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
 import { getPaymentMethods, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
 import { usePageSearch } from 'contexts/PageSearchContext';
@@ -92,7 +92,7 @@ export default function Index() {
       && (!filters.date || date === filters.date)
       && (!clientTerm || `${order.client} ${order.clientId || ''}`.toLocaleLowerCase('es').includes(clientTerm))
       && (!filters.product || (order.items || []).some(item => item.gasType === filters.product))
-      && (!filters.payment || getPaymentMethods(order).includes(filters.payment));
+      && (!filters.payment || getPaymentMethods(order).includes(filters.payment as OrderPayment['method']));
   }), [orders, activeStatus, filters, search]);
 
   const statusCounts = useMemo(() => orders.reduce<Record<string, number>>((counts, order) => {

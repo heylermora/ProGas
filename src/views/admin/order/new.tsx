@@ -9,7 +9,7 @@ import orderService from "services/OrderService";
 import productService from "services/ProductService";
 
 import { OrderItem, ProductItem } from "interfaces/OrderItem";
-import type { Product } from "interfaces/Product";
+import type { Product } from "interfaces/ProductItem";
 import FormField from "interfaces/FormField";
 import Error from "components/exceptions/Error";
 import { handleNationalIdLookup } from "utils/nationalId";
