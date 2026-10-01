@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, AlertIcon, Box, Button, FormHelperText, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Button, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react';
 import { MdMyLocation } from 'react-icons/md';
 import { coordinatesToText, isCostaRicaCoordinate, mapsEmbedUrl, mapsSearchUrl } from 'utils/location';
 import GeocodingService from 'services/GeocodingService';
@@ -65,7 +65,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
         <Button size="md" px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
           <Text as="span">Usar mi ubicación</Text>        </Button>
       </SimpleGrid>
-      <FormHelperText>Solo necesitás aceptar el permiso de ubicación.</FormHelperText>
+      <Text fontSize="sm" color="gray.500">Solo necesitás aceptar el permiso de ubicación.</Text>
       {message && <Alert status={coordinates ? 'info' : 'warning'} borderRadius="12px"><AlertIcon />{message}</Alert>}
       {embedUrl && (
         <Box border="1px solid" borderColor="gray.200" borderRadius="16px" overflow="hidden" bg="gray.50">
