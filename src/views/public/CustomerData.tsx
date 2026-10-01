@@ -6,6 +6,7 @@ import { fetchClientNameByCedula } from 'services/CedulaService';
 import { PublicCard, PublicPage } from './PublicPage';
 import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
+import Form from 'components/form/Form';
 import { saveCustomerDraft } from './customerDraft';
 import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
 
@@ -91,6 +92,7 @@ export default function CustomerData() {
     >
       <Box h={{ base: '8px', md: '12px' }} />
       <PublicCard>
+        <Form onFormSubmit={(event) => { event.preventDefault(); handleContinue(); }}>
         <Stack spacing="18px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
           <Stack spacing="4px">
@@ -111,6 +113,7 @@ export default function CustomerData() {
           </SimpleGrid>
           <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel={isChecking ? 'Verificando…' : 'Verificar y continuar'} onBack={() => history.replace('/')} onContinue={handleContinue} isContinueLoading={isChecking} />
         </Stack>
+        </Form>
       </PublicCard>
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />

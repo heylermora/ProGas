@@ -6,6 +6,7 @@ import ActiveSwitch from './form/ActiveSwitch';
 import FormActions from './form/FormActions';
 import FormField from './form/FormField';
 import BackButton from './button/BackButton';
+import Form from './form/Form';
 
 const renderUi = (ui: React.ReactNode) => render(<ChakraProvider>{ui}</ChakraProvider>);
 
@@ -38,5 +39,12 @@ describe('shared admin components', () => {
     renderUi(<BackButton onClick={goBack}>Volver al inventario</BackButton>);
     fireEvent.click(screen.getByRole('button', { name: 'Volver al inventario' }));
     expect(goBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports custom forms through the shared semantic container', () => {
+    const submit = jest.fn((event) => event.preventDefault());
+    renderUi(<Form onFormSubmit={submit}><button type="submit">Enviar</button></Form>);
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
+    expect(submit).toHaveBeenCalledTimes(1);
   });
 });

@@ -46,6 +46,7 @@ import { loginUser, requestPasswordReset } from "services/AuthService";
 import illustration from "assets/img/auth/auth.jpg";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
+import Form from 'components/form/Form';
 
 function SignIn() {
   // Chakra color mode
@@ -100,6 +101,7 @@ function SignIn() {
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
       <>
+        <Form onFormSubmit={(event) => { event.preventDefault(); handleSignIn(); }}>
           <Flex
           maxW={maxWPrimary}
           w='100%'
@@ -206,6 +208,7 @@ function SignIn() {
               </Flex>
               {feedback && <Text role="status" color={textColorDetails} fontSize="sm" mb="12px">{feedback}</Text>}
               <Button
+                type="submit"
                 fontSize='sm'
                 variant='brand'
                 fontWeight='500'
@@ -213,8 +216,7 @@ function SignIn() {
                 h='50'
                 mb='24px'
                 isLoading={isSubmitting}
-                loadingText="Ingresando"
-                onClick={handleSignIn}>
+                loadingText="Ingresando">
                 Iniciar Sesión
               </Button>
             </FormControl>
@@ -237,7 +239,8 @@ function SignIn() {
               </Text>
             </Flex>
           </Flex>
-        </Flex></>
+        </Flex>
+        </Form></>
     </DefaultAuth>
   );
 }

@@ -17,6 +17,7 @@ import { mapsSearchUrl } from 'utils/location';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import { AddressItem } from 'interfaces/AddressItem';
 import { addOrMergeOrderItem } from 'utils/order';
+import Form from 'components/form/Form';
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 12);
 
@@ -174,6 +175,7 @@ export default function Products() {
       <Box h={{ base: '8px', md: '12px' }} />
       {(isCatalogLoading || catalogError) ? <AsyncContent isLoading={isCatalogLoading} error={catalogError} loadingLabel="Cargando productos" /> :
       <PublicCard>
+        <Form onFormSubmit={(event) => { event.preventDefault(); submitOrder(); }}>
         <Stack spacing="16px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
           <Box p={{ base: '12px', md: '16px' }} border="1px solid" borderColor="gray.200" borderRadius="18px" bg="gray.50">
@@ -241,6 +243,7 @@ export default function Products() {
           <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
           <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel={isSubmitting ? 'Confirmando…' : 'Confirmar pedido'} isFinal onBack={() => history.replace('/customer/info')} onContinue={submitOrder} isContinueLoading={isSubmitting} />
         </Stack>
+        </Form>
       </PublicCard>
       }
       <MallPreview compact />

@@ -46,6 +46,7 @@ import { registerUser } from "services/AuthService";
 import illustration from "assets/img/auth/auth.jpg";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
+import Form from 'components/form/Form';
 
 function SignUp() {
   // Chakra color mode
@@ -87,7 +88,8 @@ function SignUp() {
 
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
-      <>
+        <>
+          <Form onFormSubmit={(event) => { event.preventDefault(); handleSignUp(); }}>
           <Flex
             maxW={maxWPrimary}
             w='100%'
@@ -185,6 +187,7 @@ function SignUp() {
                 </InputGroup>
                 {feedback && <Text role="status" color={textColorDetails} fontSize="sm" mb="12px">{feedback}</Text>}
                 <Button
+                  type="submit"
                   fontSize='sm'
                   variant='brand'
                   fontWeight='500'
@@ -193,7 +196,6 @@ function SignUp() {
                   mb='24px'
                   isLoading={isSubmitting}
                   loadingText="Creando cuenta"
-                  onClick={handleSignUp}
                 >
                   Crear Cuenta
                 </Button>
@@ -219,6 +221,7 @@ function SignUp() {
               </Flex>
             </Flex>
           </Flex>
+          </Form>
         </>
     </DefaultAuth>
   );

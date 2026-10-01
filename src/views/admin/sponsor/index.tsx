@@ -18,6 +18,7 @@ import { usePageSearch } from 'contexts/PageSearchContext';
 import useCategories from 'hooks/useCategories';
 import CategoryManager from 'components/category/CategoryManager';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import Form from 'components/form/Form';
 
 export default function SponsorsAdmin() {
   const { query } = usePageSearch();
@@ -167,7 +168,7 @@ export default function SponsorsAdmin() {
 
       <Accordion allowToggle>
         <AccordionItem border="0">
-          <Card overflow="hidden"><AccordionButton px={{ base: '14px', md: '18px' }} py="14px"><Box flex="1" textAlign="left"><Text fontWeight="800">Configuración del espacio disponible</Text><Text color={muted} fontSize="sm">Mensaje que se muestra cuando todavía no hay un patrocinador.</Text></Box><AccordionIcon /></AccordionButton><AccordionPanel px={{ base: '14px', md: '18px' }} pb="18px"><SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px"><FormControl><FormLabel>Título</FormLabel><Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} /></FormControl><FormControl><FormLabel>Descripción</FormLabel><Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} /></FormControl></SimpleGrid><Button mt="14px" colorScheme="brand" onClick={saveAvailableCopy} isLoading={savingAvailableCopy}>Guardar configuración</Button></AccordionPanel></Card>
+          <Card overflow="hidden"><AccordionButton px={{ base: '14px', md: '18px' }} py="14px"><Box flex="1" textAlign="left"><Text fontWeight="800">Configuración del espacio disponible</Text><Text color={muted} fontSize="sm">Mensaje que se muestra cuando todavía no hay un patrocinador.</Text></Box><AccordionIcon /></AccordionButton><AccordionPanel px={{ base: '14px', md: '18px' }} pb="18px"><Form onFormSubmit={(event) => { event.preventDefault(); saveAvailableCopy(); }}><SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px"><FormControl><FormLabel>Título</FormLabel><Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} /></FormControl><FormControl><FormLabel>Descripción</FormLabel><Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} /></FormControl></SimpleGrid><Button type="submit" mt="14px" colorScheme="brand" isLoading={savingAvailableCopy}>Guardar configuración</Button></Form></AccordionPanel></Card>
         </AccordionItem>
       </Accordion>
 

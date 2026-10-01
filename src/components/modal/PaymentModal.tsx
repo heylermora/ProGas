@@ -23,6 +23,7 @@ import {
   Box,
 } from '@chakra-ui/react';
 import { MdAdd, MdDelete } from 'react-icons/md';
+import Form from 'components/form/Form';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
 
@@ -160,6 +161,7 @@ function PaymentModal(props: {
     <Modal isOpen={isOpen} onClose={handleClose} size="xl">
       <ModalOverlay />
       <ModalContent borderRadius="20px" bg={cardBg} borderWidth="1px" borderColor={border}>
+        <Form onFormSubmit={(event) => { event.preventDefault(); handleSave(); }}>
         <ModalHeader>
           <Text color={textColor} fontSize="22px" fontWeight="700" noOfLines={1}>
             {title}
@@ -202,7 +204,7 @@ function PaymentModal(props: {
               <Text fontWeight="700" color={textColor}>
                 Métodos de pago
               </Text>
-              <Button leftIcon={<MdAdd />} size="sm" borderRadius="full" onClick={addRow}>
+              <Button type="button" leftIcon={<MdAdd />} size="sm" borderRadius="full" onClick={addRow}>
                 Agregar método
               </Button>
             </Flex>
@@ -281,6 +283,7 @@ function PaymentModal(props: {
                     </FormControl>
 
                     <IconButton
+                      type="button"
                       aria-label="Eliminar método"
                       icon={<MdDelete />}
                       variant="ghost"
@@ -303,12 +306,12 @@ function PaymentModal(props: {
             </FormControl>
 
             <Flex justify="flex-end" gap={3} pt={2}>
-              <Button variant="ghost" onClick={handleClose} isDisabled={isSaving}>
+              <Button type="button" variant="ghost" onClick={handleClose} isDisabled={isSaving}>
                 Cancelar
               </Button>
               <Button
+                type="submit"
                 colorScheme="brand"
-                onClick={handleSave}
                 isLoading={isSaving}
                 loadingText="Guardando..."
               >
@@ -317,6 +320,7 @@ function PaymentModal(props: {
             </Flex>
           </VStack>
         </ModalBody>
+        </Form>
       </ModalContent>
     </Modal>
   );

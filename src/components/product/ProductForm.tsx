@@ -14,6 +14,7 @@ import useCategories from 'hooks/useCategories';
 import FormPageHeader from 'components/layout/FormPageHeader';
 import StatusBadge from 'components/dataDisplay/StatusBadge';
 import ActiveSwitch from 'components/form/ActiveSwitch';
+import Form from 'components/form/Form';
 
 type ProductDraft = Omit<Product, 'id'>;
 interface Props { product?: Product; isLoading?: boolean; }
@@ -65,7 +66,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   };
 
   return (
-    <Box pt={{ base: '120px', md: '78px' }} maxW="1080px" w="100%" mx="auto" pb="48px" px={{ base: 1, md: 3 }}>
+    <Form pt={{ base: '120px', md: '78px' }} maxW="1080px" mx="auto" pb="48px" px={{ base: 1, md: 3 }} onFormSubmit={(event) => { event.preventDefault(); save(); }}>
       <FormPageHeader title={product ? values.description || 'Editar producto' : 'Nuevo producto'} description={product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'} onBack={goBack} backLabel="Volver al inventario" status={<StatusBadge active={values.active} activeLabel="Producto activo" inactiveLabel="Producto inactivo" />} />
 
       <SimpleGrid columns={{ base: 1, xl: 3 }} spacing="20px" alignItems="start">
@@ -144,9 +145,9 @@ export default function ProductForm({ product, isLoading = false }: Props) {
 
       <Flex mt="24px" p={{ base: 3, md: 4 }} bg={actionBg} borderWidth="1px" borderColor={border} borderRadius="2xl" boxShadow="lg" position="sticky" bottom="12px" zIndex={5} justify="space-between" align={{ base: 'stretch', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap="10px" backdropFilter="blur(12px)">
         <Text color={muted} fontSize="sm">{invalid ? 'Revisá los campos obligatorios antes de guardar.' : 'Todo listo para guardar los cambios.'}</Text>
-        <HStack justify={{ base: 'stretch', sm: 'flex-end' }}><Button flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={goBack} isDisabled={saving} whiteSpace="nowrap">Cancelar</Button><Button flex={{ base: 1, sm: 'initial' }} leftIcon={<MdCheck />} colorScheme="brand" size="lg" px={{ base: '18px', md: '28px' }} isLoading={saving || isLoading} loadingText="Guardando" onClick={save} whiteSpace="nowrap">{product ? 'Guardar cambios' : 'Crear producto'}</Button></HStack>
+        <HStack justify={{ base: 'stretch', sm: 'flex-end' }}><Button type="button" flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={goBack} isDisabled={saving} whiteSpace="nowrap">Cancelar</Button><Button type="submit" flex={{ base: 1, sm: 'initial' }} leftIcon={<MdCheck />} colorScheme="brand" size="lg" px={{ base: '18px', md: '28px' }} isLoading={saving || isLoading} loadingText="Guardando" whiteSpace="nowrap">{product ? 'Guardar cambios' : 'Crear producto'}</Button></HStack>
       </Flex>
-    </Box>
+    </Form>
   );
 }
 

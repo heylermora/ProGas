@@ -9,6 +9,7 @@ import { AddressItem, CustomerAddressItem } from 'interfaces/AddressItem';
 import { PublicCard, PublicPage } from './PublicPage';
 import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
+import Form from 'components/form/Form';
 import { CustomerDraftAddress, getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import { mapsSearchUrl } from 'utils/location';
 
@@ -121,7 +122,7 @@ export default function CustomerInfo() {
   return (
     <PublicPage title="Información del cliente" description="Seleccioná la dirección de entrega y, si querés, agregá el punto GPS exacto para el repartidor." maxW="1000px">
       <Box h={{ base: '20px', md: '28px' }} />
-      <PublicCard><Stack spacing="18px">
+      <PublicCard><Form onFormSubmit={(event) => { event.preventDefault(); saveAndContinue(); }}><Stack spacing="18px">
         {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
           <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input value={form.name} onChange={e => set('name', e.target.value)} /></FormControl>
@@ -149,7 +150,7 @@ export default function CustomerInfo() {
           }} /></Box>}
         </Box>
         <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel={isSaving ? 'Guardando…' : 'Continuar al pedido'} onBack={() => history.replace('/customer/data')} onContinue={saveAndContinue} isContinueLoading={isSaving} />
-      </Stack></PublicCard>
+      </Stack></Form></PublicCard>
       <MallPreview compact />
     </PublicPage>
   );

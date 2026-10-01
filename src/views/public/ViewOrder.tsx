@@ -23,6 +23,7 @@ import { PublicCard, PublicPage } from './PublicPage';
 import MallPreview from './MallPreview';
 import type { OrderItem } from 'interfaces/OrderItem';
 import { getPublicOrderStatus } from 'utils/order';
+import Form from 'components/form/Form';
 
 const statusColor = (status = '') => {
   if (status === 'Entregado' || status === 'Pagado') return 'green';
@@ -91,7 +92,7 @@ export default function ViewOrder() {
             <Heading fontSize={{ base: 'xl', md: '2xl' }}>Buscá tu pedido</Heading>
             <Text mt="5px" color="gray.500" fontSize="sm">El código tiene 12 caracteres y aparece al finalizar el pedido.</Text>
           </Box>
-          <Box as="form" onSubmit={handleSearch}>
+          <Form onFormSubmit={handleSearch}>
             <FormControl isRequired>
               <FormLabel>Código de pedido</FormLabel>
               <Flex gap="10px" direction={{ base: 'column', sm: 'row' }}>
@@ -100,7 +101,7 @@ export default function ViewOrder() {
               </Flex>
               <FormHelperText>No necesitás iniciar sesión.</FormHelperText>
             </FormControl>
-          </Box>
+          </Form>
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
           {!isLoading && hasSearched && !message && !orders.length && (
             <Alert status="info" borderRadius="12px"><AlertIcon />No encontramos pedidos con ese dato. Verificá que esté escrito correctamente.</Alert>

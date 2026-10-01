@@ -17,6 +17,7 @@ Un patrón debe convertirse en componente cuando aparece en más de una pantalla
 | Búsqueda contextual | `contexts/PageSearchContext` + `SearchBar` | Listados administrativos |
 | Barra de filtros | `components/dataDisplay/FilterPanel` | Pedidos y productos |
 | Campo de formulario accesible | `components/form/FormField` | Clientes y colaboradores |
+| Contenedor semántico de formulario | `components/form/Form` | Formularios administrativos, autenticación, compra pública y modales |
 | Acciones cancelar/guardar | `components/form/FormActions` | Clientes y colaboradores |
 | Estado de carga/error/vacío | `components/dataDisplay/AsyncContent` | Listados y detalles |
 | Tarjeta estadística | `components/dataDisplay/StatCard` | Inventario |
@@ -31,6 +32,7 @@ Los candidatos de prioridad alta y media ya cuentan con una implementación comp
 
 - `FilterPanel` conserva contenido flexible, acción contextual, contador y limpieza de filtros.
 - `FormField` admite cualquier control hijo, `isRequired`, deshabilitado, ayuda, error y asociación por `id`.
+- `Form` mantiene el modo declarativo basado en `fields` y también admite contenido personalizado mediante `children` y `onFormSubmit`; todos los flujos con captura de datos usan este contenedor sin trasladar su lógica de negocio.
 - `AsyncContent` resuelve carga, error, vacío y contenido.
 - `FormActions` unifica cancelar/guardar y sus estados de carga.
 - `StatCard` complementa las estadísticas existentes sin absorber lógica del dominio.

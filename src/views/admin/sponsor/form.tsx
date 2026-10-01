@@ -25,6 +25,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { MdInfoOutline, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
 import BackButton from 'components/button/BackButton';
+import Form from 'components/form/Form';
 import SponsorService from 'services/SponsorService';
 import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import useCategories from 'hooks/useCategories';
@@ -97,7 +98,7 @@ export default function SponsorForm() {
   };
 
   return (
-    <Box pt={{ base: '86px', md: '80px' }} px={{ base: '0px', md: '0px' }} pb="36px">
+    <Form pt={{ base: '86px', md: '80px' }} px={{ base: '0px', md: '0px' }} pb="36px" onFormSubmit={(event) => { event.preventDefault(); save(); }}>
       <Card p={{ base: '18px', md: '24px' }} mb="22px" bgGradient={headerBg}>
         <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="16px" direction={{ base: 'column', md: 'row' }}>
           <HStack spacing="14px" align="flex-start">
@@ -191,8 +192,8 @@ export default function SponsorForm() {
           </Stack>
 
           <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px" pt="4px">
-            <Button colorScheme="brand" size="lg" onClick={save} isLoading={saving} loadingText="Guardando" w={{ base: '100%', sm: 'auto' }}>Guardar patrocinador</Button>
-            <Button variant="outline" isDisabled={saving} onClick={() => history.push('/admin/sponsor/index')} w={{ base: '100%', sm: 'auto' }}>Cancelar</Button>
+            <Button type="submit" colorScheme="brand" size="lg" isLoading={saving} loadingText="Guardando" w={{ base: '100%', sm: 'auto' }}>Guardar patrocinador</Button>
+            <Button type="button" variant="outline" isDisabled={saving} onClick={() => history.push('/admin/sponsor/index')} w={{ base: '100%', sm: 'auto' }}>Cancelar</Button>
           </Stack>
           </Stack>
         </Card>
@@ -206,6 +207,6 @@ export default function SponsorForm() {
           </Stack>
         </Card>
       </SimpleGrid>
-    </Box>
+    </Form>
   );
 }

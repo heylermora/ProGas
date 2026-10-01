@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { FormEventHandler, ReactNode, useState, useEffect, useCallback } from 'react';
 import {
   Box,
+  BoxProps,
   Button,
   Center,
   Text,
@@ -17,15 +18,17 @@ import FieldInput from './FieldInput';
 import BackButton from 'components/button/BackButton';
 
 type Props = {
-  title: string;
+  title?: string;
   button?: string;
-  fields: FormField[];
+  fields?: FormField[];
   isDisabled?: boolean;
   back?: string;
-  onSubmit: (fieldValues: { [key: string]: any }) => void;
-};
+  onSubmit?: (fieldValues: { [key: string]: any }) => void;
+  children?: ReactNode;
+  onFormSubmit?: FormEventHandler<HTMLDivElement>;
+} & Omit<BoxProps, 'title' | 'onSubmit' | 'children'>;
 
-const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
+const Form = ({ title = '', button, fields = [], isDisabled, back, onSubmit, children, onFormSubmit, ...containerProps }: Props) => {
   const textColor = useColorModeValue('navy.700', 'white');
   const textColorSecondary = 'gray.400';
 
@@ -133,7 +136,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
       }
     });
 
-    onSubmit(payload);
+    onSubmit?.(payload);
   };
 
   const renderFields = () =>
@@ -148,8 +151,19 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
       />
     ));
 
+  if (children) {
+    return <Box
+      as="form"
+      me="auto"
+      w="100%"
+      maxW="100%"
+      onSubmit={onFormSubmit}
+      {...containerProps}
+    >{children}</Box>;
+  }
+
   return (
-    <Box me="auto" w="100%" maxW="100%">
+    <Box me="auto" w="100%" maxW="100%" {...containerProps}>
       <Heading color={textColor} fontSize={{ base: '26px', md: '34px' }} lineHeight="1.12" mb="10px" sx={{ letterSpacing: '-0.72px' }}>
         {title}
       </Heading>

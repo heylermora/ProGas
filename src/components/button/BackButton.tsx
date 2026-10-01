@@ -11,6 +11,7 @@ type BackButtonProps = Omit<ButtonProps, 'leftIcon'> & {
 /** Consistent navigation action for returning to the previous screen or list. */
 export default function BackButton({ children = 'Volver', to, variant = 'ghost', ...props }: BackButtonProps) {
   const content = <Button
+    type="button"
     leftIcon={<MdArrowBack />}
     variant={variant}
     px="2"
@@ -23,6 +24,7 @@ export default function BackButton({ children = 'Volver', to, variant = 'ghost',
 
   return <Button
     as={RouterLink}
+    type="button"
     to={to}
     leftIcon={<MdArrowBack />}
     variant={variant}
