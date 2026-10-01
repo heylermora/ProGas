@@ -17,6 +17,8 @@ const byName = (items: TerritoryOption[], name: string) => items.find(item => no
 export default function CustomerInfo() {
   const history = useHistory();
   const draft = getCustomerDraft();
+  // sessionStorage is user-controlled and can contain drafts written by older
+  // deployments. Treat the canonical address as untrusted at runtime.
   const saved = draft.address?.canonical;
   const [message, setMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -27,10 +29,10 @@ export default function CustomerInfo() {
   const [detectedLocalities, setDetectedLocalities] = useState<string[]>([]);
   const [form, setForm] = useState({
     name: draft.name || '', nickname: draft.nickname || '',
-    province: saved?.province.name || draft.address?.province || 'San José',
-    canton: saved?.canton.name || draft.address?.canton || 'Acosta',
-    district: saved?.district.name || draft.address?.district || 'San Ignacio',
-    locality: saved?.locality.name || draft.address?.neighborhood || 'Centro',
+    province: saved?.province?.name || draft.address?.province || 'San José',
+    canton: saved?.canton?.name || draft.address?.canton || 'Acosta',
+    district: saved?.district?.name || draft.address?.district || 'San Ignacio',
+    locality: saved?.locality?.name || draft.address?.neighborhood || 'Centro',
     details: saved?.exactAddress || draft.address?.details || '',
     additionalDirections: saved?.additionalDirections || '',
     coordinates: draft.address?.coordinates || '', locationUrl: draft.address?.locationUrl || '',

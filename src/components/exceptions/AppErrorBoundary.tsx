@@ -11,6 +11,10 @@ export default class AppErrorBoundary extends React.Component<Props, State> {
     return { hasError: true };
   }
 
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('Unhandled application render error', error, info);
+  }
+
   private reload = () => (this.props.onReload || (() => window.location.reload()))();
 
   render() {

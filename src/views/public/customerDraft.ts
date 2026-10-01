@@ -28,7 +28,10 @@ const KEY = 'gasMemoCustomerDraft';
 
 export const getCustomerDraft = (): CustomerDraft => {
   try {
-    return JSON.parse(window.sessionStorage.getItem(KEY) || '{}');
+    const parsed: unknown = JSON.parse(window.sessionStorage.getItem(KEY) || '{}');
+    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed as CustomerDraft
+      : {};
   } catch {
     return {};
   }

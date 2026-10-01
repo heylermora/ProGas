@@ -25,8 +25,8 @@ export default function DeliveryAddressField({ value, onChange }: { value?: Deli
   const [cantons, setCantons] = useState<TerritoryOption[]>([]);
   const [districts, setDistricts] = useState<TerritoryOption[]>([]);
   const [form, setForm] = useState({
-    province: canonical?.province.name || 'San José', canton: canonical?.canton.name || 'Acosta', district: canonical?.district.name || 'San Ignacio',
-    locality: canonical?.locality.name || '', exactAddress: canonical?.exactAddress || value?.address || '', additionalDirections: canonical?.additionalDirections || '',
+    province: canonical?.province?.name || 'San José', canton: canonical?.canton?.name || 'Acosta', district: canonical?.district?.name || 'San Ignacio',
+    locality: canonical?.locality?.name || '', exactAddress: canonical?.exactAddress || value?.address || '', additionalDirections: canonical?.additionalDirections || '',
     coordinates: value?.coordinates || '', locationUrl: value?.locationUrl || '', lat: value?.lat, lng: value?.lng, accuracyMeters: canonical?.position?.accuracyMeters,
     captureSource: canonical?.captureSource || ('manual' as const), geocoding: canonical?.geocoding,
   });
