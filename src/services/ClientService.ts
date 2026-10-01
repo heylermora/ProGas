@@ -1,6 +1,7 @@
 import { fetchAllData, addData, updateData, db } from 'apiConfig';
 import { doc, runTransaction } from 'firebase/firestore';
 import ClientItem from 'interfaces/ClientItem';
+import { CustomerAddressItem } from 'interfaces/AddressItem';
 
 const COLLECTION = 'Clients';
 
@@ -43,6 +44,34 @@ const ClientService = {
     return { id: clientId };
   },
   edit: async (id: string, client: ClientItem) => updateData(COLLECTION, id, client),
+  saveAddress: async (clientId: string, address: CustomerAddressItem) => {
+    const clientRef = doc(db, COLLECTION, clientId);
+    await runTransaction(db, async transaction => {
+      const snapshot = await transaction.get(clientRef);
+      if (!snapshot.exists()) throw new Error('El cliente no existe.');
+      const client = snapshot.data() as ClientItem;
+      const current = client.addresses || [];
+      const addresses = current.some(item => item.id === address.id)
+        ? current.map(item => item.id === address.id ? address : item)
+        : [...current, address];
+      transaction.update(clientRef, {
+        addresses: address.isDefault ? addresses.map(item => ({ ...item, isDefault: item.id === address.id })) : addresses,
+        ...(address.isDefault ? { defaultAddressId: address.id } : {}),
+      });
+    });
+  },
+  archiveAddress: async (clientId: string, addressId: string) => {
+    const clientRef = doc(db, COLLECTION, clientId);
+    await runTransaction(db, async transaction => {
+      const snapshot = await transaction.get(clientRef);
+      if (!snapshot.exists()) throw new Error('El cliente no existe.');
+      const client = snapshot.data() as ClientItem;
+      transaction.update(clientRef, {
+        addresses: (client.addresses || []).map(item => item.id === addressId ? { ...item, active: false, isDefault: false, updatedAt: new Date().toISOString() } : item),
+        ...(client.defaultAddressId === addressId ? { defaultAddressId: null } : {}),
+      });
+    });
+  },
 };
 
 export default ClientService;

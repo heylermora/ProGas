@@ -3,7 +3,7 @@ import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, FormCont
 import { customAlphabet } from 'nanoid';
 import { useHistory } from 'react-router-dom';
 import { MdAdd, MdDelete } from 'react-icons/md';
-import DeviceLocationMap from 'components/form/DeviceLocationMap';
+import DeliveryAddressField, { DeliveryLocationValue } from 'components/form/DeliveryAddressField';
 import OkModal from 'components/modal/OkModal';
 import orderService from 'services/OrderService';
 import productService from 'services/ProductService';
@@ -15,6 +15,7 @@ import OrderNavigation from './OrderNavigation';
 import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import { mapsSearchUrl } from 'utils/location';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import { AddressItem } from 'interfaces/AddressItem';
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 12);
 
@@ -41,6 +42,7 @@ export default function Products() {
     address: string;
     coordinates: string;
     locationUrl: string;
+    canonical?: AddressItem;
     transport: string;
     paymentMethod: OrderPayment['method'];
     comment: string;
@@ -51,6 +53,7 @@ export default function Products() {
     address: defaultAddress,
     coordinates: draft.address?.coordinates || '',
     locationUrl: draft.address?.locationUrl || '',
+    canonical: draft.address?.canonical,
     transport: '',
     paymentMethod: 'Efectivo',
     comment: '',
@@ -77,6 +80,7 @@ export default function Products() {
   const effectiveAddress = useCustomerAddress ? defaultAddress : orderForm.address;
   const effectiveCoordinates = useCustomerAddress ? draft.address?.coordinates || '' : orderForm.coordinates;
   const effectiveLocationUrl = useCustomerAddress ? draft.address?.locationUrl || '' : orderForm.locationUrl;
+  const effectiveCanonical = useCustomerAddress ? draft.address?.canonical : orderForm.canonical;
 
   const addItem = () => {
     if (!selectedProduct) return;
@@ -120,7 +124,9 @@ export default function Products() {
     }
     const locationUrl = effectiveLocationUrl || mapsSearchUrl(effectiveCoordinates || effectiveAddress);
 
-    saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: effectiveCoordinates, locationUrl } });
+    if (useCustomerAddress) {
+      saveCustomerDraft({ address: { ...(draft.address || {}), coordinates: effectiveCoordinates, locationUrl } });
+    }
 
     try {
       setIsSubmitting(true);
@@ -136,7 +142,10 @@ export default function Products() {
           address: effectiveAddress,
           coordinates: effectiveCoordinates,
           locationUrl,
+          ...(effectiveCanonical?.position ? { lat: effectiveCanonical.position.latitude, lng: effectiveCanonical.position.longitude } : {}),
         },
+        ...(effectiveCanonical ? { deliveryAddressSnapshot: effectiveCanonical } : {}),
+        ...(useCustomerAddress && draft.address?.savedAddressId ? { customerAddressId: draft.address.savedAddressId } : {}),
         paymentMethod: orderForm.paymentMethod,
         transport: hasTransport ? orderForm.transport : '',
         comment: orderForm.comment,
@@ -206,15 +215,7 @@ export default function Products() {
               )}
               {!useCustomerAddress && (
                 <Stack spacing="12px">
-                  <FormControl isRequired><FormLabel>Dirección del pedido</FormLabel><Textarea value={orderForm.address} onChange={(e) => set('address', e.target.value)} placeholder="Barrio y señas principales" /></FormControl>
-                  <FormControl>
-                    <FormLabel>Ubicación en el mapa</FormLabel>
-                    <DeviceLocationMap
-                      coordinates={orderForm.coordinates}
-                      addressQuery={orderForm.address}
-                      onLocation={(location) => setOrderForm((prev) => ({ ...prev, ...location }))}
-                    />
-                  </FormControl>
+                  <DeliveryAddressField value={{ address: orderForm.address, coordinates: orderForm.coordinates, locationUrl: orderForm.locationUrl, canonical: orderForm.canonical, ...(orderForm.canonical?.position ? { lat: orderForm.canonical.position.latitude, lng: orderForm.canonical.position.longitude } : {}) }} onChange={(location: DeliveryLocationValue) => setOrderForm(prev => ({ ...prev, address: location.address, coordinates: location.coordinates || '', locationUrl: location.locationUrl || '', canonical: location.canonical }))} />
                 </Stack>
               )}
             </Stack>

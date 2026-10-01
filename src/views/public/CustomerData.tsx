@@ -43,6 +43,8 @@ export default function CustomerData() {
           return;
         }
 
+        const defaultAddress = existingClient.addresses?.find(address => address.id === existingClient.defaultAddressId && address.active !== false)
+          || existingClient.addresses?.find(address => address.isDefault && address.active !== false);
         saveCustomerDraft({
           nationalId,
           phone: onlyDigits(existingClient.phone || existingClient.telefono || phoneDigits),
@@ -50,7 +52,17 @@ export default function CustomerData() {
           isExistingClient: true,
           name: existingClient.name,
           nickname: existingClient.nickname,
-          address: existingClient.address,
+          address: defaultAddress ? {
+            province: defaultAddress.province.name,
+            canton: defaultAddress.canton.name,
+            district: defaultAddress.district.name,
+            neighborhood: defaultAddress.locality.name,
+            details: defaultAddress.exactAddress,
+            additionalDirections: defaultAddress.additionalDirections,
+            coordinates: defaultAddress.position ? `${defaultAddress.position.latitude.toFixed(6)},${defaultAddress.position.longitude.toFixed(6)}` : '',
+            canonical: defaultAddress,
+            savedAddressId: defaultAddress.id,
+          } : existingClient.address,
         });
         history.push('/customer/info');
         return;

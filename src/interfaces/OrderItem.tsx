@@ -1,3 +1,5 @@
+import { AddressItem } from './AddressItem';
+
 export interface ProductItem {
     productId?: string;
     gasType: string;
@@ -30,7 +32,10 @@ export interface OrderItem {
         lng?: number;
         coordinates?: string;
         locationUrl?: string;
+        canonical?: AddressItem;
     }
+    deliveryAddressSnapshot?: AddressItem;
+    customerAddressId?: string;
     status: OrderStatus | string;
     comment: string;
     items: ProductItem[];

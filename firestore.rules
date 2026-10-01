@@ -42,6 +42,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if hasRole('admin');
     }
+    match /Territories/{documentId} {
+      allow read: if true;
+      allow write: if hasRole('admin');
+    }
 
     // These collections contain PII or financial/operational information.
     // Anonymous creation and lookup must use a trusted backend that returns a

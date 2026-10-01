@@ -7,7 +7,10 @@ export interface ReverseGeocodeItem {
   county?: string;          // Cantón
   province?: string;        // Provincia
   country?: string;         // País
-  raw: any;                 // Respuesta completa de Mapbox por si necesitas más
+  provider: string;
+  providerPlaceId?: string;
+  confidence?: number;
+  precision?: string;
 }
 
 export interface InitialLocationItem {

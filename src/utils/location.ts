@@ -17,3 +17,8 @@ export const wazeUrl = (query = '') => {
   const encoded = encodeURIComponent(query);
   return encoded ? `https://waze.com/ul?q=${encoded}&navigate=yes` : '';
 };
+
+export const isCostaRicaCoordinate = (latitude?: number, longitude?: number) =>
+  Number.isFinite(latitude) && Number.isFinite(longitude)
+  && Number(latitude) >= 8.0 && Number(latitude) <= 11.3
+  && Number(longitude) >= -86.0 && Number(longitude) <= -82.0;

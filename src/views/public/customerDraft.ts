@@ -1,11 +1,17 @@
+import { AddressItem } from 'interfaces/AddressItem';
+import { formatDeliveryAddress } from 'utils/address';
+
 export type CustomerDraftAddress = {
   province?: string;
   canton?: string;
   district?: string;
   neighborhood?: string;
   details?: string;
+  additionalDirections?: string;
   coordinates?: string;
   locationUrl?: string;
+  canonical?: AddressItem;
+  savedAddressId?: string;
 };
 
 export type CustomerDraft = {
@@ -35,7 +41,8 @@ export const saveCustomerDraft = (next: CustomerDraft) => {
 
 export const addressToText = (address?: CustomerDraftAddress) => {
   if (!address) return '';
-  return [address.district, address.neighborhood, address.details]
+  if (address.canonical) return formatDeliveryAddress(address.canonical);
+  return [address.province, address.canton, address.district, address.neighborhood, address.details, address.additionalDirections]
     .filter(Boolean)
     .join(', ');
 };

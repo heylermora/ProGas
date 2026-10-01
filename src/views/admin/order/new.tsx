@@ -356,6 +356,7 @@ export default function NewOrder() {
       client: fieldValues.clientName,
       clientId: fieldValues.clientId,
       location: fieldValues.location,
+      ...(fieldValues.location?.canonical ? { deliveryAddressSnapshot: fieldValues.location.canonical } : {}),
       comment: fieldValues.comment,
       items: products,
       totalAmount: products.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 0), 0),

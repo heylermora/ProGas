@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, AlertIcon, Box, Button, FormHelperText, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react';
 import { MdMyLocation } from 'react-icons/md';
-import { coordinatesToText, mapsEmbedUrl, mapsSearchUrl } from 'utils/location';
+import { coordinatesToText, isCostaRicaCoordinate, mapsEmbedUrl, mapsSearchUrl } from 'utils/location';
+import GeocodingService from 'services/GeocodingService';
+import { ReverseGeocodeItem } from 'interfaces/ReverseGeocodeItem';
 
 type DeviceLocationMapProps = {
   coordinates?: string;
   addressQuery?: string;
-  onLocation?: (value: { coordinates: string; locationUrl: string }) => void;
+  onLocation?: (value: { coordinates: string; locationUrl: string; latitude: number; longitude: number; accuracyMeters?: number; detectedAddress?: ReverseGeocodeItem }) => void;
 };
 
 export default function DeviceLocationMap({ coordinates = '', addressQuery = '', onLocation }: DeviceLocationMapProps) {
@@ -24,10 +26,30 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
     setLoading(true);
     setMessage('');
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        if (!isCostaRicaCoordinate(position.coords.latitude, position.coords.longitude)) {
+          setMessage('La ubicación detectada está fuera de Costa Rica. Ingresá la dirección manualmente.');
+          setLoading(false);
+          return;
+        }
         const nextCoordinates = coordinatesToText(position.coords.latitude, position.coords.longitude);
-        onLocation?.({ coordinates: nextCoordinates, locationUrl: mapsSearchUrl(nextCoordinates) });
-        setLoading(false);
+        const baseLocation = {
+          coordinates: nextCoordinates,
+          locationUrl: mapsSearchUrl(nextCoordinates),
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracyMeters: position.coords.accuracy,
+        };
+        try {
+          const detectedAddress = await GeocodingService.reverse(position.coords.latitude, position.coords.longitude);
+          onLocation?.({ ...baseLocation, detectedAddress });
+          setMessage('Ubicación encontrada. Revisá y corregí la dirección detectada antes de continuar.');
+        } catch {
+          onLocation?.(baseLocation);
+          setMessage('Guardamos las coordenadas, pero no pudimos completar la dirección. Seleccionala manualmente.');
+        } finally {
+          setLoading(false);
+        }
       },
       () => {
         setMessage('No pudimos obtener la ubicación. Revisá permisos del navegador o continuá con las señas.');
@@ -44,12 +66,13 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
           <Text as="span">Usar mi ubicación</Text>        </Button>
       </SimpleGrid>
       <FormHelperText>Solo necesitás aceptar el permiso de ubicación.</FormHelperText>
-      {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
+      {message && <Alert status={coordinates ? 'info' : 'warning'} borderRadius="12px"><AlertIcon />{message}</Alert>}
       {embedUrl && (
         <Box border="1px solid" borderColor="gray.200" borderRadius="16px" overflow="hidden" bg="gray.50">
           <Box as="iframe" title="Vista previa de ubicación en Google Maps" src={embedUrl} w="100%" h={{ base: '220px', md: '280px' }} border="0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
         </Box>
       )}
+      <Text fontSize="xs" color="gray.500">La dirección detectada es una sugerencia basada en OpenStreetMap; confirmá siempre las señas de entrega.</Text>
     </Stack>
   );
 }

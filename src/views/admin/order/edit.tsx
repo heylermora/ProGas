@@ -430,6 +430,7 @@ export default function Edit() {
       clientId: fieldValues.clientId ?? clientId,
       client: fieldValues.clientName ?? clientName,
       location: fieldValues.location ?? existingOrderData.location,
+      deliveryAddressSnapshot: fieldValues.location?.canonical ?? existingOrderData.deliveryAddressSnapshot,
       comment: fieldValues.comment ?? existingOrderData.comment,
       items: products,
       totalAmount: products.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 0), 0),

@@ -1,3 +1,5 @@
+import { AddressItem, CustomerAddressItem } from './AddressItem';
+
 interface ClientItem {
   id: string;
   nationalId: string;
@@ -12,9 +14,14 @@ interface ClientItem {
     district?: string;
     neighborhood?: string;
     details?: string;
+    additionalDirections?: string;
     coordinates?: string;
     locationUrl?: string;
+    canonical?: AddressItem;
+    savedAddressId?: string;
   };
+  addresses?: CustomerAddressItem[];
+  defaultAddressId?: string;
 }
 
 export default ClientItem;
