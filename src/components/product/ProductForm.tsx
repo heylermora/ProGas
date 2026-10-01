@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  Alert, AlertIcon, Box, Button, Divider, Flex, FormControl, FormErrorMessage,
+  Alert, AlertIcon, Box, Button, Flex, FormControl, FormErrorMessage,
   FormHelperText, FormLabel, Heading, HStack, Icon, Input, InputGroup, InputLeftAddon,
   Select, SimpleGrid, Stack, Text, useColorModeValue, useToast,
 } from '@chakra-ui/react';
@@ -65,11 +65,11 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   };
 
   return (
-    <Box pt={{ base: '120px', md: '78px' }} maxW="1180px" mx="auto" pb="48px">
+    <Box pt={{ base: '120px', md: '78px' }} maxW="1080px" w="100%" mx="auto" pb="48px" px={{ base: 1, md: 3 }}>
       <FormPageHeader title={product ? values.description || 'Editar producto' : 'Nuevo producto'} description={product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'} onBack={goBack} backLabel="Volver al inventario" status={<StatusBadge active={values.active} activeLabel="Producto activo" inactiveLabel="Producto inactivo" />} />
 
-      <SimpleGrid columns={{ base: 1, lg: 3 }} spacing="20px" alignItems="start">
-        <Stack gridColumn={{ lg: 'span 2' }} spacing="18px">
+      <SimpleGrid columns={{ base: 1, xl: 3 }} spacing="20px" alignItems="start">
+        <Stack gridColumn={{ xl: 'span 2' }} spacing="18px">
           <Card p={{ base: '18px', md: '24px' }}>
             <SectionTitle icon={MdLocalOffer} title="Información comercial" description="Así se identificará el producto al crear pedidos." />
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="18px" mt="20px">
@@ -121,30 +121,30 @@ export default function ProductForm({ product, isLoading = false }: Props) {
                 <FormHelperText>Unidades antes de considerar el stock como bajo.</FormHelperText>
               </FormControl>
             </SimpleGrid>
-            <Flex mt="20px" p="14px" bg={subtleBg} borderRadius="14px" justify="space-between" align="center" gap="12px">
+            <Flex mt="20px" p={{ base: '14px', md: '16px' }} bg={subtleBg} borderRadius="14px" justify="space-between" align={{ base: 'flex-start', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap="12px">
               <Box><Text fontWeight="800">Disponible para pedidos</Text><Text fontSize="sm" color={muted}>Al desactivarlo seguirá en el historial, pero no podrá agregarse a pedidos nuevos.</Text></Box>
               <ActiveSwitch id="product-available" label="Producto activo" isChecked={values.active} onChange={checked => set('active', checked)} />
             </Flex>
           </Card>
         </Stack>
 
-        <Card p={{ base: '18px', md: '22px' }} position={{ lg: 'sticky' }} top={{ lg: '105px' }}>
+        <Card p={{ base: '18px', md: '22px' }} position={{ xl: 'sticky' }} top={{ xl: '105px' }}>
           <Heading size="md" color={textColor}>Resumen</Heading>
           <Text color={muted} fontSize="sm" mt="4px">Revisá los valores antes de guardar.</Text>
-          <Stack spacing="14px" mt="20px" divider={<Divider borderColor={border} />}>
+          <SimpleGrid columns={{ base: 1, sm: 2, lg: 3, xl: 1 }} spacing="16px" mt="20px">
             <Summary label="Producto" value={values.description || 'Sin nombre'} />
             <Summary label="Categoría" value={values.category || 'Sin categoría'} />
             <Summary label="Precio de venta" value={crc(values.price)} strong />
             <Summary label="Ganancia por unidad" value={crc(margin)} tone={margin < 0 ? 'red.500' : 'green.500'} detail={`${marginPercent.toFixed(1)}% del precio`} />
             <Summary label="Valor del inventario" value={crc(inventoryValue)} detail={`${values.stock || 0} unidades al costo`} />
-          </Stack>
+          </SimpleGrid>
           {Number(values.stock) <= Number(values.lowStockThreshold) && <HStack mt="18px" p="12px" bg="orange.50" color="orange.700" borderRadius="xl"><Icon as={MdWarning} /><Text fontSize="sm" fontWeight="700">El producto iniciará con stock bajo.</Text></HStack>}
         </Card>
       </SimpleGrid>
 
       <Flex mt="24px" p={{ base: 3, md: 4 }} bg={actionBg} borderWidth="1px" borderColor={border} borderRadius="2xl" boxShadow="lg" position="sticky" bottom="12px" zIndex={5} justify="space-between" align={{ base: 'stretch', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap="10px" backdropFilter="blur(12px)">
         <Text color={muted} fontSize="sm">{invalid ? 'Revisá los campos obligatorios antes de guardar.' : 'Todo listo para guardar los cambios.'}</Text>
-        <HStack justify={{ base: 'stretch', sm: 'flex-end' }}><Button flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={goBack} isDisabled={saving}>Cancelar</Button><Button flex={{ base: 1, sm: 'initial' }} leftIcon={<MdCheck />} colorScheme="brand" size="lg" px="28px" isLoading={saving || isLoading} loadingText="Guardando" onClick={save}>{product ? 'Guardar cambios' : 'Crear producto'}</Button></HStack>
+        <HStack justify={{ base: 'stretch', sm: 'flex-end' }}><Button flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={goBack} isDisabled={saving} whiteSpace="nowrap">Cancelar</Button><Button flex={{ base: 1, sm: 'initial' }} leftIcon={<MdCheck />} colorScheme="brand" size="lg" px={{ base: '18px', md: '28px' }} isLoading={saving || isLoading} loadingText="Guardando" onClick={save} whiteSpace="nowrap">{product ? 'Guardar cambios' : 'Crear producto'}</Button></HStack>
       </Flex>
     </Box>
   );
@@ -157,5 +157,6 @@ function SectionTitle({ icon, title, description }: { icon: any; title: string; 
 
 function Summary({ label, value, detail, strong, tone }: { label: string; value: string; detail?: string; strong?: boolean; tone?: string }) {
   const muted = useColorModeValue('gray.600', 'gray.400');
-  return <Box><Text color={muted} fontSize="xs" fontWeight="700" textTransform="uppercase" letterSpacing=".04em">{label}</Text><Text mt="3px" fontWeight={strong ? '900' : '700'} fontSize={strong ? 'xl' : 'md'} color={tone}>{value}</Text>{detail && <Text color={muted} fontSize="xs">{detail}</Text>}</Box>;
+  const border = useColorModeValue('gray.200', 'whiteAlpha.200');
+  return <Box borderBottomWidth={{ base: '1px', xl: '1px' }} borderColor={border} pb="12px" minW="0"><Text color={muted} fontSize="xs" fontWeight="700" textTransform="uppercase" letterSpacing=".04em">{label}</Text><Text mt="3px" fontWeight={strong ? '900' : '700'} fontSize={strong ? 'xl' : 'md'} color={tone} overflowWrap="anywhere">{value}</Text>{detail && <Text color={muted} fontSize="xs">{detail}</Text>}</Box>;
 }
