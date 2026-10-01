@@ -15,11 +15,25 @@ export const parseStoredDate = (value: string) => {
     : new Date(value).getTime();
 };
 
-export const orderFingerprint = (order: OrderItem) => JSON.stringify({
+const stableValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(stableValue);
+  if (value && typeof value === 'object') {
+    return Object.keys(value as Record<string, unknown>)
+      .sort()
+      .reduce<Record<string, unknown>>((result, key) => {
+        const item = (value as Record<string, unknown>)[key];
+        if (item !== undefined) result[key] = stableValue(item);
+        return result;
+      }, {});
+  }
+  return value;
+};
+
+export const orderFingerprint = (order: OrderItem) => JSON.stringify(stableValue({
   status: order.status, locked: Boolean(order.locked), paidAt: order.paidAt || null,
   totalAmount: money(order.totalAmount), change: money(order.change),
   payments: order.payments || order.paymentMethods || order.paymentDetails || [], items: order.items,
-});
+}));
 
 export const availableOrders = (orders: OrderItem[], from: string, to: string) => {
   const start = parseStoredDate(from);

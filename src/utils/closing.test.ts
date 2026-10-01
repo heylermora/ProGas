@@ -1,4 +1,4 @@
-import { availableOrders, cylinderSummary, paymentTotals } from './closing';
+import { availableOrders, cylinderSummary, orderFingerprint, paymentTotals } from './closing';
 
 const order: any = { id: '1', requestDate: '2026-09-24T10:00:00Z', status: 'Pagado', locked: false,
   totalAmount: 15000, payments: [{ method: 'Efectivo', amount: 10000 }, { method: 'Sinpe', amount: 5000 }],
@@ -34,4 +34,19 @@ test('uses the sale-time unit cost for cylinder summaries', () => {
   const sold = { ...order, items: [{ ...order.items[0], unitCost: 4200 }] };
   const lines = cylinderSummary([sold], [{ id: 'p1', description: 'Cilindro Tropigas', category: 'Cilindros', costPrice: 9000 } as any]);
   expect(lines[0].totalCost).toBe(8400);
+});
+
+test('uses a stable order fingerprint when Firestore returns fields in another order', () => {
+  const preview = {
+    ...order,
+    payments: [{ method: 'Efectivo', amount: 10000, reference: 'A' }],
+    items: [{ productId: 'p1', gasType: '25 lb', quantity: 2, price: 7500 }],
+  };
+  const fromFirestore = {
+    ...order,
+    payments: [{ reference: 'A', amount: 10000, method: 'Efectivo' }],
+    items: [{ price: 7500, quantity: 2, gasType: '25 lb', productId: 'p1' }],
+  };
+
+  expect(orderFingerprint(preview)).toBe(orderFingerprint(fromFirestore));
 });
