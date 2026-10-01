@@ -144,7 +144,7 @@ export default function Closings() {
     <PageHeader title="Finanzas" description="Registrá gastos, cerrá turnos y revisá el balance semanal desde un solo lugar." />
     <Alert status="info" mb="5" borderRadius="xl"><AlertIcon /><Box><Text fontWeight="800">¿Por dónde empezar?</Text><Text fontSize="sm">Primero registrá los gastos. Al terminar un turno, abrí “Corte nuevo”, elegí el periodo, contá el dinero recibido y escribí ese valor en “Monto declarado”.</Text></Box></Alert>
     <Tabs colorScheme="brand" isLazy>
-      <TabList overflowX="auto"><Tab>Gastos</Tab><Tab>Cortes</Tab><Tab>Balance semanal</Tab><Tab>Historial</Tab></TabList>
+      <TabList overflowX="auto"><Tab>Gastos</Tab><Tab>Cortes</Tab><Tab>Balance e historial</Tab></TabList>
       <TabPanels>
         <TabPanel px="0">
           <Box bg="white" p="5" borderRadius="xl" mb="6">
@@ -177,8 +177,14 @@ export default function Closings() {
             <Button colorScheme="brand" mt="4" onClick={confirm} isLoading={saving} isDisabled={(type === 'shift' && (!fromTime || !toTime)) || !included.length || (isAdmin && !responsibleId)}>Confirmar corte</Button>
           </Box>
         </TabPanel>
-        <TabPanel px="0"><Balance embedded /></TabPanel>
-        <TabPanel px="0"><HistoryTable history={history} /></TabPanel>
+        <TabPanel px="0">
+          <Balance embedded />
+          <Box mt="6">
+            <Heading size="md" mb="3">Historial de cortes</Heading>
+            <Text color="gray.500" fontSize="sm" mb="4">Consultá los cierres que respaldan el balance, incluidas sus diferencias y notas.</Text>
+            <HistoryTable history={history} />
+          </Box>
+        </TabPanel>
       </TabPanels>
     </Tabs>
   </Box>;
