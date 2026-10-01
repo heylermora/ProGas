@@ -16,10 +16,11 @@ const ClosingService = {
       if (snapshots.some((snapshot) => !snapshot.exists() || (closing.type === 'cylinder' ? Boolean(snapshot.data().cylinderClosingId) : isOrderLocked(snapshot.data() as any)))) {
         throw new Error(closing.type === 'cylinder' ? 'Uno o más pedidos ya fueron incluidos en otro corte de cilindros.' : 'Uno o más pedidos ya fueron liquidados. Actualice la previsualización.');
       }
-      snapshots.forEach((snapshot) => {
+      snapshots.forEach((snapshot, index) => {
         const current = { id: snapshot.id, ...snapshot.data() } as any;
         if (closing.orderFingerprints[snapshot.id] !== orderFingerprint(current)) {
-          throw new Error('Un pedido cambió después de la previsualización. Actualice los datos.');
+          const orderCode = closing.orderCodes[index] || snapshot.id;
+          throw new Error(`El pedido ${orderCode} cambió mientras revisabas el corte. Volvé a cargar la previsualización y confirmá nuevamente.`);
         }
       });
       const expenseRefs = closing.expenseIds.map((expenseId) => doc(db, 'Expenses', expenseId));
