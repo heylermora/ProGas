@@ -8,6 +8,7 @@ export interface ExpenseItem {
   occurredAt: string;
   shift?: string;
   createdBy?: string;
+  createdByName?: string;
   createdAt: string;
   closingId?: string;
 }
@@ -44,4 +45,5 @@ export interface ClosingItem {
   cylinderLines?: CylinderLine[];
   createdAt: string;
   createdBy: string;
+  createdByName?: string;
 }

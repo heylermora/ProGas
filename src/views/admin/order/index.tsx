@@ -1,13 +1,9 @@
-// @ts-nocheck
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Flex,
-  useColorModeValue,
   SimpleGrid,
   IconButton,
-  Spinner,
-  Center,
   Input,
   Select,
   Text,
@@ -22,10 +18,12 @@ import ItemCard from 'components/card/ItemCard';
 import Empty from 'components/exceptions/Empty';
 import Error from 'components/exceptions/Error';
 import orderService from 'services/OrderService';
-import OrderItem from 'interfaces/OrderItem';
+import { OrderItem, OrderPayment } from 'interfaces/OrderItem';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
 import { getPaymentMethods, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
 import { usePageSearch } from 'contexts/PageSearchContext';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
+import FilterPanel from 'components/dataDisplay/FilterPanel';
 
 const STATUS_MENU = [...ORDER_STATUSES, 'Todos'] as const;
 
@@ -33,7 +31,6 @@ export default function Index() {
   const { query: search } = usePageSearch();
 
   const history = useHistory();
-  const spinnerColor = useColorModeValue('brand.700', 'white');
   const { refreshKey } = useOrderRefresh();
 
   const [orders, setorders] = useState<OrderItem[]>([]);
@@ -95,7 +92,7 @@ export default function Index() {
       && (!filters.date || date === filters.date)
       && (!clientTerm || `${order.client} ${order.clientId || ''}`.toLocaleLowerCase('es').includes(clientTerm))
       && (!filters.product || (order.items || []).some(item => item.gasType === filters.product))
-      && (!filters.payment || getPaymentMethods(order).includes(filters.payment));
+      && (!filters.payment || getPaymentMethods(order).includes(filters.payment as OrderPayment['method']));
   }), [orders, activeStatus, filters, search]);
 
   const statusCounts = useMemo(() => orders.reduce<Record<string, number>>((counts, order) => {
@@ -105,7 +102,6 @@ export default function Index() {
     return counts;
   }, { Todos: 0 }), [orders]);
 
-  const hasAdvancedFilters = Boolean(filters.date || filters.client || filters.product || filters.payment);
   const clearFilters = () => setFilters({ date: '', client: '', product: '', payment: '' });
 
   // Cuando un card cambia status, actualiza el estado local => el filtro reacciona
@@ -117,37 +113,31 @@ export default function Index() {
 
   return (
     <Box w="100%" pt={topPt}>
-      <Box bg="white" borderRadius="xl" p={4} mb={4} boxShadow="sm">
-        <Text fontWeight="800" mb={3}>Filtros de pedidos</Text>
+      <FilterPanel title="Filtros de pedidos" description="Combiná criterios para encontrar un pedido." activeCount={[filters.date, filters.client, filters.product, filters.payment].filter(Boolean).length} onClear={clearFilters}>
         <SimpleGrid columns={{ base: 1, md: 2, xl: 4 }} gap={3}>
           <Input aria-label="Filtrar por fecha" type="date" value={filters.date} onChange={e => setFilters(f => ({ ...f, date: e.target.value }))} />
           <Input aria-label="Filtrar por cliente" placeholder="Cliente o cédula" value={filters.client} onChange={e => setFilters(f => ({ ...f, client: e.target.value }))} />
           <Select aria-label="Filtrar por producto" value={filters.product} onChange={e => setFilters(f => ({ ...f, product: e.target.value }))}><option value="">Todos los productos</option>{products.map(value => <option key={value}>{value}</option>)}</Select>
           <Select aria-label="Filtrar por método de pago" value={filters.payment} onChange={e => setFilters(f => ({ ...f, payment: e.target.value }))}><option value="">Todos los métodos</option>{['Efectivo', 'Sinpe', 'Tarjeta', 'Otro'].map(value => <option key={value}>{value}</option>)}</Select>
         </SimpleGrid>
-        {hasAdvancedFilters && <Flex justify="flex-end" mt={3}><Button size="sm" variant="ghost" onClick={clearFilters}>Limpiar filtros</Button></Flex>}
+      </FilterPanel>
+      <Box bg="white" borderRadius="2xl" p={{ base: 3, md: 4 }} mb={5} boxShadow="sm" borderWidth="1px" borderColor="blackAlpha.100">
+        <Flex align="center" justify="space-between" gap={3} mb={3}>
+          <Box><Text fontWeight="900">Estado de los pedidos</Text><Text fontSize="sm" color="gray.500">Elegí un estado para acotar el listado.</Text></Box>
+          <IconButton colorScheme="brand" aria-label="Crear pedido" icon={<MdAdd />} as={RLink as any} borderRadius="full" to="/admin/order/new" flexShrink={0} />
+        </Flex>
+        <SimpleGrid columns={{ base: 2, sm: 3, lg: 4, xl: 7 }} gap={2}>
+          {STATUS_MENU.map((status) => (
+            <Button key={status} minW={0} w="100%" justifyContent="space-between" size="sm" px={3} variant={activeStatus === status ? 'solid' : 'outline'} colorScheme={activeStatus === status ? 'brand' : 'gray'} borderRadius="xl" onClick={() => handleStatusClick(status)}>
+              <Text as="span" noOfLines={1}>{status}</Text><Badge ml={2} flexShrink={0} borderRadius="full" colorScheme={activeStatus === status ? 'whiteAlpha' : 'gray'}>{statusCounts[status] || 0}</Badge>
+            </Button>
+          ))}
+        </SimpleGrid>
       </Box>
-      <Flex flexWrap="wrap" align="center" gap={2} mb={5}>
-        {STATUS_MENU.map((status) => (
-          <Button
-            key={status}
-            size="sm"
-            variant={activeStatus === status ? 'solid' : 'outline'}
-            colorScheme={activeStatus === status ? 'brand' : 'gray'}
-            borderRadius="full"
-            onClick={() => handleStatusClick(status)}
-          >
-            {status} <Badge ml={2} borderRadius="full" colorScheme={activeStatus === status ? 'whiteAlpha' : 'gray'}>{statusCounts[status] || 0}</Badge>
-          </Button>
-        ))}
-        <IconButton ml="auto" colorScheme="brand" aria-label="Crear pedido" icon={<MdAdd />} as={RLink as any} borderRadius="full" to="/admin/order/new" />
-      </Flex>
       {isError ? (
         <Error />
       ) : isLoading ? (
-        <Center>
-          <Spinner size="xl" variant={'darkBrand' as any} color={spinnerColor as any} />
-        </Center>
+        <AsyncContent isLoading loadingLabel="Cargando pedidos" />
       ) : visibleOrders.length === 0 ? (
         <Empty message="No hay pedidos que coincidan con los filtros seleccionados." />
       ) : (

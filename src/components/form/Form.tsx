@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { FormEventHandler, ReactNode, useState, useEffect, useCallback } from 'react';
 import {
   Box,
+  BoxProps,
   Button,
   Center,
   Text,
@@ -8,27 +9,38 @@ import {
   Heading,
   Flex,
   SimpleGrid,
+  Stack,
 } from '@chakra-ui/react';
 
 import { HSeparator } from 'components/separator/Separator';
-import { NavLink } from 'react-router-dom';
 import FormField from 'interfaces/FormField';
 import { formatValue } from 'utils/formatValue';
 import FieldInput from './FieldInput';
+import BackButton from 'components/button/BackButton';
+import FormPageHeader from 'components/layout/FormPageHeader';
 
 type Props = {
-  title: string;
+  title?: string;
   button?: string;
-  fields: FormField[];
+  fields?: FormField[];
   isDisabled?: boolean;
   back?: string;
-  onSubmit: (fieldValues: { [key: string]: any }) => void;
-};
+  onSubmit?: (fieldValues: { [key: string]: any }) => void;
+  children?: ReactNode;
+  onFormSubmit?: FormEventHandler<HTMLDivElement>;
+  description?: string;
+  status?: ReactNode;
+  backLabel?: string;
+  onBack?: () => void;
+  submitLabel?: string;
+  loadingLabel?: string;
+  isSubmitting?: boolean;
+  footerMessage?: ReactNode;
+} & Omit<BoxProps, 'title' | 'onSubmit' | 'children'>;
 
-const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
+const Form = ({ title = '', button, fields = [], isDisabled, back, onSubmit, children, onFormSubmit, description, status, backLabel, onBack, submitLabel, loadingLabel = 'Guardando', isSubmitting, footerMessage, ...containerProps }: Props) => {
   const textColor = useColorModeValue('navy.700', 'white');
   const textColorSecondary = 'gray.400';
-  const brandStars = useColorModeValue('brand.500', 'brand.400');
 
   const buildInitialValues = useCallback(() => {
     return fields.reduce((acc, field) => {
@@ -134,7 +146,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
       }
     });
 
-    onSubmit(payload);
+    onSubmit?.(payload);
   };
 
   const renderFields = () =>
@@ -149,8 +161,27 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
       />
     ));
 
+  if (children) {
+    return <Box
+      as="form"
+      me="auto"
+      w="100%"
+      maxW="100%"
+      onSubmit={onFormSubmit}
+      {...containerProps}
+    >
+      {title && onBack && <FormPageHeader title={title} description={description} status={status} onBack={onBack} backLabel={backLabel} />}
+      {title && !onBack && <Stack spacing="4px" mb="24px"><Heading color={textColor} fontSize={{ base: '26px', md: '34px' }}>{title}</Heading>{description && <Text color={textColorSecondary}>{description}</Text>}</Stack>}
+      {children}
+      {submitLabel && <Flex mt="24px" p={{ base: 3, md: 4 }} bg="white" borderWidth="1px" borderColor="gray.200" borderRadius="2xl" boxShadow="lg" position="sticky" bottom="12px" zIndex={5} justify="space-between" align={{ base: 'stretch', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap="10px">
+        {footerMessage && <Text color="gray.600" fontSize="sm">{footerMessage}</Text>}
+        <Flex gap="8px" justify="flex-end"><Button type="button" variant="ghost" onClick={onBack} isDisabled={isSubmitting}>Cancelar</Button><Button type="submit" colorScheme="brand" size="lg" px={{ base: '18px', md: '28px' }} isLoading={isSubmitting} loadingText={loadingLabel} whiteSpace="nowrap">{submitLabel}</Button></Flex>
+      </Flex>}
+    </Box>;
+  }
+
   return (
-    <Box me="auto" w="100%" maxW="100%">
+    <Box me="auto" w="100%" maxW="100%" {...containerProps}>
       <Heading color={textColor} fontSize={{ base: '26px', md: '34px' }} lineHeight="1.12" mb="10px" sx={{ letterSpacing: '-0.72px' }}>
         {title}
       </Heading>
@@ -189,13 +220,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
           </Button>
 
           {back && (
-            <Center mt="6px">
-              <NavLink to={back}>
-                <Text color={brandStars} as="span" ms="5px" fontWeight="500">
-                  Volver
-                </Text>
-              </NavLink>
-            </Center>
+            <Center mt="6px"><BackButton to={back}>Volver</BackButton></Center>
           )}
         </>
       )}

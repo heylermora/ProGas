@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Badge, Box, Button, Center, Divider, Flex, Heading, HStack, Icon, IconButton,
+  Badge, Box, Button, Flex, HStack, Icon, IconButton,
   Input, Menu, MenuButton, MenuItem, MenuList, Modal,
   ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay,
-  Select, SimpleGrid, Spinner, Stat, StatLabel, StatNumber, Switch, Table, Tbody, Td,
+  Select, SimpleGrid, Table, Tbody, Td,
   Text, Th, Thead, Tr, useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -14,6 +14,12 @@ import { Product } from 'interfaces/ProductItem';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import useCategories from 'hooks/useCategories';
 import CategoryManager from 'components/category/CategoryManager';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
+import FilterPanel from 'components/dataDisplay/FilterPanel';
+import StatCard from 'components/dataDisplay/StatCard';
+import ActiveSwitch from 'components/form/ActiveSwitch';
+import EmptyState from 'components/dataDisplay/EmptyState';
+import PageHeader from 'components/layout/PageHeader';
 
 const money = (value: number) => new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 }).format(value || 0);
 
@@ -78,27 +84,24 @@ export default function Products() {
 
   return (
     <Box pt={{ base: '150px', md: '80px' }} w="100%">
-      <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap="18px" mb="24px">
-        <Box><Heading color={text} fontSize={{ base: '28px', md: '34px' }}>Productos e inventario</Heading><Text color={muted} mt="6px">Administre su catálogo, precios y existencias desde un solo lugar.</Text></Box>
-        <Button as={RouterLink} to="/admin/product/new" leftIcon={<MdAdd />} colorScheme="brand" size="lg">Nuevo producto</Button>
-      </Flex>
+      <PageHeader title="Productos e inventario" description="Administre su catálogo, precios y existencias desde un solo lugar." action={<Button as={RouterLink} to="/admin/product/new" leftIcon={<MdAdd />} colorScheme="brand" size="lg">Nuevo producto</Button>} />
 
       <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing="16px" mb="22px">
-        <Card p="20px"><Stat><StatLabel color={muted}>Productos activos</StatLabel><StatNumber color={text}>{normalized.filter(p => p.active).length}</StatNumber><Text fontSize="xs" color={muted}>{normalized.length} productos registrados</Text></Stat></Card>
-        <Card p="20px"><Stat><StatLabel color={muted}>Unidades disponibles</StatLabel><StatNumber color={text}>{normalized.reduce((sum, p) => sum + p.stock, 0).toLocaleString('es-CR')}</StatNumber><Text fontSize="xs" color={muted}>En todas las categorías</Text></Stat></Card>
-        <Card p="20px"><Stat><StatLabel color={muted}>Valor del inventario</StatLabel><StatNumber color={text} fontSize="2xl">{money(inventoryValue)}</StatNumber><Text fontSize="xs" color={muted}>Calculado al precio de costo</Text></Stat></Card>
-        <Card p="20px" borderWidth={lowStock.length ? '1px' : '0'} borderColor="orange.200"><Stat><HStack><Icon as={MdWarning} color={lowStock.length ? 'orange.400' : 'green.400'} /><StatLabel color={muted}>Stock bajo</StatLabel></HStack><StatNumber color={lowStock.length ? 'orange.500' : text}>{lowStock.length}</StatNumber><Text fontSize="xs" color={muted}>{lowStock.length ? 'Productos requieren atención' : 'Inventario saludable'}</Text></Stat></Card>
+        <StatCard label="Productos activos" value={normalized.filter(p => p.active).length} help={`${normalized.length} productos registrados`} />
+        <StatCard label="Unidades disponibles" value={normalized.reduce((sum, p) => sum + p.stock, 0).toLocaleString('es-CR')} help="En todas las categorías" />
+        <StatCard label="Valor del inventario" value={money(inventoryValue)} help="Calculado al precio de costo" />
+        <StatCard label="Stock bajo" value={lowStock.length} help={lowStock.length ? 'Productos requieren atención' : 'Inventario saludable'} icon={MdWarning} colorScheme={lowStock.length ? 'orange' : 'green'} />
       </SimpleGrid>
 
+      <FilterPanel title="Filtros del inventario" description="El buscador superior filtra por nombre o SKU." activeCount={Number(Boolean(category)) + Number(Boolean(status))} onClear={() => { setCategory(''); setStatus(''); }} action={<Button leftIcon={<MdSettings />} variant="outline" borderRadius="xl" onClick={categoryManager.onOpen}>Administrar categorías</Button>}>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
+          <Box><Text fontSize="xs" color={muted} fontWeight="800" mb={2} textTransform="uppercase">Categoría</Text><Select value={category} onChange={e => setCategory(e.target.value)}><option value="">Todas las categorías</option>{availableCategories.map(item => <option key={item}>{item}</option>)}</Select></Box>
+          <Box><Text fontSize="xs" color={muted} fontWeight="800" mb={2} textTransform="uppercase">Estado</Text><Select value={status} onChange={e => setStatus(e.target.value)}><option value="">Todos los estados</option><option value="active">Activos</option><option value="inactive">Inactivos</option></Select></Box>
+        </SimpleGrid>
+      </FilterPanel>
+
       <Card p="0" overflow="hidden">
-        <Flex p="20px" gap="12px" wrap="wrap" align="center">
-          <Text flex="1" color={muted} fontSize="sm">Use el buscador superior para filtrar por nombre o SKU.</Text>
-          <Select value={category} onChange={e => setCategory(e.target.value)} maxW={{ base: '100%', md: '210px' }}><option value="">Todas las categorías</option>{availableCategories.map(item => <option key={item}>{item}</option>)}</Select>
-          <Button leftIcon={<MdSettings />} variant="outline" onClick={categoryManager.onOpen}>Categorías</Button>
-          <Select value={status} onChange={e => setStatus(e.target.value)} maxW={{ base: '100%', md: '170px' }}><option value="">Todos los estados</option><option value="active">Activos</option><option value="inactive">Inactivos</option></Select>
-        </Flex>
-        <Divider borderColor={border} />
-        {loading ? <Center py="70px"><Spinner size="xl" color="brand.500" /></Center> : filtered.length === 0 ? <Center py="70px" flexDirection="column"><Icon as={MdInventory2} boxSize="44px" color="gray.300" /><Text fontWeight="700" mt="12px" color={text}>No encontramos productos</Text><Text color={muted} fontSize="sm">Cambie los filtros o agregue un producto nuevo.</Text></Center> : (
+        {loading ? <AsyncContent isLoading loadingLabel="Cargando inventario" /> : filtered.length === 0 ? <EmptyState icon={MdInventory2} title="No encontramos productos" description="Cambie los filtros o agregue un producto nuevo." /> : (
           <Box overflowX="auto"><Table variant="simple">
             <Thead><Tr><Th>Producto</Th><Th>Categoría</Th><Th isNumeric>Precio venta</Th><Th isNumeric>Costo</Th><Th>Disponible</Th><Th>Estado</Th><Th w="55px" /></Tr></Thead>
             <Tbody>{filtered.map(product => {
@@ -108,7 +111,7 @@ export default function Products() {
                 <Td><Badge colorScheme="purple" borderRadius="full" px="9px" py="4px">{product.category}</Badge></Td>
                 <Td isNumeric fontWeight="700" color={text}>{money(product.price)}</Td><Td isNumeric color={muted}>{money(product.costPrice)}</Td>
                 <Td><HStack><Text fontWeight="800" color={isLow ? 'orange.500' : text}>{product.stock}</Text><Text fontSize="xs" color={muted}>unid.</Text>{isLow && <Icon as={MdWarning} color="orange.400" />}</HStack></Td>
-                <Td><HStack><Switch size="sm" colorScheme="green" isChecked={product.active} onChange={() => toggleActive(product)} /><Text fontSize="sm">{product.active ? 'Activo' : 'Inactivo'}</Text></HStack></Td>
+                <Td><ActiveSwitch id={`product-${product.id}-active`} label={product.active ? 'Activo' : 'Inactivo'} isChecked={product.active} onChange={() => toggleActive(product)} /></Td>
                 <Td><Menu placement="bottom-end"><MenuButton as={IconButton} aria-label="Acciones" icon={<MdMoreVert />} variant="ghost" /><MenuList><MenuItem icon={<MdInventory2 />} onClick={() => openAdjustment(product)}>Ajustar inventario</MenuItem><MenuItem as={RouterLink} to={`/admin/product/edit/${product.id}`} icon={<MdEdit />}>Editar producto</MenuItem></MenuList></Menu></Td>
               </Tr>;
             })}</Tbody>
@@ -117,7 +120,7 @@ export default function Products() {
         <Flex p="16px 20px" borderTopWidth="1px" borderColor={border} justify="space-between"><Text fontSize="sm" color={muted}>Mostrando {filtered.length} de {normalized.length} productos</Text></Flex>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered><ModalOverlay /><ModalContent><ModalHeader>Ajustar inventario</ModalHeader><ModalCloseButton /><ModalBody><Text fontWeight="700" color={text}>{adjusting?.description}</Text><Text color={muted} fontSize="sm" mb="20px">Existencia actual: {adjusting?.stock || 0} unidades</Text><Text fontSize="sm" fontWeight="600" mb="8px">Cantidad del ajuste</Text><Input type="number" value={adjustment} onChange={e => setAdjustment(Number(e.target.value))} /><HStack mt="12px" spacing="8px"><Button size="sm" leftIcon={<MdArrowUpward />} onClick={() => setAdjustment(Math.abs(adjustment || 1))}>Entrada</Button><Button size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(adjustment || 1))}>Salida</Button></HStack><Text fontSize="sm" color={muted} mt="16px">Nuevo total: <b>{Math.max(0, Number(adjusting?.stock || 0) + adjustment)} unidades</b></Text></ModalBody><ModalFooter><Button variant="ghost" mr="8px" onClick={onClose}>Cancelar</Button><Button colorScheme="brand" isDisabled={adjustment === 0} isLoading={saving} onClick={saveAdjustment}>Guardar ajuste</Button></ModalFooter></ModalContent></Modal>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered><ModalOverlay /><ModalContent><ModalHeader>Ajustar inventario</ModalHeader><ModalCloseButton /><ModalBody><Text fontWeight="700" color={text}>{adjusting?.description}</Text><Text color={muted} fontSize="sm" mb="20px">Existencia actual: {adjusting?.stock || 0} unidades</Text><Text fontSize="sm" fontWeight="600" mb="8px">Cantidad del ajuste</Text><Input type="number" step="1" value={adjustment} onChange={e => setAdjustment(Number(e.target.value))} /><HStack mt="12px" spacing="8px"><Button size="sm" leftIcon={<MdArrowUpward />} onClick={() => setAdjustment(Math.abs(Math.trunc(adjustment) || 1))}>Entrada</Button><Button size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(Math.trunc(adjustment) || 1))}>Salida</Button></HStack><Text fontSize="sm" color={Number(adjusting?.stock || 0) + adjustment < 0 ? 'red.500' : muted} mt="16px">Nuevo total: <b>{Number(adjusting?.stock || 0) + adjustment} unidades</b></Text></ModalBody><ModalFooter><Button variant="ghost" mr="8px" onClick={onClose}>Cancelar</Button><Button colorScheme="brand" isDisabled={!Number.isInteger(adjustment) || adjustment === 0 || Number(adjusting?.stock || 0) + adjustment < 0} isLoading={saving} onClick={saveAdjustment}>Guardar ajuste</Button></ModalFooter></ModalContent></Modal>
       <CategoryManager kind="products" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
     </Box>
   );

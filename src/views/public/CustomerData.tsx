@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { Alert, AlertIcon, Box, FormControl, FormHelperText, FormLabel, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
@@ -7,6 +6,7 @@ import { fetchClientNameByCedula } from 'services/CedulaService';
 import { PublicCard, PublicPage } from './PublicPage';
 import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
+import Form from 'components/form/Form';
 import { saveCustomerDraft } from './customerDraft';
 import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
 
@@ -15,7 +15,7 @@ export default function CustomerData() {
   const [message, setMessage] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [form, setForm] = useState({ nationalId: '', phone: '' });
-  const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const set = (key: keyof typeof form, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleContinue = async () => {
     if (isChecking) return;
@@ -40,10 +40,12 @@ export default function CustomerData() {
       if (existingClient) {
         const savedPhone = onlyDigits(existingClient.phone || existingClient.telefono);
         if (savedPhone && savedPhone !== phoneDigits) {
-          setMessage('El teléfono no coincide con el registrado para esta cédula.');
+          setMessage('No pudimos verificar los datos ingresados. Revisalos e intentá nuevamente.');
           return;
         }
 
+        const defaultAddress = existingClient.addresses?.find(address => address.id === existingClient.defaultAddressId && address.active !== false)
+          || existingClient.addresses?.find(address => address.isDefault && address.active !== false);
         saveCustomerDraft({
           nationalId,
           phone: onlyDigits(existingClient.phone || existingClient.telefono || phoneDigits),
@@ -51,7 +53,17 @@ export default function CustomerData() {
           isExistingClient: true,
           name: existingClient.name,
           nickname: existingClient.nickname,
-          address: existingClient.address,
+          address: defaultAddress ? {
+            province: defaultAddress.province.name,
+            canton: defaultAddress.canton.name,
+            district: defaultAddress.district.name,
+            neighborhood: defaultAddress.locality.name,
+            details: defaultAddress.exactAddress,
+            additionalDirections: defaultAddress.additionalDirections,
+            coordinates: defaultAddress.position ? `${defaultAddress.position.latitude.toFixed(6)},${defaultAddress.position.longitude.toFixed(6)}` : '',
+            canonical: defaultAddress,
+            savedAddressId: defaultAddress.id,
+          } : existingClient.address,
         });
         history.push('/customer/info');
         return;
@@ -80,6 +92,7 @@ export default function CustomerData() {
     >
       <Box h={{ base: '8px', md: '12px' }} />
       <PublicCard>
+        <Form onFormSubmit={(event) => { event.preventDefault(); handleContinue(); }}>
         <Stack spacing="18px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
           <Stack spacing="4px">
@@ -100,6 +113,7 @@ export default function CustomerData() {
           </SimpleGrid>
           <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel={isChecking ? 'Verificando…' : 'Verificar y continuar'} onBack={() => history.replace('/')} onContinue={handleContinue} isContinueLoading={isChecking} />
         </Stack>
+        </Form>
       </PublicCard>
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />

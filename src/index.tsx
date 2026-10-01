@@ -16,10 +16,12 @@ import ViewOrder from './views/public/ViewOrder';
 import VirtualMall from './views/public/VirtualMall';
 import Portfolio from './views/public/Portfolio';
 import { AuthProvider } from './contexts/AuthContext';
+import AppErrorBoundary from './components/exceptions/AppErrorBoundary';
 
 ReactDOM.render(
 	<ChakraProvider theme={theme}>
-		<OrderRefreshProvider>
+		<AppErrorBoundary>
+		 <OrderRefreshProvider>
 			<React.StrictMode>
 				<AuthProvider>   
 					<HashRouter>
@@ -39,13 +41,14 @@ ReactDOM.render(
 							<PrivateRoute path={`/admin/client`} roles={['admin']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/user`} roles={['admin']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/closing`} roles={['admin', 'colaborador']} component={AdminLayout} />
-							<Route path={`/customer/order`} component={AdminLayout} />
+							<PrivateRoute path={`/admin/dashboard`} roles={['admin', 'colaborador']} component={AdminLayout} />
 							<Redirect to='/' />
 						</Switch>
 					</HashRouter>
 				</AuthProvider>
 			</React.StrictMode>
-		</OrderRefreshProvider>
+		 </OrderRefreshProvider>
+		</AppErrorBoundary>
 	</ChakraProvider>,
 	document.getElementById('root')
 );

@@ -1,10 +1,9 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
   AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
   Badge, Box, Button, Center, Flex, FormControl, FormLabel, HStack, Icon, Image,
-  SimpleGrid, Spinner, Stack, Switch, Tab, TabList, Tabs, Text, Textarea,
+  Select, SimpleGrid, Stack, Switch, Text, Textarea,
   useColorModeValue, useDisclosure, useToast,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
@@ -13,26 +12,28 @@ import Card from 'components/card/Card';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import PageHeader from 'components/layout/PageHeader';
 import SponsorService from 'services/SponsorService';
-import { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import useCategories from 'hooks/useCategories';
 import CategoryManager from 'components/category/CategoryManager';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
+import Form from 'components/form/Form';
 
 export default function SponsorsAdmin() {
   const { query } = usePageSearch();
   const { categories, reload: reloadCategories } = useCategories('sponsors');
-  const [sponsors, setSponsors] = useState([]);
+  const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
   const [availableCopy, setAvailableCopy] = useState(defaultSponsorDisplaySettings);
   const [savingAvailableCopy, setSavingAvailableCopy] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState<SponsorItem | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const categoryManager = useDisclosure();
-  const cancelRef = useRef();
+  const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
   const textColor = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.500', 'gray.400');
@@ -49,7 +50,7 @@ export default function SponsorsAdmin() {
   useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
 
   const availableCategories = useMemo(() => Array.from(new Set([...categories, ...sponsors.map((sponsor) => sponsor.category).filter(Boolean)])), [categories, sponsors]);
-  const sponsorsByCategory = useMemo(() => availableCategories.reduce((acc, type) => ({
+  const sponsorsByCategory = useMemo(() => availableCategories.reduce<Record<string, SponsorItem[]>>((acc, type) => ({
     ...acc,
     [type]: sponsors.filter((sponsor) => sponsor.category === type),
   }), {}), [availableCategories, sponsors]);
@@ -57,7 +58,7 @@ export default function SponsorsAdmin() {
   const searchTerm = query.trim().toLocaleLowerCase('es');
   const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
     .sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-  const matchesSearch = (sponsor) => [sponsor.name, sponsor.description, sponsor.category]
+  const matchesSearch = (sponsor: SponsorItem) => [sponsor.name, sponsor.description, sponsor.category]
     .some((value) => String(value || '').toLocaleLowerCase('es').includes(searchTerm));
   const visibleBusinesses = searchTerm
     ? sponsors.filter(matchesSearch).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order)
@@ -65,7 +66,7 @@ export default function SponsorsAdmin() {
   const activeCount = sponsors.filter((sponsor) => sponsor.active !== false).length;
   const categoriesInUse = availableCategories.filter((category) => sponsorsByCategory[category]?.length).length;
 
-  const toggleActive = async (sponsor) => {
+  const toggleActive = async (sponsor: SponsorItem) => {
     const next = { ...sponsor, active: !sponsor.active };
     setSponsors((items) => items.map((item) => item.id === sponsor.id ? next : item));
     try { await SponsorService.edit(sponsor.id, next); }
@@ -75,7 +76,7 @@ export default function SponsorsAdmin() {
     }
   };
 
-  const requestDelete = (sponsor) => { setPendingDelete(sponsor); onOpen(); };
+  const requestDelete = (sponsor: SponsorItem) => { setPendingDelete(sponsor); onOpen(); };
   const confirmDelete = async () => {
     if (!pendingDelete) return;
     try {
@@ -87,7 +88,7 @@ export default function SponsorsAdmin() {
     } catch { toast({ status: 'error', title: 'No se pudo eliminar el patrocinador' }); }
   };
 
-  const reorderSponsors = async (targetIndex, sponsorId = draggedSponsorId) => {
+  const reorderSponsors = async (targetIndex: number, sponsorId = draggedSponsorId) => {
     if (!sponsorId || savingOrder || searchTerm) return;
     const fromIndex = currentBusinesses.findIndex((sponsor) => sponsor.id === sponsorId);
     if (fromIndex < 0 || fromIndex === targetIndex) return;
@@ -133,19 +134,14 @@ export default function SponsorsAdmin() {
         ].map((stat) => <Card key={stat.label} p="16px" direction="row" align="center" gap="12px"><Center boxSize="42px" borderRadius="14px" bg="brand.50" color="brand.500"><Icon as={stat.icon} boxSize="22px" /></Center><Box><Text fontSize="xl" fontWeight="900" color={textColor}>{stat.value}</Text><Text fontSize="sm" color={muted}>{stat.label}</Text></Box></Card>)}
       </SimpleGrid>
 
-      <Card p={{ base: '14px', md: '18px' }} mb="18px">
-        <Tabs index={Math.max(0, availableCategories.indexOf(selectedCategory))} onChange={(index) => setSelectedCategory(availableCategories[index])} colorScheme="brand" variant="soft-rounded">
-          <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="10px" mb="12px">
-            <Box><Text fontWeight="800" color={textColor}>Categoría</Text><Text color={muted} fontSize="sm">Elegí una para ver y ordenar sus patrocinadores.</Text></Box>
-            <HStack><Button size="sm" variant="outline" leftIcon={<MdSettings />} onClick={categoryManager.onOpen}>Administrar</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
-          </Flex>
-          <TabList overflowX="auto" gap="6px" pb="4px">
-            {availableCategories.map((category) => <Tab key={category} flexShrink={0} fontSize="sm">{category}<Badge ml="7px" colorScheme="gray">{sponsorsByCategory[category]?.length || 0}</Badge></Tab>)}
-          </TabList>
-        </Tabs>
+      <Card p={{ base: '16px', md: '20px' }} mb="18px">
+        <Flex align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="14px">
+          <Box flex="1" maxW={{ md: '520px' }}><Text fontWeight="900" color={textColor}>Filtrar por categoría</Text><Text color={muted} fontSize="sm" mb="9px">Seleccioná una categoría; el buscador superior filtra por nombre y descripción.</Text><Select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} size="lg" borderRadius="xl">{availableCategories.map((category) => <option key={category} value={category}>{category} · {sponsorsByCategory[category]?.length || 0}</option>)}</Select></Box>
+          <HStack wrap="wrap"><Button variant="outline" leftIcon={<MdSettings />} onClick={categoryManager.onOpen}>Administrar categorías</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
+        </Flex>
       </Card>
 
-      {loading ? <Center py="70px"><Spinner size="xl" color="brand.500" /></Center> : visibleBusinesses.length === 0 ? (
+      {loading ? <AsyncContent isLoading loadingLabel="Cargando patrocinadores" /> : visibleBusinesses.length === 0 ? (
         <EmptyState icon={MdStorefront} title={searchTerm ? 'No hay coincidencias' : 'Esta categoría está vacía'} description={searchTerm ? 'Probá con otro nombre o limpiá la búsqueda superior.' : 'Usá “Nuevo patrocinador” para agregar el primero a esta categoría.'} />
       ) : (
         <Stack spacing="10px" mb="18px">
@@ -172,7 +168,7 @@ export default function SponsorsAdmin() {
 
       <Accordion allowToggle>
         <AccordionItem border="0">
-          <Card overflow="hidden"><AccordionButton px={{ base: '14px', md: '18px' }} py="14px"><Box flex="1" textAlign="left"><Text fontWeight="800">Configuración del espacio disponible</Text><Text color={muted} fontSize="sm">Mensaje que se muestra cuando todavía no hay un patrocinador.</Text></Box><AccordionIcon /></AccordionButton><AccordionPanel px={{ base: '14px', md: '18px' }} pb="18px"><SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px"><FormControl><FormLabel>Título</FormLabel><Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} /></FormControl><FormControl><FormLabel>Descripción</FormLabel><Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} /></FormControl></SimpleGrid><Button mt="14px" colorScheme="brand" onClick={saveAvailableCopy} isLoading={savingAvailableCopy}>Guardar configuración</Button></AccordionPanel></Card>
+          <Card overflow="hidden"><AccordionButton px={{ base: '14px', md: '18px' }} py="14px"><Box flex="1" textAlign="left"><Text fontWeight="800">Configuración del espacio disponible</Text><Text color={muted} fontSize="sm">Mensaje que se muestra cuando todavía no hay un patrocinador.</Text></Box><AccordionIcon /></AccordionButton><AccordionPanel px={{ base: '14px', md: '18px' }} pb="18px"><Form onFormSubmit={(event) => { event.preventDefault(); saveAvailableCopy(); }}><SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px"><FormControl><FormLabel>Título</FormLabel><Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} /></FormControl><FormControl><FormLabel>Descripción</FormLabel><Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} /></FormControl></SimpleGrid><Button type="submit" mt="14px" colorScheme="brand" isLoading={savingAvailableCopy}>Guardar configuración</Button></Form></AccordionPanel></Card>
         </AccordionItem>
       </Accordion>
 

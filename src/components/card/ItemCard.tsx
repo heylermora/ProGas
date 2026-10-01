@@ -24,10 +24,10 @@ import { formatValue } from 'utils/formatValue';
 import OrderService from 'services/OrderService';
 import PaymentModal from 'components/modal/PaymentModal';
 import { OrderStatus } from 'interfaces/OrderItem';
-import { isOrderLocked, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
+import { isOrderLocked, normalizeOrderStatus, SELECTABLE_ORDER_STATUSES } from 'utils/order';
 import { useAuth } from 'contexts/AuthContext';
 
-const STATUS_OPTIONS = ORDER_STATUSES.map(value => ({ value, label: value }));
+const STATUS_OPTIONS = SELECTABLE_ORDER_STATUSES.map(value => ({ value, label: value }));
 
 function getStatusProps(status: OrderStatus) {
   switch (status) {
@@ -126,10 +126,6 @@ export default function ItemCard(props: any) {
     try {
       const { onStatusChange: _cb, ...orderPayload } = props;
 
-      const currentPayments = Array.isArray(orderPayload.payments)
-        ? orderPayload.payments
-        : [];
-
       const newPayments = paymentPayload?.payments ?? [];
 
       const editedOrder: any = {
@@ -138,13 +134,23 @@ export default function ItemCard(props: any) {
       };
 
       if (paymentPayload) {
-        editedOrder.payments = [...currentPayments, ...newPayments];
+        editedOrder.payments = newPayments;
         editedOrder.totalPaid = paymentPayload.totalPaid;
         editedOrder.totalToPay = paymentPayload.totalToPay;
         editedOrder.change = paymentPayload.change;
         editedOrder.pending = paymentPayload.pending;
         editedOrder.paidAt = paymentPayload.paidAt;
         editedOrder.paymentNote = paymentPayload.note;
+      }
+
+      if (next === 'Pendiente' || next === 'En ruta') {
+        editedOrder.payments = [];
+        editedOrder.totalPaid = 0;
+        editedOrder.change = 0;
+        editedOrder.pending = 0;
+        editedOrder.paidAt = null;
+        editedOrder.paymentNote = null;
+        editedOrder.paymentMethod = null;
       }
 
       await OrderService.edit(id, editedOrder);
@@ -160,7 +166,7 @@ export default function ItemCard(props: any) {
 
   const onPickStatus = (next: OrderStatus) => {
     if (isSavingStatus) return;
-    if (next === localStatus) return;
+    if (next === localStatus && next !== 'Pagado') return;
 
     if (lockedForUser) return;
     if (next === 'Pagado') {
@@ -380,8 +386,11 @@ export default function ItemCard(props: any) {
 
       <PaymentModal
         id={id}
-        title="Añadir pago"
+        title={localStatus === 'Pagado' ? 'Editar pago' : 'Añadir pago'}
         totalToPay={totalAmount}
+        initialPayments={props.payments}
+        initialPaidAt={props.paidAt}
+        initialNote={props.paymentNote}
         isOpen={isPayOpen}
         onClose={handlePaymentClose}
         onSaved={handlePaymentSaved}

@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useParams, NavLink } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
-import { Center, Text, useColorModeValue, Flex, Spinner, Box } from '@chakra-ui/react';
+import { Center, Text, useColorModeValue, Flex, Box } from '@chakra-ui/react';
 
 import { formatValue } from 'utils/formatValue';
 import OrderService from 'services/OrderService';
 import { OrderItem, ProductItem } from 'interfaces/OrderItem';
 import Error from 'components/exceptions/Error';
 import Card from 'components/card/Card';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
+import BackButton from 'components/button/BackButton';
 
 export default function Details() {
   const brandStars = useColorModeValue('brand.500', 'brand.400');
-  const spinnerColor = useColorModeValue('brand.700', 'white');
   const textColor = useColorModeValue('navy.700', 'white');
   const secondaryTextColor = useColorModeValue('secondaryGray.600', 'secondaryGray.400');
   const borderColor = useColorModeValue('secondaryGray.200', 'whiteAlpha.100');
@@ -53,9 +54,7 @@ export default function Details() {
       {isError ? (
         <Error />
       ) : isLoading ? (
-        <Center>
-          <Spinner size="xl" variant={'darkBrand' as any} color={spinnerColor as any} />
-        </Center>
+        <AsyncContent isLoading loadingLabel="Cargando pedido" />
       ) : order ? (
         <>
           {/* Header de la Factura */}
@@ -241,13 +240,7 @@ export default function Details() {
           </Card>
 
           {/* Enlace de Regreso */}
-          <Center>
-            <NavLink to="/admin/order/index">
-              <Text color={brandStars} as="span" fontWeight="500" textAlign="center">
-                Volver
-              </Text>
-            </NavLink>
-          </Center>
+          <Center><BackButton to="/admin/order/index">Volver a pedidos</BackButton></Center>
         </>
       ) : (
         <Center>

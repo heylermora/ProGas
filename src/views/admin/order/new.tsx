@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Box, Text, Input, Select, Flex } from "@chakra-ui/react";
 import { customAlphabet } from "nanoid";
 import { useHistory } from "react-router-dom";
@@ -10,7 +9,7 @@ import orderService from "services/OrderService";
 import productService from "services/ProductService";
 
 import { OrderItem, ProductItem } from "interfaces/OrderItem";
-import type { Product } from "interfaces/Product";
+import type { Product } from "interfaces/ProductItem";
 import FormField from "interfaces/FormField";
 import Error from "components/exceptions/Error";
 import { handleNationalIdLookup } from "utils/nationalId";
@@ -18,6 +17,8 @@ import { handleNationalIdLookup } from "utils/nationalId";
 const nano = customAlphabet("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789", 6);
 
 export default function NewOrder() {
+  const requestId = useRef(crypto.randomUUID());
+  const orderCode = useRef(nano());
   const [showModal, setShowModal] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -348,20 +349,21 @@ export default function NewOrder() {
 
   const handleFormSubmit = async (fieldValues: { [key: string]: any }) => {
     const newOrder: Omit<OrderItem, "id"> = {
-      orderCode: nano(),
+      orderCode: orderCode.current,
+      requestId: requestId.current,
       status: "Nuevo",
       requestDate: fieldValues.requestDateTime,
       client: fieldValues.clientName,
       clientId: fieldValues.clientId,
       location: fieldValues.location,
+      ...(fieldValues.location?.canonical ? { deliveryAddressSnapshot: fieldValues.location.canonical } : {}),
       comment: fieldValues.comment,
       items: products,
       totalAmount: products.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 0), 0),
     };
 
     try {
-      await productService.discountStock(products);
-      const response = await orderService.create(newOrder);
+      const response = await orderService.createWithStock(newOrder);
       console.log("Orden creada con ID de Firebase:", response.id);
       setShowModal(true);
     } catch (error) {

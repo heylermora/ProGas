@@ -39,7 +39,13 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
+
+      - name: Type-check source
+        run: npm run typecheck
+
+      - name: Lint source
+        run: npm run lint
 
       - name: Run tests
         run: npm test -- --watchAll=false --passWithNoTests --runInBand
@@ -58,7 +64,6 @@ jobs:
 
       - name: Build production bundle
         env:
-          CI: false
           GENERATE_SOURCEMAP: false
         run: npm run build
 

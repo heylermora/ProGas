@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   Modal,
@@ -24,6 +23,7 @@ import {
   Box,
 } from '@chakra-ui/react';
 import { MdAdd, MdDelete } from 'react-icons/md';
+import Form from 'components/form/Form';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
 
@@ -49,9 +49,13 @@ function PaymentModal(props: {
   totalToPay: number; // ✅ total a pagar
   isOpen: boolean;
   onClose: () => void;
+  onSave?: (payload: any) => void | Promise<void>;
   onSaved?: (payload: any) => void | Promise<void>;
+  initialPayments?: Array<{ method: PaymentMethod; amount: number; reference?: string | null; note?: string | null }>;
+  initialPaidAt?: string;
+  initialNote?: string | null;
 }) {
-  const { title = 'Añadir pago', id, totalToPay, isOpen, onClose, onSaved, onSave } = props;
+  const { title = 'Añadir pago', id, totalToPay, isOpen, onClose, onSaved, onSave, initialPayments, initialPaidAt, initialNote } = props;
 
   const toast = useToast();
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -71,12 +75,12 @@ function PaymentModal(props: {
   // reset cuando abre
   useEffect(() => {
     if (isOpen) {
-      setRows([{ method: 'Efectivo', amount: '' }]);
-      setPaidAt(localNow());
-      setGeneralNote('');
+      setRows(initialPayments?.length ? initialPayments.map(payment => ({ ...payment, amount: String(payment.amount), reference: payment.reference || '', note: payment.note || '' })) : [{ method: 'Efectivo', amount: '' }]);
+      setPaidAt(initialPaidAt ? new Date(initialPaidAt).toISOString().slice(0, 16) : localNow());
+      setGeneralNote(initialNote || '');
       setIsSaving(false);
     }
-  }, [isOpen]);
+  }, [initialNote, initialPaidAt, initialPayments, isOpen]);
 
   const totalPaid = useMemo(() => rows.reduce((sum, r) => sum + toNumber(r.amount), 0), [rows]);
   const diff = useMemo(() => totalPaid - (totalToPay || 0), [totalPaid, totalToPay]);
@@ -157,6 +161,7 @@ function PaymentModal(props: {
     <Modal isOpen={isOpen} onClose={handleClose} size="xl">
       <ModalOverlay />
       <ModalContent borderRadius="20px" bg={cardBg} borderWidth="1px" borderColor={border}>
+        <Form onFormSubmit={(event) => { event.preventDefault(); handleSave(); }}>
         <ModalHeader>
           <Text color={textColor} fontSize="22px" fontWeight="700" noOfLines={1}>
             {title}
@@ -199,7 +204,7 @@ function PaymentModal(props: {
               <Text fontWeight="700" color={textColor}>
                 Métodos de pago
               </Text>
-              <Button leftIcon={<MdAdd />} size="sm" borderRadius="full" onClick={addRow}>
+              <Button type="button" leftIcon={<MdAdd />} size="sm" borderRadius="full" onClick={addRow}>
                 Agregar método
               </Button>
             </Flex>
@@ -278,6 +283,7 @@ function PaymentModal(props: {
                     </FormControl>
 
                     <IconButton
+                      type="button"
                       aria-label="Eliminar método"
                       icon={<MdDelete />}
                       variant="ghost"
@@ -300,12 +306,12 @@ function PaymentModal(props: {
             </FormControl>
 
             <Flex justify="flex-end" gap={3} pt={2}>
-              <Button variant="ghost" onClick={handleClose} isDisabled={isSaving}>
+              <Button type="button" variant="ghost" onClick={handleClose} isDisabled={isSaving}>
                 Cancelar
               </Button>
               <Button
+                type="submit"
                 colorScheme="brand"
-                onClick={handleSave}
                 isLoading={isSaving}
                 loadingText="Guardando..."
               >
@@ -314,6 +320,7 @@ function PaymentModal(props: {
             </Flex>
           </VStack>
         </ModalBody>
+        </Form>
       </ModalContent>
     </Modal>
   );

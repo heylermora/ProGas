@@ -1,11 +1,7 @@
-// @ts-nocheck
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 
 import {
-  Center,
-  Spinner,
-  useColorModeValue,
   Box,
   Text,
   Input,
@@ -19,7 +15,7 @@ import OrderService from "services/OrderService";
 import productService from "services/ProductService";
 
 import { OrderItem, ProductItem } from "interfaces/OrderItem";
-import type { Product } from "interfaces/Product";
+import type { Product } from "interfaces/ProductItem";
 import FormField from "interfaces/FormField";
 import Error from "components/exceptions/Error";
 import { useOrderRefresh } from "contexts/OrderRefreshContext";
@@ -27,6 +23,7 @@ import { handleNationalIdLookup } from "utils/nationalId";
 import { useAuth } from "contexts/AuthContext";
 import { isOrderLocked } from "utils/order";
 import Unauthorized from "components/exceptions/Unauthorized";
+import AsyncContent from "components/dataDisplay/AsyncContent";
 
 const renderProductItem = (item: ProductItem) => (
   <Box>
@@ -43,7 +40,6 @@ const renderProductItem = (item: ProductItem) => (
 );
 
 export default function Edit() {
-  const spinnerColor = useColorModeValue("brand.700", "white");
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const { triggerRefresh } = useOrderRefresh();
@@ -434,6 +430,7 @@ export default function Edit() {
       clientId: fieldValues.clientId ?? clientId,
       client: fieldValues.clientName ?? clientName,
       location: fieldValues.location ?? existingOrderData.location,
+      deliveryAddressSnapshot: fieldValues.location?.canonical ?? existingOrderData.deliveryAddressSnapshot,
       comment: fieldValues.comment ?? existingOrderData.comment,
       items: products,
       totalAmount: products.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 0), 0),
@@ -459,11 +456,7 @@ export default function Edit() {
   if (isError) return <Error />;
 
   if (isLoading || !existingOrderData) {
-    return (
-      <Center>
-        <Spinner size="xl" color={spinnerColor} />
-      </Center>
-    );
+    return <AsyncContent isLoading loadingLabel="Cargando pedido" />;
   }
 
   if (isOrderLocked(existingOrderData) && !hasRole(['admin'])) return <Unauthorized />;

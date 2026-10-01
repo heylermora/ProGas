@@ -1,4 +1,3 @@
-/* eslint-disable */
 /*!
   _   _  ___  ____  ___ ________  _   _   _   _ ___   
  | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
@@ -42,12 +41,12 @@ import type { ResponsiveValue } from '@chakra-ui/react';
 // Custom components
 import { HSeparator } from "components/separator/Separator";
 import DefaultAuth from "layouts/auth/Default";
-import { loginUser } from "services/AuthService";
-import Error from 'components/exceptions/Error';
+import { loginUser, requestPasswordReset } from "services/AuthService";
 // Assets
 import illustration from "assets/img/auth/auth.jpg";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
+import Form from 'components/form/Form';
 
 function SignIn() {
   // Chakra color mode
@@ -59,23 +58,36 @@ function SignIn() {
 
   const history = useHistory();
   const [show, setShow] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   const handleClick = () => setShow(!show);
 
   const handleSignIn = async () => {
-    loginUser(email, password).then((response) => {
-        console.log('Ok:', response);
+    if (isSubmitting) return;
+    setFeedback("");
+    setIsSubmitting(true);
+    loginUser(email, password).then(() => {
         history.push('/admin/order/index');
       })
-      .catch((error) => {
-        console.error('Error:', error);
-        if (error?.response?.status !== 400) {
-          setIsError(true);
-        }
-      });
+      .catch(() => setFeedback('No fue posible iniciar sesión. Verificá los datos e intentá nuevamente.'))
+      .finally(() => setIsSubmitting(false));
+  };
+
+  const handlePasswordReset = async () => {
+    if (!email.trim()) {
+      setFeedback('Ingresá tu correo electrónico para solicitar la recuperación.');
+      return;
+    }
+    try {
+      await requestPasswordReset(email);
+      setFeedback('Si el correo está registrado, recibirás instrucciones para restablecer la contraseña.');
+    } catch {
+      // Keep the response neutral so the form does not disclose registered accounts.
+      setFeedback('Si el correo está registrado, recibirás instrucciones para restablecer la contraseña.');
+    }
   };
   // Responsive typed constants to avoid TS complex union warnings
   const maxWPrimary: ResponsiveValue<string> = { base: '100%', md: 'max-content' };
@@ -88,17 +100,8 @@ function SignIn() {
   const innerMb: ResponsiveValue<string> = { base: '20px', md: 'auto' };
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
-      { isError ? (
-        <Flex
-        maxW={maxWPrimary}
-        w='40%'
-        h='100%'
-        justifyContent='center'
-        flexDirection='column'>
-          <Error />
-        </Flex>
-      ) : (
-        <>
+      <>
+        <Form onFormSubmit={(event) => { event.preventDefault(); handleSignIn(); }}>
           <Flex
           maxW={maxWPrimary}
           w='100%'
@@ -148,6 +151,7 @@ function SignIn() {
                 Email<Text color={brandStars}>*</Text>
               </FormLabel>
               <Input
+                id="email"
                 isRequired={true}
                 variant='auth'
                 fontSize='sm'
@@ -173,6 +177,7 @@ function SignIn() {
               </FormLabel>
               <InputGroup size='md'>
                 <Input
+                  id="password"
                   isRequired={true}
                   fontSize='sm'
                   placeholder='Min. 8 caracteres'
@@ -184,33 +189,34 @@ function SignIn() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <InputRightElement display='flex' alignItems='center' mt='4px'>
-                  <Icon
+                  <Button
+                    aria-label={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    variant="ghost"
+                    minW="40px"
                     color={textColorSecondary}
-                    _hover={{ cursor: "pointer" }}
-                    as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
                     onClick={handleClick}
-                  />
+                  ><Icon as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye} /></Button>
                 </InputRightElement>
               </InputGroup>
               <Flex justifyContent='space-between' align='center' mb='12px'>
-                <NavLink to='/auth/forgot-password'>
-                  <Text
+                <Button variant="link" onClick={handlePasswordReset}
                     color={textColorBrand}
                     fontSize='sm'
-                    w='248px'
                     fontWeight='500'>
                     ¿Contraseña olvidada?
-                  </Text>
-                </NavLink>
+                </Button>
               </Flex>
+              {feedback && <Text role="status" color={textColorDetails} fontSize="sm" mb="12px">{feedback}</Text>}
               <Button
+                type="submit"
                 fontSize='sm'
                 variant='brand'
                 fontWeight='500'
                 w='100%'
                 h='50'
                 mb='24px'
-                onClick={handleSignIn}>
+                isLoading={isSubmitting}
+                loadingText="Ingresando">
                 Iniciar Sesión
               </Button>
             </FormControl>
@@ -233,8 +239,8 @@ function SignIn() {
               </Text>
             </Flex>
           </Flex>
-        </Flex></>
-      )}
+        </Flex>
+        </Form></>
     </DefaultAuth>
   );
 }

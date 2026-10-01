@@ -19,6 +19,7 @@ import IconBox from 'components/icons/IconBox';
 import Error from 'components/exceptions/Error';
 import DashboardItem from 'interfaces/DashboardItem';
 import DashboardService from 'services/DashboardService';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 
 import CheckList from 'views/admin/dashboard/components/CheckList';
 import BarChartCard from 'views/admin/dashboard/components/BarChartCard';
@@ -53,6 +54,7 @@ export default function Index() {
 
 	const [typesList, setTypesList] = useState([]);
 	const [isError, setIsError] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		let promise = DashboardService.getAll();
@@ -135,7 +137,8 @@ export default function Index() {
 			.catch((error) => {
 				console.error('Error fetching projects:', error);
 				setIsError(true);
-			});
+			})
+			.finally(() => setIsLoading(false));
 	}, []);
 
 	function sumByMonth(data: any[]): any[] {
@@ -161,6 +164,8 @@ export default function Index() {
 		}
 		return sortedResult;
 	}
+
+	if (isLoading) return <AsyncContent isLoading loadingLabel="Cargando dashboard" />;
 
 	return (
 		isError ? (

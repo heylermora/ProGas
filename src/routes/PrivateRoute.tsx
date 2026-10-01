@@ -2,6 +2,7 @@ import React from "react";
 import { Route, RouteProps } from "react-router-dom";
 import { AppRole, useAuth } from "../contexts/AuthContext";
 import Unauthorized from "components/exceptions/Unauthorized";
+import AsyncContent from "components/dataDisplay/AsyncContent";
 
 interface PrivateRouteProps extends RouteProps {
   component: React.ComponentType<any>;
@@ -15,7 +16,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 }) => {
   const { user, loading, hasRole } = useAuth();   // ← usa Firebase
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) return <AsyncContent isLoading loadingLabel="Verificando acceso" />;
 
   return (
     <Route

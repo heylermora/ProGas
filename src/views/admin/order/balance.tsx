@@ -1,11 +1,8 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import {
   Box,
   Flex,
   useColorModeValue,
-  Spinner,
-  Center,
   Text,
   Stat,
   StatLabel,
@@ -21,21 +18,25 @@ import {
   SimpleGrid,
   Tag,
   HStack,
+  Table, Tbody, Td, Th, Thead, Tr,
 } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { MdAdd } from 'react-icons/md';
 
 import orderService from 'services/OrderService';
-import OrderItem from 'interfaces/OrderItem';
+import { OrderItem } from 'interfaces/OrderItem';
 import Error from 'components/exceptions/Error';
 import Empty from 'components/exceptions/Empty';
 import { useOrderRefresh } from 'contexts/OrderRefreshContext';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 import { isOrderPaid } from 'utils/order';
+import ClosingService from 'services/ClosingService';
+import { ClosingItem } from 'interfaces/ClosingItem';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
 
-type DailySummary = {
+type WeeklySummary = {
   date: string;
   totalOrders: number;
   totalAmount: number;
@@ -52,8 +53,7 @@ type DailySummary = {
 
 const METHODS: PaymentMethod[] = ['Efectivo', 'Sinpe', 'Tarjeta', 'Otro'];
 
-export default function Balance() {
-  const spinnerColor = useColorModeValue('brand.700', 'white');
+export default function Balance({ embedded = false }: { embedded?: boolean }) {
   const cardBg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('secondaryGray.800', 'white');
   const subtleText = useColorModeValue('secondaryGray.500', 'secondaryGray.400');
@@ -61,16 +61,20 @@ export default function Balance() {
 
   const { refreshKey } = useOrderRefresh();
 
-  const [summaries, setSummaries] = useState<DailySummary[]>([]);
+  const [summaries, setSummaries] = useState<WeeklySummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [shiftClosings, setShiftClosings] = useState<ClosingItem[]>([]);
 
-  const topPt: ResponsiveValue<string> = { base: '180px', md: '80px', xl: '80px' };
+  const topPt: ResponsiveValue<string> = embedded ? '0' : { base: '180px', md: '80px', xl: '80px' };
 
   const getLocalDateKey = (date: Date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
+    const monday = new Date(date);
+    const day = monday.getDay() || 7;
+    monday.setDate(monday.getDate() - day + 1);
+    const y = monday.getFullYear();
+    const m = String(monday.getMonth() + 1).padStart(2, '0');
+    const d = String(monday.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   };
 
@@ -93,8 +97,8 @@ export default function Balance() {
     if (typeof order?.totalAmount === 'number') return order.totalAmount;
     if (typeof order?.totalToPay === 'number') return order.totalToPay;
     return order?.items
-      ? order.items.reduce(
-          (sum, it) => sum + (it.price || 0) * (it.quantity || 0),
+        ? order.items.reduce(
+          (sum: number, it: { price?: number; quantity?: number }) => sum + (it.price || 0) * (it.quantity || 0),
           0
         )
       : 0;
@@ -104,15 +108,15 @@ export default function Balance() {
     setIsLoading(true);
     setIsError(false);
 
-    orderService
-      .getAll()
-      .then((ordersData: OrderItem[]) => {
+    Promise.all([orderService.getAll(), ClosingService.getAll()])
+      .then(([ordersData, closingsData]: [OrderItem[], ClosingItem[]]) => {
+        setShiftClosings(closingsData.filter(closing => closing.type === 'shift').sort((a, b) => b.from.localeCompare(a.from)));
         if (!ordersData || ordersData.length === 0) {
           setSummaries([]);
           return;
         }
 
-        const mapByDate: Record<string, DailySummary> = {};
+        const mapByDate: Record<string, WeeklySummary> = {};
 
         ordersData.forEach((order: any) => {
           if (!order.requestDate) return;
@@ -184,9 +188,7 @@ export default function Balance() {
       {isError ? (
         <Error />
       ) : isLoading ? (
-        <Center>
-          <Spinner size="xl" variant={'darkBrand' as any} color={spinnerColor as any} />
-        </Center>
+        <AsyncContent isLoading loadingLabel="Calculando balance" />
       ) : summaries.length === 0 ? (
         <>
           <IconButton
@@ -198,12 +200,17 @@ export default function Balance() {
             as={RLink as any}
             padding="0px 8px"
             borderRadius="100%"
-            to="/order/new"
+            to="/admin/order/new"
           />
-          <Empty message="Aún no hay datos para generar el balance diario." />
+          <Empty message="Aún no hay datos para generar el balance semanal." />
         </>
       ) : (
         <Flex flexDirection="column" w="100%" maxW="1100px" mx="auto">
+          <Box bg={cardBg} borderRadius="2xl" p={{ base: 3, md: 5 }} mb="18px" overflowX="auto">
+            <Text fontWeight="900" fontSize="lg" mb="3">Desglose por día y turno</Text>
+            <Table size="sm"><Thead><Tr><Th>Día</Th><Th>Turno</Th><Th>Colaborador</Th><Th isNumeric>Ventas</Th><Th isNumeric>Costos</Th><Th isNumeric>Gastos</Th><Th isNumeric>Utilidad</Th></Tr></Thead><Tbody>{shiftClosings.map(closing => <Tr key={closing.id}><Td>{new Date(closing.from).toLocaleDateString('es-CR')}</Td><Td>{new Date(closing.from).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}–{new Date(closing.to).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}</Td><Td>{closing.createdByName || 'Sin nombre registrado'}</Td><Td isNumeric>{formatCRC(closing.totalSales)}</Td><Td isNumeric>{formatCRC(closing.costTotal)}</Td><Td isNumeric>{formatCRC(closing.expenseTotal)}</Td><Td isNumeric fontWeight="800">{formatCRC(closing.totalSales - closing.costTotal - closing.expenseTotal)}</Td></Tr>)}</Tbody></Table>
+            {!shiftClosings.length && <Text color={subtleText} py="5" textAlign="center">Confirmá el primer corte de turno para ver este desglose.</Text>}
+          </Box>
           <Flex align="center" mb="16px">
             <Box>
               <Text fontSize="sm" color={subtleText}>
@@ -218,17 +225,17 @@ export default function Balance() {
               as={RLink as any}
               padding="0px 8px"
               borderRadius="100%"
-              to="/order/new"
+              to="/admin/order/new"
             />
           </Flex>
 
           <Accordion allowMultiple defaultIndex={[0]}>
             {summaries.map((summary) => {
-              const prettyDate = new Date(summary.date).toLocaleDateString('es-CR', {
+              const prettyDate = `Semana del ${new Date(`${summary.date}T00:00`).toLocaleDateString('es-CR', {
                 year: 'numeric',
                 month: 'short',
                 day: '2-digit',
-              });
+              })}`;
 
               const hasPending = summary.pendingAmount > 0;
               const methodsTotal = METHODS.reduce(
@@ -295,7 +302,7 @@ export default function Balance() {
 
                         <Box flex="1">
                           <Stat>
-                            <StatLabel fontSize="xs">Vuelto del día</StatLabel>
+                            <StatLabel fontSize="xs">Vuelto de la semana</StatLabel>
                             <StatNumber fontSize="md">
                               {formatCRC(summary.changeTotal)}
                             </StatNumber>

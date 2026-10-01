@@ -1,4 +1,3 @@
-/* eslint-disable */
 /*!
   _   _  ___  ____  ___ ________  _   _   _   _ ___   
  | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
@@ -43,11 +42,11 @@ import type { ResponsiveValue } from '@chakra-ui/react';
 import { HSeparator } from "components/separator/Separator";
 import DefaultAuth from "layouts/auth/Default";
 import { registerUser } from "services/AuthService";
-import Error from 'components/exceptions/Error';
 // Assets
 import illustration from "assets/img/auth/auth.jpg";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
+import Form from 'components/form/Form';
 
 function SignUp() {
   // Chakra color mode
@@ -59,23 +58,22 @@ function SignUp() {
 
   const history = useHistory();
   const [show, setShow] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   const handleClick = () => setShow(!show);
 
   const handleSignUp = async () => {
-    registerUser(email, password).then((response) => {
-				console.log('Ok:', response);
+    if (isSubmitting) return;
+    setFeedback("");
+    setIsSubmitting(true);
+    registerUser(email, password).then(() => {
         history.push('/customer/data');
 			})
-			.catch((error) => {
-				console.error('Error:', error);
-				if (error?.response?.status !== 400) {
-					setIsError(true);
-				}
-			});
+			.catch(() => setFeedback('No fue posible crear la cuenta. Revisá el correo y los requisitos de la contraseña.'))
+      .finally(() => setIsSubmitting(false));
   };
 
   // Responsive typed constants
@@ -90,10 +88,8 @@ function SignUp() {
 
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
-      { isError ? (
-        <Error />
-      ) : (
         <>
+          <Form onFormSubmit={(event) => { event.preventDefault(); handleSignUp(); }}>
           <Flex
             maxW={maxWPrimary}
             w='100%'
@@ -134,6 +130,7 @@ function SignUp() {
               </Flex>
               <FormControl>
                 <FormLabel
+                  htmlFor="signup-email"
                   display='flex'
                   ms='4px'
                   fontSize='sm'
@@ -143,6 +140,7 @@ function SignUp() {
                   Email<Text color={brandStars}>*</Text>
                 </FormLabel>
                 <Input
+                  id="signup-email"
                   isRequired={true}
                   variant='auth'
                   fontSize='sm'
@@ -156,6 +154,7 @@ function SignUp() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <FormLabel
+                  htmlFor="signup-password"
                   ms='4px'
                   fontSize='sm'
                   fontWeight='500'
@@ -165,6 +164,7 @@ function SignUp() {
                 </FormLabel>
                 <InputGroup size='md'>
                   <Input
+                    id="signup-password"
                     isRequired={true}
                     fontSize='sm'
                     placeholder='Min. 8 caracteres'
@@ -176,22 +176,26 @@ function SignUp() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <InputRightElement display='flex' alignItems='center' mt='4px'>
-                    <Icon
+                    <Button
+                      aria-label={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      variant="ghost"
+                      minW="40px"
                       color={textColorSecondary}
-                      _hover={{ cursor: "pointer" }}
-                      as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
                       onClick={handleClick}
-                    />
+                    ><Icon as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye} /></Button>
                   </InputRightElement>
                 </InputGroup>
+                {feedback && <Text role="status" color={textColorDetails} fontSize="sm" mb="12px">{feedback}</Text>}
                 <Button
+                  type="submit"
                   fontSize='sm'
                   variant='brand'
                   fontWeight='500'
                   w='100%'
                   h='50'
                   mb='24px'
-                  onClick={handleSignUp}
+                  isLoading={isSubmitting}
+                  loadingText="Creando cuenta"
                 >
                   Crear Cuenta
                 </Button>
@@ -217,8 +221,8 @@ function SignUp() {
               </Flex>
             </Flex>
           </Flex>
+          </Form>
         </>
-    )}
     </DefaultAuth>
   );
 }

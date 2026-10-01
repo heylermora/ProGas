@@ -11,12 +11,15 @@ type UserProfile = {
   userId?: string;
   roles?: AppRole[];
   active?: boolean;
+  name?: string;
+  email?: string;
 };
 
 type AuthContextType = {
   user: User | null;
   roles: AppRole[];
   loading: boolean;
+  displayName: string;
   hasRole: (allowedRoles?: AppRole[]) => boolean;
 };
 
@@ -24,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   roles: [],
   loading: true,
+  displayName: '',
   hasRole: () => false,
 });
 
@@ -32,6 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [accessEnabled, setAccessEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
     let unsubscribeProfile: (() => void) | undefined;
@@ -41,6 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       unsubscribeProfile = undefined;
       setUser(firebaseUser);
       setRoles([]);
+      setDisplayName('');
       setAccessEnabled(false);
 
       if (firebaseUser) {
@@ -58,10 +64,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const enabled = Boolean(profile) && profile.active !== false;
           setAccessEnabled(enabled);
           setRoles(enabled ? (profile.roles || []) : []);
+          setDisplayName(enabled ? (profile.name || profile.email || firebaseUser.displayName || firebaseUser.email || '') : '');
           setLoading(false);
         }, (error) => {
           console.error('[AuthContext] No se pudieron cargar los roles del usuario:', error);
           setRoles([]);
+          setDisplayName('');
           setAccessEnabled(false);
           setLoading(false);
         });
@@ -78,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, roles, loading, hasRole: (allowedRoles) => {
+    <AuthContext.Provider value={{ user, roles, loading, displayName, hasRole: (allowedRoles) => {
       if (!user || !accessEnabled) return false;
       if (!allowedRoles?.length) return true;
       return allowedRoles.some((role) => roles.includes(role));

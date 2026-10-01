@@ -1,3 +1,5 @@
+import { AddressItem } from './AddressItem';
+
 export interface ProductItem {
     productId?: string;
     gasType: string;
@@ -20,6 +22,7 @@ export interface OrderPayment {
 export interface OrderItem {
     id: string;
     orderCode: string;
+    requestId?: string;
     client: string;
     clientId?: string; // cédula / identificación del cliente (opcional)
     requestDate: string;
@@ -27,11 +30,18 @@ export interface OrderItem {
         address: string;
         lat?: number;
         lng?: number;
+        coordinates?: string;
+        locationUrl?: string;
+        canonical?: AddressItem;
     }
+    deliveryAddressSnapshot?: AddressItem;
+    customerAddressId?: string;
     status: OrderStatus | string;
     comment: string;
     items: ProductItem[];
     totalAmount: number;
+    phone?: string;
+    transport?: string;
     paymentMethod?: OrderPayment['method'];
     payments?: OrderPayment[];
     paymentMethods?: OrderPayment[];
@@ -41,5 +51,7 @@ export interface OrderItem {
     change?: number;
     paymentNote?: string | null;
     locked?: boolean;
+    cylinderClosingId?: string;
+    cylinderClosedAt?: string;
     onStatusChange?: (id: string, status: string) => void;
 }

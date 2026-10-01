@@ -12,6 +12,7 @@ import {
 
 import FormField from 'interfaces/FormField';
 import ItemsFieldControl from './ItemsFieldControl';
+import DeliveryAddressField from './DeliveryAddressField';
 
 type FieldInputProps = {
   field: FormField;
@@ -70,6 +71,9 @@ const FieldInput = ({
 
       case 'items':
         return <ItemsFieldControl {...field.value} />;
+
+      case 'location':
+        return <DeliveryAddressField value={fieldValues[field.name]} onChange={value => handleInputChange(field.name, value, field.type)} />;
 
       default:
         return (

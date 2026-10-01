@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge, Box, Button, Heading, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
-import { Link as RLink } from 'react-router-dom';
+import BackButton from 'components/button/BackButton';
 import { PublicCard, PublicPage } from './PublicPage';
 
 const gasMemoWhatsApp = 'https://api.whatsapp.com/send/?phone=50683978524&text=';
@@ -87,7 +87,7 @@ export default function SponsorshipPackages() {
         })}
       </SimpleGrid>
       <Box mt="20px">
-        <Button as={RLink} to="/" variant="outline">Volver al inicio</Button>
+        <BackButton to="/" variant="outline">Volver al inicio</BackButton>
       </Box>
     </PublicPage>
   );

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import {
   Box,
@@ -171,7 +170,7 @@ function DonationBanner() {
           target="_blank"
           rel="noopener noreferrer"
           leftIcon={<MdFavorite />}
-          size={{ base: 'md', md: 'lg' }}
+          size="lg"
           alignSelf={{ base: 'stretch', md: 'center' }}
           flexShrink={0}
           bg="yellow.400"
