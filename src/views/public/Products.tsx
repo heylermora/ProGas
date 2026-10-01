@@ -16,6 +16,7 @@ import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDr
 import { mapsSearchUrl } from 'utils/location';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import { AddressItem } from 'interfaces/AddressItem';
+import { addOrMergeOrderItem } from 'utils/order';
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 12);
 
@@ -85,26 +86,33 @@ export default function Products() {
   const addItem = () => {
     if (!selectedProduct) return;
     const quantity = Number(orderForm.quantity);
+    const matchingQuantity = items
+      .filter(item => item.productId === selectedProduct.id
+        && item.price === Number(selectedProduct.price || 0)
+        && (item.comment || '').trim() === orderForm.cylinderDetails.trim())
+      .reduce((sum, item) => sum + item.quantity, 0);
+    const resultingQuantity = matchingQuantity + quantity;
     if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 99) {
       setMessage('La cantidad debe ser un número entero entre 1 y 99.');
       return;
     }
-    if (selectedProduct.active === false || Number(selectedProduct.stock ?? 0) < quantity) {
+    if (resultingQuantity > 99) {
+      setMessage('La cantidad total del producto no puede superar 99 unidades.');
+      return;
+    }
+    if (selectedProduct.active === false || Number(selectedProduct.stock ?? 0) < resultingQuantity) {
       setMessage('El producto no está disponible en la cantidad solicitada.');
       return;
     }
     setMessage('');
-    setItems((prev) => [
-      ...prev,
-      {
+    setItems((prev) => addOrMergeOrderItem(prev, {
         productId: selectedProduct.id,
         gasType: selectedProduct.description,
         quantity,
         price: Number(selectedProduct.price || 0),
         unitCost: Number(selectedProduct.costPrice || 0),
         comment: orderForm.cylinderDetails,
-      },
-    ]);
+      }));
   };
 
   const submitOrder = async () => {
