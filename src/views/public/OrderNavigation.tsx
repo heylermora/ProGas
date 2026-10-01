@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge, Box, Button, Flex, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
-import { MdArrowBack, MdArrowForward, MdCheckCircle } from 'react-icons/md';
+import { MdArrowForward, MdCheckCircle } from 'react-icons/md';
+import BackButton from 'components/button/BackButton';
 import { useHistory } from 'react-router-dom';
 
 type OrderNavigationProps = {
@@ -66,9 +67,9 @@ export default function OrderNavigation({ currentStep, backLabel = 'Retroceder',
         </SimpleGrid>
 
         <Flex direction={{ base: 'column-reverse', md: 'row' }} justify="space-between" gap="10px" align={{ base: 'stretch', md: 'center' }}>
-          <Button variant="outline" leftIcon={<MdArrowBack />} onClick={onBack} isDisabled={!onBack} flex={{ base: '0 0 auto', md: 1 }} w={{ base: '100%', md: 'auto' }} minW="0" h="auto" minH="48px" py="10px" px="14px" whiteSpace="normal" lineHeight="1.25">
+          <BackButton variant="outline" onClick={onBack} isDisabled={!onBack} flex={{ base: '0 0 auto', md: 1 }} w={{ base: '100%', md: 'auto' }} minW="0" h="auto" minH="48px" py="10px" px="14px" lineHeight="1.25">
             {backLabel}
-          </Button>
+          </BackButton>
           <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize="sm" textAlign="center" flexShrink={0}>
             Paso {currentStep} de {steps.length}
           </Text>

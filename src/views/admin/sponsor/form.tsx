@@ -22,8 +22,9 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useHistory, useParams } from 'react-router-dom';
-import { MdArrowBack, MdInfoOutline, MdVisibility } from 'react-icons/md';
+import { MdInfoOutline, MdVisibility } from 'react-icons/md';
 import Card from 'components/card/Card';
+import BackButton from 'components/button/BackButton';
 import SponsorService from 'services/SponsorService';
 import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import useCategories from 'hooks/useCategories';
@@ -100,7 +101,7 @@ export default function SponsorForm() {
       <Card p={{ base: '18px', md: '24px' }} mb="22px" bgGradient={headerBg}>
         <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="16px" direction={{ base: 'column', md: 'row' }}>
           <HStack spacing="14px" align="flex-start">
-            <Button aria-label="Volver a patrocinadores" leftIcon={<MdArrowBack />} variant="ghost" onClick={() => history.push('/admin/sponsor/index')} flexShrink={0}>Volver</Button>
+            <BackButton aria-label="Volver a patrocinadores" onClick={() => history.push('/admin/sponsor/index')} flexShrink={0}>Volver a patrocinadores</BackButton>
             <Box>
               <Heading fontSize={{ base: '24px', md: '32px' }}>{id ? 'Editar patrocinador' : 'Nuevo patrocinador'}</Heading>
               <Text color={muted} mt="4px">Configurá su presencia pública, enlaces y contenido visual en un solo lugar.</Text>

@@ -5,6 +5,7 @@ import StatusBadge from './dataDisplay/StatusBadge';
 import ActiveSwitch from './form/ActiveSwitch';
 import FormActions from './form/FormActions';
 import FormField from './form/FormField';
+import BackButton from './button/BackButton';
 
 const renderUi = (ui: React.ReactNode) => render(<ChakraProvider>{ui}</ChakraProvider>);
 
@@ -30,5 +31,12 @@ describe('shared admin components', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(change).toHaveBeenCalledWith(true);
     expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the shared back action', () => {
+    const goBack = jest.fn();
+    renderUi(<BackButton onClick={goBack}>Volver al inventario</BackButton>);
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al inventario' }));
+    expect(goBack).toHaveBeenCalledTimes(1);
   });
 });

@@ -11,10 +11,10 @@ import {
 } from '@chakra-ui/react';
 
 import { HSeparator } from 'components/separator/Separator';
-import { NavLink } from 'react-router-dom';
 import FormField from 'interfaces/FormField';
 import { formatValue } from 'utils/formatValue';
 import FieldInput from './FieldInput';
+import BackButton from 'components/button/BackButton';
 
 type Props = {
   title: string;
@@ -28,7 +28,6 @@ type Props = {
 const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
   const textColor = useColorModeValue('navy.700', 'white');
   const textColorSecondary = 'gray.400';
-  const brandStars = useColorModeValue('brand.500', 'brand.400');
 
   const buildInitialValues = useCallback(() => {
     return fields.reduce((acc, field) => {
@@ -189,13 +188,7 @@ const Form = ({ title, button, fields, isDisabled, back, onSubmit }: Props) => {
           </Button>
 
           {back && (
-            <Center mt="6px">
-              <NavLink to={back}>
-                <Text color={brandStars} as="span" ms="5px" fontWeight="500">
-                  Volver
-                </Text>
-              </NavLink>
-            </Center>
+            <Center mt="6px"><BackButton to={back}>Volver</BackButton></Center>
           )}
         </>
       )}

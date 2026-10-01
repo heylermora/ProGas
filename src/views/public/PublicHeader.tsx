@@ -1,7 +1,8 @@
 import React from 'react';
 import { Box, Button, Flex, Icon, IconButton, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink, useHistory, useLocation } from 'react-router-dom';
-import { MdArrowBack, MdHome, MdReceiptLong } from 'react-icons/md';
+import { MdHome, MdReceiptLong } from 'react-icons/md';
+import BackButton from 'components/button/BackButton';
 
 type NavigationState = { from?: string; fromLabel?: string } | null | undefined;
 
@@ -26,9 +27,9 @@ export default function PublicHeader() {
     <Flex as="header" position="sticky" top="8px" zIndex={30} mb={{ base: '18px', md: '24px' }} minH="58px" px={{ base: '10px', md: '14px' }} py="8px" align="center" justify="space-between" gap="10px" border="1px solid" borderColor={borderColor} borderRadius="20px" bg={bg} boxShadow="0 12px 28px rgba(15,23,42,.10)" backdropFilter="blur(14px)">
       <Flex align="center" gap="9px" minW="0">
         {navigation ? (
-          <Button aria-label={navigation.label} leftIcon={<MdArrowBack />} variant="ghost" size="sm" minW="0" px={{ base: '9px', md: '12px' }} onClick={() => history.replace(navigation.to)}>
+          <BackButton aria-label={navigation.label} size="sm" minW="0" px={{ base: '9px', md: '12px' }} onClick={() => history.replace(navigation.to)}>
             <Text display={{ base: 'none', sm: 'block' }} noOfLines={1}>{navigation.label}</Text>
-          </Button>
+          </BackButton>
         ) : (
           <Flex as={RLink} to="/" align="center" gap="9px" color="inherit" _hover={{ textDecoration: 'none' }}>
             <Flex w="38px" h="38px" flex="0 0 auto" borderRadius="13px" bg="brand.500" color="white" align="center" justify="center" fontWeight="900">GM</Flex>

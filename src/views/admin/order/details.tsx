@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, NavLink } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { Center, Text, useColorModeValue, Flex, Box } from '@chakra-ui/react';
 
@@ -9,6 +9,7 @@ import { OrderItem, ProductItem } from 'interfaces/OrderItem';
 import Error from 'components/exceptions/Error';
 import Card from 'components/card/Card';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import BackButton from 'components/button/BackButton';
 
 export default function Details() {
   const brandStars = useColorModeValue('brand.500', 'brand.400');
@@ -239,13 +240,7 @@ export default function Details() {
           </Card>
 
           {/* Enlace de Regreso */}
-          <Center>
-            <NavLink to="/admin/order/index">
-              <Text color={brandStars} as="span" fontWeight="500" textAlign="center">
-                Volver
-              </Text>
-            </NavLink>
-          </Center>
+          <Center><BackButton to="/admin/order/index">Volver a pedidos</BackButton></Center>
         </>
       ) : (
         <Center>
