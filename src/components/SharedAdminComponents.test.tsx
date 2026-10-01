@@ -43,8 +43,10 @@ describe('shared admin components', () => {
 
   it('supports custom forms through the shared semantic container', () => {
     const submit = jest.fn((event) => event.preventDefault());
-    renderUi(<Form onFormSubmit={submit}><button type="submit">Enviar</button></Form>);
-    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
+    renderUi(<Form title="Editar producto" description="Datos comerciales" onBack={jest.fn()} submitLabel="Guardar cambios" onFormSubmit={submit}><div>Contenido</div></Form>);
+    expect(screen.getByRole('heading', { name: 'Editar producto' })).toBeTruthy();
+    expect(screen.getByText('Datos comerciales')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
     expect(submit).toHaveBeenCalledTimes(1);
   });
 });

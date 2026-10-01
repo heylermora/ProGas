@@ -1,17 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  Alert, AlertIcon, Box, Button, Flex, FormControl, FormErrorMessage,
+  Alert, AlertIcon, Box, Flex, FormControl, FormErrorMessage,
   FormHelperText, FormLabel, Heading, HStack, Icon, Input, InputGroup, InputLeftAddon,
   Select, SimpleGrid, Stack, Text, useColorModeValue, useToast,
 } from '@chakra-ui/react';
-import { MdCheck, MdInventory2, MdLocalOffer, MdPayments, MdWarning } from 'react-icons/md';
+import { MdInventory2, MdLocalOffer, MdPayments, MdWarning } from 'react-icons/md';
 import Card from 'components/card/Card';
 import HelpLabel from 'components/form/HelpLabel';
 import productService from 'services/ProductService';
 import { Product, ProductCategory } from 'interfaces/ProductItem';
 import useCategories from 'hooks/useCategories';
-import FormPageHeader from 'components/layout/FormPageHeader';
 import StatusBadge from 'components/dataDisplay/StatusBadge';
 import ActiveSwitch from 'components/form/ActiveSwitch';
 import Form from 'components/form/Form';
@@ -39,8 +38,6 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   const textColor = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.600', 'gray.400');
   const subtleBg = useColorModeValue('gray.50', 'whiteAlpha.50');
-  const border = useColorModeValue('gray.200', 'whiteAlpha.200');
-  const actionBg = useColorModeValue('rgba(255,255,255,.94)', 'rgba(17,25,54,.94)');
 
   const set = (key: keyof ProductDraft, value: any) => setValues((current) => ({ ...current, [key]: value }));
   const invalid = !values.description.trim() || !values.category || values.price <= 0 || values.costPrice < 0 || values.stock < 0 || Number(values.lowStockThreshold) < 0;
@@ -66,9 +63,18 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   };
 
   return (
-    <Form pt={{ base: '120px', md: '78px' }} maxW="1080px" mx="auto" pb="48px" px={{ base: 1, md: 3 }} onFormSubmit={(event) => { event.preventDefault(); save(); }}>
-      <FormPageHeader title={product ? values.description || 'Editar producto' : 'Nuevo producto'} description={product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'} onBack={goBack} backLabel="Volver al inventario" status={<StatusBadge active={values.active} activeLabel="Producto activo" inactiveLabel="Producto inactivo" />} />
-
+    <Form
+      title={product ? values.description || 'Editar producto' : 'Nuevo producto'}
+      description={product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'}
+      status={<StatusBadge active={values.active} activeLabel="Producto activo" inactiveLabel="Producto inactivo" />}
+      onBack={goBack}
+      backLabel="Volver al inventario"
+      submitLabel={product ? 'Guardar cambios' : 'Crear producto'}
+      isSubmitting={saving || isLoading}
+      footerMessage={invalid ? 'Revisá los campos obligatorios antes de guardar.' : 'Todo listo para guardar los cambios.'}
+      pt={{ base: '120px', md: '78px' }} maxW="1080px" mx="auto" pb="48px" px={{ base: 1, md: 3 }}
+      onFormSubmit={(event) => { event.preventDefault(); save(); }}
+    >
       <SimpleGrid columns={{ base: 1, xl: 3 }} spacing="20px" alignItems="start">
         <Stack gridColumn={{ xl: 'span 2' }} spacing="18px">
           <Card p={{ base: '18px', md: '24px' }}>
@@ -143,10 +149,6 @@ export default function ProductForm({ product, isLoading = false }: Props) {
         </Card>
       </SimpleGrid>
 
-      <Flex mt="24px" p={{ base: 3, md: 4 }} bg={actionBg} borderWidth="1px" borderColor={border} borderRadius="2xl" boxShadow="lg" position="sticky" bottom="12px" zIndex={5} justify="space-between" align={{ base: 'stretch', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap="10px" backdropFilter="blur(12px)">
-        <Text color={muted} fontSize="sm">{invalid ? 'Revisá los campos obligatorios antes de guardar.' : 'Todo listo para guardar los cambios.'}</Text>
-        <HStack justify={{ base: 'stretch', sm: 'flex-end' }}><Button type="button" flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={goBack} isDisabled={saving} whiteSpace="nowrap">Cancelar</Button><Button type="submit" flex={{ base: 1, sm: 'initial' }} leftIcon={<MdCheck />} colorScheme="brand" size="lg" px={{ base: '18px', md: '28px' }} isLoading={saving || isLoading} loadingText="Guardando" whiteSpace="nowrap">{product ? 'Guardar cambios' : 'Crear producto'}</Button></HStack>
-      </Flex>
     </Form>
   );
 }
