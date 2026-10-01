@@ -8,10 +8,11 @@ import { ReverseGeocodeItem } from 'interfaces/ReverseGeocodeItem';
 type DeviceLocationMapProps = {
   coordinates?: string;
   addressQuery?: string;
+  detectAddress?: boolean;
   onLocation?: (value: { coordinates: string; locationUrl: string; latitude: number; longitude: number; accuracyMeters?: number; detectedAddress?: ReverseGeocodeItem }) => void;
 };
 
-export default function DeviceLocationMap({ coordinates = '', addressQuery = '', onLocation }: DeviceLocationMapProps) {
+export default function DeviceLocationMap({ coordinates = '', addressQuery = '', detectAddress = false, onLocation }: DeviceLocationMapProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const query = coordinates || addressQuery;
@@ -40,6 +41,12 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
           longitude: position.coords.longitude,
           accuracyMeters: position.coords.accuracy,
         };
+        if (!detectAddress) {
+          onLocation?.(baseLocation);
+          setMessage('Ubicación exacta agregada al pedido.');
+          setLoading(false);
+          return;
+        }
         try {
           const detectedAddress = await GeocodingService.reverse(position.coords.latitude, position.coords.longitude);
           onLocation?.({ ...baseLocation, detectedAddress });
@@ -72,7 +79,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
           <Box as="iframe" title="Vista previa de ubicación en Google Maps" src={embedUrl} w="100%" h={{ base: '220px', md: '280px' }} border="0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
         </Box>
       )}
-      <Text fontSize="xs" color="gray.500">La dirección detectada es una sugerencia basada en OpenStreetMap; confirmá siempre las señas de entrega.</Text>
+      <Text fontSize="xs" color="gray.500">El GPS guarda el punto exacto, pero no cambia el pueblo ni las señas que seleccionaste.</Text>
     </Stack>
   );
 }

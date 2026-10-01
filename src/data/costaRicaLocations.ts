@@ -7,11 +7,11 @@ export const COSTA_RICA_CATALOG_VERSION = 'service-area-2026-01';
 export const serviceAreaLocations: LocationCatalog = {
   'San José': {
     Acosta: {
-      'San Ignacio': ['Centro', 'Turrujal', 'Chirraca'],
-      Guaitil: ['Guaitil centro', 'La Cruz'],
-      Palmichal: ['Palmichal centro', 'Bajo Arias'],
-      Cangrejal: ['Cangrejal centro', 'Sabanillas'],
-      Sabanillas: ['Sabanillas centro', 'Bajos de Jorco'],
+      'San Ignacio': ['San Ignacio (centro)', 'Abarca', 'Corral', 'María Auxiliadora', 'Ortiga', 'Pozos', 'San Martín (San Gerardo)', 'San Luis', 'Turrujal', 'Vereda', 'Aguablanca (parte)', 'Alto Escalera', 'Alto Los Mora', 'Ángeles', 'Chirraca (parte)', 'Esperanza', 'Potrerillos', 'Resbalón', 'Tablazo'],
+      Guaitil: ['Guaitil (centro)', 'Alto Sierra', 'Alto Vigía', 'Bajo Arias', 'Bajo Bermúdez', 'Bajo Calvo', 'Bajo Cárdenas', 'Bajo Moras', 'Coyolar', 'Hondonada', 'La Cruz', 'Lagunillas (parte)', 'Ococa', 'Toledo', 'Zapote'],
+      Palmichal: ['Palmichal (centro)', 'San Pablo', 'Agua Blanca (parte)', 'Bajo Cerdas', 'Bajos de Jorco', 'Bolívar', 'Cañadas', 'Caragral', 'Corazón de Jesús', 'Charcalillo', 'Chirraca (parte)', 'Fila', 'Jaular', 'Lagunillas (parte)', 'La Mina', 'La Pita', 'Los Monge', 'Playa', 'Sevilla'],
+      Cangrejal: ['Cangrejal (centro)', 'Bajo Los Cruces', 'Ceiba Alta (parte)', 'Ceiba Baja', 'Ceiba Este', 'Escuadra', 'Gravilias', 'Lindavista', 'Llano Bonito', 'Mesa', 'Naranjal', 'Perpetuo Socorro', 'Tejar', 'Tiquires'],
+      Sabanillas: ['Sabanillas (centro)', 'Alto Parritón', 'Bajo Palma', 'Bajo Pérez', 'Bijagual', 'Breñón', 'Caspirola', 'Colorado', 'Cuesta Aguacate', 'Limas', 'Parritón', 'Plomo', 'Sabanas', 'San Jerónimo', 'Soledad', 'Téruel', 'Tiquiritos', 'Zoncuano'],
     },
     Aserrí: {
       Aserrí: ['Centro', 'Poás', 'Salitrillos'],
@@ -41,4 +41,3 @@ export const serviceAreaLocations: LocationCatalog = {
     },
   },
 };
-

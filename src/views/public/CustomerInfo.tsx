@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, AlertIcon, Box, FormControl, FormHelperText, FormLabel, Input, Select, SimpleGrid, Stack, Text } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Button, FormControl, FormLabel, Input, Select, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { useHistory } from 'react-router-dom';
 import ClientService from 'services/ClientService';
 import DeviceLocationMap from 'components/form/DeviceLocationMap';
@@ -26,7 +26,7 @@ export default function CustomerInfo() {
   const [provinces, setProvinces] = useState<TerritoryOption[]>([]);
   const [cantons, setCantons] = useState<TerritoryOption[]>([]);
   const [districts, setDistricts] = useState<TerritoryOption[]>([]);
-  const [detectedLocalities, setDetectedLocalities] = useState<string[]>([]);
+  const [showGps, setShowGps] = useState(false);
   const [form, setForm] = useState({
     name: draft.name || '', nickname: draft.nickname || '',
     province: saved?.province?.name || draft.address?.province || 'San José',
@@ -65,7 +65,12 @@ export default function CustomerInfo() {
   }, [provinces, cantons, form.province, form.canton, form.district]);
 
   const catalogLocalities = useMemo(() => TerritoryService.getLocalities(form.province, form.canton, form.district), [form.province, form.canton, form.district]);
-  const localities = Array.from(new Set([...detectedLocalities, ...catalogLocalities])).filter(Boolean);
+  const localities = catalogLocalities;
+  useEffect(() => {
+    if (localities.length && !localities.includes(form.locality)) {
+      setForm(prev => ({ ...prev, locality: localities[0] }));
+    }
+  }, [localities, form.locality]);
   const set = <K extends keyof typeof form>(key: K, value: typeof form[K]) => setForm(prev => ({ ...prev, [key]: value }));
 
   const saveAndContinue = async () => {
@@ -75,6 +80,7 @@ export default function CustomerInfo() {
     if (!form.name.trim() || !form.province || !form.canton || !form.district || !form.locality.trim() || !form.details.trim()) {
       return setMessage('Completá el nombre, la división territorial, el pueblo y las señas de entrega.');
     }
+    if (!localities.includes(form.locality)) return setMessage('Seleccioná un pueblo o localidad de la lista.');
     if (form.name.trim().length > 120 || form.nickname.trim().length > 60 || form.locality.trim().length > 100 || form.details.trim().length > 300 || form.additionalDirections.trim().length > 300) {
       return setMessage('Revisá la longitud del nombre, localidad y señas de entrega.');
     }
@@ -85,7 +91,7 @@ export default function CustomerInfo() {
 
     const canonical: AddressItem = {
       province, canton, district,
-      locality: { name: form.locality.trim(), source: detectedLocalities.includes(form.locality) ? 'reverse-geocoding' : 'user' },
+      locality: { name: form.locality.trim(), source: 'territorial-catalog' },
       exactAddress: form.details.trim(),
       ...(form.additionalDirections.trim() ? { additionalDirections: form.additionalDirections.trim() } : {}),
       ...(Number.isFinite(form.latitude) && Number.isFinite(form.longitude) ? { position: { latitude: Number(form.latitude), longitude: Number(form.longitude), ...(form.accuracyMeters ? { accuracyMeters: form.accuracyMeters } : {}) } } : {}),
@@ -113,7 +119,7 @@ export default function CustomerInfo() {
   };
 
   return (
-    <PublicPage title="Información del cliente" description="Elegí la dirección manualmente o usá tu ubicación para recibir una sugerencia que siempre podés corregir." maxW="1000px">
+    <PublicPage title="Información del cliente" description="Seleccioná la dirección de entrega y, si querés, agregá el punto GPS exacto para el repartidor." maxW="1000px">
       <Box h={{ base: '20px', md: '28px' }} />
       <PublicCard><Stack spacing="18px">
         {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
@@ -121,27 +127,27 @@ export default function CustomerInfo() {
           <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input value={form.name} onChange={e => set('name', e.target.value)} /></FormControl>
           <FormControl><FormLabel>Apodo</FormLabel><Input value={form.nickname} onChange={e => set('nickname', e.target.value)} /></FormControl>
         </SimpleGrid>
-        <Box p="16px" borderWidth="1px" borderRadius="18px" bg="gray.50">
-          <Text fontWeight="900" mb="2">1. Ubicación GPS (opcional)</Text>
-          <Text fontSize="sm" color="gray.600" mb="3">Podemos sugerir la división territorial y el pueblo. Nada se confirma sin que lo revisés.</Text>
-          <DeviceLocationMap coordinates={form.coordinates} addressQuery={[form.province, form.canton, form.district, form.locality, form.details].filter(Boolean).join(', ')} onLocation={location => {
-            const detected = location.detectedAddress;
-            setDetectedLocalities(prev => Array.from(new Set([detected?.neighborhood || '', ...prev])).filter(Boolean));
-            setForm(prev => ({ ...prev, coordinates: location.coordinates, locationUrl: location.locationUrl, latitude: location.latitude, longitude: location.longitude, accuracyMeters: location.accuracyMeters, captureSource: 'gps', ...(detected?.province && byName(provinces, detected.province) ? { province: byName(provinces, detected.province)!.name } : {}), ...(detected?.county ? { canton: detected.county } : {}), ...(detected?.district ? { district: detected.district } : {}), ...(detected?.neighborhood ? { locality: detected.neighborhood } : {}), ...(detected ? { geocoding: { provider: detected.provider, ...(detected.providerPlaceId ? { providerPlaceId: detected.providerPlaceId } : {}), ...(detected.confidence != null ? { confidence: detected.confidence } : {}), ...(detected.precision ? { precision: detected.precision } : {}), resolvedAt: new Date().toISOString() } } : {}) }));
-          }} />
-        </Box>
         <Box>
-          <Text fontWeight="900" mb="1">2. Confirmá la dirección</Text>
-          <Text fontSize="sm" color="gray.600" mb="4">Los campos son editables aunque hayas usado GPS.</Text>
+          <Text fontWeight="900" mb="1">Dirección de entrega</Text>
+          <Text fontSize="sm" color="gray.600" mb="4">Seleccioná cada nivel para evitar errores al ubicar el pedido.</Text>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormControl isRequired><FormLabel>Provincia</FormLabel><Select isDisabled={catalogLoading} value={form.province} onChange={e => setForm(prev => ({ ...prev, province: e.target.value, canton: '', district: '', locality: '', captureSource: 'manual' }))}>{provinces.map(item => <option key={item.code} value={item.name}>{item.name}</option>)}</Select></FormControl>
             <FormControl isRequired><FormLabel>Cantón</FormLabel><Select value={form.canton} onChange={e => setForm(prev => ({ ...prev, canton: e.target.value, district: '', locality: '', captureSource: 'manual' }))}>{cantons.map(item => <option key={item.code} value={item.name}>{item.name}</option>)}</Select></FormControl>
             <FormControl isRequired><FormLabel>Distrito</FormLabel><Select value={form.district} onChange={e => setForm(prev => ({ ...prev, district: e.target.value, locality: '', captureSource: 'manual' }))}>{districts.map(item => <option key={item.code} value={item.name}>{item.name}</option>)}</Select></FormControl>
-            <FormControl isRequired><FormLabel>Pueblo o localidad</FormLabel><Input list="locality-options" value={form.locality} onChange={e => set('locality', e.target.value)} placeholder="Elegí una sugerencia o escribí otra" /><datalist id="locality-options">{localities.map(name => <option key={name} value={name} />)}</datalist><FormHelperText>Podés corregirlo manualmente si la sugerencia no coincide.</FormHelperText></FormControl>
+            <FormControl isRequired><FormLabel>Pueblo o localidad</FormLabel><Select placeholder="Seleccioná el pueblo o localidad" value={form.locality} onChange={e => set('locality', e.target.value)}>{localities.map(name => <option key={name} value={name}>{name}</option>)}</Select></FormControl>
           </SimpleGrid>
         </Box>
         <FormControl isRequired><FormLabel>Dirección exacta / señas</FormLabel><Input value={form.details} onChange={e => set('details', e.target.value)} placeholder="Casa, color, referencia o punto cercano" /></FormControl>
         <FormControl><FormLabel>Indicaciones adicionales</FormLabel><Input value={form.additionalDirections} onChange={e => set('additionalDirections', e.target.value)} placeholder="Portón, horario, a quién llamar u otra indicación" /></FormControl>
+        <Box p="16px" borderWidth="1px" borderRadius="18px" bg="gray.50">
+          <Text fontWeight="800">Ubicación exacta por GPS</Text>
+          <Text fontSize="sm" color="gray.600" mb="3">Es opcional. Sirve para que el repartidor encuentre el punto exacto; no reemplaza la dirección seleccionada arriba.</Text>
+          <Button variant="outline" colorScheme="brand" onClick={() => setShowGps(value => !value)}>{showGps ? 'Ocultar ubicación GPS' : 'Agregar mi ubicación actual'}</Button>
+          {showGps && <Box mt="4"><DeviceLocationMap coordinates={form.coordinates} onLocation={location => {
+            const detected = location.detectedAddress;
+            setForm(prev => ({ ...prev, coordinates: location.coordinates, locationUrl: location.locationUrl, latitude: location.latitude, longitude: location.longitude, accuracyMeters: location.accuracyMeters, captureSource: 'gps', ...(detected ? { geocoding: { provider: detected.provider, ...(detected.providerPlaceId ? { providerPlaceId: detected.providerPlaceId } : {}), ...(detected.confidence != null ? { confidence: detected.confidence } : {}), ...(detected.precision ? { precision: detected.precision } : {}), resolvedAt: new Date().toISOString() } } : {}) }));
+          }} /></Box>}
+        </Box>
         <OrderNavigation currentStep={2} backLabel="Volver a verificación" continueLabel={isSaving ? 'Guardando…' : 'Continuar al pedido'} onBack={() => history.replace('/customer/data')} onContinue={saveAndContinue} isContinueLoading={isSaving} />
       </Stack></PublicCard>
       <MallPreview compact />

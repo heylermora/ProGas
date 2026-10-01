@@ -237,7 +237,7 @@ export default function Products() {
       }
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
-      {showModal && <OkModal message={`Pedido creado correctamente. Guardá este código para consultar su estado: ${createdOrderCode}`} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
+      {showModal && <OkModal message="Pedido creado correctamente. Guardá el código para consultar su estado." code={createdOrderCode} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
     </PublicPage>
   );
 }
