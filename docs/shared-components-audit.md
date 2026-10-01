@@ -15,22 +15,28 @@ Un patrón debe convertirse en componente cuando aparece en más de una pantalla
 | Inputs y selects | Tema global de Chakra (`theme/components/input.ts`) | Toda la aplicación |
 | Labels, texto de ayuda y acordeones | Tema global de Chakra (`theme/components/form.ts`) | Toda la aplicación |
 | Búsqueda contextual | `contexts/PageSearchContext` + `SearchBar` | Listados administrativos |
+| Barra de filtros | `components/dataDisplay/FilterPanel` | Pedidos y productos |
+| Campo de formulario accesible | `components/form/FormField` | Clientes y colaboradores |
+| Acciones cancelar/guardar | `components/form/FormActions` | Clientes y colaboradores |
+| Estado de carga/error/vacío | `components/dataDisplay/AsyncContent` | Listados y detalles |
+| Tarjeta estadística | `components/dataDisplay/StatCard` | Inventario |
+| Estado activo/inactivo | `components/dataDisplay/StatusBadge` | Clientes, colaboradores y productos |
+| Interruptor activo | `components/form/ActiveSwitch` | Clientes, colaboradores y productos |
+| Encabezado de formulario | `components/layout/FormPageHeader` | Alta y edición de productos |
+| Confirmación destructiva | `components/modal/DeleteModal` | Menús de eliminación |
 
-## Inventario y siguientes candidatos
+## Aplicación completada
 
-### Prioridad alta
+Los candidatos de prioridad alta y media ya cuentan con una implementación compartida y una primera adopción en dos o más flujos cuando corresponde. Las migraciones se hicieron sin mover reglas de negocio: cada vista sigue controlando consultas, validaciones y persistencia; los componentes solo resuelven estructura, estados y accesibilidad.
 
-1. **Barra de filtros**: pedidos, productos y balances combinan campos, selects y una acción para limpiar. Conviene un `FilterPanel` con título, contenido flexible, contador y acción de limpieza.
-2. **Campos de formulario**: todavía existen combinaciones repetidas de `FormControl`, `FormLabel`, control y mensaje. Debe crearse un `FormField` solo si admite correctamente `isRequired`, errores, ayuda, IDs y cualquier tipo de control; no debe limitarse a inputs de texto.
-3. **Estado de carga/error**: los listados repiten `Center + Spinner` y alternan componentes de error. Un `AsyncContent` puede normalizar los estados `loading`, `error`, `empty` y contenido sin mezclar la carga de datos con la presentación.
-4. **Acciones de formulario**: cancelar/guardar con estado de carga se repite en altas y ediciones. Puede extraerse como `FormActions` después de confirmar las variantes de navegación y modal.
-
-### Prioridad media
-
-1. **Tarjetas estadísticas**: clientes, inventario y dashboard repiten icono, cifra, etiqueta y texto auxiliar. `StatCard` debería complementar —no duplicar— `MiniStatistics` cuando este último no cubra la composición requerida.
-2. **Estado activo/inactivo**: badge y switch aparecen en clientes, colaboradores, productos y patrocinadores. Un `StatusBadge` y un `ActiveSwitch` evitarían diferencias de texto y color.
-3. **Encabezados de formularios completos**: productos, pedidos y patrocinadores tienen páginas dedicadas con volver, título y estado. Pueden compartir un `FormPageHeader`, distinto del encabezado de listados.
-4. **Confirmaciones destructivas**: las eliminaciones deben converger en `DeleteModal`, evitando confirmaciones particulares o acciones directas.
+- `FilterPanel` conserva contenido flexible, acción contextual, contador y limpieza de filtros.
+- `FormField` admite cualquier control hijo, `isRequired`, deshabilitado, ayuda, error y asociación por `id`.
+- `AsyncContent` resuelve carga, error, vacío y contenido.
+- `FormActions` unifica cancelar/guardar y sus estados de carga.
+- `StatCard` complementa las estadísticas existentes sin absorber lógica del dominio.
+- `StatusBadge` y `ActiveSwitch` normalizan etiquetas, colores y nombres accesibles.
+- `FormPageHeader` separa encabezados de formularios de los encabezados de listados.
+- `DeleteModal` ofrece confirmación consistente, cierre accesible y estado de carga.
 
 ### Prioridad baja o no recomendable todavía
 

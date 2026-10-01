@@ -23,6 +23,7 @@ import { useOrderRefresh } from 'contexts/OrderRefreshContext';
 import { getPaymentMethods, normalizeOrderStatus, ORDER_STATUSES } from 'utils/order';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import FilterPanel from 'components/dataDisplay/FilterPanel';
 
 const STATUS_MENU = [...ORDER_STATUSES, 'Todos'] as const;
 
@@ -101,7 +102,6 @@ export default function Index() {
     return counts;
   }, { Todos: 0 }), [orders]);
 
-  const hasAdvancedFilters = Boolean(filters.date || filters.client || filters.product || filters.payment);
   const clearFilters = () => setFilters({ date: '', client: '', product: '', payment: '' });
 
   // Cuando un card cambia status, actualiza el estado local => el filtro reacciona
@@ -113,16 +113,14 @@ export default function Index() {
 
   return (
     <Box w="100%" pt={topPt}>
-      <Box bg="white" borderRadius="xl" p={4} mb={4} boxShadow="sm">
-        <Text fontWeight="800" mb={3}>Filtros de pedidos</Text>
+      <FilterPanel title="Filtros de pedidos" description="Combiná criterios para encontrar un pedido." activeCount={[filters.date, filters.client, filters.product, filters.payment].filter(Boolean).length} onClear={clearFilters}>
         <SimpleGrid columns={{ base: 1, md: 2, xl: 4 }} gap={3}>
           <Input aria-label="Filtrar por fecha" type="date" value={filters.date} onChange={e => setFilters(f => ({ ...f, date: e.target.value }))} />
           <Input aria-label="Filtrar por cliente" placeholder="Cliente o cédula" value={filters.client} onChange={e => setFilters(f => ({ ...f, client: e.target.value }))} />
           <Select aria-label="Filtrar por producto" value={filters.product} onChange={e => setFilters(f => ({ ...f, product: e.target.value }))}><option value="">Todos los productos</option>{products.map(value => <option key={value}>{value}</option>)}</Select>
           <Select aria-label="Filtrar por método de pago" value={filters.payment} onChange={e => setFilters(f => ({ ...f, payment: e.target.value }))}><option value="">Todos los métodos</option>{['Efectivo', 'Sinpe', 'Tarjeta', 'Otro'].map(value => <option key={value}>{value}</option>)}</Select>
         </SimpleGrid>
-        {hasAdvancedFilters && <Flex justify="flex-end" mt={3}><Button size="sm" variant="ghost" onClick={clearFilters}>Limpiar filtros</Button></Flex>}
-      </Box>
+      </FilterPanel>
       <Box bg="white" borderRadius="2xl" p={{ base: 3, md: 4 }} mb={5} boxShadow="sm" borderWidth="1px" borderColor="blackAlpha.100">
         <Flex align="center" justify="space-between" gap={3} mb={3}>
           <Box><Text fontWeight="900">Estado de los pedidos</Text><Text fontSize="sm" color="gray.500">Elegí un estado para acotar el listado.</Text></Box>

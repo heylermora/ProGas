@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar, Badge, Box, Button, Center, Flex, FormControl, FormLabel, Icon, IconButton,
-  Input, SimpleGrid, Switch, Text, Tooltip,
+  Avatar, Box, Button, Center, Flex, Icon, IconButton,
+  Input, SimpleGrid, Text, Tooltip,
   useColorModeValue, useToast,
 } from '@chakra-ui/react';
 import { MdAdd, MdBadge, MdEdit, MdLocationOn, MdPeople, MdPhone } from 'react-icons/md';
@@ -13,6 +13,10 @@ import PageHeader from 'components/layout/PageHeader';
 import FormPanel from 'components/form/FormPanel';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import StatusBadge from 'components/dataDisplay/StatusBadge';
+import ActiveSwitch from 'components/form/ActiveSwitch';
+import FormActions from 'components/form/FormActions';
+import FormField from 'components/form/FormField';
 
 const EMPTY_CLIENT: Omit<ClientItem, 'id'> = {
   nationalId: '', name: '', nickname: '', phone: '', active: true,
@@ -114,15 +118,15 @@ export default function Clients() {
       {showForm && (
         <FormPanel title={editing ? 'Editar cliente' : 'Registrar cliente'} description="Los campos marcados son obligatorios." onClose={closeForm} footer={
           <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <FormControl display="flex" alignItems="center" w="auto"><Switch colorScheme="brand" isChecked={form.active !== false} onChange={e => change('active', e.target.checked)} /><FormLabel mb="0" ml={3}>Cliente activo</FormLabel></FormControl>
-            <Flex gap={2}><Button variant="ghost" onClick={closeForm}>Cancelar</Button><Button colorScheme="brand" px={7} isLoading={saving} loadingText="Guardando" onClick={save}>{editing ? 'Guardar cambios' : 'Crear cliente'}</Button></Flex>
+            <ActiveSwitch id="client-active" label="Cliente activo" isChecked={form.active !== false} onChange={checked => change('active', checked)} />
+            <FormActions onCancel={closeForm} onSubmit={save} isLoading={saving} submitLabel={editing ? 'Guardar cambios' : 'Crear cliente'} />
           </Flex>
         }>
           <SimpleGrid columns={{ base: 1, md: 2, xl: 4 }} spacing={4}>
-            <FormControl isRequired><FormLabel>Cédula</FormLabel><Input placeholder="Ej. 1-2345-6789" value={form.nationalId} onChange={e => change('nationalId', e.target.value)} /></FormControl>
-            <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input placeholder="Nombre y apellidos" value={form.name} onChange={e => change('name', e.target.value)} /></FormControl>
-            <FormControl><FormLabel>Apodo</FormLabel><Input placeholder="Opcional" value={form.nickname || ''} onChange={e => change('nickname', e.target.value)} /></FormControl>
-            <FormControl isRequired><FormLabel>Teléfono</FormLabel><Input type="tel" placeholder="Ej. 8888-8888" value={form.phone} onChange={e => change('phone', e.target.value)} /></FormControl>
+            <FormField id="client-national-id" label="Cédula" isRequired><Input id="client-national-id" placeholder="Ej. 1-2345-6789" value={form.nationalId} onChange={e => change('nationalId', e.target.value)} /></FormField>
+            <FormField id="client-name" label="Nombre completo" isRequired><Input id="client-name" placeholder="Nombre y apellidos" value={form.name} onChange={e => change('name', e.target.value)} /></FormField>
+            <FormField id="client-nickname" label="Apodo"><Input id="client-nickname" placeholder="Opcional" value={form.nickname || ''} onChange={e => change('nickname', e.target.value)} /></FormField>
+            <FormField id="client-phone" label="Teléfono" isRequired><Input id="client-phone" type="tel" placeholder="Ej. 8888-8888" value={form.phone} onChange={e => change('phone', e.target.value)} /></FormField>
           </SimpleGrid>
         </FormPanel>
       )}
@@ -144,7 +148,7 @@ export default function Clients() {
                   <Box minW={0} flex="1" pt="2px">
                     <Text fontWeight="800" fontSize="lg" lineHeight="1.25" wordBreak="break-word">{client.name}</Text>
                     <Flex mt="6px" align="center" gap="7px" flexWrap="wrap">
-                      <Badge colorScheme={client.active === false ? 'gray' : 'green'} borderRadius="full" px="9px">{client.active === false ? 'Inactivo' : 'Activo'}</Badge>
+                      <StatusBadge active={client.active !== false} />
                       {client.nickname && <Text fontSize="sm" color={mutedColor}>“{client.nickname}”</Text>}
                     </Flex>
                   </Box>

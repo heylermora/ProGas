@@ -19,4 +19,10 @@ describe('AsyncContent', () => {
     rerender(<ChakraProvider><AsyncContent isLoading={false}><div>Contenido</div></AsyncContent></ChakraProvider>);
     expect(screen.getByText('Contenido')).toBeTruthy();
   });
+
+  it('renders the supplied empty state after loading finishes', () => {
+    renderContent({ isLoading: false, isEmpty: true, empty: <div>Sin registros</div>, children: <div>Contenido</div> });
+    expect(screen.getByText('Sin registros')).toBeTruthy();
+    expect(screen.queryByText('Contenido')).toBeNull();
+  });
 });

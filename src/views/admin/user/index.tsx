@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar, Badge, Box, Button, Flex, FormControl, FormHelperText,
-  FormLabel, Input, SimpleGrid,
-  Switch, Text, useColorModeValue, useToast,
+  Avatar, Box, Button, Flex, Input, SimpleGrid,
+  Text, useColorModeValue, useToast,
 } from '@chakra-ui/react';
 import { MdAdd, MdEdit, MdManageAccounts } from 'react-icons/md';
 import Card from 'components/card/Card';
@@ -13,6 +12,10 @@ import PageHeader from 'components/layout/PageHeader';
 import FormPanel from 'components/form/FormPanel';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import StatusBadge from 'components/dataDisplay/StatusBadge';
+import ActiveSwitch from 'components/form/ActiveSwitch';
+import FormActions from 'components/form/FormActions';
+import FormField from 'components/form/FormField';
 
 type FormState = { name: string; email: string; password: string; active: boolean };
 const EMPTY_FORM: FormState = { name: '', email: '', password: '', active: true };
@@ -102,14 +105,14 @@ export default function Users() {
       {showForm && (
         <FormPanel title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description={editing ? 'Actualizá su nombre o acceso.' : 'Creá sus credenciales de acceso.'} onClose={close} footer={
           <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <FormControl display="flex" alignItems="center" w="auto"><Switch colorScheme="brand" isChecked={form.active} onChange={event => change('active', event.target.checked)} /><FormLabel mb="0" ml={3}>Acceso activo</FormLabel></FormControl>
-            <Flex gap={2}><Button variant="ghost" onClick={close}>Cancelar</Button><Button colorScheme="brand" px={7} isLoading={saving} loadingText="Guardando" onClick={save}>{editing ? 'Guardar cambios' : 'Crear acceso'}</Button></Flex>
+            <ActiveSwitch id="user-active" label="Acceso activo" isChecked={form.active} onChange={checked => change('active', checked)} />
+            <FormActions onCancel={close} onSubmit={save} isLoading={saving} submitLabel={editing ? 'Guardar cambios' : 'Crear acceso'} />
           </Flex>
         }>
           <SimpleGrid columns={{ base: 1, md: editing ? 2 : 3 }} spacing={4}>
-            <FormControl isRequired><FormLabel>Nombre completo</FormLabel><Input autoComplete="name" value={form.name} onChange={event => change('name', event.target.value)} /></FormControl>
-            <FormControl isRequired isDisabled={Boolean(editing)}><FormLabel>Correo electrónico</FormLabel><Input type="email" autoComplete="email" value={form.email} onChange={event => change('email', event.target.value)} /></FormControl>
-            {!editing && <FormControl isRequired><FormLabel>Contraseña temporal</FormLabel><Input type="password" minLength={6} autoComplete="new-password" value={form.password} onChange={event => change('password', event.target.value)} /><FormHelperText>Al menos 6 caracteres.</FormHelperText></FormControl>}
+            <FormField id="user-name" label="Nombre completo" isRequired><Input id="user-name" autoComplete="name" value={form.name} onChange={event => change('name', event.target.value)} /></FormField>
+            <FormField id="user-email" label="Correo electrónico" isRequired isDisabled={Boolean(editing)}><Input id="user-email" type="email" autoComplete="email" value={form.email} onChange={event => change('email', event.target.value)} /></FormField>
+            {!editing && <FormField id="user-password" label="Contraseña temporal" help="Al menos 6 caracteres." isRequired><Input id="user-password" type="password" minLength={6} autoComplete="new-password" value={form.password} onChange={event => change('password', event.target.value)} /></FormField>}
           </SimpleGrid>
         </FormPanel>
       )}
@@ -126,7 +129,7 @@ export default function Users() {
               <Box minW={0} flex="1">
                 <Flex align="center" justify="space-between" gap={3} wrap="wrap">
                   <Text fontWeight="900" fontSize="lg" lineHeight="short" wordBreak="break-word">{user.name || 'Sin nombre'}</Text>
-                  <Badge colorScheme={user.active === false ? 'gray' : 'green'} borderRadius="full" px={3} py={1}>{user.active === false ? 'Inactivo' : 'Activo'}</Badge>
+                  <StatusBadge active={user.active !== false} />
                 </Flex>
                 <Text color={muted} fontSize="sm" mt={2} wordBreak="break-all">{user.email}</Text>
                 <Button mt={4} size="sm" variant="outline" colorScheme="brand" leftIcon={<MdEdit />} onClick={() => openEdit(user)}>Editar acceso</Button>

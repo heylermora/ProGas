@@ -1,16 +1,19 @@
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  Alert, AlertIcon, Badge, Box, Button, Divider, Flex, FormControl, FormErrorMessage,
+  Alert, AlertIcon, Box, Button, Divider, Flex, FormControl, FormErrorMessage,
   FormHelperText, FormLabel, Heading, HStack, Icon, Input, InputGroup, InputLeftAddon,
-  Select, SimpleGrid, Stack, Switch, Text, useColorModeValue, useToast,
+  Select, SimpleGrid, Stack, Text, useColorModeValue, useToast,
 } from '@chakra-ui/react';
-import { MdArrowBack, MdCheck, MdInventory2, MdLocalOffer, MdPayments, MdWarning } from 'react-icons/md';
+import { MdCheck, MdInventory2, MdLocalOffer, MdPayments, MdWarning } from 'react-icons/md';
 import Card from 'components/card/Card';
 import HelpLabel from 'components/form/HelpLabel';
 import productService from 'services/ProductService';
 import { Product, ProductCategory } from 'interfaces/ProductItem';
 import useCategories from 'hooks/useCategories';
+import FormPageHeader from 'components/layout/FormPageHeader';
+import StatusBadge from 'components/dataDisplay/StatusBadge';
+import ActiveSwitch from 'components/form/ActiveSwitch';
 
 type ProductDraft = Omit<Product, 'id'>;
 interface Props { product?: Product; isLoading?: boolean; }
@@ -36,7 +39,6 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   const muted = useColorModeValue('gray.600', 'gray.400');
   const subtleBg = useColorModeValue('gray.50', 'whiteAlpha.50');
   const border = useColorModeValue('gray.200', 'whiteAlpha.200');
-  const heroBg = useColorModeValue('linear(to-r, white, brand.50)', 'linear(to-r, navy.800, navy.700)');
   const actionBg = useColorModeValue('rgba(255,255,255,.94)', 'rgba(17,25,54,.94)');
 
   const set = (key: keyof ProductDraft, value: any) => setValues((current) => ({ ...current, [key]: value }));
@@ -64,20 +66,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
 
   return (
     <Box pt={{ base: '120px', md: '78px' }} maxW="1180px" mx="auto" pb="48px">
-      <Card mb="20px" p={{ base: '18px', md: '24px' }} overflow="hidden" position="relative" bgGradient={heroBg}>
-        <Box position="absolute" right="-45px" top="-60px" boxSize="180px" borderRadius="full" bg="brand.400" opacity="0.08" />
-        <Flex position="relative" justify="space-between" align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap={5}>
-          <HStack spacing={4} align="flex-start">
-            <Button aria-label="Volver al inventario" leftIcon={<MdArrowBack />} variant="outline" borderRadius="xl" onClick={goBack}>Volver</Button>
-            <Box>
-              <Text color="brand.500" fontWeight="900" fontSize="xs" letterSpacing=".08em" textTransform="uppercase">Inventario · {product ? 'Edición' : 'Nuevo registro'}</Text>
-              <Heading color={textColor} fontSize={{ base: '26px', md: '34px' }} mt={1}>{product ? values.description || 'Editar producto' : 'Nuevo producto'}</Heading>
-              <Text color={muted} mt={2} maxW="680px">{product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'}</Text>
-            </Box>
-          </HStack>
-          <Badge px="13px" py="8px" borderRadius="full" colorScheme={values.active ? 'green' : 'gray'} flexShrink={0}>{values.active ? 'Producto activo' : 'Producto inactivo'}</Badge>
-        </Flex>
-      </Card>
+      <FormPageHeader title={product ? values.description || 'Editar producto' : 'Nuevo producto'} description={product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'} onBack={goBack} backLabel="Volver al inventario" status={<StatusBadge active={values.active} activeLabel="Producto activo" inactiveLabel="Producto inactivo" />} />
 
       <SimpleGrid columns={{ base: 1, lg: 3 }} spacing="20px" alignItems="start">
         <Stack gridColumn={{ lg: 'span 2' }} spacing="18px">
@@ -134,7 +123,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
             </SimpleGrid>
             <Flex mt="20px" p="14px" bg={subtleBg} borderRadius="14px" justify="space-between" align="center" gap="12px">
               <Box><Text fontWeight="800">Disponible para pedidos</Text><Text fontSize="sm" color={muted}>Al desactivarlo seguirá en el historial, pero no podrá agregarse a pedidos nuevos.</Text></Box>
-              <Switch aria-label="Producto disponible para pedidos" colorScheme="green" isChecked={values.active} onChange={(event) => set('active', event.target.checked)} />
+              <ActiveSwitch id="product-available" label="Producto activo" isChecked={values.active} onChange={checked => set('active', checked)} />
             </Flex>
           </Card>
         </Stack>
