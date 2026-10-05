@@ -8,7 +8,7 @@ import theme from 'theme/theme';
 jest.mock('./MallPreview', () => ({
   __esModule: true,
   default: () => (
-    <section data-testid="mall-preview"><a href="/mall">Explorar todos los negocios</a></section>
+    <section data-testid="mall-preview"><a href="/mall">Ver negocios de Acosta</a></section>
   ),
 }));
 
@@ -29,7 +29,7 @@ describe('Home', () => {
   it('prioritizes local businesses and clearly announces future online orders', () => {
     renderHome();
     expect(screen.getByRole('heading', { name: /acosta tiene mucho por descubrir/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /explorar todos los negocios/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('link', { name: /ver negocios de acosta/i }).getAttribute('href')).toBe('/mall');
     expect(screen.getByText('PRÓXIMAMENTE')).toBeTruthy();
     expect(screen.getByText(/los pedidos en línea todavía no están disponibles/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
@@ -57,7 +57,7 @@ describe('Home', () => {
     const { unmount } = renderHome();
 
     setViewportWidth(375);
-    expect(screen.getByRole('link', { name: /explorar todos los negocios/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('link', { name: /ver negocios de acosta/i }).getAttribute('href')).toBe('/mall');
     expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
 
     unmount();

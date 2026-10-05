@@ -3,7 +3,7 @@ import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text,
 import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdExplore, MdLink, MdStorefront } from 'react-icons/md';
+import { MdEmail, MdExplore, MdLink, MdStorefront, MdArrowForward } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
 
@@ -102,10 +102,10 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
       </Flex>}
 
       {embedded && <Text color="#475569" fontSize="sm" px="2px" mb="4px">Tocá un negocio para ver sus contactos.</Text>}
-      <Box position="relative" overflowX={embedded ? 'auto' : 'hidden'} overflowY="hidden" sx={{ scrollbarWidth: 'thin' }} mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running', ...(embedded ? { '@media screen and (max-width: 47.99em)': { animation: 'none' } } : {}) }}>
+      <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
+        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
           {[0, 1].map((copy) => (
-          <Flex key={copy} display={embedded && copy === 1 ? { base: 'none', md: 'flex' } : 'flex'} gap="14px" pr="14px">
+          <Flex key={copy} gap="14px" pr="14px">
             {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="92px" borderRadius="16px" bg="whiteAlpha.100" opacity={1 - item * .16} />)}
             {!loading && previewBusinesses.map((business) => {
               const businessKey = `${copy}:${business.id}`;
@@ -143,8 +143,14 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         </Flex>
         {selectedBusinessKey && <Text textAlign="center" color={embedded ? '#475569' : 'whiteAlpha.600'} fontSize="10px">El carrusel está pausado mientras revisás los contactos.</Text>}
       </Box>
-      {embedded && <Button as={RLink} to={mallDestination} rightIcon={<MdExplore />} size="lg" w={{ base: '100%', md: 'auto' }}
-        mt="12px" borderRadius="full" colorScheme="brand" fontWeight="800">Explorar todos los negocios</Button>}
+      {embedded && <Flex justify="flex-end" mt="8px">
+        <Link as={RLink} to={mallDestination} display="inline-flex" alignItems="center" gap="8px"
+          minH="44px" px="4px" color="brand.700" fontSize="sm" fontWeight="800"
+          _hover={{ color: 'brand.900', textDecoration: 'underline' }}
+          _focusVisible={{ outline: '2px solid', outlineColor: 'brand.500', outlineOffset: '4px' }}>
+          Ver negocios de Acosta <Icon as={MdArrowForward} aria-hidden="true" />
+        </Link>
+      </Flex>}
     </Box>
   );
 }
