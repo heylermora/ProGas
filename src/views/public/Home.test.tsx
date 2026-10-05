@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 import theme from 'theme/theme';
@@ -34,7 +34,8 @@ describe('Home', () => {
     expect(screen.getByText(/este servicio aún no está disponible/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
     expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
-    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i }).closest('section')?.contains(screen.getByTestId('mall-preview'))).toBe(true);
+    const community = screen.getByRole('region', { name: /lo que busca, en acosta/i });
+    expect(within(community).getByTestId('mall-preview')).toBeTruthy();
     expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
