@@ -13,8 +13,9 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdFavorite, MdAccessTime } from 'react-icons/md';
+import { MdEmail, MdFavorite, MdAccessTime, MdArrowForward } from 'react-icons/md';
 import MallPreview from './MallPreview';
 import { PublicPage } from './PublicPage';
 
@@ -148,7 +149,7 @@ function DonationBanner() {
               lineHeight="1.1"
               letterSpacing="-0.03em"
             >
-              Apoyá a la Banda Municipal de Acosta
+              Apoye a la Banda Municipal de Acosta
             </Heading>
 
             <Text
@@ -157,7 +158,7 @@ function DonationBanner() {
               maxW="620px"
               lineHeight="1.55"
             >
-              Tu donación ayuda a impulsar la música, la formación artística y el talento local.
+              Su donación ayuda a impulsar la música, la formación artística y el talento local.
               Cualquier aporte suma.
             </Text>
           </Stack>
@@ -271,15 +272,23 @@ export default function Home() {
       <Box as="section" aria-labelledby="community-title" position="relative" overflow="hidden"
         borderRadius={{ base: '24px', md: '32px' }} mb={{ base: 6, md: 8 }} bg="#EEF3FF"
         border="1px solid" borderColor="#DDE5F5" boxShadow="0 18px 44px rgba(38,51,105,.08)">
-        <Box position="relative" px={{ base: 5, md: 10 }} pt={{ base: 7, md: 12 }} pb={{ base: 6, md: 10 }} minH={{ base: '310px', md: '360px' }}>
+        <Box position="relative" px={{ base: 5, md: 10 }} pt={{ base: 7, md: 12 }} pb={{ base: 4, md: 5 }}>
           <Image src={acostaBackground} alt="" aria-hidden="true" position="absolute" inset="0"
             w="100%" h="100%" objectFit="cover" objectPosition={{ base: '72% center', md: 'center 58%' }} pointerEvents="none" />
           <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
             bg={{ base: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.72) 45%, rgba(244,246,255,.08) 90%), linear-gradient(0deg, #EEF3FF, transparent 38%)', md: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.6) 40%, transparent 72%), linear-gradient(0deg, #EEF3FF, transparent 30%)' }} />
           <Stack position="relative" spacing={{ base: 3, md: 4 }} color="#172554" maxW={{ base: '76%', md: '52%' }}>
-            <Text fontSize={{ base: '10px', md: 'xs' }} fontWeight="800" letterSpacing=".12em" textTransform="uppercase">Descubrí lo nuestro</Text>
+            <Text fontSize={{ base: '10px', md: 'xs' }} fontWeight="800" letterSpacing=".12em" textTransform="uppercase">Descubra lo nuestro</Text>
             <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Acosta tiene mucho por descubrir.</Heading>
-            <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Encontrá negocios, conectá con sus dueños y apoyá el talento local.</Text>
+            <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Encuentre negocios, conecte con sus dueños y apoye el talento local.</Text>
+            <Button as={RLink} to={{ pathname: '/mall', state: { from: '/', fromLabel: 'Volver al inicio' } }}
+              alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"
+              bg="linear-gradient(115deg, #5930E8, #3520AD)" color="white" px={{ base: 5, md: 7 }}
+              borderRadius="full" fontWeight="800" boxShadow="0 8px 22px rgba(70,39,191,.28)"
+              _hover={{ bg: '#3520AD', boxShadow: '0 10px 26px rgba(70,39,191,.36)' }}
+              _focusVisible={{ outline: '3px solid', outlineColor: 'brand.600', outlineOffset: '4px' }}>
+              Descubra negocios
+            </Button>
           </Stack>
         </Box>
         <MallPreview embedded />
@@ -297,13 +306,13 @@ export default function Home() {
               <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight="900" letterSpacing=".06em">PRÓXIMAMENTE</Text>
             </Flex>
             <Text color="brand.500" fontSize="sm" fontWeight="800">GAS MEMO · PEDIDOS EN LÍNEA</Text>
-            <Heading id="gas-coming-title" fontSize={{ base: '28px', md: '38px' }} lineHeight="1.15" letterSpacing="-.03em">Más tiempo para vos.<br />Tu gas, a unos clics.</Heading>
-            <Text color={muted} maxW="560px" lineHeight="1.7">Estamos preparando una forma más sencilla de pedir tu gas: elegir tus productos, indicar la entrega y consultar el estado de tu pedido en un solo lugar.</Text>
-            <Text color={muted} fontSize="sm">Los pedidos en línea todavía no están disponibles. Seguinos en nuestras redes para conocer las novedades del lanzamiento.</Text>
+            <Heading id="gas-coming-title" fontSize={{ base: '28px', md: '38px' }} lineHeight="1.15" letterSpacing="-.03em">Más tiempo para usted.<br />Su gas, a unos clics.</Heading>
+            <Text color={muted} maxW="560px" lineHeight="1.7">Estamos preparando una forma más sencilla de pedir su gas: elegir sus productos, indicar la entrega y consultar el estado de su pedido en un solo lugar.</Text>
+            <Text color={muted} fontSize="sm">Los pedidos en línea todavía no están disponibles. Síganos en nuestras redes para conocer las novedades del lanzamiento.</Text>
           </Stack>
           <Stack spacing={4} w={{ base: '100%', lg: '320px' }} flexShrink={0}>
             <SocialLogoHub />
-            <Text color={muted} fontSize="sm" textAlign="center">Tocá el logo y conectá con Gas Memo.</Text>
+            <Text color={muted} fontSize="sm" textAlign="center">Toque el logo y conecte con Gas Memo.</Text>
           </Stack>
         </Flex>
       </Box>

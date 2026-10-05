@@ -20,7 +20,7 @@ const ClosingService = {
         const current = { id: snapshot.id, ...snapshot.data() } as any;
         if (closing.orderFingerprints[snapshot.id] !== orderFingerprint(current)) {
           const orderCode = closing.orderCodes[index] || snapshot.id;
-          throw new Error(`El pedido ${orderCode} cambió mientras revisabas el corte. Volvé a cargar la previsualización y confirmá nuevamente.`);
+          throw new Error(`El pedido ${orderCode} cambió mientras revisaba el corte. Vuelva a cargar la previsualización y confirme nuevamente.`);
         }
       });
       const expenseRefs = closing.expenseIds.map((expenseId) => doc(db, 'Expenses', expenseId));

@@ -4,7 +4,7 @@ import { MdHome, MdLogin, MdShoppingCart, MdWork } from 'react-icons/md';
 import { FaWhatsapp } from 'react-icons/fa';
 import packageInfo from '../../../package.json';
 
-const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi tu portafolio y me gustaría conversar sobre un proyecto.')}`;
+const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi su portafolio y me gustaría conversar sobre un proyecto.')}`;
 
 export default function PublicFooter() {
   const location = useLocation();

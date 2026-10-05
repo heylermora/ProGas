@@ -76,7 +76,7 @@ export default function Clients() {
 
   const save = async () => {
     if (!form.nationalId.trim() || !form.name.trim() || !form.phone.trim()) {
-      toast({ status: 'warning', title: 'Completá la cédula, el nombre y el teléfono' });
+      toast({ status: 'warning', title: 'Complete la cédula, el nombre y el teléfono' });
       return;
     }
     setSaving(true);
@@ -100,7 +100,7 @@ export default function Clients() {
     <Box w="100%" pt={{ base: '110px', md: '80px' }} pb={8}>
       <PageHeader
         title="Clientes"
-        description="Gestioná la información y disponibilidad de tus clientes."
+        description="Gestione la información y disponibilidad de sus clientes."
         action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={create}>Nuevo cliente</Button>}
       />
 
@@ -136,7 +136,7 @@ export default function Clients() {
       {loading ? (
         <AsyncContent isLoading loadingLabel="Cargando clientes" />
       ) : visible.length === 0 ? (
-        <EmptyState icon={MdPeople} title={query ? 'No encontramos clientes' : 'Aún no hay clientes'} description={query ? 'Probá con otro nombre, cédula o teléfono.' : 'Creá el primer cliente para comenzar.'} actionLabel={!query ? 'Nuevo cliente' : undefined} actionIcon={<MdAdd />} onAction={!query ? create : undefined} />
+        <EmptyState icon={MdPeople} title={query ? 'No encontramos clientes' : 'Aún no hay clientes'} description={query ? 'Pruebe con otro nombre, cédula o teléfono.' : 'Cree el primer cliente para comenzar.'} actionLabel={!query ? 'Nuevo cliente' : undefined} actionIcon={<MdAdd />} onAction={!query ? create : undefined} />
       ) : (
         <SimpleGrid columns={{ base: 1, lg: 2, '2xl': 3 }} spacing={4}>
           {visible.map(client => {

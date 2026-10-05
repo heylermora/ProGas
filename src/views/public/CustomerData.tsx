@@ -40,7 +40,7 @@ export default function CustomerData() {
       if (existingClient) {
         const savedPhone = onlyDigits(existingClient.phone || existingClient.telefono);
         if (savedPhone && savedPhone !== phoneDigits) {
-          setMessage('No pudimos verificar los datos ingresados. Revisalos e intentá nuevamente.');
+          setMessage('No pudimos verificar los datos ingresados. Revíselos e intente nuevamente.');
           return;
         }
 
@@ -87,7 +87,7 @@ export default function CustomerData() {
   return (
     <PublicPage
       title="Verificación del cliente"
-      description="Ingresá tu cédula y teléfono para identificarte y continuar con el pedido. Si ya sos cliente, usá el mismo teléfono que registraste anteriormente."
+      description="Ingrese su cédula y teléfono para identificarle y continuar con el pedido. Si ya es cliente, use el mismo teléfono que registró anteriormente."
       maxW="900px"
     >
       <Box h={{ base: '8px', md: '12px' }} />

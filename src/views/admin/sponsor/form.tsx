@@ -56,16 +56,16 @@ export default function SponsorForm() {
     if (!file) return;
 
     if (key === 'videoUrl' && file.size > MAX_FIRESTORE_VIDEO_BYTES) {
-      showMessage('warning', 'El video es muy pesado para guardarlo directo. Pegá un link de video público o subí un archivo menor a 850 KB para esta demo.');
+      showMessage('warning', 'El video es muy pesado para guardarlo directo. Pegue un link de video público o suba un archivo menor a 850 KB para esta demo.');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
       set(key, String(reader.result || ''));
-      showMessage('success', key === 'videoUrl' ? 'Video cargado para previsualización. Guardá para aplicarlo.' : 'Archivo cargado para previsualización.');
+      showMessage('success', key === 'videoUrl' ? 'Video cargado para previsualización. Guarde para aplicarlo.' : 'Archivo cargado para previsualización.');
     };
-    reader.onerror = () => showMessage('error', 'No se pudo leer el archivo. Intentá nuevamente o usá un link.');
+    reader.onerror = () => showMessage('error', 'No se pudo leer el archivo. Intente nuevamente o use un link.');
     reader.readAsDataURL(file);
   };
 
@@ -91,7 +91,7 @@ export default function SponsorForm() {
       history.push('/admin/sponsor/index');
     } catch (error) {
       console.error('[SponsorForm] Error guardando patrocinador:', error);
-      showMessage('error', 'No se pudo guardar el patrocinador. Si adjuntaste video, probá con un archivo más liviano o con un link externo.');
+      showMessage('error', 'No se pudo guardar el patrocinador. Si adjuntó video, pruebe con un archivo más liviano o con un link externo.');
     } finally {
       setSaving(false);
     }
@@ -105,7 +105,7 @@ export default function SponsorForm() {
             <BackButton aria-label="Volver a patrocinadores" onClick={() => history.push('/admin/sponsor/index')} flexShrink={0}>Volver a patrocinadores</BackButton>
             <Box>
               <Heading fontSize={{ base: '24px', md: '32px' }}>{id ? 'Editar patrocinador' : 'Nuevo patrocinador'}</Heading>
-              <Text color={muted} mt="4px">Configurá su presencia pública, enlaces y contenido visual en un solo lugar.</Text>
+              <Text color={muted} mt="4px">Configure su presencia pública, enlaces y contenido visual en un solo lugar.</Text>
             </Box>
           </HStack>
           <HStack spacing="8px" flexWrap="wrap">
@@ -126,7 +126,7 @@ export default function SponsorForm() {
               <Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Activo' : 'Oculto'}</Badge>
             </HStack>
             <Text fontWeight="800" fontSize={{ base: 'lg', md: 'xl' }}>Datos principales</Text>
-            <Text color={muted} fontSize="sm">Organizá el orden dentro de esta categoría del centro comercial.</Text>
+            <Text color={muted} fontSize="sm">Organice el orden dentro de esta categoría del centro comercial.</Text>
           </Stack>
 
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
@@ -163,12 +163,12 @@ export default function SponsorForm() {
               <FormControl>
                   <FormLabel>Link o iframe de video</FormLabel>
                   <Input value={sponsor.videoUrl?.startsWith('data:') ? '' : sponsor.videoUrl} placeholder='<iframe src="https://..."></iframe> o https://...' onChange={(e) => set('videoUrl', e.target.value)} />
-                  <FormHelperText>Opcional. Pegá iframe o link embed público para evitar límites de guardado.</FormHelperText>
+                  <FormHelperText>Opcional. Pegue iframe o link embed público para evitar límites de guardado.</FormHelperText>
                 </FormControl>
               <FormControl>
                   <FormLabel>O subir video pequeño</FormLabel>
                   <Input type="file" accept="video/*" onChange={(e) => readFile('videoUrl', e.target.files?.[0])} />
-                  <FormHelperText>Opcional, menor a 850 KB. Si falla al guardar, usá el link de video.</FormHelperText>
+                  <FormHelperText>Opcional, menor a 850 KB. Si falla al guardar, use el link de video.</FormHelperText>
                 </FormControl>
             </SimpleGrid>
           </Stack>
@@ -176,7 +176,7 @@ export default function SponsorForm() {
           <FormControl p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
             <FormLabel>Descripción</FormLabel>
             <Textarea value={sponsor.description} placeholder="Mensaje corto del negocio, promoción o categoría." onChange={(e) => set('description', e.target.value)} />
-            <FormHelperText>Opcional. Usá una frase corta para que no sature el card.</FormHelperText>
+            <FormHelperText>Opcional. Use una frase corta para que no sature el card.</FormHelperText>
           </FormControl>
 
           <Stack spacing="12px" p={{ base: '14px', md: '16px' }} bg={sectionBg} borderRadius="16px">
@@ -201,7 +201,7 @@ export default function SponsorForm() {
         <Card p={{ base: '16px', md: '20px' }} position={{ xl: 'sticky' }} top={{ xl: '90px' }} border="1px solid" borderColor="brand.100">
           <Stack spacing="12px">
           <HStack><Box p="8px" borderRadius="full" bg="brand.50" color="brand.500"><MdVisibility size="20px" /></Box><Text fontWeight="800" fontSize={{ base: 'md', md: 'lg' }}>Previsualización en vivo</Text></HStack>
-          <Text color={muted} fontSize="sm">Revisá el resultado antes de guardar. Los contactos se despliegan al tocar el logo.</Text>
+          <Text color={muted} fontSize="sm">Revise el resultado antes de guardar. Los contactos se despliegan al tocar el logo.</Text>
           <Box p={{ base: '14px', md: '18px' }} borderRadius="16px" bg={sectionBg}><Badge colorScheme="brand">{sponsor.category}</Badge><Text fontWeight="900" fontSize="xl" mt="8px">{sponsor.name || 'Nombre del negocio'}</Text><Text color={muted} fontSize="sm" mt="4px">{sponsor.description || 'La descripción aparecerá en la tarjeta del centro comercial.'}</Text></Box>
           <HStack color={muted} fontSize="xs"><MdInfoOutline /><Text>Los cambios se publican al guardar.</Text></HStack>
           </Stack>

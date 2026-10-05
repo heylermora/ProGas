@@ -25,7 +25,7 @@ export default class AppErrorBoundary extends React.Component<Props, State> {
         <Box maxW="520px" textAlign="center">
           <Heading size="lg">No pudimos mostrar esta pantalla</Heading>
           <Text color="gray.600" mt="12px" mb="20px">
-            Recargá la aplicación para intentarlo nuevamente. Si el problema continúa, contactá al equipo de soporte.
+            Recargue la aplicación para intentarlo nuevamente. Si el problema continúa, contacte al equipo de soporte.
           </Text>
           <Button colorScheme="brand" onClick={this.reload}>Recargar aplicación</Button>
         </Box>

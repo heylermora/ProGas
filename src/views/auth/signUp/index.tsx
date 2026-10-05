@@ -72,7 +72,7 @@ function SignUp() {
     registerUser(email, password).then(() => {
         history.push('/customer/data');
 			})
-			.catch(() => setFeedback('No fue posible crear la cuenta. Revisá el correo y los requisitos de la contraseña.'))
+			.catch(() => setFeedback('No fue posible crear la cuenta. Revise el correo y los requisitos de la contraseña.'))
       .finally(() => setIsSubmitting(false));
   };
 
@@ -207,7 +207,7 @@ function SignUp() {
                 maxW='100%'
                 mt='0px'>
                 <Text color={textColorDetails} fontWeight='400' fontSize='14px'>
-                  ¿Ya tienes una cuenta?
+                  ¿Ya tiene una cuenta?
                   <NavLink to='/auth/sign-in'>
                     <Text
                       color={textColorBrand}

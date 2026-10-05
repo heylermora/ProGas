@@ -72,21 +72,21 @@ function SignIn() {
     loginUser(email, password).then(() => {
         history.push('/admin/order/index');
       })
-      .catch(() => setFeedback('No fue posible iniciar sesión. Verificá los datos e intentá nuevamente.'))
+      .catch(() => setFeedback('No fue posible iniciar sesión. Verifique los datos e intente nuevamente.'))
       .finally(() => setIsSubmitting(false));
   };
 
   const handlePasswordReset = async () => {
     if (!email.trim()) {
-      setFeedback('Ingresá tu correo electrónico para solicitar la recuperación.');
+      setFeedback('Ingrese su correo electrónico para solicitar la recuperación.');
       return;
     }
     try {
       await requestPasswordReset(email);
-      setFeedback('Si el correo está registrado, recibirás instrucciones para restablecer la contraseña.');
+      setFeedback('Si el correo está registrado, recibirá instrucciones para restablecer la contraseña.');
     } catch {
       // Keep the response neutral so the form does not disclose registered accounts.
-      setFeedback('Si el correo está registrado, recibirás instrucciones para restablecer la contraseña.');
+      setFeedback('Si el correo está registrado, recibirá instrucciones para restablecer la contraseña.');
     }
   };
   // Responsive typed constants to avoid TS complex union warnings

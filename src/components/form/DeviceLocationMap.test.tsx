@@ -11,6 +11,6 @@ describe('DeviceLocationMap', () => {
     );
 
     expect(screen.getByRole('button', { name: /usar mi ubicación/i })).toBeTruthy();
-    expect(screen.getByText(/solo necesitás aceptar el permiso/i)).toBeTruthy();
+    expect(screen.getByText(/solo necesita aceptar el permiso/i)).toBeTruthy();
   });
 });

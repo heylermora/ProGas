@@ -59,8 +59,8 @@ describe('MallPreview', () => {
     renderPreview(true);
     await screen.findAllByRole('button', { name: /ver contactos de café central/i });
     expect(screen.queryByRole('heading', { name: /negocios de nuestra comunidad/i })).toBeNull();
-    expect(screen.getAllByRole('link', { name: /ver negocios de acosta/i })).toHaveLength(1);
-    expect(screen.getByText(/tocá un negocio para ver sus contactos/i)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /ver negocios de acosta/i })).toBeNull();
+    expect(screen.getByText(/toque un negocio para ver sus contactos/i)).toBeTruthy();
     fireEvent.click(screen.getAllByRole('button', { name: /ver contactos de café central/i })[0]);
     expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
   });
