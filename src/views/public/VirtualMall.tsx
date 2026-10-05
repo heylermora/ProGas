@@ -34,6 +34,7 @@ import {
   MdViewList,
   MdMap,
 } from 'react-icons/md';
+import SearchableCategorySelect from 'components/category/SearchableCategorySelect';
 import useCategories from 'hooks/useCategories';
 import SponsorService from 'services/SponsorService';
 import { useLocation } from 'react-router-dom';
@@ -309,10 +310,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
       <Stack spacing="20px">
         <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Busque por nombre o filtre por categoría.</Text></Box>
         <Input aria-label="Buscar negocio" size="lg" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Buscar negocio o servicio" />
-        <Flex gap="8px" wrap="wrap">
-          <Button size="sm" borderRadius="full" colorScheme={!selectedCategory ? 'brand' : 'gray'} variant={!selectedCategory ? 'solid' : 'outline'} onClick={() => onCategory('')}>Todos</Button>
-          {categories.map((category) => <Button key={category} size="sm" borderRadius="full" colorScheme={selectedCategory === category ? 'brand' : 'gray'} variant={selectedCategory === category ? 'solid' : 'outline'} onClick={() => onCategory(category)}>{category}</Button>)}
-        </Flex>
+        <SearchableCategorySelect categories={categories} value={selectedCategory} onChange={onCategory} />
         <Text fontWeight="700">{visible.length} {visible.length === 1 ? 'negocio encontrado' : 'negocios encontrados'}</Text>
         {visible.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px">{visible.map((business) => {
           const links = (business.links || []).filter(Boolean).slice(0, 4);
