@@ -15,7 +15,7 @@ export default function PublicFooter() {
       <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap={{ base: '16px', md: '24px' }} px={{ base: '18px', md: '26px' }} py={{ base: '20px', md: '22px' }}>
         <Flex align="center" gap="12px">
           <Flex bg="whiteAlpha.200" color="white" w="42px" h="42px" flexShrink={0} borderRadius="14px" align="center" justify="center" fontWeight="900" letterSpacing="-.04em">GM</Flex>
-          <Box><Text fontWeight="900" lineHeight="1.15">Gas Memo</Text><Text color="whiteAlpha.700" fontSize="sm">Comercios y comunidad de Acosta</Text></Box>
+          <Box><Text fontWeight="900" lineHeight="1.15">Gas Memo</Text><Text color="whiteAlpha.700" fontSize="sm">Un espacio para el comercio local</Text></Box>
         </Flex>
         <Flex wrap="wrap" gap="8px" w={{ base: '100%', md: 'auto' }}>
           {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Inicio</Button>}

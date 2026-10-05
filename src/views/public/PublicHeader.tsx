@@ -33,7 +33,7 @@ export default function PublicHeader() {
         ) : (
           <Flex as={RLink} to="/" align="center" gap="9px" color="inherit" _hover={{ textDecoration: 'none' }}>
             <Flex w="38px" h="38px" flex="0 0 auto" borderRadius="13px" bg="brand.500" color="white" align="center" justify="center" fontWeight="900">GM</Flex>
-            <Box display={{ base: 'none', sm: 'block' }}><Text fontWeight="900" lineHeight="1">Gas Memo</Text><Text mt="3px" color={muted} fontSize="10px">Conectando Acosta</Text></Box>
+            <Box display={{ base: 'none', sm: 'block' }}><Text fontWeight="900" lineHeight="1">Gas Memo</Text><Text mt="3px" color={muted} fontSize="10px">Directorio local</Text></Box>
           </Flex>
         )}
       </Flex>

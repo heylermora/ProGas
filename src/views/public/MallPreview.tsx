@@ -94,14 +94,14 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         <Flex gap="12px" align="center">
           <Flex w={{ base: '42px', md: '48px' }} h={{ base: '42px', md: '48px' }} flex="0 0 auto" borderRadius="16px" align="center" justify="center" bg="whiteAlpha.100" border="1px solid" borderColor="whiteAlpha.300" fontSize={{ base: '23px', md: '27px' }}>🧑‍🚀</Flex>
           <Stack spacing="2px">
-            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de nuestra comunidad</Heading>
-            {!compact && <Text color="whiteAlpha.700" fontSize="sm">Descubra emprendimientos de Acosta. Toque uno para ver cómo contactarlo.</Text>}
+            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de Acosta</Heading>
+            {!compact && <Text color="whiteAlpha.700" fontSize="sm">Seleccione un negocio y contáctelo directamente.</Text>}
           </Stack>
         </Flex>
         <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} size="lg" borderRadius="full" bgGradient="linear(135deg, #FFF2A8 0%, #FACC15 48%, #E98A00 100%)" color="#281900" fontWeight="900" px="26px" animation={prefersReducedMotion ? undefined : `${ctaPulse} 2.3s ease-in-out infinite`} _hover={{ transform: 'translateY(-3px) scale(1.03)', filter: 'brightness(1.04)', textDecoration: 'none' }}>Explorar todos los negocios{compact ? ' ↗' : ''}</Button>
       </Flex>}
 
-      {embedded && <Text color="#475569" fontSize="sm" px="2px" mb="4px">Toque un negocio para ver sus contactos.</Text>}
+      {embedded && <Text color="#475569" fontSize="sm" px="2px" mb="4px">Seleccione un negocio para ver sus contactos.</Text>}
       <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
         <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
           {[0, 1].map((copy) => (
@@ -137,11 +137,11 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
                 </Box>
               );
             })}
-            {!loading && !previewBusinesses.length && <Flex flex="1" minH="86px" p="14px" borderRadius="16px" border="1px dashed" borderColor="whiteAlpha.300" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color={embedded ? 'brand.500' : 'cyan.200'} /><Text fontSize="sm" color={embedded ? '#475569' : 'whiteAlpha.700'}>Muy pronto encontrará negocios locales en este espacio.</Text></Flex>}
+            {!loading && !previewBusinesses.length && <Flex flex="1" minH="86px" p="14px" borderRadius="16px" border="1px dashed" borderColor="whiteAlpha.300" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color={embedded ? 'brand.500' : 'cyan.200'} /><Text fontSize="sm" color={embedded ? '#475569' : 'whiteAlpha.700'}>Aún no hay negocios publicados.</Text></Flex>}
           </Flex>
           ))}
         </Flex>
-        {selectedBusinessKey && <Text textAlign="center" color={embedded ? '#475569' : 'whiteAlpha.600'} fontSize="10px">El carrusel está pausado mientras revisa los contactos.</Text>}
+        {selectedBusinessKey && <Text textAlign="center" color={embedded ? '#475569' : 'whiteAlpha.600'} fontSize="10px">Carrusel pausado mientras consulta los contactos.</Text>}
       </Box>
 
     </Box>

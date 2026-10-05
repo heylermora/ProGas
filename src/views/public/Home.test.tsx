@@ -28,13 +28,13 @@ const setViewportWidth = (width: number) => {
 describe('Home', () => {
   it('prioritizes local businesses and clearly announces future online orders', () => {
     renderHome();
-    expect(screen.getByRole('heading', { name: /acosta tiene mucho por descubrir/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /descubra negocios/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /^ver negocios$/i }).getAttribute('href')).toBe('/mall');
     expect(screen.getByText('PRÓXIMAMENTE')).toBeTruthy();
-    expect(screen.getByText(/los pedidos en línea todavía no están disponibles/i)).toBeTruthy();
+    expect(screen.getByText(/este servicio aún no está disponible/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
     expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
-    expect(screen.getByRole('heading', { name: /acosta tiene mucho por descubrir/i }).closest('section')?.contains(screen.getByTestId('mall-preview'))).toBe(true);
+    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i }).closest('section')?.contains(screen.getByTestId('mall-preview'))).toBe(true);
     expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
@@ -57,14 +57,14 @@ describe('Home', () => {
     const { unmount } = renderHome();
 
     setViewportWidth(375);
-    expect(screen.getByRole('link', { name: /descubra negocios/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('link', { name: /^ver negocios$/i }).getAttribute('href')).toBe('/mall');
     expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
 
     unmount();
     setViewportWidth(1280);
     renderHome();
 
-    expect(screen.getByRole('heading', { name: /acosta tiene mucho por descubrir/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
     expect(screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i })).toBeTruthy();
   });

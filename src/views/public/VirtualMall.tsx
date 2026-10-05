@@ -224,9 +224,9 @@ export default function VirtualMall() {
           <Box position="absolute" right="-25px" top="-60px" fontSize={{ base: '140px', md: '190px' }} opacity=".11">🕹️</Box>
           <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" direction={{ base: 'column', md: 'row' }}>
           <Stack spacing="8px" maxW="760px">
-            <Badge w="fit-content" px="10px" py="4px" borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MODO EXPLORACIÓN</Badge>
-            <Heading fontSize={{ base: '29px', md: '48px' }} lineHeight="1.04">Centro Comercial Virtual</Heading>
-            <Text fontSize={{ base: 'sm', md: 'lg' }} color="whiteAlpha.900">Viaje por el mapa, entre a una categoría y descubra cada negocio en su propia estación.</Text>
+            <Badge w="fit-content" px="10px" py="4px" borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MAPA INTERACTIVO</Badge>
+            <Heading fontSize={{ base: '29px', md: '48px' }} lineHeight="1.04">Negocios de Acosta</Heading>
+            <Text fontSize={{ base: 'sm', md: 'lg' }} color="whiteAlpha.900">Encuentre comercios y servicios por categoría y consulte sus contactos.</Text>
           </Stack>
           <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="lg" flexShrink={0} onClick={() => setSimpleView((value) => !value)} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
           </Flex>
@@ -235,8 +235,8 @@ export default function VirtualMall() {
         {simpleView ? <SimpleMall categories={categories} businesses={activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
-              <Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa galáctico</Heading>
-              <Text color="gray.500" fontSize="xs">Elija una categoría para viajar a su submapa.</Text>
+              <Heading fontSize={{ base: 'lg', md: 'xl' }}>Categorías</Heading>
+              <Text color="gray.500" fontSize="xs">Seleccione una categoría.</Text>
             </Stack>
           )}
 
@@ -244,8 +244,8 @@ export default function VirtualMall() {
             <Box position="absolute" inset="8%" border="1px dashed" borderColor="cyan.200" borderRadius="45%" opacity=".24" />
             <Box position="absolute" inset="21%" border="1px dashed" borderColor="purple.200" borderRadius="44%" opacity=".2" />
 
-            {loadStatus === 'loading' && <MapStatus icon="📡" title="Escaneando la galaxia" description="Buscando estaciones comerciales…" />}
-            {loadStatus === 'error' && <MapStatus icon="⚠️" title="Se perdió la señal" description="No pudimos cargar los negocios." action="Reintentar" onAction={loadBusinesses} />}
+            {loadStatus === 'loading' && <MapStatus icon="📡" title="Cargando negocios" description="Espere un momento." />}
+            {loadStatus === 'error' && <MapStatus icon="⚠️" title="No pudimos cargar los negocios" description="Inténtelo de nuevo." action="Reintentar" onAction={loadBusinesses} />}
             {loadStatus === 'success' && (
               <Box key={selectedCategory || 'galaxy'} position="absolute" inset="0" animation={`${mapArrival} .38s ease-out`}>
                 {!selectedCategory ? (
@@ -260,8 +260,8 @@ export default function VirtualMall() {
             {loadStatus === 'success' && selectedCategory && categoryBusinesses.length === 0 && (
               <Stack position="absolute" left="50%" bottom="10%" transform="translateX(-50%)" align="center" textAlign="center" color="white" zIndex={3} w="80%" pointerEvents="none">
                 <Text fontSize="38px">🛰️</Text>
-                <Heading fontSize="xl">No hay estaciones disponibles</Heading>
-                <Text color="whiteAlpha.700" fontSize="sm">Toque el centro de la zona para regresar al mapa galáctico.</Text>
+                <Heading fontSize="xl">Esta categoría aún no tiene negocios</Heading>
+                <Text color="whiteAlpha.700" fontSize="sm">Seleccione el centro para volver a las categorías.</Text>
               </Stack>
             )}
 
@@ -307,7 +307,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
   return (
     <Box bg={surface} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '18px', md: '26px' }} boxShadow="lg">
       <Stack spacing="20px">
-        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Elija una categoría o escriba el nombre de un negocio. No necesita usar el mapa.</Text></Box>
+        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Busque por nombre o filtre por categoría.</Text></Box>
         <Input aria-label="Buscar negocio" size="lg" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Buscar negocio o servicio" />
         <Flex gap="8px" wrap="wrap">
           <Button size="sm" borderRadius="full" colorScheme={!selectedCategory ? 'brand' : 'gray'} variant={!selectedCategory ? 'solid' : 'outline'} onClick={() => onCategory('')}>Todos</Button>
@@ -416,7 +416,7 @@ function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, 
   else if (selectedCategoryIndex >= 0) position = [50, 60];
   return (
     <Stack position="absolute" left={`${position[0]}%`} top={`${Math.min(position[1] + 9, 91)}%`} transform="translate(-50%, -50%)" w={{ base: '80px', md: '106px' }} align="center" spacing="0" zIndex={4} transition="left .55s cubic-bezier(.2,.8,.2,1), top .55s cubic-bezier(.2,.8,.2,1)" pointerEvents="none">
-      <Badge whiteSpace="nowrap" colorScheme="red" borderRadius="full" fontSize={{ base: '8px', md: '10px' }}><Icon as={MdMyLocation} mr="3px" />ESTÁS AQUÍ</Badge>
+      <Badge whiteSpace="nowrap" colorScheme="red" borderRadius="full" fontSize={{ base: '8px', md: '10px' }}><Icon as={MdMyLocation} mr="3px" />USTED ESTÁ AQUÍ</Badge>
       <Box position="relative" w="62px" h="52px" display="flex" justifyContent="center">
         <Box position="absolute" bottom="1px" left="50%" w="38px" h="10px" borderRadius="full" bg="blackAlpha.500" animation={`${shadowPulse} 1s ease-in-out infinite`} />
         <Box position="relative" zIndex={1} animation={`${astronautFloat} 1s ease-in-out infinite`} fontSize={{ base: '36px', md: '45px' }} lineHeight="1">🧑‍🚀</Box>
@@ -429,7 +429,7 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
   return (
     <Box position="absolute" zIndex={8} right={{ base: '8px', md: '18px' }} bottom={{ base: '8px', md: '18px' }} w={{ base: 'calc(100% - 16px)', md: '430px' }} maxH={{ base: '260px', md: 'calc(100% - 36px)' }} overflowY="auto" p={{ base: '12px', md: '14px' }} borderRadius={{ base: '22px', md: '26px' }} bg="rgba(8, 14, 38, .94)" color="white" border="1px solid" borderColor="cyan.300" boxShadow="0 24px 65px rgba(0,0,0,.52), inset 0 0 28px rgba(34,211,238,.05)" backdropFilter="blur(16px)" animation={`${panelArrival} .24s ease-out`}>
       <Flex align="center" justify="space-between" mb={{ base: '6px', md: '8px' }}>
-        <Badge bg="cyan.300" color="navy.900" borderRadius="full" px="9px">FICHA DE ESTACIÓN</Badge>
+        <Badge bg="cyan.300" color="navy.900" borderRadius="full" px="9px">CONTACTOS DEL NEGOCIO</Badge>
         <IconButton aria-label="Cerrar ficha" icon={<MdClose />} size="sm" variant="ghost" color="white" onClick={onClose} />
       </Flex>
       <Flex gap={{ base: '10px', md: '14px' }} align="center">

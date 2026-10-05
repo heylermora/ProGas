@@ -158,8 +158,7 @@ function DonationBanner() {
               maxW="620px"
               lineHeight="1.55"
             >
-              Su donación ayuda a impulsar la música, la formación artística y el talento local.
-              Cualquier aporte suma.
+              Su aporte contribuye a la formación musical del cantón.
             </Text>
           </Stack>
         </Flex>
@@ -188,7 +187,7 @@ function DonationBanner() {
             transform: 'translateY(0)',
           }}
         >
-          Colabore ahora
+          Haga un aporte
         </Button>
       </Flex>
     </Box>
@@ -278,16 +277,16 @@ export default function Home() {
           <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
             bg={{ base: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.72) 45%, rgba(244,246,255,.08) 90%), linear-gradient(0deg, #EEF3FF, transparent 38%)', md: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.6) 40%, transparent 72%), linear-gradient(0deg, #EEF3FF, transparent 30%)' }} />
           <Stack position="relative" spacing={{ base: 3, md: 4 }} color="#172554" maxW={{ base: '76%', md: '52%' }}>
-            <Text fontSize={{ base: '10px', md: 'xs' }} fontWeight="800" letterSpacing=".12em" textTransform="uppercase">Descubra lo nuestro</Text>
-            <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Acosta tiene mucho por descubrir.</Heading>
-            <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Encuentre negocios, conecte con sus dueños y apoye el talento local.</Text>
+            <Text fontSize={{ base: '10px', md: 'xs' }} fontWeight="800" letterSpacing=".12em" textTransform="uppercase">Comercio local</Text>
+            <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Lo que busca, en Acosta.</Heading>
+            <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Productos y servicios de nuestra comunidad, reunidos en un solo lugar.</Text>
             <Button as={RLink} to={{ pathname: '/mall', state: { from: '/', fromLabel: 'Volver al inicio' } }}
               alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"
               bg="linear-gradient(115deg, #5930E8, #3520AD)" color="white" px={{ base: 5, md: 7 }}
               borderRadius="full" fontWeight="800" boxShadow="0 8px 22px rgba(70,39,191,.28)"
               _hover={{ bg: '#3520AD', boxShadow: '0 10px 26px rgba(70,39,191,.36)' }}
               _focusVisible={{ outline: '3px solid', outlineColor: 'brand.600', outlineOffset: '4px' }}>
-              Descubra negocios
+              Ver negocios
             </Button>
           </Stack>
         </Box>
@@ -305,14 +304,13 @@ export default function Home() {
               <Icon as={MdAccessTime} boxSize={{ base: '22px', md: '26px' }} />
               <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight="900" letterSpacing=".06em">PRÓXIMAMENTE</Text>
             </Flex>
-            <Text color="brand.500" fontSize="sm" fontWeight="800">GAS MEMO · PEDIDOS EN LÍNEA</Text>
-            <Heading id="gas-coming-title" fontSize={{ base: '28px', md: '38px' }} lineHeight="1.15" letterSpacing="-.03em">Más tiempo para usted.<br />Su gas, a unos clics.</Heading>
-            <Text color={muted} maxW="560px" lineHeight="1.7">Estamos preparando una forma más sencilla de pedir su gas: elegir sus productos, indicar la entrega y consultar el estado de su pedido en un solo lugar.</Text>
-            <Text color={muted} fontSize="sm">Los pedidos en línea todavía no están disponibles. Síganos en nuestras redes para conocer las novedades del lanzamiento.</Text>
+            <Text color="brand.500" fontSize="sm" fontWeight="800">GAS MEMO</Text>
+            <Heading id="gas-coming-title" fontSize={{ base: '28px', md: '38px' }} lineHeight="1.15" letterSpacing="-.03em">Pedidos en línea</Heading>
+            <Text color={muted} maxW="560px" lineHeight="1.7">Este servicio aún no está disponible. Consulte las novedades en nuestras redes.</Text>
           </Stack>
           <Stack spacing={4} w={{ base: '100%', lg: '320px' }} flexShrink={0}>
             <SocialLogoHub />
-            <Text color={muted} fontSize="sm" textAlign="center">Toque el logo y conecte con Gas Memo.</Text>
+            <Text color={muted} fontSize="sm" textAlign="center">Seleccione el logo para ver las redes.</Text>
           </Stack>
         </Flex>
       </Box>

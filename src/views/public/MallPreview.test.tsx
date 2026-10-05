@@ -58,9 +58,9 @@ describe('MallPreview', () => {
   it('embeds the carousel without a second hero heading or duplicate call to action', async () => {
     renderPreview(true);
     await screen.findAllByRole('button', { name: /ver contactos de café central/i });
-    expect(screen.queryByRole('heading', { name: /negocios de nuestra comunidad/i })).toBeNull();
+    expect(screen.queryByRole('heading', { name: /negocios de acosta/i })).toBeNull();
     expect(screen.queryByRole('link', { name: /ver negocios de acosta/i })).toBeNull();
-    expect(screen.getByText(/toque un negocio para ver sus contactos/i)).toBeTruthy();
+    expect(screen.getByText(/seleccione un negocio para ver sus contactos/i)).toBeTruthy();
     fireEvent.click(screen.getAllByRole('button', { name: /ver contactos de café central/i })[0]);
     expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
   });
@@ -75,7 +75,7 @@ describe('MallPreview', () => {
     expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
     expect(screen.getByLabelText(/tiktok de café central/i).getAttribute('href')).toBe('https://www.tiktok.com/@cafe-central');
     expect(screen.getByLabelText(/correo de café central/i).getAttribute('href')).toBe('mailto:cafe@example.com');
-    expect(screen.getByText(/carrusel está pausado/i)).toBeTruthy();
+    expect(screen.getByText(/carrusel pausado/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /ver estación de café central/i })).toBeNull();
   });
 });
