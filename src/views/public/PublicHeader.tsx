@@ -33,14 +33,14 @@ export default function PublicHeader() {
         ) : (
           <Flex as={RLink} to="/" align="center" gap="9px" color="inherit" _hover={{ textDecoration: 'none' }}>
             <Flex w="38px" h="38px" flex="0 0 auto" borderRadius="13px" bg="brand.500" color="white" align="center" justify="center" fontWeight="900">GM</Flex>
-            <Box display={{ base: 'none', sm: 'block' }}><Text fontWeight="900" lineHeight="1">Gas Memo</Text><Text mt="3px" color={muted} fontSize="10px">Pedidos y comercios locales</Text></Box>
+            <Box display={{ base: 'none', sm: 'block' }}><Text fontWeight="900" lineHeight="1">Gas Memo</Text><Text mt="3px" color={muted} fontSize="10px">Conectando Acosta</Text></Box>
           </Flex>
         )}
       </Flex>
 
       <Flex align="center" gap="6px" flexShrink={0}>
         {location.pathname !== '/' && <IconButton as={RLink} to="/" aria-label="Ir al inicio" icon={<Icon as={MdHome} boxSize="20px" />} variant="ghost" size="sm" borderRadius="full" />}
-        {location.pathname !== '/' && location.pathname !== '/customer/view-order' && <Button as={RLink} to="/customer/view-order" leftIcon={<MdReceiptLong />} variant="ghost" size="sm" px={{ base: '9px', md: '12px' }}><Text display={{ base: 'none', md: 'block' }}>Ver pedido</Text></Button>}
+        {location.pathname.startsWith('/customer/') && location.pathname !== '/customer/view-order' && <Button as={RLink} to="/customer/view-order" leftIcon={<MdReceiptLong />} variant="ghost" size="sm" px={{ base: '9px', md: '12px' }}><Text display={{ base: 'none', md: 'block' }}>Ver pedido</Text></Button>}
       </Flex>
     </Flex>
   );
