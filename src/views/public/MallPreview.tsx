@@ -60,9 +60,9 @@ const linkMeta = (link = '') => {
 
 const hrefFor = (link = '') => emailPattern.test(link.trim()) ? `mailto:${link.trim()}` : link;
 
-type MallPreviewProps = { compact?: boolean };
+type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
-export default function MallPreview({ compact = false }: MallPreviewProps) {
+export default function MallPreview({ compact = false, embedded = false }: MallPreviewProps) {
   const location = useLocation();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
@@ -88,9 +88,9 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
   const toggleBusiness = (key: string) => setSelectedBusinessKey((current) => current === key ? '' : key);
 
   return (
-    <Box as="section" aria-labelledby="mall-preview-title" position="relative" overflow="hidden" borderRadius={{ base: '22px', md: '28px' }} bg="linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)" color="white" p={{ base: '16px', md: compact ? '18px' : '24px' }} boxShadow="0 16px 38px rgba(15, 23, 42, .16)" border="1px solid" borderColor="whiteAlpha.200">
-      <Box position="absolute" inset="0" opacity=".18" pointerEvents="none" bgImage="radial-gradient(circle at 25% 25%, #fff 0 1px, transparent 1.5px)" bgSize="54px 54px" />
-      <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="14px" direction={{ base: 'column', md: 'row' }} mb={{ base: '18px', md: '20px' }}>
+    <Box as={embedded ? 'div' : 'section'} aria-label={embedded ? 'Negocios de Acosta' : undefined} aria-labelledby={embedded ? undefined : 'mall-preview-title'} position="relative" overflow="hidden" borderRadius={embedded ? '0' : { base: '22px', md: '28px' }} bg={embedded ? 'linear-gradient(0deg, #EEF3FF, rgba(238,243,255,.7))' : 'linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)'} color={embedded ? '#172554' : 'white'} p={{ base: '16px', md: compact ? '18px' : '24px' }} boxShadow={embedded ? 'none' : '0 16px 38px rgba(15, 23, 42, .16)'} border={embedded ? 'none' : '1px solid'} borderColor="whiteAlpha.200">
+      <Box display={embedded ? 'none' : 'block'} position="absolute" inset="0" opacity=".18" pointerEvents="none" bgImage="radial-gradient(circle at 25% 25%, #fff 0 1px, transparent 1.5px)" bgSize="54px 54px" />
+      {!embedded && <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="14px" direction={{ base: 'column', md: 'row' }} mb={{ base: '18px', md: '20px' }}>
         <Flex gap="12px" align="center">
           <Flex w={{ base: '42px', md: '48px' }} h={{ base: '42px', md: '48px' }} flex="0 0 auto" borderRadius="16px" align="center" justify="center" bg="whiteAlpha.100" border="1px solid" borderColor="whiteAlpha.300" fontSize={{ base: '23px', md: '27px' }}>🧑‍🚀</Flex>
           <Stack spacing="2px">
@@ -99,12 +99,13 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
           </Stack>
         </Flex>
         <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} size="lg" borderRadius="full" bgGradient="linear(135deg, #FFF2A8 0%, #FACC15 48%, #E98A00 100%)" color="#281900" fontWeight="900" px="26px" animation={prefersReducedMotion ? undefined : `${ctaPulse} 2.3s ease-in-out infinite`} _hover={{ transform: 'translateY(-3px) scale(1.03)', filter: 'brightness(1.04)', textDecoration: 'none' }}>Explorar todos los negocios{compact ? ' ↗' : ''}</Button>
-      </Flex>
+      </Flex>}
 
-      <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
+      {embedded && <Text color="#475569" fontSize="sm" px="2px" mb="4px">Tocá un negocio para ver sus contactos.</Text>}
+      <Box position="relative" overflowX={embedded ? 'auto' : 'hidden'} overflowY="hidden" sx={{ scrollbarWidth: 'thin' }} mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
+        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running', ...(embedded ? { '@media screen and (max-width: 47.99em)': { animation: 'none' } } : {}) }}>
           {[0, 1].map((copy) => (
-          <Flex key={copy} gap="14px" pr="14px">
+          <Flex key={copy} display={embedded && copy === 1 ? { base: 'none', md: 'flex' } : 'flex'} gap="14px" pr="14px">
             {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="92px" borderRadius="16px" bg="whiteAlpha.100" opacity={1 - item * .16} />)}
             {!loading && previewBusinesses.map((business) => {
               const businessKey = `${copy}:${business.id}`;
@@ -136,12 +137,14 @@ export default function MallPreview({ compact = false }: MallPreviewProps) {
                 </Box>
               );
             })}
-            {!loading && !previewBusinesses.length && <Flex flex="1" minH="86px" p="14px" borderRadius="16px" border="1px dashed" borderColor="whiteAlpha.300" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color="cyan.200" /><Text fontSize="sm" color="whiteAlpha.700">Muy pronto encontrarás negocios locales en este espacio.</Text></Flex>}
+            {!loading && !previewBusinesses.length && <Flex flex="1" minH="86px" p="14px" borderRadius="16px" border="1px dashed" borderColor="whiteAlpha.300" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color={embedded ? 'brand.500' : 'cyan.200'} /><Text fontSize="sm" color={embedded ? '#475569' : 'whiteAlpha.700'}>Muy pronto encontrarás negocios locales en este espacio.</Text></Flex>}
           </Flex>
           ))}
         </Flex>
-        {selectedBusinessKey && <Text textAlign="center" color="whiteAlpha.600" fontSize="10px">El carrusel está pausado mientras revisás los contactos.</Text>}
+        {selectedBusinessKey && <Text textAlign="center" color={embedded ? '#475569' : 'whiteAlpha.600'} fontSize="10px">El carrusel está pausado mientras revisás los contactos.</Text>}
       </Box>
+      {embedded && <Button as={RLink} to={mallDestination} rightIcon={<MdExplore />} size="lg" w={{ base: '100%', md: 'auto' }}
+        mt="12px" borderRadius="full" colorScheme="brand" fontWeight="800">Explorar todos los negocios</Button>}
     </Box>
   );
 }

@@ -19,10 +19,10 @@ const businesses: SponsorItem[] = [
   { id: '3', name: 'Negocio oculto', category: 'Otros', active: false, order: 3, logoUrl: '', links: [] },
 ];
 
-const renderPreview = () => render(
+const renderPreview = (embedded = false) => render(
   <ChakraProvider>
     <MemoryRouter>
-      <MallPreview />
+      <MallPreview embedded={embedded} />
     </MemoryRouter>
   </ChakraProvider>
 );
@@ -53,6 +53,16 @@ describe('MallPreview', () => {
     expect(screen.queryByRole('button', { name: 'Cafeterías' })).toBeNull();
     expect(screen.queryByRole('button', { name: /ver negocios anteriores/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /ver más negocios/i })).toBeNull();
+  });
+
+  it('embeds the carousel without a second hero heading or duplicate call to action', async () => {
+    renderPreview(true);
+    await screen.findAllByRole('button', { name: /ver contactos de café central/i });
+    expect(screen.queryByRole('heading', { name: /negocios de nuestra comunidad/i })).toBeNull();
+    expect(screen.getAllByRole('link', { name: /explorar todos los negocios/i })).toHaveLength(1);
+    expect(screen.getByText(/tocá un negocio para ver sus contactos/i)).toBeTruthy();
+    fireEvent.click(screen.getAllByRole('button', { name: /ver contactos de café central/i })[0]);
+    expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
   });
 
   it('opens contact bubbles in place and pauses the carousel', async () => {

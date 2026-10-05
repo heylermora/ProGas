@@ -13,9 +13,8 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdFavorite, MdAccessTime, MdArrowForward } from 'react-icons/md';
+import { MdEmail, MdFavorite, MdAccessTime } from 'react-icons/md';
 import MallPreview from './MallPreview';
 import { PublicPage } from './PublicPage';
 
@@ -270,30 +269,32 @@ export default function Home() {
   return (
     <PublicPage maxW="1200px">
       <Box as="section" aria-labelledby="community-title" position="relative" overflow="hidden"
-        borderRadius={{ base: '24px', md: '32px' }} mb={{ base: 6, md: 8 }}
-        bg="linear-gradient(120deg, #F4F6FF 0%, #DFE9FF 55%, #ABC9F4 100%)"
-        px={{ base: 6, md: 12 }} pt={{ base: 8, md: 14 }} pb={{ base: '260px', md: 14 }} minH={{ md: '480px' }}>
-        <Image src={acostaBackground} alt="" aria-hidden="true" position="absolute" bottom="0" right="0"
-          w="100%" h={{ base: '260px', md: '100%' }} objectFit="cover"
-          objectPosition={{ base: '85% 55%', md: 'center center' }} pointerEvents="none" />
-        <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
-          bg={{ base: 'linear-gradient(to bottom, #F4F6FF 0%, #F4F6FF 48%, rgba(244,246,255,.88) 59%, rgba(244,246,255,0) 77%)', md: 'linear-gradient(90deg, rgba(244,246,255,.94) 0%, rgba(244,246,255,.72) 38%, rgba(244,246,255,.15) 63%, transparent 78%)' }} />
-        <Stack position="relative" spacing={5} maxW={{ base: '100%', md: '52%' }} color="#172554">
-          <Text fontSize="xs" fontWeight="800" letterSpacing=".16em" textTransform="uppercase">Hecho para nuestra comunidad</Text>
-          <Heading id="community-title" fontSize={{ base: '36px', md: '48px', lg: '60px' }} lineHeight="1.08" letterSpacing="-.04em">Acosta tiene mucho<br />por descubrir.</Heading>
-          <Text fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.7" maxW="440px" color="#334155">Conectá con los negocios de aquí y apoyá el talento que hace crecer nuestra comunidad.</Text>
-          <Button as={RLink} to="/mall" alignSelf="flex-start" colorScheme="brand" size="lg" borderRadius="full" px={7} rightIcon={<MdArrowForward />}>Descubrir negocios</Button>
-          <Text fontSize="sm" color="#475569">Cerca de vos. Parte de Acosta.</Text>
-        </Stack>
+        borderRadius={{ base: '24px', md: '32px' }} mb={{ base: 6, md: 8 }} bg="#EEF3FF"
+        border="1px solid" borderColor="#DDE5F5" boxShadow="0 18px 44px rgba(38,51,105,.08)">
+        <Box position="relative" px={{ base: 5, md: 10 }} pt={{ base: 7, md: 12 }} pb={{ base: 6, md: 10 }} minH={{ base: '310px', md: '360px' }}>
+          <Image src={acostaBackground} alt="" aria-hidden="true" position="absolute" inset="0"
+            w="100%" h="100%" objectFit="cover" objectPosition={{ base: '72% center', md: 'center 58%' }} pointerEvents="none" />
+          <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
+            bg={{ base: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.72) 45%, rgba(244,246,255,.08) 90%), linear-gradient(0deg, #EEF3FF, transparent 38%)', md: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.6) 40%, transparent 72%), linear-gradient(0deg, #EEF3FF, transparent 30%)' }} />
+          <Stack position="relative" spacing={{ base: 3, md: 4 }} color="#172554" maxW={{ base: '76%', md: '52%' }}>
+            <Text fontSize={{ base: '10px', md: 'xs' }} fontWeight="800" letterSpacing=".12em" textTransform="uppercase">Descubrí lo nuestro</Text>
+            <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Acosta tiene mucho por descubrir.</Heading>
+            <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Encontrá negocios, conectá con sus dueños y apoyá el talento local.</Text>
+          </Stack>
+        </Box>
+        <MallPreview embedded />
       </Box>
-      <MallPreview />
       <Box as="section" aria-labelledby="gas-coming-title" mt={{ base: 6, md: 8 }} mb={{ base: 6, md: 8 }}
-        bg={cardBg} border="1px solid" borderColor={border} borderRadius={{ base: '24px', md: '28px' }}
+        bg={cardBg} border="1px solid" borderColor={border} borderTopWidth="4px" borderTopColor="brand.500" borderRadius={{ base: '24px', md: '28px' }}
         p={{ base: 6, md: 9 }} boxShadow="0 16px 40px rgba(38, 51, 105, .07)">
         <Flex direction={{ base: 'column', lg: 'row' }} align={{ base: 'stretch', lg: 'center' }} gap={{ base: 8, lg: 10 }}>
           <Stack flex="1" spacing={4}>
-            <Flex align="center" gap={2} alignSelf="flex-start" bg="brand.50" color="brand.700" borderRadius="full" px={4} py={2}>
-              <Icon as={MdAccessTime} /><Text fontSize="xs" fontWeight="800" letterSpacing=".08em">PRÓXIMAMENTE</Text>
+            <Flex align="center" gap={3} alignSelf="flex-start"
+              bg="linear-gradient(110deg, #FFD966, #FFB547)" color="#442400" borderRadius="14px"
+              px={{ base: 4, md: 5 }} py={3} border="1px solid" borderColor="#FFE8A3"
+              boxShadow="0 8px 24px rgba(245,158,11,.26)">
+              <Icon as={MdAccessTime} boxSize={{ base: '22px', md: '26px' }} />
+              <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight="900" letterSpacing=".06em">PRÓXIMAMENTE</Text>
             </Flex>
             <Text color="brand.500" fontSize="sm" fontWeight="800">GAS MEMO · PEDIDOS EN LÍNEA</Text>
             <Heading id="gas-coming-title" fontSize={{ base: '28px', md: '38px' }} lineHeight="1.15" letterSpacing="-.03em">Más tiempo para vos.<br />Tu gas, a unos clics.</Heading>
