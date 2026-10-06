@@ -71,112 +71,66 @@ const bmaSocialLinks = [
   { ...socialLinks[1], href: 'https://www.instagram.com/bandamunicipaldeacosta' },
   { ...socialLinks[2], href: 'https://wa.me/50662787984' },
   { ...socialLinks[3], href: 'https://www.tiktok.com/@bandamunicipaldeacosta' },
+  { ...socialLinks[4], href: 'mailto:bandamunicipalacostacr@gmail.com' },
 ];
 
 
 function DonationBanner() {
-  const bg = useColorModeValue(
-    'linear-gradient(135deg, #FFF8E1 0%, #FFFFFF 48%, #FFF3C4 100%)',
-    'linear-gradient(135deg, rgba(113, 63, 18, .45) 0%, rgba(23, 25, 35, .96) 55%, rgba(66, 32, 6, .55) 100%)'
-  );
-
-  const borderColor = useColorModeValue('yellow.200', 'yellow.700');
-  const textColor = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const bg = useColorModeValue('#FFFCF2', 'navy.800');
+  const border = useColorModeValue('yellow.200', 'whiteAlpha.200');
+  const text = useColorModeValue('gray.800', 'whiteAlpha.900');
   const muted = useColorModeValue('gray.600', 'gray.300');
+  const accent = useColorModeValue('yellow.800', 'yellow.200');
 
   return (
-    <Box
-      bg={bg}
-      border="1px solid"
-      borderColor={borderColor}
-      borderRadius={{ base: '20px', md: '28px' }}
-      boxShadow="0 18px 45px rgba(0, 0, 0, 0.08)"
-      px={{ base: 4, md: 6 }}
-      py={{ base: 4, md: 5 }}
-      overflow="hidden"
-      position="relative"
-    >
-      <Box
-        position="absolute"
-        top="-45px"
-        right="-45px"
-        w="140px"
-        h="140px"
-        bg="yellow.300"
-        opacity="0.22"
-        borderRadius="full"
-      />
-
-      <Flex
-        direction={{ base: 'column', md: 'row' }}
-        align={{ base: 'stretch', md: 'center' }}
-        justify="space-between"
-        gap={{ base: 4, md: 6 }}
-        position="relative"
-        zIndex={1}
-      >
-        <Flex align="center" gap={{ base: 3, md: 5 }} minW="0" flex="1">
-          <Stack spacing={{ base: 1, md: 2 }} minW="0">
-            <Text
-              color="yellow.700"
-              fontWeight="900"
-              fontSize={{ base: 'xs', md: 'sm' }}
-              letterSpacing="0.08em"
-              textTransform="uppercase"
-            >
-              Campaña solidaria
+    <Box as="section" aria-labelledby="band-support-title" bg={bg} color={text}
+      border="1px solid" borderColor={border} borderRadius={{ base: '20px', md: '24px' }}
+      overflow="hidden" boxShadow="0 8px 28px rgba(113, 63, 18, .06)">
+      <Flex direction={{ base: 'column', lg: 'row' }} gap={{ base: 5, lg: 7 }}
+        align={{ base: 'stretch', lg: 'center' }} p={{ base: 5, md: 7 }}>
+        <Flex align="center" gap={{ base: 4, md: 5 }} flex="1" minW="0">
+          <Image src={bmaLogo} alt="Banda Municipal de Acosta" objectFit="contain"
+            boxSize={{ base: '76px', md: '104px' }} flexShrink={0} borderRadius="16px"
+            bg="yellow.400" />
+          <Stack spacing={2} minW="0">
+            <Text color={accent} fontSize="xs" fontWeight="800" letterSpacing=".1em" textTransform="uppercase">
+              Música que une a Acosta
             </Text>
-
-            <Heading
-              color={textColor}
-              fontSize={{ base: 'xl', md: '3xl' }}
-              lineHeight="1.1"
-              letterSpacing="-0.03em"
-            >
-              Apoye a la Banda Municipal de Acosta
+            <Heading id="band-support-title" fontSize={{ base: 'xl', md: '28px' }} lineHeight="1.2" letterSpacing="-.025em">
+              Apoye a nuestra Banda Municipal
             </Heading>
-
-            <Text
-              color={muted}
-              fontSize={{ base: 'sm', md: 'md' }}
-              maxW="620px"
-              lineHeight="1.55"
-            >
-              Su aporte contribuye a la formación musical del cantón.
+            <Text color={muted} fontSize="sm" lineHeight="1.6" maxW="550px">
+              Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
             </Text>
           </Stack>
         </Flex>
-
-        <Stack spacing={6} w={{ base: '100%', md: '260px' }} flexShrink={0} pt={4}>
-          <SocialLogoHub organization="Banda Municipal de Acosta" logo={bmaLogo} links={bmaSocialLinks} background="white" />
-          <Text color={textColor} fontWeight="700" textAlign="center">6278-7984</Text>
-          <Button
-            as="a"
-            href={bmaDonationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            leftIcon={<MdFavorite />}
-            size="lg"
-            alignSelf={{ base: 'stretch', md: 'center' }}
-            flexShrink={0}
-            bg="yellow.400"
-            color="gray.900"
-            fontWeight="900"
-            borderRadius="full"
-            px={{ base: 6, md: 8 }}
-            boxShadow="0 10px 24px rgba(202, 138, 4, 0.28)"
-            _hover={{
-              bg: 'yellow.300',
-              transform: 'translateY(-2px)',
-              boxShadow: '0 14px 30px rgba(202, 138, 4, 0.36)',
-            }}
-            _active={{
-              transform: 'translateY(0)',
-            }}
-          >
-            Haga un aporte
+        <Stack spacing={2} flexShrink={0} w={{ base: '100%', lg: '240px' }}>
+          <Button as="a" href={bmaDonationUrl} target="_blank" rel="noopener noreferrer"
+            leftIcon={<MdFavorite />} rightIcon={<MdArrowForward />} minH="48px"
+            bg="yellow.400" color="gray.900" fontWeight="800" borderRadius="full" px={6}
+            _hover={{ bg: 'yellow.300', transform: 'translateY(-1px)' }}
+            _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.600', outlineOffset: '3px' }}>
+            Quiero apoyar
           </Button>
+          <Text color={muted} fontSize="xs" textAlign="center">Coordine su aporte por WhatsApp.</Text>
         </Stack>
+      </Flex>
+      <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }}
+        justify="space-between" gap={3} borderTop="1px solid" borderColor={border}
+        px={{ base: 5, md: 7 }} py={3}>
+        <Text color={muted} fontSize="sm">Conozca la Banda y manténgase en contacto</Text>
+        <Flex role="group" aria-label="Redes sociales de Banda Municipal de Acosta" gap={2} flexWrap="wrap">
+          {bmaSocialLinks.map((social) => (
+            <Tooltip key={social.label} label={social.label === 'Correo' ? 'bandamunicipalacostacr@gmail.com' : social.label} hasArrow>
+              <IconButton as={Link} href={social.href} isExternal={!social.href.startsWith('mailto:')}
+                aria-label={social.label} icon={<Icon as={social.icon} boxSize="18px" />}
+                sx={{ background: social.bg }} color="white" boxSize="44px" minW="44px"
+                borderRadius="full" boxShadow="0 3px 8px rgba(0,0,0,.10)"
+                _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.08)' }}
+                _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.600', outlineOffset: '3px' }} />
+            </Tooltip>
+          ))}
+        </Flex>
       </Flex>
     </Box>
   );

@@ -52,12 +52,15 @@ describe('Home', () => {
       Instagram: 'https://www.instagram.com/bandamunicipaldeacosta',
       TikTok: 'https://www.tiktok.com/@bandamunicipaldeacosta',
       WhatsApp: 'https://wa.me/50662787984',
+      Correo: 'mailto:bandamunicipalacostacr@gmail.com',
     };
     Object.entries(bandUrls).forEach(([name, href]) => {
       expect(band.getByRole('link', { name }).getAttribute('href')).toBe(href);
     });
-    expect(screen.getByRole('link', { name: /haga un aporte/i }).getAttribute('href')).toContain('phone=50662787984');
-    expect(screen.getByText('6278-7984')).toBeTruthy();
+    expect(screen.getByRole('link', { name: /quiero apoyar/i }).getAttribute('href')).toContain('phone=50662787984');
+    expect(screen.queryByText('6278-7984')).toBeNull();
+    expect(screen.getByText('Coordine su aporte por WhatsApp.')).toBeTruthy();
+    expect(screen.getByRole('region', { name: /apoye a nuestra banda municipal/i })).toBeTruthy();
     expect(screen.queryByText('Seleccione el logo para ver las redes.')).toBeNull();
     expect(screen.queryByRole('button', { name: /mostrar redes sociales/i })).toBeNull();
   });
