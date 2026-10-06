@@ -17,6 +17,7 @@ import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdEmail, MdFavorite, MdAccessTime, MdArrowForward } from 'react-icons/md';
 import MallPreview from './MallPreview';
+import BusinessPromotion from './BusinessPromotion';
 import { PublicPage } from './PublicPage';
 
 const acostaBackground = `${process.env.PUBLIC_URL}/acosta-fondo.png`;
@@ -257,6 +258,7 @@ export default function Home() {
         </Box>
         <MallPreview embedded />
       </Box>
+      <BusinessPromotion />
       <Box as="section" aria-labelledby="gas-coming-title" mt={{ base: 6, md: 8 }} mb={{ base: 6, md: 8 }}
         bg={cardBg} border="1px solid" borderColor={border} borderTopWidth="4px" borderTopColor="brand.500" borderRadius={{ base: '24px', md: '28px' }}
         p={{ base: 6, md: 9 }} boxShadow="0 16px 40px rgba(38, 51, 105, .07)">

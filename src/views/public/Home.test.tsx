@@ -39,6 +39,20 @@ describe('Home', () => {
     expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
+  it('invites business owners through an illustrative listing and a prepared Gas Memo message', () => {
+    renderHome();
+    const promotion = within(screen.getByRole('region', { name: /su negocio también puede estar aquí/i }));
+    expect(promotion.getByText(/ejemplo ilustrativo/i)).toBeTruthy();
+    expect(promotion.getByText('Su negocio')).toBeTruthy();
+    const cta = promotion.getByRole('link', { name: /quiero promocionar mi negocio/i });
+    const url = new URL(cta.getAttribute('href')!);
+    expect(url.origin).toBe('https://wa.me');
+    expect(url.pathname).toBe('/50683978524');
+    expect(url.searchParams.get('text')).toBe('Hola, Gas Memo. Tengo un negocio en Acosta y quiero promocionarlo en su directorio. ¿Me pueden compartir qué incluye la publicación, los costos y cómo participar?');
+    expect(cta.getAttribute('rel')).toContain('noopener');
+    expect(promotion.queryByRole('link', { name: /su contacto directo/i })).toBeNull();
+  });
+
   it('always shows social links for Gas Memo and the band without a toggle', () => {
     renderHome();
     const gas = within(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' }));
