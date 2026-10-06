@@ -20,7 +20,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
 
   const requestLocation = () => {
     if (!navigator.geolocation) {
-      setMessage('Este dispositivo no permite obtener la ubicación automáticamente. Escribí las señas para continuar.');
+      setMessage('Este dispositivo no permite obtener la ubicación automáticamente. Escriba las señas para continuar.');
       return;
     }
 
@@ -29,7 +29,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         if (!isCostaRicaCoordinate(position.coords.latitude, position.coords.longitude)) {
-          setMessage('La ubicación detectada está fuera de Costa Rica. Ingresá la dirección manualmente.');
+          setMessage('La ubicación detectada está fuera de Costa Rica. Ingrese la dirección manualmente.');
           setLoading(false);
           return;
         }
@@ -50,16 +50,16 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
         try {
           const detectedAddress = await GeocodingService.reverse(position.coords.latitude, position.coords.longitude);
           onLocation?.({ ...baseLocation, detectedAddress });
-          setMessage('Ubicación encontrada. Revisá y corregí la dirección detectada antes de continuar.');
+          setMessage('Ubicación encontrada. Revise y corrija la dirección detectada antes de continuar.');
         } catch {
           onLocation?.(baseLocation);
-          setMessage('Guardamos las coordenadas, pero no pudimos completar la dirección. Seleccionala manualmente.');
+          setMessage('Guardamos las coordenadas, pero no pudimos completar la dirección. Selecciónela manualmente.');
         } finally {
           setLoading(false);
         }
       },
       () => {
-        setMessage('No pudimos obtener la ubicación. Revisá permisos del navegador o continuá con las señas.');
+        setMessage('No pudimos obtener la ubicación. Revise permisos del navegador o continúe con las señas.');
         setLoading(false);
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
@@ -72,7 +72,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
         <Button size="md" px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
           <Text as="span">Usar mi ubicación</Text>        </Button>
       </SimpleGrid>
-      <Text fontSize="sm" color="gray.500">Solo necesitás aceptar el permiso de ubicación.</Text>
+      <Text fontSize="sm" color="gray.500">Solo necesita aceptar el permiso de ubicación.</Text>
       {message && <Alert status={coordinates ? 'info' : 'warning'} borderRadius="12px"><AlertIcon />{message}</Alert>}
       {embedUrl && (
         <Box border="1px solid" borderColor="gray.200" borderRadius="16px" overflow="hidden" bg="gray.50">

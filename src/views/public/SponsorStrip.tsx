@@ -88,7 +88,7 @@ const makeAvailableSponsor = (type: SponsorType, index: number): DisplaySponsor 
   type,
   category: 'Otros',
   name: 'Disponible',
-  description: 'Reservá este espacio publicitario para que tu negocio aparezca aquí.',
+  description: 'Reserve este espacio publicitario para que su negocio aparezca aquí.',
   isAvailable: true,
   active: true,
   order: index,
@@ -202,7 +202,7 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }: { sponsor: Displ
 
       {hasLinks && (
         <Text textAlign="center" color={muted} fontSize="xs" fontWeight="700" mt="2px">
-          {isOpen ? 'Elegí un contacto' : 'Tocá el logo para ver contactos'}
+          {isOpen ? 'Elija un contacto' : 'Toque el logo para ver contactos'}
         </Text>
       )}
 

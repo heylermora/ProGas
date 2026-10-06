@@ -43,13 +43,13 @@ describe('SponsorStrip', () => {
             type="General"
             max={1}
             sponsors={[]}
-            availableCopy={{ availableTitle: 'Anunciá con nosotros', availableDescription: 'Texto administrado' }}
+            availableCopy={{ availableTitle: 'Anuncie con nosotros', availableDescription: 'Texto administrado' }}
           />
         </MemoryRouter>
       </ChakraProvider>
     );
 
-    expect(screen.getByText('Anunciá con nosotros')).toBeTruthy();
+    expect(screen.getByText('Anuncie con nosotros')).toBeTruthy();
     expect(screen.getByText('Texto administrado')).toBeTruthy();
   });
 

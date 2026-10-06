@@ -6,7 +6,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { PublicPage } from './PublicPage';
 import BackButton from 'components/button/BackButton';
 
-const whatsappUrl = 'https://wa.me/50683508585?text=' + encodeURIComponent('Hola Johel, vi tu portafolio en Gas Memo y me gustaría conversar sobre una solución digital para mi emprendimiento.');
+const whatsappUrl = 'https://wa.me/50683508585?text=' + encodeURIComponent('Hola Johel, vi su portafolio en Gas Memo y me gustaría conversar sobre una solución digital para mi emprendimiento.');
 
 const services = [
   { icon: MdDevices, title: 'Sitios y aplicaciones web', text: 'Experiencias rápidas, claras y adaptadas a celulares, tabletas y computadoras.' },
@@ -102,7 +102,7 @@ export default function Portfolio() {
 
         <Box as="section" aria-labelledby="services-title">
           <Text color="brand.500" fontWeight="900" fontSize="sm" letterSpacing=".1em">SERVICIOS</Text>
-          <Heading id="services-title" mt="3px" fontSize={{ base: '26px', md: '36px' }}>Una solución clara para hacer crecer tu proyecto</Heading>
+          <Heading id="services-title" mt="3px" fontSize={{ base: '26px', md: '36px' }}>Una solución clara para hacer crecer su proyecto</Heading>
           <SimpleGrid columns={{ base: 1, md: 3 }} gap="14px" mt="18px">
             {services.map((service) => (
               <Stack key={service.title} bg={surface} border="1px solid" borderColor={border} borderRadius="22px" p={{ base: '20px', md: '24px' }} spacing="12px" boxShadow="0 10px 28px rgba(66,42,251,.07)">
@@ -115,7 +115,7 @@ export default function Portfolio() {
         </Box>
 
         <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" bg={surface} border="1px solid" borderColor={border} borderRadius="24px" p={{ base: '22px', md: '30px' }}>
-          <Flex gap="14px" align="center"><Flex w="50px" h="50px" borderRadius="full" bg="brand.500" color="white" align="center" justify="center"><Icon as={MdRocketLaunch} boxSize="26px" /></Flex><Box><Heading fontSize={{ base: 'xl', md: '2xl' }}>¿Tenés una idea?</Heading><Text color={muted}>Démosle forma y pongámosla al alcance de tus clientes.</Text></Box></Flex>
+          <Flex gap="14px" align="center"><Flex w="50px" h="50px" borderRadius="full" bg="brand.500" color="white" align="center" justify="center"><Icon as={MdRocketLaunch} boxSize="26px" /></Flex><Box><Heading fontSize={{ base: 'xl', md: '2xl' }}>¿Tiene una idea?</Heading><Text color={muted}>Démosle forma y pongámosla al alcance de sus clientes.</Text></Box></Flex>
           <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} colorScheme="brand" borderRadius="full" size="lg" flexShrink={0} w={{ base: '100%', md: 'auto' }}>Escribirme por WhatsApp</Button>
         </Flex>
       </Stack>

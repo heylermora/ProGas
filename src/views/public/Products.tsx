@@ -128,7 +128,7 @@ export default function Products() {
       return;
     }
     if (!effectiveAddress.trim()) {
-      setMessage('Ingresá una dirección de entrega antes de confirmar.');
+      setMessage('Ingrese una dirección de entrega antes de confirmar.');
       return;
     }
     const locationUrl = effectiveLocationUrl || mapsSearchUrl(effectiveCoordinates || effectiveAddress);
@@ -164,7 +164,7 @@ export default function Products() {
       setCreatedOrderCode(orderCode.current);
       setShowModal(true);
     } catch {
-      setMessage('No pudimos crear el pedido. Revisá tu conexión e intentá nuevamente; no se realizó ningún cobro.');
+      setMessage('No pudimos crear el pedido. Revise su conexión e intente nuevamente; no se realizó ningún cobro.');
     } finally {
       setIsSubmitting(false);
     }
@@ -183,7 +183,7 @@ export default function Products() {
               <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} gap="10px" direction={{ base: 'column', md: 'row' }}>
                 <Box>
                   <Text fontWeight="900" fontSize={{ base: 'lg', md: 'xl' }}>Productos del pedido</Text>
-                  <Text color="gray.500" fontSize="sm">Agregá uno o varios productos antes de confirmar.</Text>
+                  <Text color="gray.500" fontSize="sm">Agregue uno o varios productos antes de confirmar.</Text>
                 </Box>
                 <Badge colorScheme={items.length ? 'green' : 'gray'} px="10px" py="6px" borderRadius="full">{items.length} producto(s)</Badge>
               </Flex>
@@ -235,7 +235,7 @@ export default function Products() {
               <Checkbox isChecked={hasTransport} onChange={(e) => setHasTransport(e.target.checked)} fontWeight="700">
                 Agregar transporte
               </Checkbox>
-              <FormHelperText>Marcá esta opción si el pedido necesita entrega, ruta especial o coordinación de transporte.</FormHelperText>
+              <FormHelperText>Marque esta opción si el pedido necesita entrega, ruta especial o coordinación de transporte.</FormHelperText>
               {hasTransport && <Input mt="10px" value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Detalle del transporte" />}
             </FormControl>
             <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value as OrderPayment['method'])}><option value="Efectivo">Efectivo</option><option value="Sinpe">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
@@ -248,7 +248,7 @@ export default function Products() {
       }
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
-      {showModal && <OkModal message="Pedido creado correctamente. Guardá el código para consultar su estado." code={createdOrderCode} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
+      {showModal && <OkModal message="Pedido creado correctamente. Guarde el código para consultar su estado." code={createdOrderCode} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
     </PublicPage>
   );
 }

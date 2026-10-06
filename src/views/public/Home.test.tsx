@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 import theme from 'theme/theme';
@@ -8,7 +8,7 @@ import theme from 'theme/theme';
 jest.mock('./MallPreview', () => ({
   __esModule: true,
   default: () => (
-    <section data-testid="mall-preview"><a href="/mall">Explorar el mapa</a></section>
+    <section data-testid="mall-preview">Vista de negocios</section>
   ),
 }));
 
@@ -26,19 +26,17 @@ const setViewportWidth = (width: number) => {
 };
 
 describe('Home', () => {
-  it('renders the main conversion copy and customer actions', () => {
+  it('prioritizes local businesses and clearly announces future online orders', () => {
     renderHome();
-
-    const mallPreview = screen.getByTestId('mall-preview');
-    const mainHeading = screen.getByRole('heading', { name: /pedí tu gas en minutos/i });
-
-    expect(mallPreview.compareDocumentPosition(mainHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByRole('heading', { name: /pedí tu gas en minutos/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /hacer pedido/i }).getAttribute('href')).toBe('/customer/data');
-    expect(screen.getAllByRole('link', { name: /hacer pedido/i })).toHaveLength(1);
-    expect(screen.getByRole('link', { name: /ver pedido/i }).getAttribute('href')).toBe('/customer/view-order');
-    expect(mallPreview).toBeTruthy();
-    expect(screen.getByRole('link', { name: /explorar el mapa/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /^ver negocios$/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByText('PRÓXIMAMENTE')).toBeTruthy();
+    expect(screen.getByText(/este servicio aún no está disponible/i)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
+    expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
+    const community = screen.getByRole('region', { name: /lo que busca, en acosta/i });
+    expect(within(community).getByTestId('mall-preview')).toBeTruthy();
+    expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
   it('opens and closes the social logo hub with accessible state', () => {
@@ -56,18 +54,18 @@ describe('Home', () => {
     expect(screen.getByLabelText('Facebook').getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
   });
 
-  it('keeps the main actions available on mobile and desktop viewport widths', () => {
+  it('keeps community navigation available on mobile and desktop viewport widths', () => {
     const { unmount } = renderHome();
 
     setViewportWidth(375);
-    expect(screen.getByRole('link', { name: /hacer pedido/i }).getAttribute('href')).toBe('/customer/data');
-    expect(screen.getByRole('link', { name: /ver pedido/i }).getAttribute('href')).toBe('/customer/view-order');
+    expect(screen.getByRole('link', { name: /^ver negocios$/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
 
     unmount();
     setViewportWidth(1280);
     renderHome();
 
-    expect(screen.getByRole('heading', { name: /pedí tu gas en minutos/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
     expect(screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i })).toBeTruthy();
   });

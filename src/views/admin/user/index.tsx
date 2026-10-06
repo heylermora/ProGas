@@ -63,7 +63,7 @@ export default function Users() {
 
   const save = async () => {
     if (!form.name.trim() || (!editing && !form.email.trim())) {
-      toast({ status: 'warning', title: 'Completá los campos obligatorios' });
+      toast({ status: 'warning', title: 'Complete los campos obligatorios' });
       return;
     }
     if (!editing && form.password.length < 6) {
@@ -88,7 +88,7 @@ export default function Users() {
           duration: null,
           isClosable: true,
           title: 'La creación quedó incompleta',
-          description: `Eliminá en Firebase Authentication la cuenta con UID ${error.userId} antes de volver a intentarlo.`,
+          description: `Elimine en Firebase Authentication la cuenta con UID ${error.userId} antes de volver a intentarlo.`,
         });
       } else {
         const message = error instanceof Error && error.message.includes('email-already-in-use')
@@ -100,10 +100,10 @@ export default function Users() {
 
   return (
     <Box w="100%" pt={{ base: '110px', md: '80px' }} pb={8}>
-      <PageHeader title="Colaboradores" description="Agregá y administrá el acceso de tu equipo." action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={openCreate}>Agregar colaborador</Button>} />
+      <PageHeader title="Colaboradores" description="Agregue y administre el acceso de su equipo." action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={openCreate}>Agregar colaborador</Button>} />
 
       {showForm && (
-        <FormPanel title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description={editing ? 'Actualizá su nombre o acceso.' : 'Creá sus credenciales de acceso.'} onClose={close} footer={
+        <FormPanel title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description={editing ? 'Actualice su nombre o acceso.' : 'Cree sus credenciales de acceso.'} onClose={close} footer={
           <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
             <ActiveSwitch id="user-active" label="Acceso activo" isChecked={form.active} onChange={checked => change('active', checked)} />
             <FormActions onCancel={close} onSubmit={save} isLoading={saving} submitLabel={editing ? 'Guardar cambios' : 'Crear acceso'} />
@@ -120,7 +120,7 @@ export default function Users() {
       <Text mb={5} textAlign="right" color={muted} fontSize="sm">{visible.length} {visible.length === 1 ? 'colaborador' : 'colaboradores'}</Text>
 
       {loading ? <AsyncContent isLoading loadingLabel="Cargando colaboradores" /> : visible.length === 0 ? (
-        <EmptyState icon={MdManageAccounts} title={query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'} description={query ? 'Probá con otro nombre o correo.' : 'Agregá a la primera persona de tu equipo.'} actionLabel={!query ? 'Agregar colaborador' : undefined} actionIcon={<MdAdd />} onAction={!query ? openCreate : undefined} />
+        <EmptyState icon={MdManageAccounts} title={query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'} description={query ? 'Pruebe con otro nombre o correo.' : 'Agregue a la primera persona de su equipo.'} actionLabel={!query ? 'Agregar colaborador' : undefined} actionIcon={<MdAdd />} onAction={!query ? openCreate : undefined} />
       ) : (
         <SimpleGrid columns={{ base: 1, lg: 2, '2xl': 3 }} spacing={4}>{visible.map(user => (
           <Card key={user.id} p={{ base: 4, md: 5 }} borderWidth="1px" borderColor="blackAlpha.100" _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg', borderColor: 'brand.200' }} transition="all .2s ease">

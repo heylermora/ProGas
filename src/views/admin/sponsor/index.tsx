@@ -122,7 +122,7 @@ export default function SponsorsAdmin() {
     <Box pt={{ base: '120px', md: '80px' }} pb="32px">
       <PageHeader
         title="Patrocinadores"
-        description="Administrá la visibilidad y el orden de los comercios publicados."
+        description="Administre la visibilidad y el orden de los comercios publicados."
         action={<Button as={RLink} to="/admin/sponsor/new" leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full">Nuevo patrocinador</Button>}
       />
 
@@ -136,13 +136,13 @@ export default function SponsorsAdmin() {
 
       <Card p={{ base: '16px', md: '20px' }} mb="18px">
         <Flex align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="14px">
-          <Box flex="1" maxW={{ md: '520px' }}><Text fontWeight="900" color={textColor}>Filtrar por categoría</Text><Text color={muted} fontSize="sm" mb="9px">Seleccioná una categoría; el buscador superior filtra por nombre y descripción.</Text><Select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} size="lg" borderRadius="xl">{availableCategories.map((category) => <option key={category} value={category}>{category} · {sponsorsByCategory[category]?.length || 0}</option>)}</Select></Box>
+          <Box flex="1" maxW={{ md: '520px' }}><Text fontWeight="900" color={textColor}>Filtrar por categoría</Text><Text color={muted} fontSize="sm" mb="9px">Seleccione una categoría; el buscador superior filtra por nombre y descripción.</Text><Select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} size="lg" borderRadius="xl">{availableCategories.map((category) => <option key={category} value={category}>{category} · {sponsorsByCategory[category]?.length || 0}</option>)}</Select></Box>
           <HStack wrap="wrap"><Button variant="outline" leftIcon={<MdSettings />} onClick={categoryManager.onOpen}>Administrar categorías</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
         </Flex>
       </Card>
 
       {loading ? <AsyncContent isLoading loadingLabel="Cargando patrocinadores" /> : visibleBusinesses.length === 0 ? (
-        <EmptyState icon={MdStorefront} title={searchTerm ? 'No hay coincidencias' : 'Esta categoría está vacía'} description={searchTerm ? 'Probá con otro nombre o limpiá la búsqueda superior.' : 'Usá “Nuevo patrocinador” para agregar el primero a esta categoría.'} />
+        <EmptyState icon={MdStorefront} title={searchTerm ? 'No hay coincidencias' : 'Esta categoría está vacía'} description={searchTerm ? 'Pruebe con otro nombre o limpie la búsqueda superior.' : 'Use “Nuevo patrocinador” para agregar el primero a esta categoría.'} />
       ) : (
         <Stack spacing="10px" mb="18px">
           {visibleBusinesses.map((sponsor) => {
@@ -173,7 +173,7 @@ export default function SponsorsAdmin() {
       </Accordion>
 
       <CategoryManager kind="sponsors" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} isCentered><AlertDialogOverlay><AlertDialogContent><AlertDialogHeader>Eliminar patrocinador</AlertDialogHeader><AlertDialogBody>¿Querés eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</AlertDialogBody><AlertDialogFooter><Button ref={cancelRef} onClick={onClose}>Cancelar</Button><Button colorScheme="red" ml={3} onClick={confirmDelete}>Eliminar</Button></AlertDialogFooter></AlertDialogContent></AlertDialogOverlay></AlertDialog>
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} isCentered><AlertDialogOverlay><AlertDialogContent><AlertDialogHeader>Eliminar patrocinador</AlertDialogHeader><AlertDialogBody>¿Quiere eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</AlertDialogBody><AlertDialogFooter><Button ref={cancelRef} onClick={onClose}>Cancelar</Button><Button colorScheme="red" ml={3} onClick={confirmDelete}>Eliminar</Button></AlertDialogFooter></AlertDialogContent></AlertDialogOverlay></AlertDialog>
     </Box>
   );
 }
