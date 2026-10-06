@@ -94,7 +94,7 @@ function DonationBanner() {
       border="1px solid" borderColor={border} borderRadius={{ base: '28px', md: '36px' }}
       position="relative" isolation="isolate" overflow="hidden" boxShadow="0 14px 38px rgba(113, 63, 18, .10)">
       <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice"
-        position="absolute" inset="0" w="100%" h="100%" pointerEvents="none" zIndex={-1}>
+        display={{ base: 'none', md: 'block' }} position="absolute" inset="0" w="100%" h="100%" pointerEvents="none" zIndex={-1}>
         <path d="M900 -100 C790 5 1120 45 1050 145 S1100 305 1300 270" fill="none" stroke={ribbon} strokeWidth="78" opacity=".15" />
         <path d="M1080 -100 C965 0 1270 60 1190 155 S1240 330 1380 300" fill="none" stroke={ribbon} strokeWidth="22" opacity=".28" />
         {[0, 12, 24, 36, 48].map((offset) => (
@@ -108,9 +108,17 @@ function DonationBanner() {
         <circle cx="740" cy="35" r="4" fill={ribbon} opacity=".55" />
         <circle cx="765" cy="48" r="2" fill={staff} opacity=".25" />
       </Box>
+      <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 360 430" preserveAspectRatio="none"
+        display={{ base: 'block', md: 'none' }} position="absolute" inset="0" w="100%" h="100%" pointerEvents="none" zIndex={-1}>
+        <path d="M290 -40 C210 40 360 55 320 130 S340 190 390 210" fill="none" stroke={ribbon} strokeWidth="35" opacity=".18" />
+        {[0, 9, 18, 27, 36].map(offset => <path key={offset} d={`M-30 ${270 + offset} C80 ${220 + offset} 180 ${350 + offset} 390 ${270 + offset}`} fill="none" stroke={staff} strokeWidth="1" opacity=".10" />)}
+        <g fill={staff} opacity=".13" transform="translate(280 255) rotate(-12)">
+          <ellipse cx="0" cy="22" rx="7" ry="5" /><path d="M5 22 V-10 H8 V22Z M5 -10 Q25 -7 19 7 Q17 -2 5 -3Z" />
+        </g>
+      </Box>
       <Flex direction={{ base: 'column', lg: 'row' }} gap={{ base: 5, lg: 7 }}
         align={{ base: 'stretch', lg: 'center' }} p={{ base: 5, md: 7 }}>
-        <Flex align="center" gap={{ base: 4, md: 5 }} flex="1" minW="0">
+        <Flex align={{ base: 'flex-start', md: 'center' }} gap={{ base: 4, md: 5 }} flex="1" minW="0">
           <Box flexShrink={0} p="6px" bg="white" borderRadius="20px" transform="rotate(-5deg)"
             boxShadow="0 8px 18px rgba(113,63,18,.16)" border="1px solid" borderColor="yellow.100">
             <Image src={bmaLogo} alt="Banda Municipal de Acosta" objectFit="contain"
@@ -124,11 +132,14 @@ function DonationBanner() {
             <Heading id="band-support-title" fontSize={{ base: 'xl', md: '28px' }} lineHeight="1.2" letterSpacing="-.025em">
               Apoye a nuestra Banda Municipal
             </Heading>
-            <Text color={muted} fontSize="sm" lineHeight="1.6" maxW="550px">
+            <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize="sm" lineHeight="1.6" maxW="550px">
               Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
             </Text>
           </Stack>
         </Flex>
+        <Text display={{ base: 'block', md: 'none' }} color={muted} fontSize="sm" lineHeight="1.6">
+          Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
+        </Text>
         <Stack spacing={2} flexShrink={0} w={{ base: '100%', lg: '240px' }}>
           <Button as="a" href={bmaDonationUrl} target="_blank" rel="noopener noreferrer"
             leftIcon={<MdFavorite />} rightIcon={<MdArrowForward />} minH="48px"
@@ -175,7 +186,7 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
       aria-label={`Redes sociales de ${organization}`}
       bg={background}
       borderRadius={{ base: '22px', md: '32px' }}
-      p={{ base: '24px', md: '34px' }}
+      p={{ base: '20px', md: '22px' }}
       minW="0" w="100%"
       textAlign="center"
       boxShadow="xl"
@@ -187,12 +198,12 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
         mx="auto"
         display="block"
         borderRadius="28px"
-        p={{ base: '10px', md: '14px' }}
+        p={0}
         transition="transform .2s ease, filter .2s ease"
         _hover={{ transform: 'translateY(-3px) scale(1.01)', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.20))' }}
         _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '6px' }}
       >
-        <Image src={logo} alt={organization} maxH={{ base: '130px', md: '170px' }} mx="auto" objectFit="contain" pointerEvents="none" />
+        <Image src={logo} alt={organization} maxH={{ base: '70px', md: '82px' }} mx="auto" objectFit="contain" pointerEvents="none" />
       </Box>
 
       {links.map((social) => (
@@ -210,9 +221,9 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
               background: social.bg,
             }}
             color="white"
-            w={{ base: '50px', md: '56px' }}
-            h={{ base: '50px', md: '56px' }}
-            minW={{ base: '50px', md: '56px' }}
+            w="44px"
+            h="44px"
+            minW="44px"
             borderRadius="full"
             boxShadow="0 18px 30px rgba(15, 23, 42, .28)"
             border="3px solid"
@@ -259,25 +270,18 @@ export default function Home() {
         <MallPreview embedded />
         <BusinessPromotion />
       </Box>
-      <Box as="section" aria-labelledby="gas-coming-title" mt={{ base: 6, md: 8 }} mb={{ base: 6, md: 8 }}
-        bg={cardBg} border="1px solid" borderColor={border} borderTopWidth="4px" borderTopColor="brand.500" borderRadius={{ base: '24px', md: '28px' }}
-        p={{ base: 6, md: 9 }} boxShadow="0 16px 40px rgba(38, 51, 105, .07)">
-        <Flex direction={{ base: 'column', lg: 'row' }} align={{ base: 'stretch', lg: 'center' }} gap={{ base: 8, lg: 10 }}>
-          <Stack flex="1" spacing={4}>
-            <Flex align="center" gap={3} alignSelf="flex-start"
-              bg="linear-gradient(110deg, #FFD966, #FFB547)" color="#442400" borderRadius="14px"
-              px={{ base: 4, md: 5 }} py={3} border="1px solid" borderColor="#FFE8A3"
-              boxShadow="0 8px 24px rgba(245,158,11,.26)">
-              <Icon as={MdAccessTime} boxSize={{ base: '22px', md: '26px' }} />
-              <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight="900" letterSpacing=".06em">PRÓXIMAMENTE</Text>
+      <Box as="section" aria-labelledby="gas-coming-title" mb={{ base: 6, md: 8 }}
+        bg={cardBg} border="1px solid" borderColor={border} borderRadius="24px"
+        px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
+        <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'center' }} gap={5}>
+          <Stack flex="1" spacing={2}>
+            <Flex align="center" gap={2} color="#6B4300" bg="#FFF0C2" borderRadius="full" px={3} py={1} alignSelf="flex-start">
+              <Icon as={MdAccessTime} boxSize="16px" /><Text fontSize="xs" fontWeight="800">PRÓXIMAMENTE</Text>
             </Flex>
-            <Text color="brand.500" fontSize="sm" fontWeight="800">GAS MEMO</Text>
-            <Heading id="gas-coming-title" fontSize={{ base: '28px', md: '38px' }} lineHeight="1.15" letterSpacing="-.03em">Pedidos en línea</Heading>
-            <Text color={muted} maxW="560px" lineHeight="1.7">Este servicio aún no está disponible. Consulte las novedades en nuestras redes.</Text>
+            <Heading id="gas-coming-title" fontSize={{ base: 'xl', md: '2xl' }}>Pedidos en línea con Gas Memo</Heading>
+            <Text color={muted} fontSize="sm">Este servicio aún no está disponible. Consulte las novedades en nuestras redes.</Text>
           </Stack>
-          <Stack spacing={4} w={{ base: '100%', lg: '320px' }} flexShrink={0}>
-            <SocialLogoHub />
-          </Stack>
+          <Box w="210px" alignSelf="center" flexShrink={0} mx={3} my={2}><SocialLogoHub /></Box>
         </Flex>
       </Box>
       <DonationBanner />
