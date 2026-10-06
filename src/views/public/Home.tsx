@@ -76,24 +76,48 @@ const bmaSocialLinks = [
 
 
 function DonationBanner() {
-  const bg = useColorModeValue('#FFFCF2', 'navy.800');
+  const bg = useColorModeValue(
+    'linear-gradient(115deg, #FFFCF5 0%, #FFF8E5 60%, #FCE8AB 100%)',
+    'linear-gradient(115deg, #141E35 0%, #202B43 60%, #453B26 100%)'
+  );
   const border = useColorModeValue('yellow.200', 'whiteAlpha.200');
   const text = useColorModeValue('gray.800', 'whiteAlpha.900');
   const muted = useColorModeValue('gray.600', 'gray.300');
   const accent = useColorModeValue('yellow.800', 'yellow.200');
+  const ribbon = useColorModeValue('#DFAE32', '#E8BA50');
+  const staff = useColorModeValue('#263B59', '#F5D889');
+  const footer = useColorModeValue('rgba(255, 255, 255, .58)', 'rgba(10, 18, 33, .38)');
 
   return (
     <Box as="section" aria-labelledby="band-support-title" bg={bg} color={text}
-      border="1px solid" borderColor={border} borderRadius={{ base: '20px', md: '24px' }}
-      overflow="hidden" boxShadow="0 8px 28px rgba(113, 63, 18, .06)">
+      border="1px solid" borderColor={border} borderRadius={{ base: '28px', md: '36px' }}
+      position="relative" isolation="isolate" overflow="hidden" boxShadow="0 14px 38px rgba(113, 63, 18, .10)">
+      <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice"
+        position="absolute" inset="0" w="100%" h="100%" pointerEvents="none" zIndex={-1}>
+        <path d="M900 -100 C790 5 1120 45 1050 145 S1100 305 1300 270" fill="none" stroke={ribbon} strokeWidth="78" opacity=".15" />
+        <path d="M1080 -100 C965 0 1270 60 1190 155 S1240 330 1380 300" fill="none" stroke={ribbon} strokeWidth="22" opacity=".28" />
+        {[0, 12, 24, 36, 48].map((offset) => (
+          <path key={offset} d={`M-50 ${200 + offset} C220 ${110 + offset} 350 ${305 + offset} 680 ${220 + offset} S1030 ${130 + offset} 1270 ${240 + offset}`}
+            fill="none" stroke={staff} strokeWidth="1.2" opacity=".07" />
+        ))}
+        <g fill={staff} opacity=".09" transform="translate(805 165) rotate(-12)">
+          <ellipse cx="0" cy="35" rx="10" ry="7" /><path d="M8 35 V-8 H11 V35Z M8 -8 Q35 -5 27 15 Q24 3 8 1Z" />
+        </g>
+        <circle cx="70" cy="-12" r="68" fill={ribbon} opacity=".12" />
+        <circle cx="740" cy="35" r="4" fill={ribbon} opacity=".55" />
+        <circle cx="765" cy="48" r="2" fill={staff} opacity=".25" />
+      </Box>
       <Flex direction={{ base: 'column', lg: 'row' }} gap={{ base: 5, lg: 7 }}
         align={{ base: 'stretch', lg: 'center' }} p={{ base: 5, md: 7 }}>
         <Flex align="center" gap={{ base: 4, md: 5 }} flex="1" minW="0">
-          <Image src={bmaLogo} alt="Banda Municipal de Acosta" objectFit="contain"
-            boxSize={{ base: '76px', md: '104px' }} flexShrink={0} borderRadius="16px"
-            bg="yellow.400" />
+          <Box flexShrink={0} p="6px" bg="white" borderRadius="20px" transform="rotate(-5deg)"
+            boxShadow="0 8px 18px rgba(113,63,18,.16)" border="1px solid" borderColor="yellow.100">
+            <Image src={bmaLogo} alt="Banda Municipal de Acosta" objectFit="contain"
+              boxSize={{ base: '64px', md: '92px' }} borderRadius="14px" bg="yellow.400" />
+          </Box>
           <Stack spacing={2} minW="0">
-            <Text color={accent} fontSize="xs" fontWeight="800" letterSpacing=".1em" textTransform="uppercase">
+            <Text color={accent} fontSize="10px" fontWeight="800" letterSpacing=".12em" textTransform="uppercase"
+              alignSelf="flex-start" border="1px solid" borderColor={border} borderRadius="full" px={3} py={1} bg={footer}>
               Música que une a Acosta
             </Text>
             <Heading id="band-support-title" fontSize={{ base: 'xl', md: '28px' }} lineHeight="1.2" letterSpacing="-.025em">
@@ -107,7 +131,8 @@ function DonationBanner() {
         <Stack spacing={2} flexShrink={0} w={{ base: '100%', lg: '240px' }}>
           <Button as="a" href={bmaDonationUrl} target="_blank" rel="noopener noreferrer"
             leftIcon={<MdFavorite />} rightIcon={<MdArrowForward />} minH="48px"
-            bg="yellow.400" color="gray.900" fontWeight="800" borderRadius="full" px={6}
+            bg="linear-gradient(110deg, #F8D760, #EFC044)" color="gray.900" fontWeight="800" borderRadius="full" px={6}
+            boxShadow="0 6px 18px rgba(184, 125, 15, .20)"
             _hover={{ bg: 'yellow.300', transform: 'translateY(-1px)' }}
             _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.600', outlineOffset: '3px' }}>
             Quiero apoyar
@@ -116,7 +141,7 @@ function DonationBanner() {
         </Stack>
       </Flex>
       <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }}
-        justify="space-between" gap={3} borderTop="1px solid" borderColor={border}
+        justify="space-between" gap={3} borderTop="1px solid" borderColor={border} bg={footer} backdropFilter="blur(8px)"
         px={{ base: 5, md: 7 }} py={3}>
         <Text color={muted} fontSize="sm">Conozca la Banda y manténgase en contacto</Text>
         <Flex role="group" aria-label="Redes sociales de Banda Municipal de Acosta" gap={2} flexWrap="wrap">
