@@ -39,11 +39,14 @@ describe('Home', () => {
     expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
-  it('invites business owners through an illustrative listing and a prepared Gas Memo message', () => {
+  it('invites business owners in the main card footer with a prepared Gas Memo message', () => {
     renderHome();
-    const promotion = within(screen.getByRole('region', { name: /su negocio también puede estar aquí/i }));
-    expect(promotion.getByText(/ejemplo ilustrativo/i)).toBeTruthy();
-    expect(promotion.getByText('Su negocio')).toBeTruthy();
+    const community = screen.getByRole('region', { name: /lo que busca, en acosta/i });
+    const footer = within(community).getByRole('group', { name: 'Promocione su negocio' });
+    const promotion = within(footer);
+    expect(promotion.getByRole('heading', { name: /su negocio también puede estar aquí/i })).toBeTruthy();
+    expect(screen.queryByText(/ejemplo ilustrativo/i)).toBeNull();
+    expect(promotion.queryByRole('figure')).toBeNull();
     const cta = promotion.getByRole('link', { name: /quiero promocionar mi negocio/i });
     const url = new URL(cta.getAttribute('href')!);
     expect(url.origin).toBe('https://wa.me');

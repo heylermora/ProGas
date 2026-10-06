@@ -257,8 +257,8 @@ export default function Home() {
           </Stack>
         </Box>
         <MallPreview embedded />
+        <BusinessPromotion />
       </Box>
-      <BusinessPromotion />
       <Box as="section" aria-labelledby="gas-coming-title" mt={{ base: 6, md: 8 }} mb={{ base: 6, md: 8 }}
         bg={cardBg} border="1px solid" borderColor={border} borderTopWidth="4px" borderTopColor="brand.500" borderRadius={{ base: '24px', md: '28px' }}
         p={{ base: 6, md: 9 }} boxShadow="0 16px 40px rgba(38, 51, 105, .07)">
