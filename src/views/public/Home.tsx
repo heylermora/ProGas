@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Button,
@@ -23,7 +23,7 @@ const acostaBackground = `${process.env.PUBLIC_URL}/acosta-fondo.png`;
 const gasMemoLogo = `${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`;
 const bmaLogo = `${process.env.PUBLIC_URL}/Banda%20Municipal%20de%20Acosta/logo.png`;
 const bmaDonationUrl =
-  'https://api.whatsapp.com/send/?phone=50683978524&text=' +
+  'https://api.whatsapp.com/send/?phone=50662787984&text=' +
   encodeURIComponent('Hola, quiero apoyar a la Banda Municipal de Acosta con una donación. ¿Me comparten la información?') +
   '&type=phone_number&app_absent=0';
 
@@ -66,6 +66,14 @@ const socialLinks = [
 ];
 
 
+const bmaSocialLinks = [
+  { ...socialLinks[0], href: 'https://www.facebook.com/BandaMunicipaldeAcosta/' },
+  { ...socialLinks[1], href: 'https://www.instagram.com/bandamunicipaldeacosta' },
+  { ...socialLinks[2], href: 'https://wa.me/50662787984' },
+  { ...socialLinks[3], href: 'https://www.tiktok.com/@bandamunicipaldeacosta' },
+];
+
+
 function DonationBanner() {
   const bg = useColorModeValue(
     'linear-gradient(135deg, #FFF8E1 0%, #FFFFFF 48%, #FFF3C4 100%)',
@@ -75,7 +83,6 @@ function DonationBanner() {
   const borderColor = useColorModeValue('yellow.200', 'yellow.700');
   const textColor = useColorModeValue('gray.800', 'whiteAlpha.900');
   const muted = useColorModeValue('gray.600', 'gray.300');
-  const logoBg = useColorModeValue('white', 'whiteAlpha.900');
 
   return (
     <Box
@@ -108,30 +115,7 @@ function DonationBanner() {
         position="relative"
         zIndex={1}
       >
-        <Flex align="center" gap={{ base: 3, md: 5 }} minW="0">
-          <Box
-            bg={logoBg}
-            border="1px solid"
-            borderColor={useColorModeValue('yellow.100', 'yellow.600')}
-            borderRadius={{ base: '18px', md: '22px' }}
-            boxShadow="sm"
-            p={{ base: 2, md: 3 }}
-            w={{ base: '78px', md: '104px' }}
-            minW={{ base: '78px', md: '104px' }}
-            h={{ base: '64px', md: '82px' }}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Image
-              src={bmaLogo}
-              alt="Banda Municipal de Acosta"
-              maxH="100%"
-              maxW="100%"
-              objectFit="contain"
-            />
-          </Box>
-
+        <Flex align="center" gap={{ base: 3, md: 5 }} minW="0" flex="1">
           <Stack spacing={{ base: 1, md: 2 }} minW="0">
             <Text
               color="yellow.700"
@@ -163,43 +147,53 @@ function DonationBanner() {
           </Stack>
         </Flex>
 
-        <Button
-          as="a"
-          href={bmaDonationUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          leftIcon={<MdFavorite />}
-          size="lg"
-          alignSelf={{ base: 'stretch', md: 'center' }}
-          flexShrink={0}
-          bg="yellow.400"
-          color="gray.900"
-          fontWeight="900"
-          borderRadius="full"
-          px={{ base: 6, md: 8 }}
-          boxShadow="0 10px 24px rgba(202, 138, 4, 0.28)"
-          _hover={{
-            bg: 'yellow.300',
-            transform: 'translateY(-2px)',
-            boxShadow: '0 14px 30px rgba(202, 138, 4, 0.36)',
-          }}
-          _active={{
-            transform: 'translateY(0)',
-          }}
-        >
-          Haga un aporte
-        </Button>
+        <Stack spacing={6} w={{ base: '100%', md: '260px' }} flexShrink={0} pt={4}>
+          <SocialLogoHub organization="Banda Municipal de Acosta" logo={bmaLogo} links={bmaSocialLinks} background="white" />
+          <Text color={textColor} fontWeight="700" textAlign="center">6278-7984</Text>
+          <Button
+            as="a"
+            href={bmaDonationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            leftIcon={<MdFavorite />}
+            size="lg"
+            alignSelf={{ base: 'stretch', md: 'center' }}
+            flexShrink={0}
+            bg="yellow.400"
+            color="gray.900"
+            fontWeight="900"
+            borderRadius="full"
+            px={{ base: 6, md: 8 }}
+            boxShadow="0 10px 24px rgba(202, 138, 4, 0.28)"
+            _hover={{
+              bg: 'yellow.300',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 14px 30px rgba(202, 138, 4, 0.36)',
+            }}
+            _active={{
+              transform: 'translateY(0)',
+            }}
+          >
+            Haga un aporte
+          </Button>
+        </Stack>
       </Flex>
     </Box>
   );
 }
 
-function SocialLogoHub() {
-  const [isOpen, setIsOpen] = useState(false);
+function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = socialLinks, background = 'brand.500' }: {
+  organization?: string;
+  logo?: string;
+  links?: typeof socialLinks;
+  background?: string;
+}) {
 
   return (
     <Box
-      bg="brand.500"
+      role="group"
+      aria-label={`Redes sociales de ${organization}`}
+      bg={background}
       borderRadius={{ base: '22px', md: '32px' }}
       p={{ base: '24px', md: '34px' }}
       minW="0" w="100%"
@@ -209,11 +203,6 @@ function SocialLogoHub() {
       overflow="visible"
     >
       <Box
-        as="button"
-        type="button"
-        aria-label={isOpen ? 'Ocultar redes sociales de Gas Memo' : 'Mostrar redes sociales de Gas Memo'}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((current) => !current)}
         position="relative"
         mx="auto"
         display="block"
@@ -223,10 +212,10 @@ function SocialLogoHub() {
         _hover={{ transform: 'translateY(-3px) scale(1.01)', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.20))' }}
         _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '6px' }}
       >
-        <Image src={gasMemoLogo} alt="Gas Memo" maxH={{ base: '130px', md: '170px' }} mx="auto" objectFit="contain" pointerEvents="none" />
+        <Image src={logo} alt={organization} maxH={{ base: '130px', md: '170px' }} mx="auto" objectFit="contain" pointerEvents="none" />
       </Box>
 
-      {socialLinks.map((social, index) => (
+      {links.map((social) => (
         <Tooltip key={social.label} label={social.label} hasArrow placement="top">
           <IconButton
             as={Link}
@@ -248,10 +237,7 @@ function SocialLogoHub() {
             boxShadow="0 18px 30px rgba(15, 23, 42, .28)"
             border="3px solid"
             borderColor="white"
-            opacity={isOpen ? 1 : 0}
-            visibility={isOpen ? 'visible' : 'hidden'}
-            transform={isOpen ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 12px, 0) scale(.65)'}
-            transition={`all .28s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`}
+            transition="transform .2s ease, filter .2s ease"
             _hover={{ transform: 'translate3d(0, -4px, 0) scale(1.08)', textDecoration: 'none', filter: 'brightness(1.05)' }}
             _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '3px' }}
           />
@@ -310,7 +296,6 @@ export default function Home() {
           </Stack>
           <Stack spacing={4} w={{ base: '100%', lg: '320px' }} flexShrink={0}>
             <SocialLogoHub />
-            <Text color={muted} fontSize="sm" textAlign="center">Seleccione el logo para ver las redes.</Text>
           </Stack>
         </Flex>
       </Box>

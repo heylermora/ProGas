@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 import theme from 'theme/theme';
@@ -39,19 +39,27 @@ describe('Home', () => {
     expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
-  it('opens and closes the social logo hub with accessible state', () => {
+  it('always shows social links for Gas Memo and the band without a toggle', () => {
     renderHome();
-
-    const toggle = screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i });
-    const facebook = screen.getByLabelText('Facebook');
-
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(facebook.getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
-
-    fireEvent.click(toggle);
-
-    expect(screen.getByRole('button', { name: /ocultar redes sociales de gas memo/i }).getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByLabelText('Facebook').getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
+    const gas = within(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' }));
+    const band = within(screen.getByRole('group', { name: 'Redes sociales de Banda Municipal de Acosta' }));
+    expect(gas.getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
+    for (const name of ['Facebook', 'Instagram', 'WhatsApp', 'TikTok', 'Correo']) {
+      expect(gas.getByRole('link', { name }).style.visibility).not.toBe('hidden');
+    }
+    const bandUrls = {
+      Facebook: 'https://www.facebook.com/BandaMunicipaldeAcosta/',
+      Instagram: 'https://www.instagram.com/bandamunicipaldeacosta',
+      TikTok: 'https://www.tiktok.com/@bandamunicipaldeacosta',
+      WhatsApp: 'https://wa.me/50662787984',
+    };
+    Object.entries(bandUrls).forEach(([name, href]) => {
+      expect(band.getByRole('link', { name }).getAttribute('href')).toBe(href);
+    });
+    expect(screen.getByRole('link', { name: /haga un aporte/i }).getAttribute('href')).toContain('phone=50662787984');
+    expect(screen.getByText('6278-7984')).toBeTruthy();
+    expect(screen.queryByText('Seleccione el logo para ver las redes.')).toBeNull();
+    expect(screen.queryByRole('button', { name: /mostrar redes sociales/i })).toBeNull();
   });
 
   it('keeps community navigation available on mobile and desktop viewport widths', () => {
@@ -67,6 +75,6 @@ describe('Home', () => {
 
     expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i })).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' })).toBeTruthy();
   });
 });
