@@ -30,6 +30,7 @@ export interface ItemsFieldControlProps<TItem = any, TForm = any> {
   onRemoveItem?: (item: TItem, index: number) => void;
   addButtonLabel?: string;
   emptyText?: string;
+  isDisabled?: boolean;
 }
 
 const ItemsFieldControl = <TItem, TForm>({
@@ -40,6 +41,7 @@ const ItemsFieldControl = <TItem, TForm>({
   onFormChange,
   onAddItem,
   onRemoveItem,
+  isDisabled,
   addButtonLabel = "Agregar",
   emptyText = "No hay ítems agregados.",
 }: ItemsFieldControlProps<TItem, TForm>) => {
@@ -64,7 +66,7 @@ const ItemsFieldControl = <TItem, TForm>({
             {emptyText}
           </Text>
         )}
-        
+
         {items.map((item, i) => (
           <Flex key={i} justify="space-between" align="center" p={2}>
             <Box flex="1">{renderItem(item, i)}</Box>
@@ -87,7 +89,7 @@ const ItemsFieldControl = <TItem, TForm>({
       <Stack spacing={3}>
         <Flex gap={3} wrap="wrap" justify="flex-end">
           {form !== undefined && renderFormFields(form as TForm, onFormChange)}
-          <Button variant="action" onClick={onAddItem}>
+          <Button type="button" variant="action" onClick={onAddItem} isDisabled={isDisabled}>
             {addButtonLabel}
           </Button>
         </Flex>

@@ -7,10 +7,10 @@ import EmptyState from 'components/dataDisplay/EmptyState';
 
 describe('shared page patterns', () => {
   it('renders a consistent page heading and action', () => {
-    render(<ChakraProvider><PageHeader title="Clientes" description="Administre sus clientes." action={<Button>Nuevo cliente</Button>} /></ChakraProvider>);
+    render(<ChakraProvider><PageHeader title="Clientes" description="Administrá tus clientes." action={<Button>Nuevo cliente</Button>} /></ChakraProvider>);
 
     expect(screen.getByRole('heading', { name: 'Clientes' })).toBeTruthy();
-    expect(screen.getByText('Administre sus clientes.')).toBeTruthy();
+    expect(screen.getByText('Administrá tus clientes.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Nuevo cliente' })).toBeTruthy();
   });
 
@@ -20,11 +20,11 @@ describe('shared page patterns', () => {
     render(
       <ChakraProvider>
         <FormPanel title="Registrar cliente" onClose={close}><div>Formulario</div></FormPanel>
-        <EmptyState icon={MdPeople} title="Aún no hay clientes" description="Cree el primero." actionLabel="Nuevo cliente" onAction={create} />
+        <EmptyState icon={MdPeople} title="Aún no hay clientes" description="Creá el primero." actionLabel="Nuevo cliente" onAction={create} />
       </ChakraProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
     fireEvent.click(screen.getByRole('button', { name: 'Nuevo cliente' }));
     expect(close).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledTimes(1);

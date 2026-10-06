@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { FormControl, FormLabel, Input, Select, SimpleGrid, Stack, Textarea } from '@chakra-ui/react';
-import { AddressItem } from 'interfaces/AddressItem';
+import { Input, Select, SimpleGrid, Stack, Textarea } from '@chakra-ui/react';
+import FormField from 'components/form/FormField';
 import { COSTA_RICA_CATALOG_VERSION } from 'data/costaRicaLocations';
+import { AddressItem } from 'interfaces/AddressItem';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import TerritoryService, { normalizeTerritoryName, TerritoryOption } from 'services/TerritoryService';
 import { mapsSearchUrl } from 'utils/location';
 import DeviceLocationMap from './DeviceLocationMap';
@@ -59,13 +60,13 @@ export default function DeliveryAddressField({ value, onChange }: { value?: Deli
 
   return <Stack spacing="12px">
     <SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px">
-      <FormControl isRequired><FormLabel>Provincia</FormLabel><Select value={form.province} onChange={e => setForm(prev => ({ ...prev, province: e.target.value, canton: '', district: '', captureSource: 'manual' }))}>{provinces.map(item => <option key={item.code}>{item.name}</option>)}</Select></FormControl>
-      <FormControl isRequired><FormLabel>Cantón</FormLabel><Select value={form.canton} onChange={e => setForm(prev => ({ ...prev, canton: e.target.value, district: '', captureSource: 'manual' }))}>{cantons.map(item => <option key={item.code}>{item.name}</option>)}</Select></FormControl>
-      <FormControl isRequired><FormLabel>Distrito</FormLabel><Select value={form.district} onChange={e => setForm(prev => ({ ...prev, district: e.target.value, captureSource: 'manual' }))}>{districts.map(item => <option key={item.code}>{item.name}</option>)}</Select></FormControl>
-      <FormControl isRequired><FormLabel>Pueblo / localidad</FormLabel><Select placeholder="Seleccione el pueblo o localidad" value={form.locality} onChange={e => setForm(prev => ({ ...prev, locality: e.target.value, captureSource: 'manual' }))}>{localities.map(name => <option key={name} value={name}>{name}</option>)}</Select></FormControl>
+      <FormField isRequired label={<>Provincia</>}><Select value={form.province} onChange={e => setForm(prev => ({ ...prev, province: e.target.value, canton: '', district: '', captureSource: 'manual' }))}>{provinces.map(item => <option key={item.code}>{item.name}</option>)}</Select></FormField>
+      <FormField isRequired label={<>Cantón</>}><Select value={form.canton} onChange={e => setForm(prev => ({ ...prev, canton: e.target.value, district: '', captureSource: 'manual' }))}>{cantons.map(item => <option key={item.code}>{item.name}</option>)}</Select></FormField>
+      <FormField isRequired label={<>Distrito</>}><Select value={form.district} onChange={e => setForm(prev => ({ ...prev, district: e.target.value, captureSource: 'manual' }))}>{districts.map(item => <option key={item.code}>{item.name}</option>)}</Select></FormField>
+      <FormField isRequired label={<>Pueblo / localidad</>}><Select placeholder="Seleccioná el pueblo o localidad" value={form.locality} onChange={e => setForm(prev => ({ ...prev, locality: e.target.value, captureSource: 'manual' }))}>{localities.map(name => <option key={name} value={name}>{name}</option>)}</Select></FormField>
     </SimpleGrid>
-    <FormControl isRequired><FormLabel>Dirección exacta / señas</FormLabel><Textarea value={form.exactAddress} onChange={e => setForm(prev => ({ ...prev, exactAddress: e.target.value, captureSource: 'manual' }))} /></FormControl>
-    <FormControl><FormLabel>Indicaciones adicionales</FormLabel><Input value={form.additionalDirections} onChange={e => setForm(prev => ({ ...prev, additionalDirections: e.target.value }))} /></FormControl>
+    <FormField isRequired label={<>Dirección exacta / señas</>}><Textarea value={form.exactAddress} onChange={e => setForm(prev => ({ ...prev, exactAddress: e.target.value, captureSource: 'manual' }))} /></FormField>
+    <FormField  label={<>Indicaciones adicionales</>}><Input value={form.additionalDirections} onChange={e => setForm(prev => ({ ...prev, additionalDirections: e.target.value }))} /></FormField>
     <DeviceLocationMap coordinates={form.coordinates} onLocation={location => setForm(prev => ({ ...prev, coordinates: location.coordinates, locationUrl: location.locationUrl, lat: location.latitude, lng: location.longitude, accuracyMeters: location.accuracyMeters, captureSource: 'gps', ...(location.detectedAddress ? { geocoding: { provider: location.detectedAddress.provider, ...(location.detectedAddress.providerPlaceId ? { providerPlaceId: location.detectedAddress.providerPlaceId } : {}), ...(location.detectedAddress.confidence != null ? { confidence: location.detectedAddress.confidence } : {}), ...(location.detectedAddress.precision ? { precision: location.detectedAddress.precision } : {}), resolvedAt: new Date().toISOString() } } : {}) }))} />
   </Stack>;
 }

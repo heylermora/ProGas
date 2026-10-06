@@ -1,23 +1,24 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, FormControl, FormHelperText, FormLabel, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
-import { customAlphabet } from 'nanoid';
-import { useHistory } from 'react-router-dom';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
 import DeliveryAddressField, { DeliveryLocationValue } from 'components/form/DeliveryAddressField';
+import Form from 'components/form/Form';
+import FormField from 'components/form/FormField';
 import OkModal from 'components/modal/OkModal';
-import orderService from 'services/OrderService';
-import productService from 'services/ProductService';
+import { AddressItem } from 'interfaces/AddressItem';
 import type { OrderPayment, ProductItem } from 'interfaces/OrderItem';
 import type { Product } from 'interfaces/ProductItem';
-import { PublicCard, PublicPage } from './PublicPage';
+import { customAlphabet } from 'nanoid';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { MdAdd, MdDelete } from 'react-icons/md';
+import { useHistory } from 'react-router-dom';
+import orderService from 'services/OrderService';
+import productService from 'services/ProductService';
+import { mapsSearchUrl } from 'utils/location';
+import { addOrMergeOrderItem } from 'utils/order';
+import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
 import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
-import { addressToText, getCustomerDraft, saveCustomerDraft } from './customerDraft';
-import { mapsSearchUrl } from 'utils/location';
-import AsyncContent from 'components/dataDisplay/AsyncContent';
-import { AddressItem } from 'interfaces/AddressItem';
-import { addOrMergeOrderItem } from 'utils/order';
-import Form from 'components/form/Form';
+import { PublicCard, PublicPage } from './PublicPage';
 
 const nano = customAlphabet('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789', 12);
 
@@ -128,7 +129,7 @@ export default function Products() {
       return;
     }
     if (!effectiveAddress.trim()) {
-      setMessage('Ingrese una dirección de entrega antes de confirmar.');
+      setMessage('Ingresá una dirección de entrega antes de confirmar.');
       return;
     }
     const locationUrl = effectiveLocationUrl || mapsSearchUrl(effectiveCoordinates || effectiveAddress);
@@ -164,7 +165,7 @@ export default function Products() {
       setCreatedOrderCode(orderCode.current);
       setShowModal(true);
     } catch {
-      setMessage('No pudimos crear el pedido. Revise su conexión e intente nuevamente; no se realizó ningún cobro.');
+      setMessage('No pudimos crear el pedido. Revisá tu conexión e intentá nuevamente; no se realizó ningún cobro.');
     } finally {
       setIsSubmitting(false);
     }
@@ -183,14 +184,14 @@ export default function Products() {
               <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} gap="10px" direction={{ base: 'column', md: 'row' }}>
                 <Box>
                   <Text fontWeight="900" fontSize={{ base: 'lg', md: 'xl' }}>Productos del pedido</Text>
-                  <Text color="gray.500" fontSize="sm">Agregue uno o varios productos antes de confirmar.</Text>
+                  <Text color="gray.500" fontSize="sm">Agregá uno o varios productos antes de confirmar.</Text>
                 </Box>
                 <Badge colorScheme={items.length ? 'green' : 'gray'} px="10px" py="6px" borderRadius="full">{items.length} producto(s)</Badge>
               </Flex>
               <SimpleGrid columns={{ base: 1, lg: 3 }} spacing="12px">
-                <FormControl isRequired><FormLabel>Producto</FormLabel><Select bg="white" value={orderForm.productId} onChange={(e) => set('productId', e.target.value)}>{catalog.map((product) => <option key={product.id} value={product.id}>{product.description}</option>)}</Select></FormControl>
-                <FormControl isRequired><FormLabel>Cantidad</FormLabel><Input bg="white" type="number" min="1" value={orderForm.quantity} onChange={(e) => set('quantity', Number(e.target.value))} /></FormControl>
-                <FormControl><FormLabel>Datos del cilindro</FormLabel><Input bg="white" value={orderForm.cylinderDetails} onChange={(e) => set('cylinderDetails', e.target.value)} placeholder="Tipo / tamaño si aplica" /></FormControl>
+                <FormField isRequired label={<>Producto</>}><Select bg="white" value={orderForm.productId} onChange={(e) => set('productId', e.target.value)}>{catalog.map((product) => <option key={product.id} value={product.id}>{product.description}</option>)}</Select></FormField>
+                <FormField isRequired label={<>Cantidad</>}><Input bg="white" type="number" min="1" value={orderForm.quantity} onChange={(e) => set('quantity', Number(e.target.value))} /></FormField>
+                <FormField  label={<>Datos del cilindro</>}><Input bg="white" value={orderForm.cylinderDetails} onChange={(e) => set('cylinderDetails', e.target.value)} placeholder="Tipo / tamaño si aplica" /></FormField>
               </SimpleGrid>
               <Button leftIcon={<MdAdd />} alignSelf={{ base: 'stretch', md: 'flex-start' }} onClick={addItem} isDisabled={!selectedProduct}>Agregar producto</Button>
               <Divider />
@@ -231,16 +232,16 @@ export default function Products() {
             </Stack>
           </Box>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
-            <FormControl>
+            <Stack spacing={2}>
               <Checkbox isChecked={hasTransport} onChange={(e) => setHasTransport(e.target.checked)} fontWeight="700">
                 Agregar transporte
               </Checkbox>
-              <FormHelperText>Marque esta opción si el pedido necesita entrega, ruta especial o coordinación de transporte.</FormHelperText>
-              {hasTransport && <Input mt="10px" value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Detalle del transporte" />}
-            </FormControl>
-            <FormControl isRequired><FormLabel>Método de pago</FormLabel><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value as OrderPayment['method'])}><option value="Efectivo">Efectivo</option><option value="Sinpe">SINPE</option><option value="Otro">Otro</option></Select></FormControl>
+              <Text fontSize="sm" color="gray.500">Marcá esta opción si el pedido necesita entrega, ruta especial o coordinación de transporte.</Text>
+              {hasTransport && <FormField label="Detalle del transporte"><Input value={orderForm.transport} onChange={(e) => set('transport', e.target.value)} placeholder="Ruta o coordinación necesaria" /></FormField>}
+            </Stack>
+            <FormField isRequired label={<>Método de pago</>}><Select value={orderForm.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value as OrderPayment['method'])}><option value="Efectivo">Efectivo</option><option value="Sinpe">SINPE</option><option value="Otro">Otro</option></Select></FormField>
           </SimpleGrid>
-          <FormControl><FormLabel>Comentario</FormLabel><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormControl>
+          <FormField  label={<>Comentario</>}><Textarea value={orderForm.comment} onChange={(e) => set('comment', e.target.value)} /></FormField>
           <OrderNavigation currentStep={3} backLabel="Volver a cliente" continueLabel={isSubmitting ? 'Confirmando…' : 'Confirmar pedido'} isFinal onBack={() => history.replace('/customer/info')} onContinue={submitOrder} isContinueLoading={isSubmitting} />
         </Stack>
         </Form>
@@ -248,7 +249,7 @@ export default function Products() {
       }
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
-      {showModal && <OkModal message="Pedido creado correctamente. Guarde el código para consultar su estado." code={createdOrderCode} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
+      {showModal && <OkModal message="Pedido creado correctamente. Guardá el código para consultar su estado." code={createdOrderCode} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
     </PublicPage>
   );
 }

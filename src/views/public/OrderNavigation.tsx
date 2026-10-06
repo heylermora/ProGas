@@ -1,7 +1,5 @@
-import React from 'react';
-import { Badge, Box, Button, Flex, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
-import { MdArrowForward, MdCheckCircle } from 'react-icons/md';
-import BackButton from 'components/button/BackButton';
+import { Badge, Box, SimpleGrid, Stack, useColorModeValue } from '@chakra-ui/react';
+import FormActions from 'components/form/FormActions';
 import { useHistory } from 'react-router-dom';
 
 type OrderNavigationProps = {
@@ -20,10 +18,9 @@ const steps = [
   { step: 3, label: 'Pedido', shortLabel: 'Pedido', route: '/customer/products' },
 ];
 
-export default function OrderNavigation({ currentStep, backLabel = 'Retroceder', continueLabel = 'Continuar', isFinal = false, onBack, onContinue, isContinueLoading = false }: OrderNavigationProps) {
+export default function OrderNavigation({ currentStep, continueLabel = 'Continuar', onContinue, isContinueLoading = false }: OrderNavigationProps) {
   const history = useHistory();
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
-  const muted = useColorModeValue('gray.500', 'gray.400');
   const panelBg = useColorModeValue('white', 'navy.800');
 
   return (
@@ -66,17 +63,7 @@ export default function OrderNavigation({ currentStep, backLabel = 'Retroceder',
           })}
         </SimpleGrid>
 
-        <Flex direction={{ base: 'column-reverse', md: 'row' }} justify="space-between" gap="10px" align={{ base: 'stretch', md: 'center' }}>
-          <BackButton variant="outline" onClick={onBack} isDisabled={!onBack} flex={{ base: '0 0 auto', md: 1 }} w={{ base: '100%', md: 'auto' }} minW="0" h="auto" minH="48px" py="10px" px="14px" lineHeight="1.25">
-            {backLabel}
-          </BackButton>
-          <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize="sm" textAlign="center" flexShrink={0}>
-            Paso {currentStep} de {steps.length}
-          </Text>
-          <Button colorScheme="brand" rightIcon={isFinal ? <MdCheckCircle /> : <MdArrowForward />} onClick={onContinue} isLoading={isContinueLoading} loadingText={continueLabel} flex={{ base: '0 0 auto', md: 1 }} w={{ base: '100%', md: 'auto' }} minW="0" h="auto" minH="48px" py="10px" px="14px" whiteSpace="normal" lineHeight="1.25">
-            {continueLabel}
-          </Button>
-        </Flex>
+        <FormActions onSubmit={onContinue} submitLabel={continueLabel} isLoading={isContinueLoading} loadingLabel={continueLabel} />
       </Stack>
     </Box>
   );

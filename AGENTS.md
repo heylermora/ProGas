@@ -90,7 +90,7 @@ Mantener los textos de interfaz en español y los nombres técnicos coherentes c
 | Formulario declarativo o personalizado | `components/form/Form` |
 | Panel de formulario | `components/form/FormPanel` |
 | Label, ayuda y error de campo | `components/form/FormField` |
-| Acciones cancelar/guardar | `components/form/FormActions` |
+| Acciones principales y cancelar en modales | `components/form/FormActions` |
 | Dirección y ubicación | `DeliveryAddressField`, `DeviceLocationMap` |
 | Carga, error y resultado vacío | `components/dataDisplay/AsyncContent` |
 | Estado vacío con acción | `components/dataDisplay/EmptyState` |
@@ -109,6 +109,9 @@ Extraer un componente cuando varias pantallas compartan intención, estructura y
 
 ## 6. Formularios y experiencia de uso
 
+- Seguir la línea visual de Pedidos: encabezado simple, separador, controles y ayudas uniformes y acción principal a ancho completo al final.
+- En páginas y paneles mostrar «Volver» con flecha arriba mediante `FormPageHeader`; en modales usar la X de cierre, sin «Volver».
+- Reutilizar `PasswordField` para contraseñas y `OrderProductFields` para los campos de productos del pedido. Los controles se definen en `theme/components/formControls.ts`.
 - Reutilizar `Form`, que admite `fields` o contenido personalizado mediante `children` y `onFormSubmit`. Evitar formularios HTML anidados.
 - Asociar cada label con el `id` de su control. Mostrar errores junto al campo y ayuda comprensible.
 - Cubrir carga inicial, error, vacío, contenido y guardado. Bloquear envíos duplicados mientras se persiste.

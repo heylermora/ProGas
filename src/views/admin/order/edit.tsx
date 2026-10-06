@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import OrderProductFields from 'components/form/OrderProductFields';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useHistory, useParams } from "react-router-dom";
 
 import {
-  Box,
-  Text,
-  Input,
-  Select,
-  Flex,
+Box,
+Text
 } from "@chakra-ui/react";
 
 import Form from "components/form/Form";
@@ -14,16 +12,16 @@ import OkModal from "components/modal/OkModal";
 import OrderService from "services/OrderService";
 import productService from "services/ProductService";
 
+import AsyncContent from "components/dataDisplay/AsyncContent";
+import Error from "components/exceptions/Error";
+import Unauthorized from "components/exceptions/Unauthorized";
+import { useAuth } from "contexts/AuthContext";
+import { useOrderRefresh } from "contexts/OrderRefreshContext";
+import FormField from "interfaces/FormField";
 import { OrderItem, ProductItem } from "interfaces/OrderItem";
 import type { Product } from "interfaces/ProductItem";
-import FormField from "interfaces/FormField";
-import Error from "components/exceptions/Error";
-import { useOrderRefresh } from "contexts/OrderRefreshContext";
 import { handleNationalIdLookup } from "utils/nationalId";
-import { useAuth } from "contexts/AuthContext";
 import { isOrderLocked } from "utils/order";
-import Unauthorized from "components/exceptions/Unauthorized";
-import AsyncContent from "components/dataDisplay/AsyncContent";
 
 const renderProductItem = (item: ProductItem) => (
   <Box>
@@ -45,6 +43,7 @@ export default function Edit() {
   const { triggerRefresh } = useOrderRefresh();
   const { hasRole } = useAuth();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -245,88 +244,7 @@ export default function Edit() {
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
       ) => void
     ) => (
-      <Flex gap={3} wrap="wrap">
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Producto
-          </Text>
-          <Select
-            isRequired
-            variant="auth"
-            fontSize="sm"
-            name="productId"
-            value={form.productId}
-            onChange={onChange}
-            size="md"
-            maxW="260px"
-            isDisabled={isCatalogLoading || catalog.length === 0}
-          >
-            {catalog.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.description}
-              </option>
-            ))}
-          </Select>
-
-          {selectedProduct && (
-            <Text fontSize="xs" color="gray.500" mt={1}>
-              Precio actual: ₡{Number(selectedProduct.price ?? 0)}
-            </Text>
-          )}
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Cantidad
-          </Text>
-          <Input
-            isRequired
-            variant="auth"
-            fontSize="sm"
-            type="number"
-            size="md"
-            name="quantity"
-            min={1}
-            maxW="80px"
-            value={form.quantity}
-            onChange={onChange}
-          />
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Precio
-          </Text>
-          <Input
-            isRequired
-            variant="auth"
-            fontSize="sm"
-            type="number"
-            size="md"
-            name="price"
-            min={1}
-            maxW="160px"
-            value={form.price}
-            isDisabled
-          />
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Comentario
-          </Text>
-          <Input
-            variant="auth"
-            fontSize="sm"
-            type="text"
-            size="md"
-            name="comment"
-            value={form.comment}
-            onChange={onChange}
-            placeholder="Comentario (opcional)"
-          />
-        </Box>
-      </Flex>
+      <OrderProductFields form={form} onChange={onChange} catalog={catalog} loading={isCatalogLoading} selectedProduct={selectedProduct} />
     ),
     [catalog, isCatalogLoading, selectedProduct]
   );
@@ -425,6 +343,8 @@ export default function Edit() {
       return;
     }
 
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const editedOrder: OrderItem = {
       ...existingOrderData,
       clientId: fieldValues.clientId ?? clientId,
@@ -445,7 +365,8 @@ export default function Edit() {
       .catch((error) => {
         console.error("Error:", error);
         setIsError(true);
-      });
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   const closeModalAndRedirect = () => {
@@ -464,8 +385,9 @@ export default function Edit() {
   return (
     <>
       <Form
-        title="Actualización de Orden"
-        button="Actualizar Orden"
+        isSubmitting={isSubmitting}
+        title="Editar pedido"
+        button="Guardar cambios"
         back="/admin/order/index"
         fields={fields}
         onSubmit={handleFormSubmit}

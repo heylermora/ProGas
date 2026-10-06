@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { Alert, AlertIcon, Box, FormControl, FormHelperText, FormLabel, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
+import Form from 'components/form/Form';
+import FormField from 'components/form/FormField';
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import ClientService from 'services/ClientService';
 import { fetchClientNameByCedula } from 'services/CedulaService';
-import { PublicCard, PublicPage } from './PublicPage';
+import ClientService from 'services/ClientService';
+import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
+import { saveCustomerDraft } from './customerDraft';
 import MallPreview from './MallPreview';
 import OrderNavigation from './OrderNavigation';
-import Form from 'components/form/Form';
-import { saveCustomerDraft } from './customerDraft';
-import { formatPhoneDisplay, onlyDigits } from 'utils/phone';
+import { PublicCard, PublicPage } from './PublicPage';
 
 export default function CustomerData() {
   const history = useHistory();
@@ -40,7 +41,7 @@ export default function CustomerData() {
       if (existingClient) {
         const savedPhone = onlyDigits(existingClient.phone || existingClient.telefono);
         if (savedPhone && savedPhone !== phoneDigits) {
-          setMessage('No pudimos verificar los datos ingresados. Revíselos e intente nuevamente.');
+          setMessage('No pudimos verificar los datos ingresados. Revisalos e intentá nuevamente.');
           return;
         }
 
@@ -87,7 +88,7 @@ export default function CustomerData() {
   return (
     <PublicPage
       title="Verificación del cliente"
-      description="Ingrese su cédula y teléfono para identificarle y continuar con el pedido. Si ya es cliente, use el mismo teléfono que registró anteriormente."
+      description="Ingresá tu cédula y teléfono para identificarte y continuar con el pedido. Si ya sos cliente, usá el mismo teléfono que registraste anteriormente."
       maxW="900px"
     >
       <Box h={{ base: '8px', md: '12px' }} />
@@ -100,16 +101,16 @@ export default function CustomerData() {
             <Text color="gray.500" fontSize="sm">Usamos estos datos para validar el cliente antes de armar el pedido.</Text>
           </Stack>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
-            <FormControl isRequired>
-              <FormLabel>Cédula</FormLabel>
+            <FormField isRequired label={<>Cédula</>} help={<> Solo para verificar si el cliente existe o debe crearse. </>}>
+
               <Input value={form.nationalId} onChange={(e) => set('nationalId', onlyDigits(e.target.value))} inputMode="numeric" placeholder="Ej. 101110111" />
-              <FormHelperText>Solo para verificar si el cliente existe o debe crearse.</FormHelperText>
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Teléfono</FormLabel>
+
+            </FormField>
+            <FormField isRequired label={<>Teléfono</>} help={<> Debe tener al menos 8 dígitos. </>}>
+
               <Input value={formatPhoneDisplay(form.phone)} onChange={(e) => set('phone', onlyDigits(e.target.value))} inputMode="tel" maxLength={9} placeholder="Ej. 8888-8888" />
-              <FormHelperText>Debe tener al menos 8 dígitos.</FormHelperText>
-            </FormControl>
+
+            </FormField>
           </SimpleGrid>
           <OrderNavigation currentStep={1} backLabel="Volver al inicio" continueLabel={isChecking ? 'Verificando…' : 'Verificar y continuar'} onBack={() => history.replace('/')} onContinue={handleContinue} isContinueLoading={isChecking} />
         </Stack>

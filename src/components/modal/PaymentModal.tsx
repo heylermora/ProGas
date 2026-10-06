@@ -1,29 +1,12 @@
-import React, { useMemo, useState, useEffect } from 'react';
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
-  ModalHeader,
-  ModalCloseButton,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  Textarea,
-  Text,
-  useColorModeValue,
-  VStack,
-  HStack,
-  IconButton,
-  Divider,
-  useToast,
-  Box,
+Box, Button, Divider, Flex, HStack,
+IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Text, Textarea, useColorModeValue, useToast, VStack
 } from '@chakra-ui/react';
-import { MdAdd, MdDelete } from 'react-icons/md';
 import Form from 'components/form/Form';
+import FormActions from 'components/form/FormActions';
+import FormField from 'components/form/FormField';
+import { useEffect, useMemo, useState } from 'react';
+import { MdAdd, MdDelete } from 'react-icons/md';
 
 type PaymentMethod = 'Efectivo' | 'Sinpe' | 'Tarjeta' | 'Otro';
 
@@ -98,7 +81,7 @@ function PaymentModal(props: {
   };
 
   const validate = () => {
-    if (!rows.length) return 'Agregue al menos un método de pago.';
+    if (!rows.length) return 'Agregá al menos un método de pago.';
     if (totalToPay <= 0) return 'El total a pagar debe ser mayor a 0.';
     if (totalPaid <= 0) return 'El total pagado debe ser mayor a 0.';
 
@@ -161,7 +144,7 @@ function PaymentModal(props: {
     <Modal isOpen={isOpen} onClose={handleClose} size="xl">
       <ModalOverlay />
       <ModalContent borderRadius="20px" bg={cardBg} borderWidth="1px" borderColor={border}>
-        <Form onFormSubmit={(event) => { event.preventDefault(); handleSave(); }}>
+        <Form isSubmitting={isSaving} onFormSubmit={(event) => { event.preventDefault(); handleSave(); }}>
         <ModalHeader>
           <Text color={textColor} fontSize="22px" fontWeight="700" noOfLines={1}>
             {title}
@@ -172,30 +155,30 @@ function PaymentModal(props: {
         <ModalBody pb={6}>
           <VStack align="stretch" spacing={4}>
             <HStack spacing={3} align="flex-end" flexWrap={{ base: 'wrap', md: 'nowrap' }}>
-              <FormControl>
-                <FormLabel>Fecha de pago</FormLabel>
+              <FormField  label={<>Fecha de pago</>}>
+
                 <Input type="datetime-local" value={paidAt} onChange={e => setPaidAt(e.target.value)} />
-              </FormControl>
+              </FormField>
 
-              <FormControl>
-                <FormLabel>Total a pagar</FormLabel>
+              <FormField  label={<>Total a pagar</>}>
+
                 <Input isReadOnly value={formatCRC(totalToPay)} />
-              </FormControl>
+              </FormField>
 
-              <FormControl>
-                <FormLabel>Total pagado</FormLabel>
+              <FormField  label={<>Total pagado</>}>
+
                 <Input isReadOnly value={formatCRC(totalPaid)} />
-              </FormControl>
+              </FormField>
 
-              <FormControl>
-                <FormLabel>{diffLabel}</FormLabel>
+              <FormField  label={<>{diffLabel}</>}>
+
                 <Input
                   isReadOnly
                   value={formatCRC(Math.abs(diff))}
                   color={hasChange ? 'green.500' : hasPending ? 'red.500' : undefined}
                   fontWeight="800"
                 />
-              </FormControl>
+              </FormField>
             </HStack>
 
             <Divider />
@@ -231,8 +214,8 @@ function PaymentModal(props: {
                     direction={{ base: 'column', md: 'row' }}
                     align={{ base: 'stretch', md: 'flex-end' }}
                   >
-                    <FormControl>
-                      <FormLabel>Método</FormLabel>
+                    <FormField  label={<>Método</>}>
+
                       <Select
                         value={r.method}
                         onChange={e => updateRow(idx, { method: e.target.value as PaymentMethod, reference: '' })}
@@ -242,21 +225,21 @@ function PaymentModal(props: {
                         <option value="Tarjeta">Tarjeta</option>
                         <option value="Otro">Otro</option>
                       </Select>
-                    </FormControl>
+                    </FormField>
 
-                    <FormControl>
-                      <FormLabel>Monto</FormLabel>
+                    <FormField  label={<>Monto</>}>
+
                       <Input
                         inputMode="decimal"
                         placeholder="0"
                         value={r.amount}
                         onChange={e => updateRow(idx, { amount: e.target.value })}
                       />
-                    </FormControl>
+                    </FormField>
 
                     {needsRef ? (
-                      <FormControl isRequired>
-                        <FormLabel>{refLabel}</FormLabel>
+                      <FormField isRequired label={<>{refLabel}</>}>
+
                         <Input
                           placeholder={
                             r.method === 'Sinpe'
@@ -268,19 +251,19 @@ function PaymentModal(props: {
                           value={r.reference || ''}
                           onChange={e => updateRow(idx, { reference: e.target.value })}
                         />
-                      </FormControl>
+                      </FormField>
                     ) : (
                       <Box flex="1" />
                     )}
 
-                    <FormControl>
-                      <FormLabel>Nota</FormLabel>
+                    <FormField  label={<>Nota</>}>
+
                       <Input
                         placeholder="Opcional"
                         value={r.note || ''}
                         onChange={e => updateRow(idx, { note: e.target.value })}
                       />
-                    </FormControl>
+                    </FormField>
 
                     <IconButton
                       type="button"
@@ -296,28 +279,16 @@ function PaymentModal(props: {
               })}
             </VStack>
 
-            <FormControl>
-              <FormLabel>Nota general</FormLabel>
+            <FormField  label={<>Nota general</>}>
+
               <Textarea
                 placeholder="Opcional"
                 value={generalNote}
                 onChange={e => setGeneralNote(e.target.value)}
               />
-            </FormControl>
+            </FormField>
 
-            <Flex justify="flex-end" gap={3} pt={2}>
-              <Button type="button" variant="ghost" onClick={handleClose} isDisabled={isSaving}>
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                colorScheme="brand"
-                isLoading={isSaving}
-                loadingText="Guardando..."
-              >
-                Guardar pago
-              </Button>
-            </Flex>
+            <FormActions submitLabel="Guardar pago" isLoading={isSaving} onCancel={handleClose} showCancel />
           </VStack>
         </ModalBody>
         </Form>
