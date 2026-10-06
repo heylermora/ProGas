@@ -49,7 +49,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   const goBack = () => history.push('/admin/product/index');
   const save = async () => {
     setSubmitted(true);
-    if (invalid) { toast({ title: 'Revisá los campos marcados', status: 'warning' }); return; }
+    if (invalid) { toast({ title: 'Revise los campos marcados', status: 'warning' }); return; }
     setSaving(true);
     const payload = { ...values, description: values.description.trim(), sku: values.sku?.trim().toUpperCase(), updatedAt: new Date().toISOString() };
     try {
@@ -58,20 +58,20 @@ export default function ProductForm({ product, isLoading = false }: Props) {
       toast({ title: product ? 'Producto actualizado' : 'Producto creado', description: 'Los cambios ya están disponibles en el inventario.', status: 'success', duration: 3000 });
       goBack();
     } catch {
-      toast({ title: 'No pudimos guardar el producto', description: 'Revisá la conexión e intentá nuevamente.', status: 'error', duration: 4000 });
+      toast({ title: 'No pudimos guardar el producto', description: 'Revise la conexión e intente nuevamente.', status: 'error', duration: 4000 });
     } finally { setSaving(false); }
   };
 
   return (
     <Form
       title={product ? values.description || 'Editar producto' : 'Nuevo producto'}
-      description={product ? 'Actualizá precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Completá los datos comerciales y la existencia inicial para comenzar a vender.'}
+      description={product ? 'Actualice precios, datos comerciales y disponibilidad desde una sola pantalla.' : 'Complete los datos comerciales y la existencia inicial para comenzar a vender.'}
       status={<StatusBadge active={values.active} activeLabel="Producto activo" inactiveLabel="Producto inactivo" />}
       onBack={goBack}
       backLabel="Volver al inventario"
       submitLabel={product ? 'Guardar cambios' : 'Crear producto'}
       isSubmitting={saving || isLoading}
-      footerMessage={invalid ? 'Revisá los campos obligatorios antes de guardar.' : 'Todo listo para guardar los cambios.'}
+      footerMessage={invalid ? 'Revise los campos obligatorios antes de guardar.' : 'Todo listo para guardar los cambios.'}
       pt={{ base: '120px', md: '78px' }} maxW="1080px" mx="auto" pb="48px" px={{ base: 1, md: 3 }}
       onFormSubmit={(event) => { event.preventDefault(); save(); }}
     >
@@ -83,12 +83,12 @@ export default function ProductForm({ product, isLoading = false }: Props) {
               <FormControl gridColumn={{ md: 'span 2' }} isRequired isInvalid={submitted && !values.description.trim()}>
                 <FormLabel>Nombre del producto</FormLabel>
                 <Input value={values.description} onChange={(event) => set('description', event.target.value)} placeholder="Ej. Cilindro de gas 25 lb" autoFocus={!product} />
-                <FormErrorMessage>Ingresá un nombre para reconocer el producto.</FormErrorMessage>
+                <FormErrorMessage>Ingrese un nombre para reconocer el producto.</FormErrorMessage>
               </FormControl>
               <FormControl isRequired isInvalid={submitted && !values.category}>
                 <HelpLabel help="Usamos la categoría para ordenar el inventario y facilitar los filtros.">Categoría</HelpLabel>
                 <Select value={values.category} onChange={(event) => set('category', event.target.value as ProductCategory)}>{categoryOptions.map((category) => <option key={category}>{category}</option>)}</Select>
-                <FormErrorMessage>Seleccioná una categoría.</FormErrorMessage>
+                <FormErrorMessage>Seleccione una categoría.</FormErrorMessage>
               </FormControl>
               <FormControl>
                 <HelpLabel help="Código interno opcional. Se guarda en mayúsculas y también sirve para buscar el producto.">SKU / código</HelpLabel>
@@ -98,7 +98,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
           </Card>
 
           <Card p={{ base: '18px', md: '24px' }}>
-            <SectionTitle icon={MdPayments} title="Precios" description="Definí el costo real y el precio que verá el cliente." />
+            <SectionTitle icon={MdPayments} title="Precios" description="Defina el costo real y el precio que verá el cliente." />
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="18px" mt="20px">
               <FormControl isRequired isInvalid={submitted && values.price <= 0}>
                 <HelpLabel help="Monto final que se cobrará por cada unidad." required>Precio de venta</HelpLabel>
@@ -115,7 +115,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
           </Card>
 
           <Card p={{ base: '18px', md: '24px' }}>
-            <SectionTitle icon={MdInventory2} title="Inventario" description={product ? 'El ajuste posterior de existencias también puede hacerse desde la tabla de productos.' : 'Indicá con cuántas unidades comenzará el producto.'} />
+            <SectionTitle icon={MdInventory2} title="Inventario" description={product ? 'El ajuste posterior de existencias también puede hacerse desde la tabla de productos.' : 'Indique con cuántas unidades comenzará el producto.'} />
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="18px" mt="20px">
               <FormControl isInvalid={submitted && values.stock < 0}>
                 <HelpLabel help="Cantidad que está físicamente disponible para vender.">Unidades disponibles</HelpLabel>
@@ -137,7 +137,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
 
         <Card p={{ base: '18px', md: '22px' }} position={{ xl: 'sticky' }} top={{ xl: '105px' }}>
           <Heading size="md" color={textColor}>Resumen</Heading>
-          <Text color={muted} fontSize="sm" mt="4px">Revisá los valores antes de guardar.</Text>
+          <Text color={muted} fontSize="sm" mt="4px">Revise los valores antes de guardar.</Text>
           <SimpleGrid columns={{ base: 1, sm: 2, lg: 3, xl: 1 }} spacing="16px" mt="20px">
             <Summary label="Producto" value={values.description || 'Sin nombre'} />
             <Summary label="Categoría" value={values.category || 'Sin categoría'} />

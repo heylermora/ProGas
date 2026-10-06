@@ -18,7 +18,7 @@ describe('PublicFooter', () => {
     expect(screen.getByText(`Versión ${packageInfo.version}`)).toBeTruthy();
     expect(screen.getByRole('link', { name: /^portafolio$/i }).getAttribute('href')).toBe('/portfolio');
     expect(screen.getByRole('link', { name: /acceso administrativo/i }).getAttribute('href')).toBe('/auth/sign-in');
-    expect(screen.getByText(/pedidos y comercios de acosta/i)).toBeTruthy();
+    expect(screen.getByText(/un espacio para el comercio local/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /explorar comercios/i })).toBeNull();
   });
 

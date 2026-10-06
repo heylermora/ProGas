@@ -209,7 +209,7 @@ export default function Balance({ embedded = false }: { embedded?: boolean }) {
           <Box bg={cardBg} borderRadius="2xl" p={{ base: 3, md: 5 }} mb="18px" overflowX="auto">
             <Text fontWeight="900" fontSize="lg" mb="3">Desglose por día y turno</Text>
             <Table size="sm"><Thead><Tr><Th>Día</Th><Th>Turno</Th><Th>Colaborador</Th><Th isNumeric>Ventas</Th><Th isNumeric>Costos</Th><Th isNumeric>Gastos</Th><Th isNumeric>Utilidad</Th></Tr></Thead><Tbody>{shiftClosings.map(closing => <Tr key={closing.id}><Td>{new Date(closing.from).toLocaleDateString('es-CR')}</Td><Td>{new Date(closing.from).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}–{new Date(closing.to).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}</Td><Td>{closing.createdByName || 'Sin nombre registrado'}</Td><Td isNumeric>{formatCRC(closing.totalSales)}</Td><Td isNumeric>{formatCRC(closing.costTotal)}</Td><Td isNumeric>{formatCRC(closing.expenseTotal)}</Td><Td isNumeric fontWeight="800">{formatCRC(closing.totalSales - closing.costTotal - closing.expenseTotal)}</Td></Tr>)}</Tbody></Table>
-            {!shiftClosings.length && <Text color={subtleText} py="5" textAlign="center">Confirmá el primer corte de turno para ver este desglose.</Text>}
+            {!shiftClosings.length && <Text color={subtleText} py="5" textAlign="center">Confirme el primer corte de turno para ver este desglose.</Text>}
           </Box>
           <Flex align="center" mb="16px">
             <Box>

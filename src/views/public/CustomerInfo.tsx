@@ -77,18 +77,18 @@ export default function CustomerInfo() {
   const saveAndContinue = async () => {
     if (isSaving) return;
     setMessage('');
-    if (!draft.nationalId || !draft.phone) return setMessage('Primero verificá tu cédula y teléfono.');
+    if (!draft.nationalId || !draft.phone) return setMessage('Primero verifique su cédula y teléfono.');
     if (!form.name.trim() || !form.province || !form.canton || !form.district || !form.locality.trim() || !form.details.trim()) {
-      return setMessage('Completá el nombre, la división territorial, el pueblo y las señas de entrega.');
+      return setMessage('Complete el nombre, la división territorial, el pueblo y las señas de entrega.');
     }
-    if (!localities.includes(form.locality)) return setMessage('Seleccioná un pueblo o localidad de la lista.');
+    if (!localities.includes(form.locality)) return setMessage('Seleccione un pueblo o localidad de la lista.');
     if (form.name.trim().length > 120 || form.nickname.trim().length > 60 || form.locality.trim().length > 100 || form.details.trim().length > 300 || form.additionalDirections.trim().length > 300) {
-      return setMessage('Revisá la longitud del nombre, localidad y señas de entrega.');
+      return setMessage('Revise la longitud del nombre, localidad y señas de entrega.');
     }
     const province = byName(provinces, form.province);
     const canton = byName(cantons, form.canton);
     const district = byName(districts, form.district);
-    if (!province || !canton || !district) return setMessage('Seleccioná una provincia, cantón y distrito válidos.');
+    if (!province || !canton || !district) return setMessage('Seleccione una provincia, cantón y distrito válidos.');
 
     const canonical: AddressItem = {
       province, canton, district,
@@ -115,12 +115,12 @@ export default function CustomerInfo() {
       }
       saveCustomerDraft({ clientRecordId, isExistingClient: true, name: form.name.trim(), nickname: form.nickname.trim(), address });
       history.push('/customer/products');
-    } catch { setMessage('No pudimos guardar la información. Verificá los datos e intentá nuevamente.'); }
+    } catch { setMessage('No pudimos guardar la información. Verifique los datos e intente nuevamente.'); }
     finally { setIsSaving(false); }
   };
 
   return (
-    <PublicPage title="Información del cliente" description="Seleccioná la dirección de entrega y, si querés, agregá el punto GPS exacto para el repartidor." maxW="1000px">
+    <PublicPage title="Información del cliente" description="Seleccione la dirección de entrega y, si quiere, agregue el punto GPS exacto para el repartidor." maxW="1000px">
       <Box h={{ base: '20px', md: '28px' }} />
       <PublicCard><Form onFormSubmit={(event) => { event.preventDefault(); saveAndContinue(); }}><Stack spacing="18px">
         {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
@@ -130,12 +130,12 @@ export default function CustomerInfo() {
         </SimpleGrid>
         <Box>
           <Text fontWeight="900" mb="1">Dirección de entrega</Text>
-          <Text fontSize="sm" color="gray.600" mb="4">Seleccioná cada nivel para evitar errores al ubicar el pedido.</Text>
+          <Text fontSize="sm" color="gray.600" mb="4">Seleccione cada nivel para evitar errores al ubicar el pedido.</Text>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormControl isRequired><FormLabel>Provincia</FormLabel><Select isDisabled={catalogLoading} value={form.province} onChange={e => setForm(prev => ({ ...prev, province: e.target.value, canton: '', district: '', locality: '', captureSource: 'manual' }))}>{provinces.map(item => <option key={item.code} value={item.name}>{item.name}</option>)}</Select></FormControl>
             <FormControl isRequired><FormLabel>Cantón</FormLabel><Select value={form.canton} onChange={e => setForm(prev => ({ ...prev, canton: e.target.value, district: '', locality: '', captureSource: 'manual' }))}>{cantons.map(item => <option key={item.code} value={item.name}>{item.name}</option>)}</Select></FormControl>
             <FormControl isRequired><FormLabel>Distrito</FormLabel><Select value={form.district} onChange={e => setForm(prev => ({ ...prev, district: e.target.value, locality: '', captureSource: 'manual' }))}>{districts.map(item => <option key={item.code} value={item.name}>{item.name}</option>)}</Select></FormControl>
-            <FormControl isRequired><FormLabel>Pueblo o localidad</FormLabel><Select placeholder="Seleccioná el pueblo o localidad" value={form.locality} onChange={e => set('locality', e.target.value)}>{localities.map(name => <option key={name} value={name}>{name}</option>)}</Select></FormControl>
+            <FormControl isRequired><FormLabel>Pueblo o localidad</FormLabel><Select placeholder="Seleccione el pueblo o localidad" value={form.locality} onChange={e => set('locality', e.target.value)}>{localities.map(name => <option key={name} value={name}>{name}</option>)}</Select></FormControl>
           </SimpleGrid>
         </Box>
         <FormControl isRequired><FormLabel>Dirección exacta / señas</FormLabel><Input value={form.details} onChange={e => set('details', e.target.value)} placeholder="Casa, color, referencia o punto cercano" /></FormControl>

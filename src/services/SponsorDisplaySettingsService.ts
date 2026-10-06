@@ -4,8 +4,8 @@ const COLLECTION = 'SponsorDisplaySettings';
 const DOCUMENT_ID = 'public-strip';
 
 export const defaultSponsorDisplaySettings = {
-  availableTitle: 'Tu marca aquí',
-  availableDescription: 'Llegá a clientes locales mientras hacen su pedido.',
+  availableTitle: 'Su marca aquí',
+  availableDescription: 'Llegue a clientes locales mientras hacen su pedido.',
 };
 
 const SponsorDisplaySettingsService = {

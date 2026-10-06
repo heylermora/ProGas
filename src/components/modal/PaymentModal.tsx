@@ -98,7 +98,7 @@ function PaymentModal(props: {
   };
 
   const validate = () => {
-    if (!rows.length) return 'Agregá al menos un método de pago.';
+    if (!rows.length) return 'Agregue al menos un método de pago.';
     if (totalToPay <= 0) return 'El total a pagar debe ser mayor a 0.';
     if (totalPaid <= 0) return 'El total pagado debe ser mayor a 0.';
 

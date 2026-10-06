@@ -19,7 +19,7 @@ const Error = () => {
                 color="#1B2559"
                 fontSize="14px"
             >
-                Vuelve a intentar más tarde.
+                Vuelva a intentar más tarde.
             </Text>
             <Image
                 src={illustration}

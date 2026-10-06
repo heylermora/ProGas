@@ -4,7 +4,7 @@ import { MdHome, MdLogin, MdShoppingCart, MdWork } from 'react-icons/md';
 import { FaWhatsapp } from 'react-icons/fa';
 import packageInfo from '../../../package.json';
 
-const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi tu portafolio y me gustaría conversar sobre un proyecto.')}`;
+const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi su portafolio y me gustaría conversar sobre un proyecto.')}`;
 
 export default function PublicFooter() {
   const location = useLocation();
@@ -15,11 +15,11 @@ export default function PublicFooter() {
       <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap={{ base: '16px', md: '24px' }} px={{ base: '18px', md: '26px' }} py={{ base: '20px', md: '22px' }}>
         <Flex align="center" gap="12px">
           <Flex bg="whiteAlpha.200" color="white" w="42px" h="42px" flexShrink={0} borderRadius="14px" align="center" justify="center" fontWeight="900" letterSpacing="-.04em">GM</Flex>
-          <Box><Text fontWeight="900" lineHeight="1.15">Gas Memo</Text><Text color="whiteAlpha.700" fontSize="sm">Pedidos y comercios de Acosta</Text></Box>
+          <Box><Text fontWeight="900" lineHeight="1.15">Gas Memo</Text><Text color="whiteAlpha.700" fontSize="sm">Un espacio para el comercio local</Text></Box>
         </Flex>
         <Flex wrap="wrap" gap="8px" w={{ base: '100%', md: 'auto' }}>
           {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Inicio</Button>}
-          {location.pathname !== '/' && location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
+          {location.pathname.startsWith('/customer/') && location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
           {isPortfolio ? <Button as="a" href={portfolioContactUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} size="sm" borderRadius="full" bg="white" color="brand.800" _hover={{ bg: 'brand.100' }}>Contactar</Button> : <Button as={RLink} to="/portfolio" leftIcon={<MdWork />} size="sm" borderRadius="full" bg="white" color="brand.800" _hover={{ bg: 'brand.100' }}>Portafolio</Button>}
         </Flex>
       </Flex>

@@ -11,17 +11,17 @@ import {
   Stack,
   Text,
   Tooltip,
-  SimpleGrid,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdFavorite, MdLocationOn, MdReceiptLong, MdShoppingBasket } from 'react-icons/md';
+import { MdEmail, MdFavorite, MdAccessTime, MdArrowForward } from 'react-icons/md';
 import MallPreview from './MallPreview';
 import { PublicPage } from './PublicPage';
 
+const acostaBackground = `${process.env.PUBLIC_URL}/acosta-fondo.png`;
 const gasMemoLogo = `${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`;
-const bmaLogo = `${process.env.PUBLIC_URL}/Banda%20Municipal%20de%20Acosta/Logo.png`;
+const bmaLogo = `${process.env.PUBLIC_URL}/Banda%20Municipal%20de%20Acosta/logo.png`;
 const bmaDonationUrl =
   'https://api.whatsapp.com/send/?phone=50683978524&text=' +
   encodeURIComponent('Hola, quiero apoyar a la Banda Municipal de Acosta con una donación. ¿Me comparten la información?') +
@@ -149,7 +149,7 @@ function DonationBanner() {
               lineHeight="1.1"
               letterSpacing="-0.03em"
             >
-              Apoyá a la Banda Municipal de Acosta
+              Apoye a la Banda Municipal de Acosta
             </Heading>
 
             <Text
@@ -158,8 +158,7 @@ function DonationBanner() {
               maxW="620px"
               lineHeight="1.55"
             >
-              Tu donación ayuda a impulsar la música, la formación artística y el talento local.
-              Cualquier aporte suma.
+              Su aporte contribuye a la formación musical del cantón.
             </Text>
           </Stack>
         </Flex>
@@ -188,7 +187,7 @@ function DonationBanner() {
             transform: 'translateY(0)',
           }}
         >
-          Colabore ahora
+          Haga un aporte
         </Button>
       </Flex>
     </Box>
@@ -203,7 +202,7 @@ function SocialLogoHub() {
       bg="brand.500"
       borderRadius={{ base: '22px', md: '32px' }}
       p={{ base: '24px', md: '34px' }}
-      minW={{ base: '100%', lg: '340px' }}
+      minW="0" w="100%"
       textAlign="center"
       boxShadow="xl"
       position="relative"
@@ -263,47 +262,57 @@ function SocialLogoHub() {
 }
 
 export default function Home() {
-  const mutedText = useColorModeValue('gray.600', 'gray.300');
-  const stepBg = useColorModeValue('white', 'navy.800');
-  const stepBorder = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const cardBg = useColorModeValue('rgba(255,255,255,.94)', 'navy.800');
+  const muted = useColorModeValue('gray.600', 'gray.300');
+  const border = useColorModeValue('brand.100', 'whiteAlpha.200');
 
   return (
     <PublicPage maxW="1200px">
-      <MallPreview />
-      <Flex direction={{ base: 'column', lg: 'row' }} justify="space-between" align={{ base: 'stretch', lg: 'center' }} gap={{ base: '20px', md: '24px' }} my={{ base: '18px', md: '28px' }}>
-        <Stack spacing={{ base: '10px', md: '12px' }} maxW={{ base: '100%', lg: '680px' }}>
-          <Text color="brand.500" fontWeight="900" letterSpacing="wide">GAS MEMO</Text>
-          <Heading fontSize={{ base: '34px', md: '48px', xl: '56px' }} lineHeight="1.05">Pedí tu gas en minutos.</Heading>
-          <Text color={mutedText} fontSize={{ base: 'md', md: 'lg' }}>Elegí tus productos, confirmá dónde entregarlos y recibí un código para consultar el avance. Sin llamadas.</Text>
-          <Stack direction={{ base: 'column', sm: 'row' }} spacing="12px" pt="12px" w={{ base: '100%', sm: 'auto' }}>
-            <Button as={RLink} to="/customer/data" colorScheme="brand" size="lg" w={{ base: '100%', sm: 'auto' }}>Hacer pedido</Button>
-            <Button as={RLink} to="/customer/view-order" variant="outline" size="lg" w={{ base: '100%', sm: 'auto' }}>Ver pedido</Button>
+      <Box as="section" aria-labelledby="community-title" position="relative" overflow="hidden"
+        borderRadius={{ base: '24px', md: '32px' }} mb={{ base: 6, md: 8 }} bg="#EEF3FF"
+        border="1px solid" borderColor="#DDE5F5" boxShadow="0 18px 44px rgba(38,51,105,.08)">
+        <Box position="relative" px={{ base: 5, md: 10 }} pt={{ base: 7, md: 12 }} pb={{ base: 4, md: 5 }}>
+          <Image src={acostaBackground} alt="" aria-hidden="true" position="absolute" inset="0"
+            w="100%" h="100%" objectFit="cover" objectPosition={{ base: '72% center', md: 'center 58%' }} pointerEvents="none" />
+          <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
+            bg={{ base: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.72) 45%, rgba(244,246,255,.08) 90%), linear-gradient(0deg, #EEF3FF, transparent 38%)', md: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.6) 40%, transparent 72%), linear-gradient(0deg, #EEF3FF, transparent 30%)' }} />
+          <Stack position="relative" spacing={{ base: 3, md: 4 }} color="#172554" maxW={{ base: '76%', md: '52%' }}>
+            <Text fontSize={{ base: '10px', md: 'xs' }} fontWeight="800" letterSpacing=".12em" textTransform="uppercase">Comercio local</Text>
+            <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Lo que busca, en Acosta.</Heading>
+            <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Productos y servicios de nuestra comunidad, reunidos en un solo lugar.</Text>
+            <Button as={RLink} to={{ pathname: '/mall', state: { from: '/', fromLabel: 'Volver al inicio' } }}
+              alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"
+              bg="linear-gradient(115deg, #5930E8, #3520AD)" color="white" px={{ base: 5, md: 7 }}
+              borderRadius="full" fontWeight="800" boxShadow="0 8px 22px rgba(70,39,191,.28)"
+              _hover={{ bg: '#3520AD', boxShadow: '0 10px 26px rgba(70,39,191,.36)' }}
+              _focusVisible={{ outline: '3px solid', outlineColor: 'brand.600', outlineOffset: '4px' }}>
+              Ver negocios
+            </Button>
           </Stack>
-        </Stack>
-        <SocialLogoHub />
-      </Flex>
-      <Box as="section" aria-labelledby="how-it-works-title" mb={{ base: '20px', md: '28px' }}>
-        <Stack spacing="14px">
-          <Box>
-            <Text color="brand.500" fontSize="sm" fontWeight="900" letterSpacing="wide">SIMPLE Y CLARO</Text>
-            <Heading id="how-it-works-title" fontSize={{ base: '24px', md: '30px' }}>¿Cómo funciona?</Heading>
-          </Box>
-          <Box position="relative" mt={{ base: '4px', md: '12px' }} px={{ base: '0', md: '18px' }} py={{ base: '4px', md: '12px' }}>
-            <Box aria-hidden="true" position="absolute" left={{ base: '25px', md: '16%' }} right={{ base: 'auto', md: '16%' }} top={{ base: '28px', md: '42px' }} bottom={{ base: '28px', md: 'auto' }} w={{ base: '3px', md: 'auto' }} h={{ base: 'auto', md: '3px' }} bgGradient={{ base: 'linear(to-b, brand.200, brand.500, brand.400)', md: 'linear(to-r, brand.200, brand.500, brand.400)' }} borderRadius="full" />
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: '18px', md: '28px' }} position="relative">
-            {[
-              { icon: MdShoppingBasket, title: 'Hacé tu pedido', text: 'Verificá tus datos y agregá los productos que necesitás.' },
-              { icon: MdLocationOn, title: 'Indicá la entrega', text: 'Confirmá el lugar exacto donde querés recibirlo.' },
-              { icon: MdReceiptLong, title: 'Seguí el recorrido', text: 'Guardá tu código y consultá el avance cuando querás.' },
-            ].map((item, index) => (
-              <Flex key={item.title} direction={{ base: 'row', md: 'column' }} align={{ base: 'flex-start', md: 'center' }} textAlign={{ base: 'left', md: 'center' }} gap={{ base: '14px', md: '12px' }}>
-                <Flex position="relative" zIndex={1} bg="brand.500" color="white" borderRadius="full" w="54px" h="54px" minW="54px" align="center" justify="center" boxShadow="0 0 0 7px rgba(233,227,255,.95), 0 8px 20px rgba(66,42,251,.24)"><Icon as={item.icon} boxSize="24px" /><Flex position="absolute" right="-4px" top="-5px" w="20px" h="20px" align="center" justify="center" borderRadius="full" bg="white" color="brand.600" fontSize="10px" fontWeight="900" border="2px solid" borderColor="brand.100">{index + 1}</Flex></Flex>
-                <Box bg={stepBg} border="1px solid" borderColor={stepBorder} borderRadius="18px" p={{ base: '14px', md: '16px' }} w="100%" minH={{ md: '116px' }} boxShadow="sm"><Text fontWeight="900" fontSize="md">{item.title}</Text><Text mt="5px" color={mutedText} fontSize="sm" lineHeight="1.55">{item.text}</Text></Box>
-              </Flex>
-            ))}
-            </SimpleGrid>
-          </Box>
-        </Stack>
+        </Box>
+        <MallPreview embedded />
+      </Box>
+      <Box as="section" aria-labelledby="gas-coming-title" mt={{ base: 6, md: 8 }} mb={{ base: 6, md: 8 }}
+        bg={cardBg} border="1px solid" borderColor={border} borderTopWidth="4px" borderTopColor="brand.500" borderRadius={{ base: '24px', md: '28px' }}
+        p={{ base: 6, md: 9 }} boxShadow="0 16px 40px rgba(38, 51, 105, .07)">
+        <Flex direction={{ base: 'column', lg: 'row' }} align={{ base: 'stretch', lg: 'center' }} gap={{ base: 8, lg: 10 }}>
+          <Stack flex="1" spacing={4}>
+            <Flex align="center" gap={3} alignSelf="flex-start"
+              bg="linear-gradient(110deg, #FFD966, #FFB547)" color="#442400" borderRadius="14px"
+              px={{ base: 4, md: 5 }} py={3} border="1px solid" borderColor="#FFE8A3"
+              boxShadow="0 8px 24px rgba(245,158,11,.26)">
+              <Icon as={MdAccessTime} boxSize={{ base: '22px', md: '26px' }} />
+              <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight="900" letterSpacing=".06em">PRÓXIMAMENTE</Text>
+            </Flex>
+            <Text color="brand.500" fontSize="sm" fontWeight="800">GAS MEMO</Text>
+            <Heading id="gas-coming-title" fontSize={{ base: '28px', md: '38px' }} lineHeight="1.15" letterSpacing="-.03em">Pedidos en línea</Heading>
+            <Text color={muted} maxW="560px" lineHeight="1.7">Este servicio aún no está disponible. Consulte las novedades en nuestras redes.</Text>
+          </Stack>
+          <Stack spacing={4} w={{ base: '100%', lg: '320px' }} flexShrink={0}>
+            <SocialLogoHub />
+            <Text color={muted} fontSize="sm" textAlign="center">Seleccione el logo para ver las redes.</Text>
+          </Stack>
+        </Flex>
       </Box>
       <DonationBanner />
       <Box h={{ base: '14px', md: '18px' }} />

@@ -113,7 +113,7 @@ export default function Index() {
 
   return (
     <Box w="100%" pt={topPt}>
-      <FilterPanel title="Filtros de pedidos" description="Combiná criterios para encontrar un pedido." activeCount={[filters.date, filters.client, filters.product, filters.payment].filter(Boolean).length} onClear={clearFilters}>
+      <FilterPanel title="Filtros de pedidos" description="Combine criterios para encontrar un pedido." activeCount={[filters.date, filters.client, filters.product, filters.payment].filter(Boolean).length} onClear={clearFilters}>
         <SimpleGrid columns={{ base: 1, md: 2, xl: 4 }} gap={3}>
           <Input aria-label="Filtrar por fecha" type="date" value={filters.date} onChange={e => setFilters(f => ({ ...f, date: e.target.value }))} />
           <Input aria-label="Filtrar por cliente" placeholder="Cliente o cédula" value={filters.client} onChange={e => setFilters(f => ({ ...f, client: e.target.value }))} />
@@ -123,7 +123,7 @@ export default function Index() {
       </FilterPanel>
       <Box bg="white" borderRadius="2xl" p={{ base: 3, md: 4 }} mb={5} boxShadow="sm" borderWidth="1px" borderColor="blackAlpha.100">
         <Flex align="center" justify="space-between" gap={3} mb={3}>
-          <Box><Text fontWeight="900">Estado de los pedidos</Text><Text fontSize="sm" color="gray.500">Elegí un estado para acotar el listado.</Text></Box>
+          <Box><Text fontWeight="900">Estado de los pedidos</Text><Text fontSize="sm" color="gray.500">Elija un estado para acotar el listado.</Text></Box>
           <IconButton colorScheme="brand" aria-label="Crear pedido" icon={<MdAdd />} as={RLink as any} borderRadius="full" to="/admin/order/new" flexShrink={0} />
         </Flex>
         <SimpleGrid columns={{ base: 2, sm: 3, lg: 4, xl: 7 }} gap={2}>

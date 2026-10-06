@@ -1,5 +1,5 @@
 import { Box, Image, Text, Button } from '@chakra-ui/react';
-import illustration from "assets/img/exceptions/unauthorized.svg"; // Cambia la ilustración si tienes otra
+import illustration from "assets/img/exceptions/unauthorized.svg"; // Cambia la ilustración si tiene otra
 
 const Unauthorized = () => {
     const handleRedirect = () => {
@@ -20,8 +20,8 @@ const Unauthorized = () => {
                 color="#1B2559"
                 fontSize="14px"
             >
-                No tienes acceso a esta sección.
-                Por favor, vuelve a ingresar con tu cuenta.
+                No tiene acceso a esta sección.
+                Por favor, vuelva a ingresar con su cuenta.
             </Text>
 
             <Image
