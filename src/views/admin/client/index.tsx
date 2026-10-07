@@ -8,10 +8,9 @@ import AsyncContent from 'components/dataDisplay/AsyncContent';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import StatusBadge from 'components/dataDisplay/StatusBadge';
 import ActiveSwitch from 'components/form/ActiveSwitch';
-import FormActions from 'components/form/FormActions';
 import FormField from 'components/form/FormField';
-import FormPanel from 'components/form/FormPanel';
 import PageHeader from 'components/layout/PageHeader';
+import FormModal from 'components/modal/FormModal';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import ClientItem from 'interfaces/ClientItem';
 import { useEffect, useMemo, useState } from 'react';
@@ -73,7 +72,6 @@ export default function Clients() {
       ...(client.address ? { address: client.address } : {}),
     });
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const save = async () => {
@@ -120,19 +118,15 @@ export default function Clients() {
       </SimpleGrid>
 
       {showForm && (
-        <FormPanel isSubmitting={saving} onSubmit={save} title={editing ? 'Editar cliente' : 'Registrar cliente'} description="Los campos marcados son obligatorios." onClose={closeForm} footer={
-          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <ActiveSwitch id="client-active" label="Cliente activo" isChecked={form.active !== false} onChange={checked => change('active', checked)} />
-            <FormActions onCancel={closeForm} isLoading={saving} submitLabel={editing ? 'Guardar cambios' : 'Crear cliente'} />
-          </Flex>
-        }>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-            <FormField id="client-national-id" label="Cédula" error={submitted && !form.nationalId.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-national-id" placeholder="Ej. 1-2345-6789" value={form.nationalId} onChange={e => change('nationalId', e.target.value)} /></FormField>
-            <FormField id="client-name" label="Nombre completo" error={submitted && !form.name.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-name" placeholder="Nombre y apellidos" value={form.name} onChange={e => change('name', e.target.value)} /></FormField>
-            <FormField id="client-nickname" label="Apodo"><Input id="client-nickname" placeholder="Opcional" value={form.nickname || ''} onChange={e => change('nickname', e.target.value)} /></FormField>
-            <FormField id="client-phone" label="Teléfono" error={submitted && !form.phone.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-phone" type="tel" placeholder="Ej. 8888-8888" value={form.phone} onChange={e => change('phone', e.target.value)} /></FormField>
+        <FormModal isOpen={showForm} isSubmitting={saving} onSubmit={save} title={editing ? 'Editar cliente' : 'Registrar cliente'} description="Identificación y contacto del cliente." onClose={closeForm} submitLabel={editing ? 'Guardar cambios' : 'Crear cliente'}>
+          <SimpleGrid columns={2} spacing={4}>
+            <FormField gridColumn={{ base: 'span 2', md: 'auto' }} id="client-name" label="Nombre completo" error={submitted && !form.name.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-name" placeholder="Nombre y apellidos" value={form.name} onChange={e => change('name', e.target.value)} /></FormField>
+            <FormField id="client-national-id" label="Cédula" error={submitted && !form.nationalId.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-national-id" placeholder="Ej. 101110111" value={form.nationalId} onChange={e => change('nationalId', e.target.value)} /></FormField>
+            <FormField id="client-phone" label="Teléfono" error={submitted && !form.phone.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-phone" type="tel" placeholder="8888-8888" value={form.phone} onChange={e => change('phone', e.target.value)} /></FormField>
+            <FormField gridColumn={{ base: 'span 2', md: 'auto' }} id="client-nickname" label="Apodo"><Input id="client-nickname" placeholder="Opcional" value={form.nickname || ''} onChange={e => change('nickname', e.target.value)} /></FormField>
           </SimpleGrid>
-        </FormPanel>
+          <Box mt={4}><ActiveSwitch id="client-active" label="Cliente activo" isChecked={form.active !== false} onChange={checked => change('active', checked)} /></Box>
+        </FormModal>
       )}
 
       <Text mb={5} textAlign="right" color={mutedColor} fontSize="sm">{visible.length} {visible.length === 1 ? 'resultado' : 'resultados'}</Text>

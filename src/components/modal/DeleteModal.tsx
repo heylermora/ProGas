@@ -1,5 +1,6 @@
-import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text } from '@chakra-ui/react';
-import { ReactNode } from 'react';
+import { Button, Flex, Text } from '@chakra-ui/react';
+import { ReactNode, useRef } from 'react';
+import AppModal from './AppModal';
 
 type DeleteModalProps = {
   message: ReactNode;
@@ -12,16 +13,10 @@ type DeleteModalProps = {
 };
 
 export default function DeleteModal({ message, handle, isOpen, onClose, title = 'Confirmar eliminación', confirmLabel = 'Eliminar', isLoading }: DeleteModalProps) {
-  return <Modal isOpen={isOpen} onClose={onClose} isCentered>
-    <ModalOverlay />
-    <ModalContent borderRadius="20px">
-      <ModalHeader>{title}</ModalHeader>
-      <ModalCloseButton />
-      <ModalBody><Text as="div" color="gray.600">{message}</Text></ModalBody>
-      <ModalFooter gap={2}>
-        <Button variant="ghost" onClick={onClose} isDisabled={isLoading}>Cancelar</Button>
-        <Button colorScheme="red" onClick={handle} isLoading={isLoading}>{confirmLabel}</Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>;
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  return <AppModal title={title} isOpen={isOpen} onClose={onClose} size="md" role="alertdialog" initialFocusRef={cancelRef} isBusy={isLoading}
+    footer={<Flex gap={3}><Button ref={cancelRef} type="button" variant="ghost" onClick={onClose} isDisabled={isLoading}>Cancelar</Button>
+      <Button type="button" flex="1" colorScheme="red" onClick={handle} isLoading={isLoading}>{confirmLabel}</Button></Flex>}>
+    <Text>{message}</Text>
+  </AppModal>;
 }

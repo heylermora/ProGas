@@ -97,6 +97,9 @@ Mantener los textos de interfaz en español y los nombres técnicos coherentes c
 | Filtros | `components/dataDisplay/FilterPanel` |
 | Estadísticas y estado | `StatCard`, `StatusBadge`, `ActiveSwitch` |
 | Superficie de tarjeta | `components/card/Card` |
+| Modal general | `components/modal/AppModal` |
+| Modal de formulario | `components/modal/FormModal` |
+| Detalles opcionales / listas acotadas | `components/modal/ModalSection`, `ModalList` |
 | Confirmación de eliminación | `components/modal/DeleteModal` |
 | Estructura de páginas públicas | `views/public/PublicPage`, `PublicHeader`, `PublicFooter` |
 | Búsqueda de listados administrativos | `PageSearchContext` y `SearchBar` |
@@ -110,6 +113,10 @@ Extraer un componente cuando varias pantallas compartan intención, estructura y
 ## 6. Formularios y experiencia de uso
 
 - Seguir la línea visual de Pedidos: encabezado simple, separador, controles y ayudas uniformes y acción principal a ancho completo al final.
+- Usar `AppModal` para todos los diálogos y `FormModal` para captura de datos. No repetir `ModalContent`, encabezados o pies en las vistas. Clientes y colaboradores crean/editan en modales; Pedidos y Producto conservan páginas propias.
+- El modal tiene altura limitada al viewport, encabezado y pie fijos y un único cuerpo desplazable. No agregar contenedores con scroll dentro del cuerpo, salvo controles de texto que lo necesitan.
+- Mantener datos obligatorios visibles en el bloque que se está editando; plegar información opcional con `ModalSection` y paginar listas repetitivas con `ModalList`. Si un error está plegado, abrir su sección para corregirlo.
+- `FormModal` contiene el formulario semántico y las acciones: no anidar `Form` ni formularios HTML en sus hijos. Bloquear cierre y envíos mientras se guarda; conservar valores si falla.
 - En páginas y paneles mostrar «Volver» con flecha arriba mediante `FormPageHeader`; en modales usar la X de cierre, sin «Volver».
 - Reutilizar `PasswordField` para contraseñas y `OrderProductFields` para los campos de productos del pedido. Los controles se definen en `theme/components/formControls.ts`.
 - Reutilizar `Form`, que admite `fields` o contenido personalizado mediante `children` y `onFormSubmit`. Evitar formularios HTML anidados.

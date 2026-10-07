@@ -9,7 +9,9 @@ Un patrón debe convertirse en componente cuando aparece en más de una pantalla
 | Patrón | Solución compartida | Uso inicial |
 | --- | --- | --- |
 | Encabezado de sección administrativa | `components/layout/PageHeader` | Clientes y colaboradores |
-| Panel de alta/edición | `components/form/FormPanel` | Clientes y colaboradores |
+| Alta/edición breve en modal | `components/modal/FormModal` | Clientes, colaboradores, pagos, categorías e inventario |
+| Contenedor de modal | `components/modal/AppModal` | Todos los diálogos, confirmaciones y videos |
+| Divulgación progresiva / listas | `components/modal/ModalSection`, `ModalList` | Detalles de pago y categorías |
 | Resultado vacío con acción opcional | `components/dataDisplay/EmptyState` | Clientes y colaboradores |
 | Botones | Tema global de Chakra (`theme/components/button.ts`) | Toda la aplicación |
 | Inputs y selects | Tema global de Chakra (`theme/components/input.ts`) | Toda la aplicación |
@@ -53,3 +55,16 @@ Los candidatos de prioridad alta y media ya cuentan con una implementación comp
 - Mantener el contenido y las reglas de negocio en la vista; los componentes compartidos reciben datos, acciones y estados mediante propiedades.
 - Todo componente interactivo nuevo debe tener nombre accesible, foco visible, estado deshabilitado y prueba de su comportamiento principal.
 - Adoptar los componentes gradualmente al tocar cada módulo; evitar una migración masiva que mezcle cambios visuales con cambios de lógica.
+
+## Unificación de modales — 7 de octubre de 2026
+
+`AppModal` centraliza superficie, borde, radios, cierre, foco, bloqueo del fondo y altura máxima dinámica. Solo el cuerpo se desplaza; encabezado y pie permanecen visibles. `FormModal` agrega formulario semántico, validación del flujo mediante callback, guardado y acciones compartidas, sin botones Volver ni formularios anidados.
+
+- Clientes y colaboradores: formularios breves dentro del modal, sin desplazar ni reiniciar el listado.
+- Pagos: resumen de importes, un método expandido a la vez, referencias obligatorias visibles y fecha/nota general plegables. Los errores abren el método o la sección correspondiente.
+- Categorías: lista de cuatro elementos por página en móvil y cinco en escritorio, con edición y eliminación; no hay scroll interno adicional.
+- Copiar información: área de texto de altura acotada y acciones en el pie; no crece con el documento completo.
+- Inventario y confirmaciones: contenido breve, misma base; eliminar da foco inicial a Cancelar.
+- Videos: misma estructura en variante oscura, con tamaño y reproductor limitados al viewport.
+
+Los paneles laterales de navegación (`Drawer`) conservan su patrón porque no son diálogos de contenido o formularios.

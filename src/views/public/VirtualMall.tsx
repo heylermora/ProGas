@@ -1,45 +1,36 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { keyframes } from '@emotion/react';
 import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Icon,
-  IconButton,
-  Image,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  SimpleGrid,
-  Stack,
-  Text,
-  useColorModeValue,
+Badge,
+Box,
+Button,
+Flex,
+Heading,
+Icon,
+IconButton,
+Image,
+Input, SimpleGrid,
+Stack,
+Text,
+useColorModeValue
 } from '@chakra-ui/react';
+import { keyframes } from '@emotion/react';
+import AppModal from 'components/modal/AppModal';
+import useCategories from 'hooks/useCategories';
+import SponsorItem from 'interfaces/SponsorItem';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import {
-  MdChevronLeft,
-  MdChevronRight,
-  MdClose,
-  MdEmail,
-  MdLink,
-  MdMyLocation,
-  MdPlayArrow,
-  MdStorefront,
-  MdViewList,
-  MdMap,
+MdChevronLeft,
+MdChevronRight,
+MdClose,
+MdEmail,
+MdLink, MdMap, MdMyLocation,
+MdPlayArrow,
+MdStorefront,
+MdViewList
 } from 'react-icons/md';
-import SearchableCategorySelect from 'components/category/SearchableCategorySelect';
-import useCategories from 'hooks/useCategories';
-import SponsorService from 'services/SponsorService';
 import { useLocation } from 'react-router-dom';
+import SponsorService from 'services/SponsorService';
 import { PublicPage } from './PublicPage';
-import SponsorItem from 'interfaces/SponsorItem';
 
 const categoryEmoji = ['🍽️', '🍔', '🍕', '☕', '🍦', '🍷', '🛒', '🛍️', '💎', '👟', '💈', '💇', '🐾', '💊', '🔨', '🌱', '💪', '🏍️', '🔧', '🛡️', '✨'];
 const shortLabels = ['Restaurantes', 'Rápidas', 'Pizzerías', 'Cafeterías', 'Heladerías', 'Licoreras', 'Súperes', 'Tiendas', 'Joyerías', 'Zapaterías', 'Barberías', 'Belleza', 'Veterinarias', 'Farmacias', 'Ferreterías', 'Agro', 'Gimnasios', 'Motos', 'Mecánicos', 'Fumigadoras', 'Otros'];
@@ -225,9 +216,9 @@ export default function VirtualMall() {
           <Box position="absolute" right="-25px" top="-60px" fontSize={{ base: '140px', md: '190px' }} opacity=".11">🕹️</Box>
           <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" direction={{ base: 'column', md: 'row' }}>
           <Stack spacing="8px" maxW="760px">
-            <Badge w="fit-content" px="10px" py="4px" borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MAPA INTERACTIVO</Badge>
-            <Heading fontSize={{ base: '29px', md: '48px' }} lineHeight="1.04">Negocios de Acosta</Heading>
-            <Text fontSize={{ base: 'sm', md: 'lg' }} color="whiteAlpha.900">Encuentre comercios y servicios por categoría y consulte sus contactos.</Text>
+            <Badge w="fit-content" px="10px" py="4px" borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MODO EXPLORACIÓN</Badge>
+            <Heading fontSize={{ base: '29px', md: '48px' }} lineHeight="1.04">Centro Comercial Virtual</Heading>
+            <Text fontSize={{ base: 'sm', md: 'lg' }} color="whiteAlpha.900">Viajá por el mapa, entrá a una categoría y descubrí cada negocio en su propia estación.</Text>
           </Stack>
           <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="lg" flexShrink={0} onClick={() => setSimpleView((value) => !value)} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
           </Flex>
@@ -236,8 +227,8 @@ export default function VirtualMall() {
         {simpleView ? <SimpleMall categories={categories} businesses={activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
-              <Heading fontSize={{ base: 'lg', md: 'xl' }}>Categorías</Heading>
-              <Text color="gray.500" fontSize="xs">Seleccione una categoría.</Text>
+              <Heading fontSize={{ base: 'lg', md: 'xl' }}>Mapa galáctico</Heading>
+              <Text color="gray.500" fontSize="xs">Elegí una categoría para viajar a su submapa.</Text>
             </Stack>
           )}
 
@@ -245,8 +236,8 @@ export default function VirtualMall() {
             <Box position="absolute" inset="8%" border="1px dashed" borderColor="cyan.200" borderRadius="45%" opacity=".24" />
             <Box position="absolute" inset="21%" border="1px dashed" borderColor="purple.200" borderRadius="44%" opacity=".2" />
 
-            {loadStatus === 'loading' && <MapStatus icon="📡" title="Cargando negocios" description="Espere un momento." />}
-            {loadStatus === 'error' && <MapStatus icon="⚠️" title="No pudimos cargar los negocios" description="Inténtelo de nuevo." action="Reintentar" onAction={loadBusinesses} />}
+            {loadStatus === 'loading' && <MapStatus icon="📡" title="Escaneando la galaxia" description="Buscando estaciones comerciales…" />}
+            {loadStatus === 'error' && <MapStatus icon="⚠️" title="Se perdió la señal" description="No pudimos cargar los negocios." action="Reintentar" onAction={loadBusinesses} />}
             {loadStatus === 'success' && (
               <Box key={selectedCategory || 'galaxy'} position="absolute" inset="0" animation={`${mapArrival} .38s ease-out`}>
                 {!selectedCategory ? (
@@ -261,8 +252,8 @@ export default function VirtualMall() {
             {loadStatus === 'success' && selectedCategory && categoryBusinesses.length === 0 && (
               <Stack position="absolute" left="50%" bottom="10%" transform="translateX(-50%)" align="center" textAlign="center" color="white" zIndex={3} w="80%" pointerEvents="none">
                 <Text fontSize="38px">🛰️</Text>
-                <Heading fontSize="xl">Esta categoría aún no tiene negocios</Heading>
-                <Text color="whiteAlpha.700" fontSize="sm">Seleccione el centro para volver a las categorías.</Text>
+                <Heading fontSize="xl">No hay estaciones disponibles</Heading>
+                <Text color="whiteAlpha.700" fontSize="sm">Tocá el centro de la zona para regresar al mapa galáctico.</Text>
               </Stack>
             )}
 
@@ -280,20 +271,13 @@ export default function VirtualMall() {
         </Box>}
       </Stack>
 
-      <Modal isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" isCentered>
-        <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(8px)" />
-        <ModalContent bg="navy.900" color="white" borderRadius="24px" overflow="hidden" mx="12px">
-          <ModalHeader>{arrivedBusiness?.name || 'Video del negocio'}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody p={{ base: '12px', md: '20px' }}>
+      <AppModal isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" appearance="media" title={arrivedBusiness?.name || 'Video del negocio'}>
             {isDirectVideo(arrivedBusiness?.videoUrl || '') ? (
-              <Box as="video" src={arrivedBusiness?.videoUrl} controls autoPlay playsInline w="100%" maxH="70vh" borderRadius="16px" />
+              <Box as="video" src={arrivedBusiness?.videoUrl} controls autoPlay playsInline w="100%" maxH="60vh" borderRadius="16px" />
             ) : (
-              <Box as="iframe" title={`Video de ${arrivedBusiness?.name || 'negocio'}`} src={videoSource(arrivedBusiness?.videoUrl)} w="100%" h={{ base: '240px', md: '520px' }} border="0" borderRadius="16px" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
+              <Box as="iframe" title={`Video de ${arrivedBusiness?.name || 'negocio'}`} src={videoSource(arrivedBusiness?.videoUrl)} w="100%" h={{ base: '220px', md: '440px' }} maxH="60vh" border="0" borderRadius="16px" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
             )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      </AppModal>
     </PublicPage>
   );
 }
@@ -308,9 +292,12 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
   return (
     <Box bg={surface} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '18px', md: '26px' }} boxShadow="lg">
       <Stack spacing="20px">
-        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Busque por nombre o filtre por categoría.</Text></Box>
+        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Elegí una categoría o escribí el nombre de un negocio. No necesitás usar el mapa.</Text></Box>
         <Input aria-label="Buscar negocio" size="lg" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Buscar negocio o servicio" />
-        <SearchableCategorySelect categories={categories} value={selectedCategory} onChange={onCategory} />
+        <Flex gap="8px" wrap="wrap">
+          <Button size="sm" borderRadius="full" colorScheme={!selectedCategory ? 'brand' : 'gray'} variant={!selectedCategory ? 'solid' : 'outline'} onClick={() => onCategory('')}>Todos</Button>
+          {categories.map((category) => <Button key={category} size="sm" borderRadius="full" colorScheme={selectedCategory === category ? 'brand' : 'gray'} variant={selectedCategory === category ? 'solid' : 'outline'} onClick={() => onCategory(category)}>{category}</Button>)}
+        </Flex>
         <Text fontWeight="700">{visible.length} {visible.length === 1 ? 'negocio encontrado' : 'negocios encontrados'}</Text>
         {visible.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px">{visible.map((business) => {
           const links = (business.links || []).filter(Boolean).slice(0, 4);
@@ -319,7 +306,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
             {business.description && <Text color={muted} fontSize="sm" lineHeight="1.6" mt="12px">{business.description}</Text>}
             {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <Button key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" size="sm" leftIcon={<Icon as={meta.icon} />} colorScheme="brand" variant="outline">{meta.label}</Button>; })}</Flex>}
           </Box>;
-        })}</SimpleGrid> : <Box textAlign="center" py="40px"><Icon as={MdStorefront} boxSize="42px" color="gray.300" /><Text fontWeight="800" mt="10px">No encontramos negocios</Text><Text color={muted}>Pruebe con otra categoría o borre la búsqueda.</Text></Box>}
+        })}</SimpleGrid> : <Box textAlign="center" py="40px"><Icon as={MdStorefront} boxSize="42px" color="gray.300" /><Text fontWeight="800" mt="10px">No encontramos negocios</Text><Text color={muted}>Probá con otra categoría o borrá la búsqueda.</Text></Box>}
       </Stack>
     </Box>
   );
@@ -414,7 +401,7 @@ function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, 
   else if (selectedCategoryIndex >= 0) position = [50, 60];
   return (
     <Stack position="absolute" left={`${position[0]}%`} top={`${Math.min(position[1] + 9, 91)}%`} transform="translate(-50%, -50%)" w={{ base: '80px', md: '106px' }} align="center" spacing="0" zIndex={4} transition="left .55s cubic-bezier(.2,.8,.2,1), top .55s cubic-bezier(.2,.8,.2,1)" pointerEvents="none">
-      <Badge whiteSpace="nowrap" colorScheme="red" borderRadius="full" fontSize={{ base: '8px', md: '10px' }}><Icon as={MdMyLocation} mr="3px" />USTED ESTÁ AQUÍ</Badge>
+      <Badge whiteSpace="nowrap" colorScheme="red" borderRadius="full" fontSize={{ base: '8px', md: '10px' }}><Icon as={MdMyLocation} mr="3px" />ESTÁS AQUÍ</Badge>
       <Box position="relative" w="62px" h="52px" display="flex" justifyContent="center">
         <Box position="absolute" bottom="1px" left="50%" w="38px" h="10px" borderRadius="full" bg="blackAlpha.500" animation={`${shadowPulse} 1s ease-in-out infinite`} />
         <Box position="relative" zIndex={1} animation={`${astronautFloat} 1s ease-in-out infinite`} fontSize={{ base: '36px', md: '45px' }} lineHeight="1">🧑‍🚀</Box>
@@ -427,7 +414,7 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
   return (
     <Box position="absolute" zIndex={8} right={{ base: '8px', md: '18px' }} bottom={{ base: '8px', md: '18px' }} w={{ base: 'calc(100% - 16px)', md: '430px' }} maxH={{ base: '260px', md: 'calc(100% - 36px)' }} overflowY="auto" p={{ base: '12px', md: '14px' }} borderRadius={{ base: '22px', md: '26px' }} bg="rgba(8, 14, 38, .94)" color="white" border="1px solid" borderColor="cyan.300" boxShadow="0 24px 65px rgba(0,0,0,.52), inset 0 0 28px rgba(34,211,238,.05)" backdropFilter="blur(16px)" animation={`${panelArrival} .24s ease-out`}>
       <Flex align="center" justify="space-between" mb={{ base: '6px', md: '8px' }}>
-        <Badge bg="cyan.300" color="navy.900" borderRadius="full" px="9px">CONTACTOS DEL NEGOCIO</Badge>
+        <Badge bg="cyan.300" color="navy.900" borderRadius="full" px="9px">FICHA DE ESTACIÓN</Badge>
         <IconButton aria-label="Cerrar ficha" icon={<MdClose />} size="sm" variant="ghost" color="white" onClick={onClose} />
       </Flex>
       <Flex gap={{ base: '10px', md: '14px' }} align="center">

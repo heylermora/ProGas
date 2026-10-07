@@ -7,11 +7,10 @@ import AsyncContent from 'components/dataDisplay/AsyncContent';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import StatusBadge from 'components/dataDisplay/StatusBadge';
 import ActiveSwitch from 'components/form/ActiveSwitch';
-import FormActions from 'components/form/FormActions';
 import FormField from 'components/form/FormField';
-import FormPanel from 'components/form/FormPanel';
 import PasswordField from 'components/form/PasswordField';
 import PageHeader from 'components/layout/PageHeader';
+import FormModal from 'components/modal/FormModal';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import UserItem from 'interfaces/UserItem';
 import { useEffect, useMemo, useState } from 'react';
@@ -59,7 +58,6 @@ export default function Users() {
     setEditing(user);
     setForm({ name: user.name || '', email: user.email || '', password: '', active: user.active !== false });
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const change = (field: keyof FormState, value: string | boolean) =>
     setForm(current => ({ ...current, [field]: value }));
@@ -108,18 +106,14 @@ export default function Users() {
       <PageHeader title="Colaboradores" description="Agregá y administrá el acceso de tu equipo." action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={openCreate}>Agregar colaborador</Button>} />
 
       {showForm && (
-        <FormPanel isSubmitting={saving} onSubmit={save} title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description={editing ? 'Actualizá su nombre o acceso.' : 'Creá sus credenciales de acceso.'} onClose={close} footer={
-          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <ActiveSwitch id="user-active" label="Acceso activo" isChecked={form.active} onChange={checked => change('active', checked)} />
-            <FormActions onCancel={close} isLoading={saving} submitLabel={editing ? 'Guardar cambios' : 'Crear acceso'} />
-          </Flex>
-        }>
+        <FormModal isOpen={showForm} isSubmitting={saving} onSubmit={save} title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description="Datos personales y acceso." onClose={close} submitLabel={editing ? 'Guardar cambios' : 'Crear acceso'}>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
             <FormField id="user-name" label="Nombre completo" error={submitted && !form.name.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="user-name" autoComplete="name" value={form.name} onChange={event => change('name', event.target.value)} /></FormField>
             <FormField id="user-email" label="Correo electrónico" error={submitted && !form.email.trim() ? 'El campo es requerido.' : undefined} isRequired isDisabled={Boolean(editing)}><Input id="user-email" type="email" autoComplete="email" value={form.email} onChange={event => change('email', event.target.value)} /></FormField>
             {!editing && <PasswordField id="user-password" label="Contraseña temporal" value={form.password} onChange={value => change('password', value)} isNew isDisabled={saving} error={submitted && form.password.length < 6 ? 'La contraseña debe tener al menos 6 caracteres.' : undefined} />}
           </SimpleGrid>
-        </FormPanel>
+          <Box mt={4}><ActiveSwitch id="user-active" label="Acceso activo" isChecked={form.active} onChange={checked => change('active', checked)} /></Box>
+        </FormModal>
       )}
 
       <Text mb={5} textAlign="right" color={muted} fontSize="sm">{visible.length} {visible.length === 1 ? 'colaborador' : 'colaboradores'}</Text>

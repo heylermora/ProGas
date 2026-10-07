@@ -1,7 +1,5 @@
 import {
-Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
-AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
-Badge, Box, Button, Center, Flex, HStack, Icon, Image,
+Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Badge, Box, Button, Center, Flex, HStack, Icon, Image,
 Select, SimpleGrid, Stack, Switch, Text, Textarea,
 useColorModeValue, useDisclosure, useToast
 } from '@chakra-ui/react';
@@ -13,10 +11,11 @@ import Form from 'components/form/Form';
 import FormActions from 'components/form/FormActions';
 import FormField from 'components/form/FormField';
 import PageHeader from 'components/layout/PageHeader';
+import DeleteModal from 'components/modal/DeleteModal';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import useCategories from 'hooks/useCategories';
 import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MdAdd, MdDelete, MdDragIndicator, MdEdit, MdSettings, MdStorefront, MdTune, MdVisibility } from 'react-icons/md';
 import { Link as RLink } from 'react-router-dom';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
@@ -35,7 +34,7 @@ export default function SponsorsAdmin() {
   const [pendingDelete, setPendingDelete] = useState<SponsorItem | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const categoryManager = useDisclosure();
-  const cancelRef = useRef<HTMLButtonElement>(null);
+  const [deleting, setDeleting] = useState(false);
   const toast = useToast();
   const textColor = useColorModeValue('navy.700', 'white');
   const muted = useColorModeValue('gray.500', 'gray.400');
@@ -80,7 +79,8 @@ export default function SponsorsAdmin() {
 
   const requestDelete = (sponsor: SponsorItem) => { setPendingDelete(sponsor); onOpen(); };
   const confirmDelete = async () => {
-    if (!pendingDelete) return;
+    if (!pendingDelete || deleting) return;
+    setDeleting(true);
     try {
       await SponsorService.delete(pendingDelete.id);
       toast({ status: 'success', title: 'Patrocinador eliminado' });
@@ -88,6 +88,7 @@ export default function SponsorsAdmin() {
       setPendingDelete(null);
       await load();
     } catch { toast({ status: 'error', title: 'No se pudo eliminar el patrocinador' }); }
+    finally { setDeleting(false); }
   };
 
   const reorderSponsors = async (targetIndex: number, sponsorId = draggedSponsorId) => {
@@ -175,7 +176,8 @@ export default function SponsorsAdmin() {
       </Accordion>
 
       <CategoryManager kind="sponsors" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} isCentered><AlertDialogOverlay><AlertDialogContent><AlertDialogHeader>Eliminar patrocinador</AlertDialogHeader><AlertDialogBody>¿Querés eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</AlertDialogBody><AlertDialogFooter><Button ref={cancelRef} onClick={onClose}>Cancelar</Button><Button colorScheme="red" ml={3} onClick={confirmDelete}>Eliminar</Button></AlertDialogFooter></AlertDialogContent></AlertDialogOverlay></AlertDialog>
+      <DeleteModal title="Eliminar patrocinador" isOpen={isOpen} onClose={onClose} handle={confirmDelete} isLoading={deleting}
+        message={<>¿Querés eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</>} />
     </Box>
   );
 }

@@ -1,29 +1,23 @@
-import React, { useEffect, useState } from 'react';
 import {
-  AspectRatio,
-  Box,
-  Icon,
-  IconButton,
-  Image,
-  Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  SimpleGrid,
-  Stack,
-  Text,
-  Tooltip,
-  useColorModeValue,
+AspectRatio,
+Box,
+Icon,
+IconButton,
+Image,
+Link, SimpleGrid,
+Stack,
+Text,
+Tooltip,
+useColorModeValue
 } from '@chakra-ui/react';
-import { Link as RLink } from 'react-router-dom';
+import AppModal from 'components/modal/AppModal';
+import SponsorItem, { SponsorType } from 'interfaces/SponsorItem';
+import { useEffect, useState } from 'react';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdAddBusiness, MdEmail, MdLink, MdOpenInFull, MdPlayCircleFilled, MdStar } from 'react-icons/md';
-import SponsorService from 'services/SponsorService';
+import { Link as RLink } from 'react-router-dom';
 import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
-import SponsorItem, { SponsorType } from 'interfaces/SponsorItem';
+import SponsorService from 'services/SponsorService';
 
 
 const getVideoEmbedSrc = (value = '') => {
@@ -88,7 +82,7 @@ const makeAvailableSponsor = (type: SponsorType, index: number): DisplaySponsor 
   type,
   category: 'Otros',
   name: 'Disponible',
-  description: 'Reserve este espacio publicitario para que su negocio aparezca aquí.',
+  description: 'Reservá este espacio publicitario para que tu negocio aparezca aquí.',
   isAvailable: true,
   active: true,
   order: index,
@@ -202,7 +196,7 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }: { sponsor: Displ
 
       {hasLinks && (
         <Text textAlign="center" color={muted} fontSize="xs" fontWeight="700" mt="2px">
-          {isOpen ? 'Elija un contacto' : 'Toque el logo para ver contactos'}
+          {isOpen ? 'Elegí un contacto' : 'Tocá el logo para ver contactos'}
         </Text>
       )}
 
@@ -306,18 +300,11 @@ function SponsorVideoFrame({ sponsor, onBack }: { sponsor: DisplaySponsor; onBac
         />
       </Stack>
 
-      <Modal isOpen={isExpanded} onClose={() => setIsExpanded(false)} size="6xl" isCentered>
-        <ModalOverlay bg="blackAlpha.800" />
-        <ModalContent mx={{ base: 3, md: 6 }} bg="gray.900" color="white" borderRadius={{ base: '18px', md: '24px' }} overflow="hidden">
-          <ModalHeader pr="56px" fontSize={{ base: 'md', md: 'lg' }}>{videoTitle}</ModalHeader>
-          <ModalCloseButton top={{ base: '12px', md: '14px' }} right={{ base: '12px', md: '14px' }} />
-          <ModalBody p={{ base: 3, md: 5 }} pt={0}>
-            <AspectRatio ratio={16 / 9} w="100%" borderRadius={{ base: '14px', md: '18px' }} overflow="hidden" bg="black">
+      <AppModal isOpen={isExpanded} onClose={() => setIsExpanded(false)} size="4xl" appearance="media" title={videoTitle}>
+            <AspectRatio ratio={16 / 9} w="100%" maxW="106.667vh" mx="auto" borderRadius={{ base: '14px', md: '18px' }} overflow="hidden" bg="black">
               <SponsorVideoPlayer sponsor={sponsor} />
             </AspectRatio>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      </AppModal>
     </>
   );
 }
