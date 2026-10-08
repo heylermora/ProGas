@@ -9,7 +9,9 @@ Un patrón debe convertirse en componente cuando aparece en más de una pantalla
 | Patrón | Solución compartida | Uso inicial |
 | --- | --- | --- |
 | Encabezado de sección administrativa | `components/layout/PageHeader` | Clientes y colaboradores |
-| Panel de alta/edición | `components/form/FormPanel` | Clientes y colaboradores |
+| Alta/edición breve en modal | `components/modal/FormModal` | Clientes, colaboradores, pagos, categorías e inventario |
+| Contenedor de modal | `components/modal/AppModal` | Todos los diálogos, confirmaciones y videos |
+| Divulgación progresiva / listas | `components/modal/ModalSection`, `ModalList` | Detalles de pago y categorías |
 | Resultado vacío con acción opcional | `components/dataDisplay/EmptyState` | Clientes y colaboradores |
 | Botones | Tema global de Chakra (`theme/components/button.ts`) | Toda la aplicación |
 | Inputs y selects | Tema global de Chakra (`theme/components/input.ts`) | Toda la aplicación |
@@ -53,3 +55,24 @@ Los candidatos de prioridad alta y media ya cuentan con una implementación comp
 - Mantener el contenido y las reglas de negocio en la vista; los componentes compartidos reciben datos, acciones y estados mediante propiedades.
 - Todo componente interactivo nuevo debe tener nombre accesible, foco visible, estado deshabilitado y prueba de su comportamiento principal.
 - Adoptar los componentes gradualmente al tocar cada módulo; evitar una migración masiva que mezcle cambios visuales con cambios de lógica.
+
+## Unificación de modales — 7 de octubre de 2026
+
+`AppModal` centraliza superficie, borde, radios, cierre, foco, bloqueo del fondo y altura máxima dinámica. Solo el cuerpo se desplaza; encabezado y pie permanecen visibles. `FormModal` agrega formulario semántico, validación del flujo mediante callback, guardado y acciones compartidas, sin botones Volver ni formularios anidados.
+
+- Clientes y colaboradores: formularios breves dentro del modal, sin desplazar ni reiniciar el listado.
+- Pagos: resumen de importes, un método expandido a la vez, referencias obligatorias visibles y fecha/nota general plegables. Los errores abren el método o la sección correspondiente.
+- Categorías: lista de cuatro elementos por página en móvil y cinco en escritorio, con edición y eliminación; no hay scroll interno adicional.
+- Copiar información: área de texto de altura acotada y acciones en el pie; no crece con el documento completo.
+- Inventario y confirmaciones: contenido breve, misma base; eliminar da foco inicial a Cancelar.
+- Videos: misma estructura en variante oscura, con tamaño y reproductor limitados al viewport.
+
+Los paneles laterales de navegación (`Drawer`) conservan su patrón porque no son diálogos de contenido o formularios.
+
+## Patrocinadores — 8 de octubre de 2026
+
+Crear y editar reutilizan `SponsorForm` como página con layout administrativo amplio. Mantener un solo flujo de campos, sin una previsualización lateral que reduzca el ancho disponible. Se reutilizan `Form`, `FormField`, una única `Card` y `FormSection` para títulos/divisores sin tarjetas por sección. `SocialNetworkLabel` agrega iconos decorativos y conserva los nombres accesibles. El campo de video permanece visible; `ModalSection` reserva las instrucciones extensas para «Cómo agregar el video». El GPS compacto usa estilo secundario y Maps/Waze comparten fila en escritorio. El orden no se solicita: crear agrega al final de la categoría, editar conserva la posición y cambiar de categoría agrega al final de la nueva; el listado permite reordenar.
+
+`utils/sponsor` define los campos opcionales por red, reconoce contactos históricos y conserva los enlaces adicionales. El contrato mantiene `links` para consumidores anteriores y agrega `socialLinks` por nombre. `SponsorLocation` presenta las señas y enlaces a Maps/Waze tanto en el formulario como en las dos vistas del directorio. `SponsorLocationFields` pide enlaces compartidos de Google Maps/Waze y señas, sin campos de coordenadas. El GPS completa los destinos desde el local. Se conservan coordenadas históricas y se reconoce un destino explícito en Maps; los enlaces cortos se guardan sin inventar un destino de Waze a partir de las señas o del centro del mapa. `DeviceLocationMap` admite mensajes contextuales sin cambiar el flujo de pedidos.
+
+El video se configura mediante enlace compartido de YouTube/Vimeo o archivo público MP4/WebM/OGG. No ofrecer carga directa de nuevos videos a Firestore: su límite documental no sirve para videos habituales. Los videos históricos se conservan y pueden quitarse o reemplazarse. La configuración del espacio disponible se retiró del listado administrativo porque correspondía a `SponsorStrip`, que ya no se monta en el directorio actual; se mantienen servicio y documentos históricos.

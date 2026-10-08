@@ -1,22 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar, Box, Button, Center, Flex, Icon, IconButton,
-  Input, SimpleGrid, Text, Tooltip,
-  useColorModeValue, useToast,
+Avatar, Box, Button, Center, Flex, Icon, IconButton,
+Input, SimpleGrid, Text, Tooltip,
+useColorModeValue, useToast
 } from '@chakra-ui/react';
-import { MdAdd, MdBadge, MdEdit, MdLocationOn, MdPeople, MdPhone } from 'react-icons/md';
 import Card from 'components/card/Card';
-import ClientItem from 'interfaces/ClientItem';
-import ClientService from 'services/ClientService';
-import { usePageSearch } from 'contexts/PageSearchContext';
-import PageHeader from 'components/layout/PageHeader';
-import FormPanel from 'components/form/FormPanel';
-import EmptyState from 'components/dataDisplay/EmptyState';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import EmptyState from 'components/dataDisplay/EmptyState';
 import StatusBadge from 'components/dataDisplay/StatusBadge';
 import ActiveSwitch from 'components/form/ActiveSwitch';
-import FormActions from 'components/form/FormActions';
 import FormField from 'components/form/FormField';
+import PageHeader from 'components/layout/PageHeader';
+import FormModal from 'components/modal/FormModal';
+import { usePageSearch } from 'contexts/PageSearchContext';
+import ClientItem from 'interfaces/ClientItem';
+import { useEffect, useMemo, useState } from 'react';
+import { MdAdd, MdBadge, MdEdit, MdLocationOn, MdPeople, MdPhone } from 'react-icons/md';
+import ClientService from 'services/ClientService';
 
 const EMPTY_CLIENT: Omit<ClientItem, 'id'> = {
   nationalId: '', name: '', nickname: '', phone: '', active: true,
@@ -38,6 +37,7 @@ export default function Clients() {
   const [form, setForm] = useState<Omit<ClientItem, 'id'>>(EMPTY_CLIENT);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -58,9 +58,10 @@ export default function Clients() {
 
   const activeClients = clients.filter(client => client.active !== false).length;
   const change = (name: keyof typeof form, value: any) => setForm(current => ({ ...current, [name]: value }));
-  const closeForm = () => { setEditing(null); setForm(EMPTY_CLIENT); setShowForm(false); };
-  const create = () => { setEditing(null); setForm(EMPTY_CLIENT); setShowForm(true); };
+  const closeForm = () => { setSubmitted(false); setEditing(null); setForm(EMPTY_CLIENT); setShowForm(false); };
+  const create = () => { setSubmitted(false); setEditing(null); setForm(EMPTY_CLIENT); setShowForm(true); };
   const edit = (client: ClientItem) => {
+    setSubmitted(false);
     setEditing(client);
     setForm({
       nationalId: client.nationalId || '',
@@ -71,12 +72,13 @@ export default function Clients() {
       ...(client.address ? { address: client.address } : {}),
     });
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const save = async () => {
+    if (saving) return;
+    setSubmitted(true);
     if (!form.nationalId.trim() || !form.name.trim() || !form.phone.trim()) {
-      toast({ status: 'warning', title: 'Complete la cédula, el nombre y el teléfono' });
+      toast({ status: 'warning', title: 'Completá la cédula, el nombre y el teléfono' });
       return;
     }
     setSaving(true);
@@ -100,7 +102,7 @@ export default function Clients() {
     <Box w="100%" pt={{ base: '110px', md: '80px' }} pb={8}>
       <PageHeader
         title="Clientes"
-        description="Gestione la información y disponibilidad de sus clientes."
+        description="Gestioná la información y disponibilidad de tus clientes."
         action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={create}>Nuevo cliente</Button>}
       />
 
@@ -116,19 +118,15 @@ export default function Clients() {
       </SimpleGrid>
 
       {showForm && (
-        <FormPanel title={editing ? 'Editar cliente' : 'Registrar cliente'} description="Los campos marcados son obligatorios." onClose={closeForm} footer={
-          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <ActiveSwitch id="client-active" label="Cliente activo" isChecked={form.active !== false} onChange={checked => change('active', checked)} />
-            <FormActions onCancel={closeForm} onSubmit={save} isLoading={saving} submitLabel={editing ? 'Guardar cambios' : 'Crear cliente'} />
-          </Flex>
-        }>
-          <SimpleGrid columns={{ base: 1, md: 2, xl: 4 }} spacing={4}>
-            <FormField id="client-national-id" label="Cédula" isRequired><Input id="client-national-id" placeholder="Ej. 1-2345-6789" value={form.nationalId} onChange={e => change('nationalId', e.target.value)} /></FormField>
-            <FormField id="client-name" label="Nombre completo" isRequired><Input id="client-name" placeholder="Nombre y apellidos" value={form.name} onChange={e => change('name', e.target.value)} /></FormField>
-            <FormField id="client-nickname" label="Apodo"><Input id="client-nickname" placeholder="Opcional" value={form.nickname || ''} onChange={e => change('nickname', e.target.value)} /></FormField>
-            <FormField id="client-phone" label="Teléfono" isRequired><Input id="client-phone" type="tel" placeholder="Ej. 8888-8888" value={form.phone} onChange={e => change('phone', e.target.value)} /></FormField>
+        <FormModal isOpen={showForm} isSubmitting={saving} onSubmit={save} title={editing ? 'Editar cliente' : 'Registrar cliente'} description="Identificación y contacto del cliente." onClose={closeForm} submitLabel={editing ? 'Guardar cambios' : 'Crear cliente'}>
+          <SimpleGrid columns={2} spacing={4}>
+            <FormField gridColumn={{ base: 'span 2', md: 'auto' }} id="client-name" label="Nombre completo" error={submitted && !form.name.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-name" placeholder="Nombre y apellidos" value={form.name} onChange={e => change('name', e.target.value)} /></FormField>
+            <FormField id="client-national-id" label="Cédula" error={submitted && !form.nationalId.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-national-id" placeholder="Ej. 101110111" value={form.nationalId} onChange={e => change('nationalId', e.target.value)} /></FormField>
+            <FormField id="client-phone" label="Teléfono" error={submitted && !form.phone.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="client-phone" type="tel" placeholder="8888-8888" value={form.phone} onChange={e => change('phone', e.target.value)} /></FormField>
+            <FormField gridColumn={{ base: 'span 2', md: 'auto' }} id="client-nickname" label="Apodo"><Input id="client-nickname" placeholder="Opcional" value={form.nickname || ''} onChange={e => change('nickname', e.target.value)} /></FormField>
           </SimpleGrid>
-        </FormPanel>
+          <Box mt={4}><ActiveSwitch id="client-active" label="Cliente activo" isChecked={form.active !== false} onChange={checked => change('active', checked)} /></Box>
+        </FormModal>
       )}
 
       <Text mb={5} textAlign="right" color={mutedColor} fontSize="sm">{visible.length} {visible.length === 1 ? 'resultado' : 'resultados'}</Text>
@@ -136,7 +134,7 @@ export default function Clients() {
       {loading ? (
         <AsyncContent isLoading loadingLabel="Cargando clientes" />
       ) : visible.length === 0 ? (
-        <EmptyState icon={MdPeople} title={query ? 'No encontramos clientes' : 'Aún no hay clientes'} description={query ? 'Pruebe con otro nombre, cédula o teléfono.' : 'Cree el primer cliente para comenzar.'} actionLabel={!query ? 'Nuevo cliente' : undefined} actionIcon={<MdAdd />} onAction={!query ? create : undefined} />
+        <EmptyState icon={MdPeople} title={query ? 'No encontramos clientes' : 'Aún no hay clientes'} description={query ? 'Probá con otro nombre, cédula o teléfono.' : 'Creá el primer cliente para comenzar.'} actionLabel={!query ? 'Nuevo cliente' : undefined} actionIcon={<MdAdd />} onAction={!query ? create : undefined} />
       ) : (
         <SimpleGrid columns={{ base: 1, lg: 2, '2xl': 3 }} spacing={4}>
           {visible.map(client => {

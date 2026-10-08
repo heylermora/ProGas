@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
@@ -19,10 +19,10 @@ const businesses: SponsorItem[] = [
   { id: '3', name: 'Negocio oculto', category: 'Otros', active: false, order: 3, logoUrl: '', links: [] },
 ];
 
-const renderPreview = (embedded = false) => render(
+const renderPreview = () => render(
   <ChakraProvider>
     <MemoryRouter>
-      <MallPreview embedded={embedded} />
+      <MallPreview />
     </MemoryRouter>
   </ChakraProvider>
 );
@@ -43,6 +43,27 @@ describe('MallPreview', () => {
     (SponsorService.getAll as jest.Mock).mockResolvedValue(businesses);
   });
 
+  it('announces loading without showing an empty directory', async () => {
+    (SponsorService.getAll as jest.Mock).mockResolvedValueOnce([]);
+    const view = renderPreview();
+    expect(screen.getByRole('status').textContent).toContain('Cargando negocios');
+    expect(screen.queryByText('Aún no hay negocios publicados.')).toBeNull();
+    await screen.findByText('Aún no hay negocios publicados.');
+    expect(screen.getAllByText('Aún no hay negocios publicados.')).toHaveLength(1);
+    view.unmount();
+  });
+
+  it('distinguishes a failed request and allows retrying', async () => {
+    (SponsorService.getAll as jest.Mock).mockRejectedValueOnce(new Error('Permission denied')).mockResolvedValueOnce([]);
+    renderPreview();
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(screen.queryByText('Aún no hay negocios publicados.')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    await screen.findByText('Aún no hay negocios publicados.');
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
+    expect(screen.getAllByText('Aún no hay negocios publicados.')).toHaveLength(1);
+  });
+
   it('shows all active businesses without category filters and links to the mall', async () => {
     renderPreview();
 
@@ -53,16 +74,6 @@ describe('MallPreview', () => {
     expect(screen.queryByRole('button', { name: 'Cafeterías' })).toBeNull();
     expect(screen.queryByRole('button', { name: /ver negocios anteriores/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /ver más negocios/i })).toBeNull();
-  });
-
-  it('embeds the carousel without a second hero heading or duplicate call to action', async () => {
-    renderPreview(true);
-    await screen.findAllByRole('button', { name: /ver contactos de café central/i });
-    expect(screen.queryByRole('heading', { name: /negocios de acosta/i })).toBeNull();
-    expect(screen.queryByRole('link', { name: /ver negocios de acosta/i })).toBeNull();
-    expect(screen.getByText(/seleccione un negocio para ver sus contactos/i)).toBeTruthy();
-    fireEvent.click(screen.getAllByRole('button', { name: /ver contactos de café central/i })[0]);
-    expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
   });
 
   it('opens contact bubbles in place and pauses the carousel', async () => {

@@ -1,29 +1,26 @@
-import React, { useState } from 'react';
 import {
-  Alert,
-  AlertIcon,
-  Badge,
-  Box,
-  Button,
-  Divider,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Heading,
-  Input,
-  Stack,
-  Text,
-  useColorModeValue,
+Alert,
+AlertIcon,
+Badge,
+Box,
+Button,
+Divider,
+Flex, Heading,
+Input,
+Stack,
+Text,
+useColorModeValue
 } from '@chakra-ui/react';
-import { MdCheckCircle, MdContentCopy, MdLocalShipping, MdPayment, MdSchedule, MdSearch, MdShoppingBag } from 'react-icons/md';
-import { FaWhatsapp } from 'react-icons/fa';
-import orderService from 'services/OrderService';
-import { PublicCard, PublicPage } from './PublicPage';
-import MallPreview from './MallPreview';
-import type { OrderItem } from 'interfaces/OrderItem';
-import { getPublicOrderStatus } from 'utils/order';
 import Form from 'components/form/Form';
+import FormField from 'components/form/FormField';
+import type { OrderItem } from 'interfaces/OrderItem';
+import React, { useState } from 'react';
+import { FaWhatsapp } from 'react-icons/fa';
+import { MdCheckCircle, MdContentCopy, MdLocalShipping, MdPayment, MdSchedule, MdShoppingBag } from 'react-icons/md';
+import orderService from 'services/OrderService';
+import { getPublicOrderStatus } from 'utils/order';
+import MallPreview from './MallPreview';
+import { PublicCard, PublicPage } from './PublicPage';
 
 const statusColor = (status = '') => {
   if (status === 'Entregado' || status === 'Pagado') return 'green';
@@ -46,11 +43,11 @@ const STATUS_ICON = {
   Pagado: MdPayment,
 };
 const STATUS_DESCRIPTION: Record<string, string> = {
-  Pendiente: 'Recibimos su solicitud y estamos preparando el pedido.',
-  'En ruta': 'Su pedido salió y va camino a la ubicación indicada.',
+  Pendiente: 'Recibimos tu solicitud y estamos preparando el pedido.',
+  'En ruta': 'Tu pedido salió y va camino a la ubicación indicada.',
   Entregado: 'El pedido fue entregado; queda confirmar el pago.',
   Pagado: 'El pago fue registrado correctamente.',
-  Cancelado: 'Este pedido fue cancelado. Escríbanos si necesita ayuda.',
+  Cancelado: 'Este pedido fue cancelado. Escribinos si necesitás ayuda.',
 };
 
 export default function ViewOrder() {
@@ -66,7 +63,7 @@ export default function ViewOrder() {
     event?.preventDefault();
     const term = search.trim().toUpperCase();
     if (!term) {
-      setMessage('Ingrese el código que recibió al confirmar el pedido.');
+      setMessage('Ingresá el código que recibiste al confirmar el pedido.');
       return;
     }
 
@@ -78,33 +75,30 @@ export default function ViewOrder() {
       const results = await orderService.getByCode(term);
       setOrders(results || []);
     } catch {
-      setMessage('No pudimos consultar los pedidos en este momento. Revise su conexión e intente de nuevo.');
+      setMessage('No pudimos consultar los pedidos en este momento. Revisá tu conexión e intentá de nuevo.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <PublicPage title="Consulte su pedido" description="Revise el estado y el resumen de su compra con el código entregado al confirmar." maxW="760px">
+    <PublicPage title="Consultá tu pedido" description="Revisá el estado y el resumen de tu compra con el código entregado al confirmar." maxW="760px">
       <PublicCard>
         <Stack spacing="20px">
           <Box>
-            <Heading fontSize={{ base: 'xl', md: '2xl' }}>Busque su pedido</Heading>
+            <Heading fontSize={{ base: 'xl', md: '2xl' }}>Buscá tu pedido</Heading>
             <Text mt="5px" color="gray.500" fontSize="sm">El código tiene 12 caracteres y aparece al finalizar el pedido.</Text>
           </Box>
-          <Form onFormSubmit={handleSearch}>
-            <FormControl isRequired>
-              <FormLabel>Código de pedido</FormLabel>
-              <Flex gap="10px" direction={{ base: 'column', sm: 'row' }}>
-                <Input value={search} onChange={(event) => setSearch(event.target.value.toUpperCase())} placeholder="Ej. AB12CD34EF56" autoComplete="off" maxLength={12} />
-                <Button type="submit" colorScheme="brand" leftIcon={<MdSearch />} isLoading={isLoading} loadingText="Buscando" flexShrink={0}>Consultar</Button>
-              </Flex>
-              <FormHelperText>No necesita iniciar sesión.</FormHelperText>
-            </FormControl>
+          <Form onFormSubmit={handleSearch} submitLabel="Consultar" isSubmitting={isLoading} loadingLabel="Buscando">
+            <FormField isRequired label={<>Código de pedido</>} help={<> No necesitás iniciar sesión. </>}>
+
+              <Input value={search} onChange={(event) => setSearch(event.target.value.toUpperCase())} placeholder="Ej. AB12CD34EF56" autoComplete="off" maxLength={12} />
+
+            </FormField>
           </Form>
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
           {!isLoading && hasSearched && !message && !orders.length && (
-            <Alert status="info" borderRadius="12px"><AlertIcon />No encontramos pedidos con ese dato. Verifique que esté escrito correctamente.</Alert>
+            <Alert status="info" borderRadius="12px"><AlertIcon />No encontramos pedidos con ese dato. Verificá que esté escrito correctamente.</Alert>
           )}
           {orders.map((order) => (
             <Box key={order.id} border="1px solid" borderColor={borderColor} bg={cardBg} borderRadius="18px" p={{ base: '14px', md: '18px' }}>
@@ -117,7 +111,7 @@ export default function ViewOrder() {
                 <Box p={{ base: 4, md: 5 }} bg="white" borderRadius="2xl" borderWidth="1px" borderColor={borderColor}>
                   <Flex justify="space-between" gap={1} mb={5}>{TRACKED_STATUSES.map((step, index) => { const StepIcon = STATUS_ICON[step]; const reached = currentStatus !== 'Cancelado' && index <= currentIndex; const active = index === currentIndex; return <Flex key={step} flex="1" align="flex-start"><Stack spacing="5px" align="center" minW={{ base: '42px', md: '64px' }}><Flex boxSize={active ? '38px' : '32px'} borderRadius="full" bg={reached ? 'brand.500' : 'gray.100'} color={reached ? 'white' : 'gray.400'} align="center" justify="center" boxShadow={active ? '0 0 0 5px rgba(66, 42, 255, .14)' : undefined}><StepIcon size={active ? 21 : 18} /></Flex><Text fontSize="xs" fontWeight={active ? '900' : '700'} color={active ? 'brand.600' : 'gray.500'} textAlign="center">{step}</Text></Stack><Box h="3px" flex="1" mt={active ? '18px' : '15px'} bg={currentStatus !== 'Cancelado' && index < currentIndex ? 'brand.500' : 'gray.200'} display={index === TRACKED_STATUSES.length - 1 ? 'none' : 'block'} /></Flex>; })}</Flex>
                   <Badge display="inline-flex" alignItems="center" gap="6px" colorScheme={statusColor(currentStatus)} borderRadius="full" px="12px" py="6px"><CurrentStatusIcon />{currentStatus}</Badge>
-                  <Heading fontSize={{ base: 'lg', md: 'xl' }} mt={3}>{currentStatus === 'Cancelado' ? 'Pedido cancelado' : `Su pedido está ${currentStatus.toLocaleLowerCase('es')}`}</Heading>
+                  <Heading fontSize={{ base: 'lg', md: 'xl' }} mt={3}>{currentStatus === 'Cancelado' ? 'Pedido cancelado' : `Tu pedido está ${currentStatus.toLocaleLowerCase('es')}`}</Heading>
                   <Text color="gray.600" mt={2}>{STATUS_DESCRIPTION[currentStatus]}</Text>
                 </Box>
                 <Text color="gray.500" fontSize="sm">Solicitado: {formatDate(order.requestDate)}</Text>

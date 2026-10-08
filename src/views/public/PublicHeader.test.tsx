@@ -14,14 +14,14 @@ const renderHeader = (path: string, state?: Record<string, string>) => {
 describe('PublicHeader', () => {
   it('returns to the previous order step without adding another history entry', () => {
     const view = renderHeader('/customer/info');
-    fireEvent.click(screen.getByRole('button', { name: /volver a verificación/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
     expect(view.location.pathname).toBe('/customer/data');
     expect(view.length).toBe(1);
   });
 
   it('uses the origin supplied by the mall preview', () => {
     const view = renderHeader('/mall', { from: '/customer/products', fromLabel: 'Volver al pedido' });
-    fireEvent.click(screen.getByRole('button', { name: /volver al pedido/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
     expect(view.location.pathname).toBe('/customer/products');
   });
 });

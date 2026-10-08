@@ -10,6 +10,7 @@ import { switchStyles } from './components/switch';
 import { linkStyles } from './components/link';
 import { breakpoints } from './foundations/breakpoints';
 import { globalStyles } from './styles';
+import { unifiedFormControls } from './components/formControls';
 import { formStyles } from './components/form';
 
 export default extendTheme(
@@ -24,7 +25,8 @@ export default extendTheme(
 	formStyles, // labels, helper text and accordion styles
 	textareaStyles, // textarea styles
 	switchStyles, // switch styles
-	CardComponent // card component
+	CardComponent, // card component
+  unifiedFormControls
 );
 
 export interface CustomCardProps extends HTMLChakraProps<'div'>, ThemingProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 import theme from 'theme/theme';
@@ -39,19 +39,47 @@ describe('Home', () => {
     expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
-  it('opens and closes the social logo hub with accessible state', () => {
+  it('invites business owners in the main card footer with a prepared Gas Memo message', () => {
     renderHome();
+    const community = screen.getByRole('region', { name: /lo que busca, en acosta/i });
+    const footer = within(community).getByRole('group', { name: 'Promocione su negocio' });
+    const promotion = within(footer);
+    expect(promotion.getByRole('heading', { name: /su negocio también puede estar aquí/i })).toBeTruthy();
+    expect(screen.queryByText(/ejemplo ilustrativo/i)).toBeNull();
+    expect(promotion.queryByRole('figure')).toBeNull();
+    const cta = promotion.getByRole('link', { name: /quiero promocionar mi negocio/i });
+    const url = new URL(cta.getAttribute('href')!);
+    expect(url.origin).toBe('https://wa.me');
+    expect(url.pathname).toBe('/50683978524');
+    expect(url.searchParams.get('text')).toBe('Hola, Gas Memo. Tengo un negocio en Acosta y quiero promocionarlo en su directorio. ¿Me pueden compartir qué incluye la publicación, los costos y cómo participar?');
+    expect(cta.getAttribute('rel')).toContain('noopener');
+    expect(promotion.queryByRole('link', { name: /su contacto directo/i })).toBeNull();
+  });
 
-    const toggle = screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i });
-    const facebook = screen.getByLabelText('Facebook');
-
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(facebook.getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
-
-    fireEvent.click(toggle);
-
-    expect(screen.getByRole('button', { name: /ocultar redes sociales de gas memo/i }).getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByLabelText('Facebook').getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
+  it('always shows social links for Gas Memo and the band without a toggle', () => {
+    renderHome();
+    const gas = within(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' }));
+    const band = within(screen.getByRole('group', { name: 'Redes sociales de Banda Municipal de Acosta' }));
+    expect(gas.getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
+    for (const name of ['Facebook', 'Instagram', 'WhatsApp', 'TikTok', 'Correo']) {
+      expect(gas.getByRole('link', { name }).style.visibility).not.toBe('hidden');
+    }
+    const bandUrls = {
+      Facebook: 'https://www.facebook.com/BandaMunicipaldeAcosta/',
+      Instagram: 'https://www.instagram.com/bandamunicipaldeacosta',
+      TikTok: 'https://www.tiktok.com/@bandamunicipaldeacosta',
+      WhatsApp: 'https://wa.me/50662787984',
+      Correo: 'mailto:bandamunicipalacostacr@gmail.com',
+    };
+    Object.entries(bandUrls).forEach(([name, href]) => {
+      expect(band.getByRole('link', { name }).getAttribute('href')).toBe(href);
+    });
+    expect(screen.getByRole('link', { name: /quiero apoyar/i }).getAttribute('href')).toContain('phone=50662787984');
+    expect(screen.queryByText('6278-7984')).toBeNull();
+    expect(screen.getByText('Coordine su aporte por WhatsApp.')).toBeTruthy();
+    expect(screen.getByRole('region', { name: /apoye a nuestra banda municipal/i })).toBeTruthy();
+    expect(screen.queryByText('Seleccione el logo para ver las redes.')).toBeNull();
+    expect(screen.queryByRole('button', { name: /mostrar redes sociales/i })).toBeNull();
   });
 
   it('keeps community navigation available on mobile and desktop viewport widths', () => {
@@ -67,6 +95,6 @@ describe('Home', () => {
 
     expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /mostrar redes sociales de gas memo/i })).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' })).toBeTruthy();
   });
 });

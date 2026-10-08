@@ -1,23 +1,15 @@
-import { FormEventHandler, ReactNode, useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  BoxProps,
-  Button,
-  Center,
-  Text,
-  useColorModeValue,
-  Heading,
-  Flex,
-  SimpleGrid,
-  Stack,
+Box,
+BoxProps
 } from '@chakra-ui/react';
+import { FormEventHandler, ReactNode, useCallback, useEffect, useState } from 'react';
 
+import FormPageHeader from 'components/layout/FormPageHeader';
 import { HSeparator } from 'components/separator/Separator';
 import FormField from 'interfaces/FormField';
 import { formatValue } from 'utils/formatValue';
 import FieldInput from './FieldInput';
-import BackButton from 'components/button/BackButton';
-import FormPageHeader from 'components/layout/FormPageHeader';
+import FormActions from './FormActions';
 
 type Props = {
   title?: string;
@@ -39,8 +31,6 @@ type Props = {
 } & Omit<BoxProps, 'title' | 'onSubmit' | 'children'>;
 
 const Form = ({ title = '', button, fields = [], isDisabled, back, onSubmit, children, onFormSubmit, description, status, backLabel, onBack, submitLabel, loadingLabel = 'Guardando', isSubmitting, footerMessage, ...containerProps }: Props) => {
-  const textColor = useColorModeValue('navy.700', 'white');
-  const textColorSecondary = 'gray.400';
 
   const buildInitialValues = useCallback(() => {
     return fields.reduce((acc, field) => {
@@ -88,7 +78,7 @@ const Form = ({ title = '', button, fields = [], isDisabled, back, onSubmit, chi
     const field = fields.find(f => f.name === fieldName);
     if (!field?.validation) return { isError: false, message: '' };
 
-    const stringValue = typeof value === 'string' ? value.trim() : '';
+    const stringValue = value == null ? '' : String(value).trim();
     const { required, maxLength, regex } = field.validation;
 
     const isError =
@@ -161,71 +151,18 @@ const Form = ({ title = '', button, fields = [], isDisabled, back, onSubmit, chi
       />
     ));
 
-  if (children) {
-    return <Box
-      as="form"
-      me="auto"
-      w="100%"
-      maxW="100%"
-      onSubmit={onFormSubmit}
-      {...containerProps}
-    >
-      {title && onBack && <FormPageHeader title={title} description={description} status={status} onBack={onBack} backLabel={backLabel} />}
-      {title && !onBack && <Stack spacing="4px" mb="24px"><Heading color={textColor} fontSize={{ base: '26px', md: '34px' }}>{title}</Heading>{description && <Text color={textColorSecondary}>{description}</Text>}</Stack>}
-      {children}
-      {submitLabel && <Flex mt="24px" p={{ base: 3, md: 4 }} bg="white" borderWidth="1px" borderColor="gray.200" borderRadius="2xl" boxShadow="lg" position="sticky" bottom="12px" zIndex={5} justify="space-between" align={{ base: 'stretch', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap="10px">
-        {footerMessage && <Text color="gray.600" fontSize="sm">{footerMessage}</Text>}
-        <Flex gap="8px" justify="flex-end"><Button type="button" variant="ghost" onClick={onBack} isDisabled={isSubmitting}>Cancelar</Button><Button type="submit" colorScheme="brand" size="lg" px={{ base: '18px', md: '28px' }} isLoading={isSubmitting} loadingText={loadingLabel} whiteSpace="nowrap">{submitLabel}</Button></Flex>
-      </Flex>}
-    </Box>;
-  }
+  const header = title ? <>
+    <FormPageHeader title={title} description={description || (fields.length ? 'Los campos marcados con * son obligatorios.' : undefined)} status={status} onBack={onBack} back={back} />
+    <HSeparator mb={6} />
+  </> : null;
 
-  return (
-    <Box me="auto" w="100%" maxW="100%" {...containerProps}>
-      <Heading color={textColor} fontSize={{ base: '26px', md: '34px' }} lineHeight="1.12" mb="10px" sx={{ letterSpacing: '-0.72px' }}>
-        {title}
-      </Heading>
-
-      {!title.includes('Detalles') && (
-        <Text mb={{ base: "24px", md: "34px" }} ms="4px" color={textColorSecondary} fontWeight="400" fontSize="md">
-          ¡Ingrese todos los datos requeridos!
-        </Text>
-      )}
-
-      <Flex align="center" mb={{ base: "22px", md: "28px" }}>
-        <HSeparator />
-      </Flex>
-
-      {!title.includes('Detalles') && !title.includes('Planilla') ? (
-        renderFields()
-      ) : (
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 3, md: 5 }}>
-          {renderFields()}
-        </SimpleGrid>
-      )}
-
-      {button && (
-        <>
-          <Button
-            fontSize="sm"
-            variant="brand"
-            fontWeight="500"
-            w="100%"
-            h="52px"
-            mt="24px"
-            mb="12px"
-            onClick={handleSubmit}
-          >
-            {button}
-          </Button>
-
-          {back && (
-            <Center mt="6px"><BackButton to={back}>Volver</BackButton></Center>
-          )}
-        </>
-      )}
-    </Box>
-  );
+  return <Box as="form" me="auto" w="100%" maxW="100%" noValidate aria-label={title || undefined}
+    onSubmit={event => { event.preventDefault(); if (isSubmitting || isDisabled) return; if (children) onFormSubmit?.(event); else handleSubmit(); }} {...containerProps}>
+    {header}
+    {children || renderFields()}
+    {(submitLabel || button) && <FormActions submitLabel={submitLabel || button} isLoading={isSubmitting}
+      isDisabled={isDisabled} loadingLabel={loadingLabel} message={footerMessage} />}
+  </Box>;
 };
 
 export default Form;

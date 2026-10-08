@@ -1,131 +1,33 @@
+import { Box, Input, Select, Text } from '@chakra-ui/react';
+import type FieldDefinition from 'interfaces/FormField';
 import React from 'react';
-import {
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  FormErrorMessage,
-  FormHelperText,
-  Text,
-  useColorModeValue,
-} from '@chakra-ui/react';
-
-import FormField from 'interfaces/FormField';
-import ItemsFieldControl from './ItemsFieldControl';
 import DeliveryAddressField from './DeliveryAddressField';
+import FormField from './FormField';
+import ItemsFieldControl from './ItemsFieldControl';
 
-type FieldInputProps = {
-  field: FormField;
+type Props = {
+  field: FieldDefinition;
   fieldValues: { [key: string]: any };
   isDisabled?: boolean;
-  handleInputChange: (fieldName: string, value: any, type: string) => void;
+  handleInputChange: (name: string, value: any, type: string) => void;
   fieldErrors: { [key: string]: { isError: boolean; message: string } };
 };
-
-const FieldInput = ({
-  field,
-  fieldValues,
-  isDisabled = false,
-  handleInputChange,
-  fieldErrors,
-}: FieldInputProps) => {
-  const textColor = useColorModeValue('navy.700', 'white');
-  const brandStars = useColorModeValue('brand.500', 'brand.400');
-
-  const errorInfo = fieldErrors[field.name] || { isError: false, message: '' };
-  const isInvalid = errorInfo.isError;
-
-  const handleChange =
-    (type: string) =>
-    (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-      >
-    ) => {
-      handleInputChange(field.name, e.target.value, type);
-    };
-
-  const renderInput = () => {
-    switch (field.type) {
-      case 'select':
-        return (
-          <Select
-            isRequired
-            variant="auth"
-            fontSize="sm"
-            ms={{ base: '0px', md: '0px' }}
-            size="md"
-            h="46px"
-            value={fieldValues[field.name] ?? ''}
-            onChange={handleChange(field.type)}
-          >
-            {(Array.isArray(field.value) ? field.value : []).map(
-              (option: any) => (
-                <option key={String(option)} value={option}>
-                  {String(option)}
-                </option>
-              ),
-            )}
-          </Select>
-        );
-
-      case 'items':
-        return <ItemsFieldControl {...field.value} />;
-
-      case 'location':
-        return <DeliveryAddressField value={fieldValues[field.name]} onChange={value => handleInputChange(field.name, value, field.type)} />;
-
-      default:
-        return (
-          <Input
-            isRequired
-            isDisabled={field.isDisabled ?? false}
-            variant="auth"
-            fontSize="sm"
-            ms={{ base: '0px', md: '0px' }}
-            type={field.type}
-            fontWeight="500"
-            size="md"
-            h="46px"
-            value={fieldValues[field.name] ?? ''}
-            onChange={handleChange(field.type)}
-          />
-        );
-    }
-  };
-
-  return (
-    <FormControl isDisabled={isDisabled} isInvalid={isInvalid} mb={{ base: "14px", md: "18px" }}>
-      <FormLabel
-        display="flex"
-        ms="4px"
-        fontSize="sm"
-        fontWeight="700"
-        color={textColor}
-        mt="0px"
-        mb="8px"
-      >
-        {field.label}
-        {field.validation?.required && (
-          <Text as="span" color={brandStars} ml="2px">
-            *
-          </Text>
-        )}
-      </FormLabel>
-
-      {field.helper !== undefined && (
-        <FormHelperText ml="4px" mt="0px" pb="10px" color="secondaryGray.600">
-          {field.helper}
-        </FormHelperText>
-      )}
-
-      {renderInput()}
-
-      <FormErrorMessage ml="4px" fontWeight="600">
-        {errorInfo.message}
-      </FormErrorMessage>
-    </FormControl>
-  );
-};
-
-export default FieldInput;
+export default function FieldInput({ field, fieldValues, isDisabled, handleInputChange, fieldErrors }: Props) {
+  const id = `order-${field.name}`;
+  const error = fieldErrors[field.name];
+  const change = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => handleInputChange(field.name, event.target.value, field.type);
+  const disabled = Boolean(isDisabled || field.isDisabled);
+  const required = Boolean(field.validation?.required);
+  if (field.type === 'items' || field.type === 'location') return <Box as="fieldset" border="0" p={0} m={0} mb={4} minW="0">
+    <Text as="legend" fontSize="sm" fontWeight="700" mb={2}>{field.label}</Text>
+    {field.type === 'items' ? <ItemsFieldControl {...field.value} /> : <DeliveryAddressField value={fieldValues[field.name]} onChange={value => handleInputChange(field.name, value, field.type)} />}
+    {field.helper && <Text fontSize="sm" color="gray.500" mt={2}>{field.helper}</Text>}
+  </Box>;
+  return <FormField id={id} label={field.label} help={field.helper} error={error?.isError ? error.message : undefined}
+    isRequired={required} isDisabled={disabled} mb={4}>
+    {field.type === 'select' ? <Select id={id} value={fieldValues[field.name] ?? ''} onChange={change}>
+        {(Array.isArray(field.value) ? field.value : []).map(option => <option key={String(option)} value={option}>{String(option)}</option>)}
+      </Select> : <Input id={id} type={field.type === 'money' ? 'text' : field.type} inputMode={field.type === 'money' ? 'decimal' : undefined}
+        value={fieldValues[field.name] ?? ''} onChange={change} />}
+  </FormField>;
+}

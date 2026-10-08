@@ -1,25 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Badge, Box, Button, Flex, HStack, Icon, IconButton,
-  Input, Menu, MenuButton, MenuItem, MenuList, Modal,
-  ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay,
-  Select, SimpleGrid, Table, Tbody, Td,
-  Text, Th, Thead, Tr, useColorModeValue, useDisclosure, useToast,
+Badge, Box, Button, Flex, HStack, Icon, IconButton,
+Input, Menu, MenuButton, MenuItem, MenuList, Select, SimpleGrid, Table, Tbody, Td,
+Text, Th, Thead, Tr, useColorModeValue, useDisclosure, useToast
 } from '@chakra-ui/react';
-import { Link as RouterLink } from 'react-router-dom';
-import { MdAdd, MdArrowDownward, MdArrowUpward, MdEdit, MdInventory2, MdMoreVert, MdSettings, MdWarning } from 'react-icons/md';
 import Card from 'components/card/Card';
-import productService from 'services/ProductService';
-import { Product } from 'interfaces/ProductItem';
-import { usePageSearch } from 'contexts/PageSearchContext';
-import useCategories from 'hooks/useCategories';
 import CategoryManager from 'components/category/CategoryManager';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import EmptyState from 'components/dataDisplay/EmptyState';
 import FilterPanel from 'components/dataDisplay/FilterPanel';
 import StatCard from 'components/dataDisplay/StatCard';
 import ActiveSwitch from 'components/form/ActiveSwitch';
-import EmptyState from 'components/dataDisplay/EmptyState';
+import FormField from 'components/form/FormField';
 import PageHeader from 'components/layout/PageHeader';
+import FormModal from 'components/modal/FormModal';
+import { usePageSearch } from 'contexts/PageSearchContext';
+import useCategories from 'hooks/useCategories';
+import { Product } from 'interfaces/ProductItem';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { MdAdd, MdArrowDownward, MdArrowUpward, MdEdit, MdInventory2, MdMoreVert, MdSettings, MdWarning } from 'react-icons/md';
+import { Link as RouterLink } from 'react-router-dom';
+import productService from 'services/ProductService';
 
 const money = (value: number) => new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 }).format(value || 0);
 
@@ -120,7 +120,15 @@ export default function Products() {
         <Flex p="16px 20px" borderTopWidth="1px" borderColor={border} justify="space-between"><Text fontSize="sm" color={muted}>Mostrando {filtered.length} de {normalized.length} productos</Text></Flex>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered><ModalOverlay /><ModalContent><ModalHeader>Ajustar inventario</ModalHeader><ModalCloseButton /><ModalBody><Text fontWeight="700" color={text}>{adjusting?.description}</Text><Text color={muted} fontSize="sm" mb="20px">Existencia actual: {adjusting?.stock || 0} unidades</Text><Text fontSize="sm" fontWeight="600" mb="8px">Cantidad del ajuste</Text><Input type="number" step="1" value={adjustment} onChange={e => setAdjustment(Number(e.target.value))} /><HStack mt="12px" spacing="8px"><Button size="sm" leftIcon={<MdArrowUpward />} onClick={() => setAdjustment(Math.abs(Math.trunc(adjustment) || 1))}>Entrada</Button><Button size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(Math.trunc(adjustment) || 1))}>Salida</Button></HStack><Text fontSize="sm" color={Number(adjusting?.stock || 0) + adjustment < 0 ? 'red.500' : muted} mt="16px">Nuevo total: <b>{Number(adjusting?.stock || 0) + adjustment} unidades</b></Text></ModalBody><ModalFooter><Button variant="ghost" mr="8px" onClick={onClose}>Cancelar</Button><Button colorScheme="brand" isDisabled={!Number.isInteger(adjustment) || adjustment === 0 || Number(adjusting?.stock || 0) + adjustment < 0} isLoading={saving} onClick={saveAdjustment}>Guardar ajuste</Button></ModalFooter></ModalContent></Modal>
+      <FormModal isOpen={isOpen} onClose={onClose} title="Ajustar inventario" description={adjusting?.description}
+        isSubmitting={saving} isDisabled={!Number.isInteger(adjustment) || adjustment === 0 || Number(adjusting?.stock || 0) + adjustment < 0}
+        onSubmit={saveAdjustment} submitLabel="Guardar ajuste" size="md">
+        <Text color={muted} fontSize="sm" mb={4}>Existencia actual: {adjusting?.stock || 0} unidades</Text>
+        <FormField label="Cantidad del ajuste"><Input type="number" step="1" value={adjustment} onChange={e => setAdjustment(Number(e.target.value))} /></FormField>
+        <HStack mt={3} spacing={2}><Button type="button" size="sm" leftIcon={<MdArrowUpward />} onClick={() => setAdjustment(Math.abs(Math.trunc(adjustment) || 1))}>Entrada</Button>
+          <Button type="button" size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(Math.trunc(adjustment) || 1))}>Salida</Button></HStack>
+        <Text fontSize="sm" color={Number(adjusting?.stock || 0) + adjustment < 0 ? 'red.500' : muted} mt={4}>Nuevo total: <b>{Number(adjusting?.stock || 0) + adjustment} unidades</b></Text>
+      </FormModal>
       <CategoryManager kind="products" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
     </Box>
   );

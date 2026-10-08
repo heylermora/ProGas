@@ -1,11 +1,10 @@
+import { Flex, HStack, IconButton, Input, Stack, Text, useToast } from '@chakra-ui/react';
+import FormField from 'components/form/FormField';
+import FormModal from 'components/modal/FormModal';
+import ModalList from 'components/modal/ModalList';
 import { useEffect, useState } from 'react';
-import {
-  Button, Flex, FormControl, FormLabel, HStack, IconButton, Input, Modal, ModalBody,
-  ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, useToast,
-} from '@chakra-ui/react';
 import { MdAdd, MdCheck, MdClose, MdDelete, MdEdit } from 'react-icons/md';
 import CategoryService, { CategoryKind } from 'services/CategoryService';
-import Form from 'components/form/Form';
 
 type Props = { kind: CategoryKind; categories: string[]; isOpen: boolean; onClose: () => void; onSaved: () => Promise<void> | void };
 
@@ -17,7 +16,7 @@ export default function CategoryManager({ kind, categories, isOpen, onClose, onS
   const [editValue, setEditValue] = useState('');
   const toast = useToast();
 
-  useEffect(() => { if (isOpen) setValues(categories); }, [categories, isOpen]);
+  useEffect(() => { if (isOpen) { setValues(categories); setDraft(''); setEditingIndex(null); } }, [categories, isOpen]);
   const add = () => {
     const value = draft.trim();
     if (!value || values.some((item) => item.toLocaleLowerCase('es') === value.toLocaleLowerCase('es'))) return;
@@ -36,5 +35,23 @@ export default function CategoryManager({ kind, categories, isOpen, onClose, onS
     finally { setSaving(false); }
   };
 
-  return <Modal isOpen={isOpen} onClose={onClose} onOverlayClick={onClose} isCentered size="lg"><ModalOverlay /><ModalContent><Form onFormSubmit={(event) => { event.preventDefault(); save(); }}><ModalHeader>Administrar categorías</ModalHeader><ModalCloseButton /><ModalBody><Text color="gray.500" fontSize="sm" mb={4}>Cree, renombre o elimine las opciones disponibles. Los registros existentes no cambian automáticamente al renombrar.</Text><FormControl><FormLabel>Nueva categoría</FormLabel><HStack><Input value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); add(); } }} /><IconButton type="button" aria-label="Agregar categoría" icon={<MdAdd />} colorScheme="brand" onClick={add} /></HStack></FormControl><Stack mt={5} spacing={2}>{values.map((value, index) => <Flex key={`${value}-${index}`} align="center" p={3} borderWidth="1px" borderRadius="xl">{editingIndex === index ? <Input flex="1" value={editValue} onChange={(event) => setEditValue(event.target.value)} autoFocus /> : <Text flex="1" fontWeight="700">{value}</Text>}{editingIndex === index ? <><IconButton type="button" aria-label="Confirmar nombre" icon={<MdCheck />} size="sm" colorScheme="brand" onClick={confirmRename} /><IconButton type="button" aria-label="Cancelar edición" icon={<MdClose />} size="sm" variant="ghost" onClick={() => setEditingIndex(null)} /></> : <IconButton type="button" aria-label={`Renombrar ${value}`} icon={<MdEdit />} size="sm" variant="ghost" onClick={() => startRename(index)} />}<IconButton type="button" aria-label={`Eliminar ${value}`} icon={<MdDelete />} size="sm" variant="ghost" colorScheme="red" onClick={() => setValues(values.filter((_, itemIndex) => itemIndex !== index))} /></Flex>)}</Stack></ModalBody><ModalFooter><Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button><Button type="submit" colorScheme="brand" ml={3} isLoading={saving}>Guardar cambios</Button></ModalFooter></Form></ModalContent></Modal>;
+  return <FormModal title="Administrar categorías" description="Cambiar un nombre no actualiza los registros existentes."
+    isOpen={isOpen} onClose={onClose} onSubmit={save} submitLabel="Guardar cambios" isSubmitting={saving} isDisabled={editingIndex !== null} size="lg">
+    <Stack spacing={4}>
+      <FormField label="Nueva categoría"><HStack><Input value={draft} onChange={event => setDraft(event.target.value)}
+        onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); add(); } }} />
+        <IconButton type="button" aria-label="Agregar categoría" icon={<MdAdd />} colorScheme="brand" onClick={add} /></HStack>
+      </FormField>
+      <Text fontSize="sm" fontWeight="700">Categorías ({values.length})</Text>
+      <ModalList isDisabled={editingIndex !== null} items={values} renderItem={(value, index) => <Flex align="center" p={1} borderWidth="1px" borderRadius="12px" gap={1}>
+        {editingIndex === index ? <Input aria-label={`Nombre de ${value}`} flex="1" minW={0} value={editValue} onChange={event => setEditValue(event.target.value)} autoFocus
+          onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); confirmRename(); } }} /> : <Text flex="1" minW={0} fontSize="sm" fontWeight="700" overflowWrap="anywhere">{value}</Text>}
+        {editingIndex === index ? <><IconButton type="button" aria-label="Confirmar nombre" icon={<MdCheck />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} colorScheme="brand" onClick={confirmRename} />
+          <IconButton type="button" aria-label="Cancelar edición" icon={<MdClose />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} variant="ghost" onClick={() => setEditingIndex(null)} /></> :
+          <IconButton type="button" aria-label={`Renombrar ${value}`} icon={<MdEdit />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} variant="ghost" onClick={() => startRename(index)} />}
+        <IconButton type="button" aria-label={`Eliminar ${value}`} icon={<MdDelete />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} variant="ghost" colorScheme="red" onClick={() => { setValues(values.filter((_, itemIndex) => itemIndex !== index)); setEditingIndex(null); }} />
+      </Flex>} />
+      {editingIndex !== null && <Text fontSize="sm" color="gray.500">Confirme el nombre o cancele la edición antes de guardar.</Text>}
+    </Stack>
+  </FormModal>;
 }

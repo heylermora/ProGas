@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { FormControl, FormLabel, useColorModeValue } from '@chakra-ui/react';
+import React, { useMemo, useState } from 'react';
+import { Box, FormControl, FormLabel, Select as NativeSelect, useColorModeValue } from '@chakra-ui/react';
 import Select, { StylesConfig } from 'react-select';
 
 type CategoryOption = { value: string; label: string };
@@ -11,6 +11,7 @@ type Props = {
 };
 
 export default function SearchableCategorySelect({ categories, value, onChange, id = 'business-category' }: Props) {
+  const [query, setQuery] = useState('');
   const background = useColorModeValue('#FFFFFF', '#111C44');
   const text = useColorModeValue('#1B2559', '#FFFFFF');
   const border = useColorModeValue('#E2E8F0', '#354166');
@@ -38,18 +39,32 @@ export default function SearchableCategorySelect({ categories, value, onChange, 
   return (
     <FormControl>
       <FormLabel htmlFor={id} fontSize="sm" fontWeight="700">Categoría</FormLabel>
+      <Box display={{ base: 'block', md: 'none' }}>
+        <NativeSelect id={id} size="lg" borderRadius="14px" value={value}
+          onChange={(event) => onChange(event.target.value)}>
+          {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </NativeSelect>
+      </Box>
+      <Box display={{ base: 'none', md: 'block' }}>
       <Select<CategoryOption, false>
-        inputId={id}
+        inputId={`${id}-search`}
         instanceId={id}
         options={options}
         value={options.find((option) => option.value === value) || options[0]}
-        onChange={(option) => onChange(option?.value || '')}
+        aria-label="Categoría"
+        inputValue={query}
+        onInputChange={(next, action) => {
+          if (action.action === 'input-change') setQuery(next);
+        }}
+        onChange={(option) => { onChange(option?.value || ''); setQuery(''); }}
         isSearchable
         isClearable={Boolean(value)}
         placeholder="Buscar categoría"
         noOptionsMessage={() => 'No encontramos esa categoría.'}
         styles={styles}
       />
+      </Box>
     </FormControl>
   );
 }
+

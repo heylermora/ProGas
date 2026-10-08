@@ -1,18 +1,6 @@
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  Button,
-  Textarea,
-  Box,
-  Flex,
-  useToast
-} from '@chakra-ui/react';
-
-import TextareaAutosize from "react-textarea-autosize";
+import { Button, Stack, Textarea, useToast } from '@chakra-ui/react';
+import { FaWhatsapp } from 'react-icons/fa';
+import AppModal from './AppModal';
 
 type CopyModalProps = {
   message?: React.ReactNode;
@@ -58,53 +46,15 @@ function CopyModal(props: CopyModalProps) {
   };
 
 
-  return (
-    <Modal colorScheme="blue" isOpen={isOpen} onClose={onClose} isCentered>
-      <ModalOverlay />
-      <ModalContent bg="blue.200" borderRadius="20px">
-        <ModalHeader
-          bg="white"
-          borderTopLeftRadius="20px"
-          borderTopRightRadius="20px"
-        >
-          Copiar información
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody pb={6}>
-          {message && (
-            <Box mb={4}>
-              {message}
-            </Box>
-          )}
-
-          <Textarea
-            as={TextareaAutosize}
-            value={copyText}
-            isReadOnly
-            size="sm"
-            mb={2}
-            borderRadius="12px"
-            variant="subtle"
-          />
-
-          <Flex justify="space-between" mt={3}>
-            <Button 
-              colorScheme="whatsapp" 
-              onClick={handleSendWhatsApp}
-              leftIcon={<i className="fa-brands fa-whatsapp"></i>}
-            >
-              Enviar WA
-            </Button>
-
-            <Button colorScheme="blue" onClick={handleCopy}>
-              Copiar
-            </Button>
-          </Flex>
-
-        </ModalBody>
-      </ModalContent>
-    </Modal>
-  );
+  return <AppModal title="Copiar información" isOpen={isOpen} onClose={onClose}
+    footer={<Stack direction={{ base: 'column', md: 'row' }} spacing={3}>
+      <Button type="button" flex="1" colorScheme="whatsapp" onClick={handleSendWhatsApp} leftIcon={<FaWhatsapp />}>Enviar por WhatsApp</Button>
+      <Button type="button" flex="1" variant="brand" onClick={handleCopy}>Copiar</Button>
+    </Stack>}>
+    <Stack spacing={3}>{message}
+      <Textarea aria-label="Información para copiar" value={copyText} isReadOnly rows={8} minH="160px" resize="none" />
+    </Stack>
+  </AppModal>;
 }
 
 export default CopyModal;

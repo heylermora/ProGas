@@ -84,7 +84,7 @@ export const globalStyles = {
 				overflowX: 'hidden',
 				minWidth: '0',
 				bg: mode('secondaryGray.300', 'navy.900')(props),
-				fontFamily: 'DM Sans',
+				fontFamily: '"DM Sans", Arial, sans-serif',
 				letterSpacing: '-0.2px',
 				color: mode('navy.700', 'white')(props),
 				WebkitFontSmoothing: 'antialiased',
@@ -115,7 +115,7 @@ export const globalStyles = {
 				borderRadius: '999px'
 			},
 			html: {
-				fontFamily: 'DM Sans',
+				fontFamily: '"DM Sans", Arial, sans-serif',
 				WebkitTextSizeAdjust: '100%'
 			},
 			'@media screen and (max-width: 47.99em)': {

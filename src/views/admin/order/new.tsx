@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { Box, Text, Input, Select, Flex } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
+import OrderProductFields from 'components/form/OrderProductFields';
 import { customAlphabet } from "nanoid";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import Form from "components/form/Form";
@@ -8,10 +9,10 @@ import OkModal from "components/modal/OkModal";
 import orderService from "services/OrderService";
 import productService from "services/ProductService";
 
+import Error from "components/exceptions/Error";
+import FormField from "interfaces/FormField";
 import { OrderItem, ProductItem } from "interfaces/OrderItem";
 import type { Product } from "interfaces/ProductItem";
-import FormField from "interfaces/FormField";
-import Error from "components/exceptions/Error";
 import { handleNationalIdLookup } from "utils/nationalId";
 
 const nano = customAlphabet("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789", 6);
@@ -19,6 +20,7 @@ const nano = customAlphabet("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789", 6);
 export default function NewOrder() {
   const requestId = useRef(crypto.randomUUID());
   const orderCode = useRef(nano());
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -183,88 +185,7 @@ export default function NewOrder() {
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
       ) => void
     ) => (
-      <Flex gap={3} wrap="wrap">
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Producto
-          </Text>
-          <Select
-            isRequired
-            variant="auth"
-            fontSize="sm"
-            name="productId"
-            value={form.productId}
-            onChange={onChange}
-            size="md"
-            maxW="260px"
-            isDisabled={isCatalogLoading || catalog.length === 0}
-          >
-            {catalog.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.description}
-              </option>
-            ))}
-          </Select>
-
-          {selectedProduct && (
-            <Text fontSize="xs" color="gray.500" mt={1}>
-              Precio actual: ₡{Number(selectedProduct.price ?? 0)}
-            </Text>
-          )}
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Cantidad
-          </Text>
-          <Input
-            isRequired
-            variant="auth"
-            fontSize="sm"
-            type="number"
-            size="md"
-            name="quantity"
-            min={1}
-            maxW="80px"
-            value={form.quantity}
-            onChange={onChange}
-          />
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Precio
-          </Text>
-          <Input
-            isRequired
-            variant="auth"
-            fontSize="sm"
-            type="number"
-            size="md"
-            name="price"
-            min={1}
-            maxW="160px"
-            value={form.price}
-            isDisabled
-          />
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" mb={1}>
-            Comentario
-          </Text>
-          <Input
-            variant="auth"
-            fontSize="sm"
-            type="text"
-            size="md"
-            name="comment"
-            value={form.comment}
-            onChange={onChange}
-            placeholder="Comentario (opcional)"
-          />
-        </Box>
-      </Flex>
+      <OrderProductFields form={form} onChange={onChange} catalog={catalog} loading={isCatalogLoading} selectedProduct={selectedProduct} />
     ),
     [catalog, isCatalogLoading, selectedProduct]
   );
@@ -348,6 +269,8 @@ export default function NewOrder() {
   );
 
   const handleFormSubmit = async (fieldValues: { [key: string]: any }) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const newOrder: Omit<OrderItem, "id"> = {
       orderCode: orderCode.current,
       requestId: requestId.current,
@@ -369,6 +292,8 @@ export default function NewOrder() {
     } catch (error) {
       console.error("Error:", error);
       setIsError(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -382,8 +307,9 @@ export default function NewOrder() {
   return (
     <>
       <Form
-        title="Nuevo Pedido"
-        button="Crear Pedido"
+        isSubmitting={isSubmitting}
+        title="Nuevo pedido"
+        button="Crear pedido"
         back="/admin/order/index"
         fields={fields}
         onSubmit={handleFormSubmit}

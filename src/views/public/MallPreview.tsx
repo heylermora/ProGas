@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip, usePrefersReducedMotion } from '@chakra-ui/react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
@@ -24,8 +24,9 @@ const getPreviewBusinesses = () => {
   if (!businessesRequest) {
     businessesRequest = SponsorService.getAll()
       .then((items) => {
-        cachedBusinesses = shuffled(items.filter((item) => item.active !== false));
-        return cachedBusinesses;
+        const activeBusinesses = shuffled(items.filter((item) => item.active !== false));
+        cachedBusinesses = activeBusinesses.length ? activeBusinesses : undefined;
+        return activeBusinesses;
       })
       .finally(() => { businessesRequest = undefined; });
   }
@@ -68,15 +69,19 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
   const [loading, setLoading] = useState(!cachedBusinesses);
   const [selectedBusinessKey, setSelectedBusinessKey] = useState('');
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const retry = useCallback(() => { setError(false); setLoading(true); setAttempt(value => value + 1); }, []);
 
   useEffect(() => {
     let mounted = true;
+    setError(false);
     getPreviewBusinesses()
       .then((items) => { if (mounted) setBusinesses(items); })
-      .catch(() => { if (mounted) setBusinesses([]); })
+      .catch(() => { if (mounted) setError(true); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, []);
+  }, [attempt]);
 
   const previewBusinesses = businesses;
   const originLabels: Record<string, string> = {
@@ -101,12 +106,21 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} size="lg" borderRadius="full" bgGradient="linear(135deg, #FFF2A8 0%, #FACC15 48%, #E98A00 100%)" color="#281900" fontWeight="900" px="26px" animation={prefersReducedMotion ? undefined : `${ctaPulse} 2.3s ease-in-out infinite`} _hover={{ transform: 'translateY(-3px) scale(1.03)', filter: 'brightness(1.04)', textDecoration: 'none' }}>Explorar todos los negocios{compact ? ' ↗' : ''}</Button>
       </Flex>}
 
-      {embedded && <Text color="#475569" fontSize="sm" px="2px" mb="4px">Seleccione un negocio para ver sus contactos.</Text>}
-      <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
+      {embedded && !loading && !error && previewBusinesses.length > 0 && <Text color="#475569" fontSize="sm" px="2px" mb="4px">Seleccione un negocio para ver sus contactos.</Text>}
+      {loading && <Flex role="status" aria-live="polite" minH="100px" align="center" justify="center" gap={3}>
+        <Spinner size="sm" /><Text fontSize="sm">Cargando negocios…</Text>
+      </Flex>}
+      {error && <Flex role="alert" minH="100px" direction={{ base: 'column', md: 'row' }} align="center" justify="center" gap={3} py={4}>
+        <Text fontSize="sm">No pudimos cargar los negocios. Inténtelo nuevamente.</Text>
+        <Button size="sm" onClick={retry} colorScheme="brand">Reintentar</Button>
+      </Flex>}
+      {!loading && !error && !previewBusinesses.length && <Flex role="status" minH="100px" align="center" justify="center" gap={3} py={4}>
+        <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
+      </Flex>}
+      {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
         <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
-          {[0, 1].map((copy) => (
+          {(previewBusinesses.length > 1 ? [0, 1] : [0]).map((copy) => (
           <Flex key={copy} gap="14px" pr="14px">
-            {loading && [0, 1, 2, 3].map((item) => <Box key={item} flex="0 0 190px" h="92px" borderRadius="16px" bg="whiteAlpha.100" opacity={1 - item * .16} />)}
             {!loading && previewBusinesses.map((business) => {
               const businessKey = `${copy}:${business.id}`;
               const selected = selectedBusinessKey === businessKey;
@@ -137,12 +151,12 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
                 </Box>
               );
             })}
-            {!loading && !previewBusinesses.length && <Flex flex="1" minH="86px" p="14px" borderRadius="16px" border="1px dashed" borderColor="whiteAlpha.300" align="center" gap="10px"><Icon as={MdStorefront} boxSize="28px" color={embedded ? 'brand.500' : 'cyan.200'} /><Text fontSize="sm" color={embedded ? '#475569' : 'whiteAlpha.700'}>Aún no hay negocios publicados.</Text></Flex>}
+
           </Flex>
           ))}
         </Flex>
         {selectedBusinessKey && <Text textAlign="center" color={embedded ? '#475569' : 'whiteAlpha.600'} fontSize="10px">Carrusel pausado mientras consulta los contactos.</Text>}
-      </Box>
+      </Box>}
 
     </Box>
   );

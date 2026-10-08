@@ -1,57 +1,16 @@
-// Chakra imports
-import { Box, Flex} from '@chakra-ui/react';
-import PropTypes from 'prop-types';
+import { Box, Flex, Grid } from '@chakra-ui/react';
+import { ReactNode } from 'react';
 
-function AuthIllustration(props: { children: JSX.Element | string; illustrationBackground: string; image?: string }) {
-	const { children, illustrationBackground } = props;
-	// Chakra color mode
-	return (
-		<Flex position='relative' h='max-content'>
-			<Flex
-				 h={{
-					base: 'initial',
-					sm: 'initial',
-					md: 'unset',
-					lg: '100vh',
-					xl: '97vh'
-				}}
-				w='100%'
-				maxW={{ md: '66%', lg: '1313px' }}
-				mx='auto'
-				pt={{ base: '24px', sm: '50px', md: '0px' }}
-				px={{ base: '16px', lg: '30px', xl: '0px' }}
-				ps={{ xl: '70px' }}
-				justifyContent='start'
-				direction='column'>
-				{children}
-				<Box
-					display={{ base: 'none', md: 'block' }}
-					h='100%'
-					minH='100vh'
-					w={{ lg: '50vw', '2xl': '44vw' }}
-					position='absolute'
-					right='0px'>
-					<Flex
-						bg={`url(${illustrationBackground})`}
-						justify='center'
-						align='end'
-						w='100%'
-						h='100%'
-						bgSize='cover'
-						bgPosition='50%'
-						position='absolute'
-						borderBottomLeftRadius={{ lg: '120px', xl: '200px' }}
-					/>
-				</Box>
-			</Flex>
-		</Flex>
-	);
+function AuthIllustration({ children, illustrationBackground }: { children: ReactNode; illustrationBackground: string; image?: string }) {
+  return <Grid minH="100vh" templateColumns={{ base: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' }}
+    sx={{ '@supports (min-height: 100dvh)': { minHeight: '100dvh' } }}>
+    <Flex minW={0} align="center" justify="center" px={{ base: 0, md: 8, lg: 12 }}>
+      {children}
+    </Flex>
+    <Box aria-hidden="true" display={{ base: 'none', lg: 'block' }} minW={0}
+      bgImage={`url(${illustrationBackground})`} bgSize="cover" bgPosition="center"
+      borderBottomLeftRadius={{ lg: '120px', xl: '200px' }} />
+  </Grid>;
 }
-// PROPS
-
-AuthIllustration.propTypes = {
-	illustrationBackground: PropTypes.string,
-	image: PropTypes.any
-};
 
 export default AuthIllustration;

@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar, Box, Button, Flex, Input, SimpleGrid,
-  Text, useColorModeValue, useToast,
+Avatar, Box, Button, Flex, Input, SimpleGrid,
+Text, useColorModeValue, useToast
 } from '@chakra-ui/react';
-import { MdAdd, MdEdit, MdManageAccounts } from 'react-icons/md';
 import Card from 'components/card/Card';
-import UserItem from 'interfaces/UserItem';
-import UserService, { CollaboratorRollbackError } from 'services/UserService';
-import { usePageSearch } from 'contexts/PageSearchContext';
-import PageHeader from 'components/layout/PageHeader';
-import FormPanel from 'components/form/FormPanel';
-import EmptyState from 'components/dataDisplay/EmptyState';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
+import EmptyState from 'components/dataDisplay/EmptyState';
 import StatusBadge from 'components/dataDisplay/StatusBadge';
 import ActiveSwitch from 'components/form/ActiveSwitch';
-import FormActions from 'components/form/FormActions';
 import FormField from 'components/form/FormField';
+import PasswordField from 'components/form/PasswordField';
+import PageHeader from 'components/layout/PageHeader';
+import FormModal from 'components/modal/FormModal';
+import { usePageSearch } from 'contexts/PageSearchContext';
+import UserItem from 'interfaces/UserItem';
+import { useEffect, useMemo, useState } from 'react';
+import { MdAdd, MdEdit, MdManageAccounts } from 'react-icons/md';
+import UserService, { CollaboratorRollbackError } from 'services/UserService';
 
 type FormState = { name: string; email: string; password: string; active: boolean };
 const EMPTY_FORM: FormState = { name: '', email: '', password: '', active: true };
@@ -29,6 +29,7 @@ export default function Users() {
   const [editing, setEditing] = useState<UserItem | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -50,20 +51,22 @@ export default function Users() {
       .some(value => String(value || '').toLocaleLowerCase('es').includes(term)));
   }, [query, users]);
 
-  const close = () => { setShowForm(false); setEditing(null); setForm(EMPTY_FORM); };
-  const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
+  const close = () => { setSubmitted(false); setShowForm(false); setEditing(null); setForm(EMPTY_FORM); };
+  const openCreate = () => { setSubmitted(false); setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
   const openEdit = (user: UserItem) => {
+    setSubmitted(false);
     setEditing(user);
     setForm({ name: user.name || '', email: user.email || '', password: '', active: user.active !== false });
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const change = (field: keyof FormState, value: string | boolean) =>
     setForm(current => ({ ...current, [field]: value }));
 
   const save = async () => {
+    if (saving) return;
+    setSubmitted(true);
     if (!form.name.trim() || (!editing && !form.email.trim())) {
-      toast({ status: 'warning', title: 'Complete los campos obligatorios' });
+      toast({ status: 'warning', title: 'Completá los campos obligatorios' });
       return;
     }
     if (!editing && form.password.length < 6) {
@@ -88,7 +91,7 @@ export default function Users() {
           duration: null,
           isClosable: true,
           title: 'La creación quedó incompleta',
-          description: `Elimine en Firebase Authentication la cuenta con UID ${error.userId} antes de volver a intentarlo.`,
+          description: `Eliminá en Firebase Authentication la cuenta con UID ${error.userId} antes de volver a intentarlo.`,
         });
       } else {
         const message = error instanceof Error && error.message.includes('email-already-in-use')
@@ -100,27 +103,23 @@ export default function Users() {
 
   return (
     <Box w="100%" pt={{ base: '110px', md: '80px' }} pb={8}>
-      <PageHeader title="Colaboradores" description="Agregue y administre el acceso de su equipo." action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={openCreate}>Agregar colaborador</Button>} />
+      <PageHeader title="Colaboradores" description="Agregá y administrá el acceso de tu equipo." action={<Button leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full" px={6} onClick={openCreate}>Agregar colaborador</Button>} />
 
       {showForm && (
-        <FormPanel title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description={editing ? 'Actualice su nombre o acceso.' : 'Cree sus credenciales de acceso.'} onClose={close} footer={
-          <Flex justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
-            <ActiveSwitch id="user-active" label="Acceso activo" isChecked={form.active} onChange={checked => change('active', checked)} />
-            <FormActions onCancel={close} onSubmit={save} isLoading={saving} submitLabel={editing ? 'Guardar cambios' : 'Crear acceso'} />
-          </Flex>
-        }>
-          <SimpleGrid columns={{ base: 1, md: editing ? 2 : 3 }} spacing={4}>
-            <FormField id="user-name" label="Nombre completo" isRequired><Input id="user-name" autoComplete="name" value={form.name} onChange={event => change('name', event.target.value)} /></FormField>
-            <FormField id="user-email" label="Correo electrónico" isRequired isDisabled={Boolean(editing)}><Input id="user-email" type="email" autoComplete="email" value={form.email} onChange={event => change('email', event.target.value)} /></FormField>
-            {!editing && <FormField id="user-password" label="Contraseña temporal" help="Al menos 6 caracteres." isRequired><Input id="user-password" type="password" minLength={6} autoComplete="new-password" value={form.password} onChange={event => change('password', event.target.value)} /></FormField>}
+        <FormModal isOpen={showForm} isSubmitting={saving} onSubmit={save} title={editing ? 'Editar colaborador' : 'Nuevo colaborador'} description="Datos personales y acceso." onClose={close} submitLabel={editing ? 'Guardar cambios' : 'Crear acceso'}>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+            <FormField id="user-name" label="Nombre completo" error={submitted && !form.name.trim() ? 'El campo es requerido.' : undefined} isRequired><Input id="user-name" autoComplete="name" value={form.name} onChange={event => change('name', event.target.value)} /></FormField>
+            <FormField id="user-email" label="Correo electrónico" error={submitted && !form.email.trim() ? 'El campo es requerido.' : undefined} isRequired isDisabled={Boolean(editing)}><Input id="user-email" type="email" autoComplete="email" value={form.email} onChange={event => change('email', event.target.value)} /></FormField>
+            {!editing && <PasswordField id="user-password" label="Contraseña temporal" value={form.password} onChange={value => change('password', value)} isNew isDisabled={saving} error={submitted && form.password.length < 6 ? 'La contraseña debe tener al menos 6 caracteres.' : undefined} />}
           </SimpleGrid>
-        </FormPanel>
+          <Box mt={4}><ActiveSwitch id="user-active" label="Acceso activo" isChecked={form.active} onChange={checked => change('active', checked)} /></Box>
+        </FormModal>
       )}
 
       <Text mb={5} textAlign="right" color={muted} fontSize="sm">{visible.length} {visible.length === 1 ? 'colaborador' : 'colaboradores'}</Text>
 
       {loading ? <AsyncContent isLoading loadingLabel="Cargando colaboradores" /> : visible.length === 0 ? (
-        <EmptyState icon={MdManageAccounts} title={query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'} description={query ? 'Pruebe con otro nombre o correo.' : 'Agregue a la primera persona de su equipo.'} actionLabel={!query ? 'Agregar colaborador' : undefined} actionIcon={<MdAdd />} onAction={!query ? openCreate : undefined} />
+        <EmptyState icon={MdManageAccounts} title={query ? 'No encontramos colaboradores' : 'Aún no hay colaboradores'} description={query ? 'Probá con otro nombre o correo.' : 'Agregá a la primera persona de tu equipo.'} actionLabel={!query ? 'Agregar colaborador' : undefined} actionIcon={<MdAdd />} onAction={!query ? openCreate : undefined} />
       ) : (
         <SimpleGrid columns={{ base: 1, lg: 2, '2xl': 3 }} spacing={4}>{visible.map(user => (
           <Card key={user.id} p={{ base: 4, md: 5 }} borderWidth="1px" borderColor="blackAlpha.100" _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg', borderColor: 'brand.200' }} transition="all .2s ease">

@@ -1,26 +1,25 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Alert, AlertIcon, Badge, Box, Button, FormControl, FormLabel, Heading, Input, Select,
-  SimpleGrid, Stat, StatLabel, StatNumber, Tab, TabList, TabPanel, TabPanels,
-  Table, Tbody, Td, Text, Textarea, Th, Thead, Tr, Tabs, useToast,
+Alert, AlertIcon, Badge, Box, Heading, Input, Select,
+SimpleGrid, Stat, StatLabel, StatNumber, Tab, Table, TabList, TabPanel, TabPanels, Tabs, Tbody, Td, Text, Textarea, Th, Thead, Tr, useColorModeValue, useToast
 } from '@chakra-ui/react';
+import AsyncContent from 'components/dataDisplay/AsyncContent';
+import Form from 'components/form/Form';
+import FormActions from 'components/form/FormActions';
+import FormField from 'components/form/FormField';
+import PageHeader from 'components/layout/PageHeader';
 import { useAuth } from 'contexts/AuthContext';
 import { ClosingItem, ClosingType, ExpenseItem } from 'interfaces/ClosingItem';
 import { OrderItem } from 'interfaces/OrderItem';
 import { Product } from 'interfaces/ProductItem';
+import UserItem from 'interfaces/UserItem';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ClosingService from 'services/ClosingService';
 import OrderService from 'services/OrderService';
 import ProductService from 'services/ProductService';
-import { availableExpenses, availableOrders, cylinderSummary, orderFingerprint, orderTotal, paymentTotals } from 'utils/closing';
-import HelpLabel from 'components/form/HelpLabel';
-import AsyncContent from 'components/dataDisplay/AsyncContent';
-import Form from 'components/form/Form';
-import PageHeader from 'components/layout/PageHeader';
 import UserService from 'services/UserService';
-import UserItem from 'interfaces/UserItem';
-import Balance from 'views/admin/order/balance';
+import { availableExpenses, availableOrders, cylinderSummary, orderFingerprint, orderTotal, parseStoredDate, paymentTotals } from 'utils/closing';
 import { isOrderPaid } from 'utils/order';
-import { parseStoredDate } from 'utils/closing';
+import Balance from 'views/admin/order/balance';
 
 const crc = (amount: number) => `₡${amount.toLocaleString('es-CR')}`;
 const nowLocal = () => {
@@ -36,6 +35,7 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 export default function Closings() {
+  const formBg = useColorModeValue('white', 'navy.800');
   const { user, roles, displayName } = useAuth();
   const toast = useToast();
   const isAdmin = roles.includes('admin');
@@ -104,7 +104,7 @@ export default function Closings() {
     if (!expense.description.trim() || Number(expense.amount) <= 0) {
       toast({ title: 'Ingrese una descripción y un monto válido.', status: 'warning' }); return;
     }
-    if (isAdmin && !responsibleId) { toast({ title: 'Seleccione el colaborador responsable.', status: 'warning' }); return; }
+    if (isAdmin && !responsibleId) { toast({ title: 'Seleccioná el colaborador responsable.', status: 'warning' }); return; }
     setSaving(true);
     try {
       await ClosingService.createExpense({ ...expense, amount: Number(expense.amount), occurredAt: new Date(expense.occurredAt).toISOString(), createdAt: new Date().toISOString(), createdBy: isAdmin ? responsibleId : user?.uid || '', createdByName: responsibleName });
@@ -114,9 +114,9 @@ export default function Closings() {
   };
 
   const confirm = async () => {
-    if (type === 'shift' && (!fromTime || !toTime)) { toast({ title: 'Seleccione la hora de inicio y fin del turno.', status: 'warning' }); return; }
+    if (type === 'shift' && (!fromTime || !toTime)) { toast({ title: 'Seleccioná la hora de inicio y fin del turno.', status: 'warning' }); return; }
     if (new Date(from).getTime() >= new Date(to).getTime()) { toast({ title: 'La hora final debe ser posterior a la hora inicial.', status: 'warning' }); return; }
-    if (isAdmin && !responsibleId) { toast({ title: 'Seleccione el colaborador responsable.', status: 'warning' }); return; }
+    if (isAdmin && !responsibleId) { toast({ title: 'Seleccioná el colaborador responsable.', status: 'warning' }); return; }
     if (!included.length) { toast({ title: 'No hay pedidos disponibles en el periodo.', status: 'warning' }); return; }
     if (type === 'cylinder' && !canCloseCylinders) { toast({ title: 'No tiene autorización para este corte.', status: 'error' }); return; }
     if (type === 'shift' && difference !== 0 && !note.trim()) { toast({ title: 'Explique la diferencia de caja antes de confirmar.', status: 'warning' }); return; }
@@ -137,52 +137,51 @@ export default function Closings() {
     try {
       await ClosingService.confirm(closing); toast({ title: 'Corte confirmado y pedidos bloqueados.', status: 'success' });
       setDeclared(''); setNote(''); await load();
-    } catch (error) { toast({ title: 'No se pudo confirmar el corte.', description: error instanceof Error ? error.message : 'Actualice la previsualización e intente nuevamente.', status: 'error' }); } finally { setSaving(false); }
+    } catch (error) { toast({ title: 'No se pudo confirmar el corte.', description: error instanceof Error ? error.message : 'Actualizá la previsualización e intentá nuevamente.', status: 'error' }); } finally { setSaving(false); }
   };
 
   if (loading) return <AsyncContent isLoading loadingLabel="Cargando cortes" />;
   return <Box w="100%" pt={{ base: '180px', md: '80px' }}>
-    <PageHeader title="Finanzas" description="Registre gastos, cierre turnos y revise el balance semanal desde un solo lugar." />
-    <Alert status="info" mb="5" borderRadius="xl"><AlertIcon /><Box><Text fontWeight="800">¿Por dónde empezar?</Text><Text fontSize="sm">Primero registre los gastos. Al terminar un turno, abra “Corte nuevo”, elija el periodo, cuente el dinero recibido y escriba ese valor en “Monto declarado”.</Text></Box></Alert>
+    <PageHeader title="Finanzas" description="Registrá gastos, cerrá turnos y revisá el balance semanal desde un solo lugar." />
+    <Alert status="info" mb="5" borderRadius="xl"><AlertIcon /><Box><Text fontWeight="800">¿Por dónde empezar?</Text><Text fontSize="sm">Primero registrá los gastos. Al terminar un turno, abrí “Corte nuevo”, elegí el periodo, contá el dinero recibido y escribí ese valor en “Monto declarado”.</Text></Box></Alert>
     <Tabs colorScheme="brand" isLazy>
       <TabList overflowX="auto"><Tab>Gastos</Tab><Tab>Cortes</Tab><Tab>Balance e historial</Tab></TabList>
       <TabPanels>
         <TabPanel px="0">
-          <Form bg="white" p="5" borderRadius="xl" mb="6" onFormSubmit={(event) => { event.preventDefault(); saveExpense(); }}>
-            <Heading size="md" mb="4">Registrar gasto</Heading>
+          <Form isSubmitting={saving} title="Registrar gasto" bg={formBg} p="5" borderRadius="xl" mb="6" onFormSubmit={(event) => { event.preventDefault(); saveExpense(); }}>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing="4">
-              <FormControl isRequired><HelpLabel help="Indique en qué se utilizó el dinero; por ejemplo, combustible o mantenimiento." required>Descripción</HelpLabel><Input value={expense.description} onChange={(e) => setExpense({ ...expense, description: e.target.value })} /></FormControl>
-              <FormControl><HelpLabel help="Agrupa gastos similares para que el historial sea más fácil de revisar.">Categoría</HelpLabel><Select value={expense.category} onChange={(e) => setExpense({ ...expense, category: e.target.value })}><option>Operación</option><option>Combustible</option><option>Mantenimiento</option><option>Otro</option></Select></FormControl>
-              <FormControl isRequired><HelpLabel help="Monto exacto que salió de caja. Se resta del efectivo esperado en el corte." required>Monto</HelpLabel><Input type="number" min="0" value={expense.amount} onChange={(e) => setExpense({ ...expense, amount: e.target.value })} /></FormControl>
-              <FormControl isRequired><HelpLabel help="Momento real del gasto. Define en cuál corte será incluido." required>Fecha y hora</HelpLabel><Input type="datetime-local" value={expense.occurredAt} onChange={(e) => setExpense({ ...expense, occurredAt: e.target.value })} /></FormControl>
+              <FormField isRequired label={<>Descripción</>} help="Indicá en qué se utilizó el dinero; por ejemplo, combustible o mantenimiento."><Input value={expense.description} onChange={(e) => setExpense({ ...expense, description: e.target.value })} /></FormField>
+              <FormField  label={<>Categoría</>} help="Agrupa gastos similares para que el historial sea más fácil de revisar."><Select value={expense.category} onChange={(e) => setExpense({ ...expense, category: e.target.value })}><option>Operación</option><option>Combustible</option><option>Mantenimiento</option><option>Otro</option></Select></FormField>
+              <FormField isRequired label={<>Monto</>} help="Monto exacto que salió de caja. Se resta del efectivo esperado en el corte."><Input type="number" min="0" value={expense.amount} onChange={(e) => setExpense({ ...expense, amount: e.target.value })} /></FormField>
+              <FormField isRequired label={<>Fecha y hora</>} help="Momento real del gasto. Define en cuál corte será incluido."><Input type="datetime-local" value={expense.occurredAt} onChange={(e) => setExpense({ ...expense, occurredAt: e.target.value })} /></FormField>
               <ResponsibleControl isAdmin={isAdmin} collaborators={collaborators} responsibleId={responsibleId} responsibleName={responsibleName} onChange={setResponsibleId} />
-            </SimpleGrid><Button type="submit" mt="4" colorScheme="brand" isLoading={saving}>Guardar gasto</Button>
+            </SimpleGrid><FormActions submitLabel="Guardar gasto" isLoading={saving} />
           </Form>
           <ExpenseTable expenses={expenses} />
         </TabPanel>
         <TabPanel px="0">
-          <Form bg="white" p="5" borderRadius="xl" onFormSubmit={(event) => { event.preventDefault(); confirm(); }}>
+          <Form isSubmitting={saving} title="Registrar corte" bg={formBg} p="5" borderRadius="xl" onFormSubmit={(event) => { event.preventDefault(); confirm(); }}>
             <SimpleGrid columns={{ base: 1, md: 4 }} spacing="4">
-              <FormControl><HelpLabel help="Turno liquida caja y pedidos; cilindros acumula las ventas desde su último corte.">Tipo de corte</HelpLabel><Select value={type} onChange={(e) => setType(e.target.value as ClosingType)}><option value="shift">Turno</option>{canCloseCylinders && <option value="cylinder">Cilindros acumulados</option>}</Select></FormControl>
-              {type === 'shift' ? <><FormControl><FormLabel>Fecha del turno</FormLabel><Input type="date" value={closingDate} onChange={(e) => setClosingDate(e.target.value)} /></FormControl><FormControl isRequired><HelpLabel help="No se completa automáticamente para evitar incluir ventas de otro turno." required>Hora de inicio</HelpLabel><Input type="time" value={fromTime} onChange={(e) => setFromTime(e.target.value)} /></FormControl><FormControl isRequired><HelpLabel help="Debe ser posterior a la hora inicial del mismo día." required>Hora de fin</HelpLabel><Input type="time" value={toTime} onChange={(e) => setToTime(e.target.value)} /></FormControl></> : <Box gridColumn={{ md: 'span 3' }} p="3" bg="purple.50" borderRadius="xl"><Text fontWeight="800">Periodo acumulado de cilindros</Text><Text fontSize="sm">Desde {new Date(from).toLocaleString('es-CR')} hasta ahora. El siguiente corte continuará desde este punto.</Text></Box>}
+              <FormField  label={<>Tipo de corte</>} help="Turno liquida caja y pedidos; cilindros acumula las ventas desde su último corte."><Select value={type} onChange={(e) => setType(e.target.value as ClosingType)}><option value="shift">Turno</option>{canCloseCylinders && <option value="cylinder">Cilindros acumulados</option>}</Select></FormField>
+              {type === 'shift' ? <><FormField  label={<>Fecha del turno</>}><Input type="date" value={closingDate} onChange={(e) => setClosingDate(e.target.value)} /></FormField><FormField isRequired label={<>Hora de inicio</>} help="No se completa automáticamente para evitar incluir ventas de otro turno."><Input type="time" value={fromTime} onChange={(e) => setFromTime(e.target.value)} /></FormField><FormField isRequired label={<>Hora de fin</>} help="Debe ser posterior a la hora inicial del mismo día."><Input type="time" value={toTime} onChange={(e) => setToTime(e.target.value)} /></FormField></> : <Box gridColumn={{ md: 'span 3' }} p="3" bg="purple.50" borderRadius="xl"><Text fontWeight="800">Periodo acumulado de cilindros</Text><Text fontSize="sm">Desde {new Date(from).toLocaleString('es-CR')} hasta ahora. El siguiente corte continuará desde este punto.</Text></Box>}
             </SimpleGrid>
             <Box mt="4"><ResponsibleControl isAdmin={isAdmin} collaborators={collaborators} responsibleId={responsibleId} responsibleName={responsibleName} onChange={setResponsibleId} /></Box>
             <Heading size="md" mt="6" mb="3">Previsualización</Heading>
             <SimpleGrid columns={{ base: 2, lg: 4 }} spacing="3"><Metric label="Total vendido" value={sales} /><Metric label="Efectivo" value={payments.cash} /><Metric label="SINPE" value={payments.sinpe} /><Metric label="Otros métodos" value={payments.other} /><Metric label="Gastos" value={expensesInPeriod} />{type !== 'shift' && <Metric label="Costos" value={type === 'cylinder' ? cylinderCost : allCost} />}<Metric label="Monto esperado" value={expected} /><Metric label="Diferencia" value={difference} /></SimpleGrid>
             {type === 'cylinder' ? <CylinderTable lines={cylinders} /> : <OrderTable orders={included} />}
             {type === 'shift' && <SimpleGrid columns={{ base: 1, md: 2 }} spacing="4" mt="5">
-              <FormControl isRequired><HelpLabel help="Cantidad que realmente contaste en caja. Se compara con el monto esperado." required>Monto declarado</HelpLabel><Input type="number" value={declared} onChange={(e) => setDeclared(e.target.value)} /></FormControl>
-              <FormControl isRequired={difference !== 0}><HelpLabel help="Si falta o sobra dinero, explique la razón para que quede registrada." required={difference !== 0}>Nota explicativa</HelpLabel><Textarea value={note} onChange={(e) => setNote(e.target.value)} /></FormControl>
+              <FormField isRequired label={<>Monto declarado</>} help="Cantidad que realmente contaste en caja. Se compara con el monto esperado."><Input type="number" value={declared} onChange={(e) => setDeclared(e.target.value)} /></FormField>
+              <FormField isRequired={difference !== 0} label={<>Nota explicativa</>} help="Si falta o sobra dinero, explicá la razón para que quede registrada."><Textarea value={note} onChange={(e) => setNote(e.target.value)} /></FormField>
             </SimpleGrid>}
             <Alert status="info" mt="4"><AlertIcon />{type === 'cylinder' ? `Al confirmar, ${included.length} pedidos quedarán marcados para que sus cilindros no vuelvan a contarse.` : `Al confirmar, ${included.length} pedidos quedarán liquidados y no podrán incluirse en otro cierre de turno.`}</Alert>
-            <Button type="submit" colorScheme="brand" mt="4" isLoading={saving} isDisabled={(type === 'shift' && (!fromTime || !toTime)) || !included.length || (isAdmin && !responsibleId)}>Confirmar corte</Button>
+            <FormActions submitLabel="Confirmar corte" isLoading={saving} isDisabled={(type === 'shift' && (!fromTime || !toTime)) || !included.length || (isAdmin && !responsibleId)} />
           </Form>
         </TabPanel>
         <TabPanel px="0">
           <Balance embedded />
           <Box mt="6">
             <Heading size="md" mb="3">Historial de cortes</Heading>
-            <Text color="gray.500" fontSize="sm" mb="4">Consulte los cierres que respaldan el balance, incluidas sus diferencias y notas.</Text>
+            <Text color="gray.500" fontSize="sm" mb="4">Consultá los cierres que respaldan el balance, incluidas sus diferencias y notas.</Text>
             <HistoryTable history={history} />
           </Box>
         </TabPanel>
@@ -192,7 +191,7 @@ export default function Closings() {
 }
 
 function ResponsibleControl({ isAdmin, collaborators, responsibleId, responsibleName, onChange }: { isAdmin: boolean; collaborators: UserItem[]; responsibleId: string; responsibleName: string; onChange: (id: string) => void }) {
-  return isAdmin ? <FormControl isRequired><FormLabel>Colaborador responsable</FormLabel><Select placeholder="Seleccione un colaborador" value={responsibleId} onChange={event => onChange(event.target.value)}>{collaborators.map(item => <option key={item.userId} value={item.userId}>{item.name || item.email}</option>)}</Select></FormControl> : <FormControl><FormLabel>Colaborador responsable</FormLabel><Input value={responsibleName} isReadOnly /></FormControl>;
+  return isAdmin ? <FormField isRequired label={<>Colaborador responsable</>}><Select placeholder="Seleccioná un colaborador" value={responsibleId} onChange={event => onChange(event.target.value)}>{collaborators.map(item => <option key={item.userId} value={item.userId}>{item.name || item.email}</option>)}</Select></FormField> : <FormField  label={<>Colaborador responsable</>}><Input value={responsibleName} isReadOnly /></FormField>;
 }
 
 function OrderTable({ orders }: { orders: OrderItem[] }) { return <Box overflowX="auto" mt="5"><Table size="sm"><Thead><Tr><Th>Pedido</Th><Th>Fecha</Th><Th>Cliente</Th><Th isNumeric>Total</Th></Tr></Thead><Tbody>{orders.map((o) => <Tr key={o.id}><Td>{o.orderCode}</Td><Td>{new Date(o.paidAt || o.requestDate).toLocaleString('es-CR')}</Td><Td>{o.client}</Td><Td isNumeric>{crc(orderTotal(o))}</Td></Tr>)}</Tbody></Table>{!orders.length && <Text p="4" color="gray.500">No hay pedidos pagados y sin cortar en este periodo.</Text>}</Box>; }

@@ -1,10 +1,13 @@
+import { Alert, AlertIcon, Button, Link, Stack } from '@chakra-ui/react';
+import FormField from 'components/form/FormField';
+import PasswordField from 'components/form/PasswordField';
 /*!
-  _   _  ___  ____  ___ ________  _   _   _   _ ___   
- | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
- | |_| | | | | |_) || |  / / | | |  \| | | | | || | 
+  _   _  ___  ____  ___ ________  _   _   _   _ ___
+ | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _|
+ | |_| | | | | |_) || |  / / | | |  \| | | | | || |
  |  _  | |_| |  _ < | | / /| |_| | |\  | | |_| || |
  |_| |_|\___/|_| \_\___/____\___/|_| \_|  \___/|___|
-                                                                                                                                                                                                                                                                                                                                       
+
 =========================================================
 * Horizon UI - v1.1.0
 =========================================================
@@ -24,225 +27,68 @@ import { useState } from 'react';
 import { NavLink, useHistory } from "react-router-dom";
 // Chakra imports
 import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  Heading,
-  Icon,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Text,
-  useColorModeValue,
+Box, Input, Text
 } from "@chakra-ui/react";
-import type { ResponsiveValue } from '@chakra-ui/react';
 // Custom components
-import { HSeparator } from "components/separator/Separator";
 import DefaultAuth from "layouts/auth/Default";
 import { loginUser, requestPasswordReset } from "services/AuthService";
 // Assets
 import illustration from "assets/img/auth/auth.jpg";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { RiEyeCloseLine } from "react-icons/ri";
 import Form from 'components/form/Form';
 
 function SignIn() {
-  // Chakra color mode
-  const textColor = useColorModeValue("navy.700", "white");
-  const textColorSecondary = "gray.400";
-  const textColorDetails = useColorModeValue("navy.700", "secondaryGray.600");
-  const textColorBrand = useColorModeValue("brand.500", "white");
-  const brandStars = useColorModeValue("brand.500", "brand.400");
-
   const history = useHistory();
-  const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [recovering, setRecovering] = useState(false);
 
-  const handleClick = () => setShow(!show);
+
 
   const handleSignIn = async () => {
     if (isSubmitting) return;
+    setRecovering(false);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || !password) { setFeedback('Revise el correo electrónico y la contraseña.'); return; }
     setFeedback("");
     setIsSubmitting(true);
     loginUser(email, password).then(() => {
         history.push('/admin/order/index');
       })
-      .catch(() => setFeedback('No fue posible iniciar sesión. Verifique los datos e intente nuevamente.'))
+      .catch(() => setFeedback('No fue posible iniciar sesión. Verificá los datos e intentá nuevamente.'))
       .finally(() => setIsSubmitting(false));
   };
 
   const handlePasswordReset = async () => {
+    setRecovering(true);
     if (!email.trim()) {
-      setFeedback('Ingrese su correo electrónico para solicitar la recuperación.');
+      setFeedback('Ingresá tu correo electrónico para solicitar la recuperación.');
       return;
     }
     try {
       await requestPasswordReset(email);
-      setFeedback('Si el correo está registrado, recibirá instrucciones para restablecer la contraseña.');
+      setFeedback('Si el correo está registrado, recibirás instrucciones para restablecer la contraseña.');
     } catch {
       // Keep the response neutral so the form does not disclose registered accounts.
-      setFeedback('Si el correo está registrado, recibirá instrucciones para restablecer la contraseña.');
+      setFeedback('Si el correo está registrado, recibirás instrucciones para restablecer la contraseña.');
     }
   };
-  // Responsive typed constants to avoid TS complex union warnings
-  const maxWPrimary: ResponsiveValue<string> = { base: '100%', md: 'max-content' };
-  const mxAutoLg: ResponsiveValue<string> = { base: 'auto', lg: '0px' };
-  const mbPrimary: ResponsiveValue<string> = { base: '30px', md: '60px' };
-  const pxPrimary: ResponsiveValue<string> = { base: '25px', md: '0px' };
-  const mtPrimary: ResponsiveValue<string> = { base: '40px', md: '14vh' };
-  const innerW: ResponsiveValue<string> = { base: '100%', md: '420px' };
-  const innerMx: ResponsiveValue<string> = { base: 'auto', lg: 'unset' };
-  const innerMb: ResponsiveValue<string> = { base: '20px', md: 'auto' };
-  return (
-    <DefaultAuth illustrationBackground={illustration} image={illustration}>
-      <>
-        <Form onFormSubmit={(event) => { event.preventDefault(); handleSignIn(); }}>
-          <Flex
-          maxW={maxWPrimary}
-          w='100%'
-          mx={mxAutoLg}
-          me='auto'
-          h='100%'
-          alignItems='start'
-          justifyContent='center'
-          mb={mbPrimary}
-          px={pxPrimary}
-          mt={mtPrimary}
-          flexDirection='column'>
-          <Box me='auto'>
-            <Heading color={textColor} fontSize='36px' mb='10px'>
-              Inicia sesión
-            </Heading>
-            <Text
-              mb='36px'
-              ms='4px'
-              color={textColorSecondary}
-              fontWeight='400'
-              fontSize='md'>
-              ¡Ingrese su correo electrónico y contraseña para iniciar sesión!
-            </Text>
-          </Box>
-          <Flex
-            zIndex='2'
-            direction='column'
-            w={innerW}
-            maxW='100%'
-            background='transparent'
-            borderRadius='15px'
-            mx={innerMx}
-            me='auto'
-            mb={innerMb}>
-            <Flex align='center' mb='25px'>
-              <HSeparator />
-            </Flex>
-            <FormControl>
-              <FormLabel
-                htmlFor="email"
-                display='flex'
-                ms='4px'
-                fontSize='sm'
-                fontWeight='500'
-                color={textColor}>
-                Email<Text color={brandStars}>*</Text>
-              </FormLabel>
-              <Input
-                id="email"
-                isRequired={true}
-                variant='auth'
-                fontSize='sm'
-                ms={{ base: "0px", md: "0px" }}
-                type='email'
-                placeholder='mail@simmmple.com'
-                mb='12px'
-                fontWeight='500'
-                size='lg'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel
-                htmlFor="password"
-                ms='4px'
-                fontSize='sm'
-                fontWeight='500'
-                color={textColor}
-                display='flex'>
-                Contraseña<Text color={brandStars}>*</Text>
-              </FormLabel>
-              <InputGroup size='md'>
-                <Input
-                  id="password"
-                  isRequired={true}
-                  fontSize='sm'
-                  placeholder='Min. 8 caracteres'
-                  mb='12px'
-                  size='lg'
-                  type={show ? "text" : "password"}
-                  variant='auth'
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <InputRightElement display='flex' alignItems='center' mt='4px'>
-                  <Button
-                    aria-label={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    variant="ghost"
-                    minW="40px"
-                    color={textColorSecondary}
-                    onClick={handleClick}
-                  ><Icon as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye} /></Button>
-                </InputRightElement>
-              </InputGroup>
-              <Flex justifyContent='space-between' align='center' mb='12px'>
-                <Button variant="link" onClick={handlePasswordReset}
-                    color={textColorBrand}
-                    fontSize='sm'
-                    fontWeight='500'>
-                    ¿Contraseña olvidada?
-                </Button>
-              </Flex>
-              {feedback && <Text role="status" color={textColorDetails} fontSize="sm" mb="12px">{feedback}</Text>}
-              <Button
-                type="submit"
-                fontSize='sm'
-                variant='brand'
-                fontWeight='500'
-                w='100%'
-                h='50'
-                mb='24px'
-                isLoading={isSubmitting}
-                loadingText="Ingresando">
-                Iniciar Sesión
-              </Button>
-            </FormControl>
-            <Flex
-              flexDirection='column'
-              justifyContent='center'
-              alignItems='start'
-              maxW='100%'>
-              <Text color={textColorDetails} fontWeight='400' fontSize='14px'>
-                ¿Aún no está registrado?
-                <NavLink to='/auth/sign-up'>
-                  <Text
-                    color={textColorBrand}
-                    as='span'
-                    ms='5px'
-                    fontWeight='500'>
-                    Crea una cuenta
-                  </Text>
-                </NavLink>
-              </Text>
-            </Flex>
-          </Flex>
-        </Flex>
-        </Form></>
-    </DefaultAuth>
-  );
+  return <DefaultAuth illustrationBackground={illustration} image={illustration}>
+    <Box w="100%" maxW="420px" mx="auto" px={{ base: 5, md: 0 }} py={{ base: 8, md: 12 }}>
+      <Form title="Iniciar sesión" description="Ingrese su correo electrónico y contraseña." submitLabel="Ingresar" isSubmitting={isSubmitting}
+        loadingLabel="Ingresando" onFormSubmit={event => { event.preventDefault(); handleSignIn(); }}>
+        <Stack spacing={4}>
+          <FormField id="signIn-email" label="Correo electrónico" isRequired isDisabled={isSubmitting}>
+            <Input id="signIn-email" type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} />
+          </FormField>
+          <PasswordField id="signIn-password" value={password} onChange={setPassword} isNew={false} isDisabled={isSubmitting} />
+          <Button type="button" variant="link" colorScheme="brand" alignSelf="flex-start" onClick={handlePasswordReset} isDisabled={isSubmitting}>¿Olvidó su contraseña?</Button>
+          {feedback && <Alert status={recovering ? "info" : "error"}><AlertIcon />{feedback}</Alert>}
+        </Stack>
+      </Form>
+      <Text mt={5} fontSize="sm">¿No tiene cuenta? <Link as={NavLink} to="/auth/sign-up" color="brand.500" fontWeight="700">Crear cuenta</Link></Text>
+    </Box>
+  </DefaultAuth>;
 }
 
 export default SignIn;

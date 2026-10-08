@@ -1,7 +1,7 @@
-import { Box, Button, Flex, Text, useColorModeValue } from '@chakra-ui/react';
-import type { ReactNode } from 'react';
-import { MdClose } from 'react-icons/md';
+import { Box } from '@chakra-ui/react';
 import Card from 'components/card/Card';
+import type { ReactNode } from 'react';
+import Form from './Form';
 
 type FormPanelProps = {
   title: string;
@@ -10,22 +10,16 @@ type FormPanelProps = {
   children: ReactNode;
   footer?: ReactNode;
   closeLabel?: string;
+  onSubmit?: () => void;
+  isSubmitting?: boolean;
 };
 
-export default function FormPanel({ title, description, onClose, children, footer, closeLabel = 'Cerrar' }: FormPanelProps) {
-  const muted = useColorModeValue('secondaryGray.600', 'secondaryGray.400');
+export default function FormPanel({ title, description, onClose, children, footer, onSubmit, isSubmitting }: FormPanelProps) {
 
-  return (
-    <Card as="section" p={{ base: 5, md: 6 }} mb={5} borderColor="brand.200">
-      <Flex justify="space-between" align="flex-start" gap={4} mb={5}>
-        <Box>
-          <Text as="h2" fontSize="lg" fontWeight="800">{title}</Text>
-          {description && <Text fontSize="sm" color={muted}>{description}</Text>}
-        </Box>
-        <Button aria-label={closeLabel} leftIcon={<MdClose />} size="sm" variant="ghost" onClick={onClose}>{closeLabel}</Button>
-      </Flex>
+  return <Card p={{ base: 5, md: 6 }} mb={5} borderColor="brand.200">
+    <Form isSubmitting={isSubmitting} title={title} description={description} onBack={onClose} onFormSubmit={event => { event.preventDefault(); onSubmit?.(); }}>
       {children}
       {footer && <Box mt={6}>{footer}</Box>}
-    </Card>
-  );
+    </Form>
+  </Card>;
 }
