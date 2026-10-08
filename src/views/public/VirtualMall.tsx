@@ -14,6 +14,8 @@ useColorModeValue
 } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import AppModal from 'components/modal/AppModal';
+import SponsorLocation from 'components/sponsor/SponsorLocation';
+import { networkFor, sponsorContactHref, sponsorLinks, sponsorVideoSource } from 'utils/sponsor';
 import useCategories from 'hooks/useCategories';
 import SearchableCategorySelect from 'components/category/SearchableCategorySelect';
 import SponsorItem from 'interfaces/SponsorItem';
@@ -91,25 +93,18 @@ const goldenActionStyles = {
   _focusVisible: { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' },
 };
 
-const hrefFor = (link = '') => link.includes('@') && !link.startsWith('mailto:') ? `mailto:${link}` : link;
+const hrefFor = sponsorContactHref;
 const linkMeta = (link = '') => {
-  const value = link.toLowerCase();
-  if (value.includes('facebook.com')) return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
-  if (value.includes('instagram.com')) return { label: 'Instagram', icon: FaInstagram, bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' };
-  if (value.includes('whatsapp.com') || value.includes('wa.me')) return { label: 'WhatsApp', icon: FaWhatsapp, bg: '#25D366' };
-  if (value.includes('tiktok.com')) return { label: 'TikTok', icon: FaTiktok, bg: '#111111' };
-  if (value.startsWith('mailto:') || value.includes('@')) return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
-  if (value.includes('http')) return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
+  const network = networkFor(link);
+  if (network === 'facebook') return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
+  if (network === 'instagram') return { label: 'Instagram', icon: FaInstagram, bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' };
+  if (network === 'whatsapp') return { label: 'WhatsApp', icon: FaWhatsapp, bg: '#25D366' };
+  if (network === 'tiktok') return { label: 'TikTok', icon: FaTiktok, bg: '#111111' };
+  if (network === 'email') return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
+  if (network === 'website') return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
   return { label: 'Contacto', icon: MdLink, bg: '#64748B' };
 };
-const videoSource = (value = '') => {
-  const source = value.match(/src=["']([^"']+)["']/i)?.[1] || value;
-  const youtubeId = source.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([^?&/]+)/i)?.[1];
-  if (youtubeId) return `https://www.youtube.com/embed/${youtubeId}`;
-  const vimeoId = source.match(/vimeo\.com\/(?:video\/)?(\d+)/i)?.[1];
-  if (vimeoId) return `https://player.vimeo.com/video/${vimeoId}`;
-  return source;
-};
+const videoSource = (value = '') => sponsorVideoSource(value) || value.match(/src=["']([^"']+)["']/i)?.[1] || value;
 const isDirectVideo = (value = '') => value.startsWith('data:video') || /\.(mp4|webm|ogg)(?:\?|$)/i.test(value);
 const businessPosition = (index: number, total: number): number[] => {
   const ring = index < 8 ? 0 : 1;
@@ -180,7 +175,7 @@ export default function VirtualMall() {
   const arrivedBusiness = arrivedBusinessId === selectedBusinessId ? selectedBusiness : undefined;
   const selectedCategoryIndex = categories.indexOf(selectedCategory);
   const categoryIcon = categoryEmoji[selectedCategoryIndex] || '🪐';
-  const contactLinks = (selectedBusiness?.links || []).filter(Boolean).slice(0, 4);
+  const contactLinks = selectedBusiness ? sponsorLinks(selectedBusiness).slice(0, 4) : [];
 
   const enterCategory = (category: string) => {
     setSelectedCategory(category);
@@ -298,10 +293,11 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
         <SearchableCategorySelect categories={categories} value={selectedCategory} onChange={onCategory} />
         <Text fontWeight="700">{visible.length} {visible.length === 1 ? 'negocio encontrado' : 'negocios encontrados'}</Text>
         {visible.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px">{visible.map((business) => {
-          const links = (business.links || []).filter(Boolean).slice(0, 4);
+          const links = sponsorLinks(business);
           return <Box key={business.id} border="1px solid" borderColor={border} borderRadius="20px" p={{ base: '16px', md: '18px' }}>
             <Flex gap="14px" align="center"><Flex w="64px" h="64px" borderRadius="16px" bg="gray.50" align="center" justify="center" p="8px" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}</Flex><Box minW={0}><Heading fontSize="lg">{business.name || 'Negocio local'}</Heading><Badge mt="5px" colorScheme="purple">{business.category}</Badge></Box></Flex>
             {business.description && <Text color={muted} fontSize="sm" lineHeight="1.6" mt="12px">{business.description}</Text>}
+            <SponsorLocation sponsor={business} />
             {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <Button key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" size="sm" leftIcon={<Icon as={meta.icon} />} colorScheme="brand" variant="outline">{meta.label}</Button>; })}</Flex>}
           </Box>;
         })}</SimpleGrid> : <Box textAlign="center" py="40px"><Icon as={MdStorefront} boxSize="42px" color="gray.300" /><Text fontWeight="800" mt="10px">No encontramos negocios</Text><Text color={muted}>Probá con otra categoría o borrá la búsqueda.</Text></Box>}
@@ -438,6 +434,8 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
           </Flex>
         </Stack>
       </Flex>
+      <SponsorLocation sponsor={business} />
+      {sponsorLinks(business).length > 4 && <Flex gap={2} wrap="wrap" mt={3}>{sponsorLinks(business).slice(4).map(link => <Button key={link} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" size="sm" {...goldenActionStyles}>{linkMeta(link).label}</Button>)}</Flex>}
     </Box>
   );
 }

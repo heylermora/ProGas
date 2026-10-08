@@ -68,3 +68,11 @@ Los candidatos de prioridad alta y media ya cuentan con una implementación comp
 - Videos: misma estructura en variante oscura, con tamaño y reproductor limitados al viewport.
 
 Los paneles laterales de navegación (`Drawer`) conservan su patrón porque no son diálogos de contenido o formularios.
+
+## Patrocinadores — 8 de octubre de 2026
+
+Crear y editar reutilizan `SponsorForm` como página con layout administrativo amplio. Mantener un solo flujo de campos, sin una previsualización lateral que reduzca el ancho disponible. Se reutilizan `Form`, `FormField`, `Card` y `ModalSection` para detalles opcionales de video y orden.
+
+`utils/sponsor` define los campos opcionales por red, reconoce contactos históricos y conserva los enlaces adicionales. El contrato mantiene `links` para consumidores anteriores y agrega `socialLinks` por nombre. `SponsorLocation` presenta las señas y enlaces a Maps/Waze tanto en el formulario como en las dos vistas del directorio. Un único campo `coordinates` determina ambos destinos; no inventar un punto a partir de las señas. `DeviceLocationMap` admite mensajes contextuales sin cambiar el flujo de pedidos.
+
+El video se configura mediante enlace compartido de YouTube/Vimeo o archivo público MP4/WebM/OGG. No ofrecer carga directa de nuevos videos a Firestore: su límite documental no sirve para videos habituales. Los videos históricos se conservan y pueden quitarse o reemplazarse. La configuración del espacio disponible se retiró del listado administrativo porque correspondía a `SponsorStrip`, que ya no se monta en el directorio actual; se mantienen servicio y documentos históricos.

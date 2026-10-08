@@ -6,13 +6,15 @@ import GeocodingService from 'services/GeocodingService';
 import { ReverseGeocodeItem } from 'interfaces/ReverseGeocodeItem';
 
 type DeviceLocationMapProps = {
+  successMessage?: string;
+  footnote?: string;
   coordinates?: string;
   addressQuery?: string;
   detectAddress?: boolean;
   onLocation?: (value: { coordinates: string; locationUrl: string; latitude: number; longitude: number; accuracyMeters?: number; detectedAddress?: ReverseGeocodeItem }) => void;
 };
 
-export default function DeviceLocationMap({ coordinates = '', addressQuery = '', detectAddress = false, onLocation }: DeviceLocationMapProps) {
+export default function DeviceLocationMap({ coordinates = '', addressQuery = '', detectAddress = false, onLocation, successMessage = 'Ubicación exacta agregada al pedido.', footnote = 'El GPS guarda el punto exacto, pero no cambia el pueblo ni las señas que seleccionaste.' }: DeviceLocationMapProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const query = coordinates || addressQuery;
@@ -20,7 +22,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
 
   const requestLocation = () => {
     if (!navigator.geolocation) {
-      setMessage('Este dispositivo no permite obtener la ubicación automáticamente. Escriba las señas para continuar.');
+      setMessage('Este dispositivo no permite obtener la ubicación automáticamente. Escribí las señas para continuar.');
       return;
     }
 
@@ -29,7 +31,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         if (!isCostaRicaCoordinate(position.coords.latitude, position.coords.longitude)) {
-          setMessage('La ubicación detectada está fuera de Costa Rica. Ingrese la dirección manualmente.');
+          setMessage('La ubicación detectada está fuera de Costa Rica. Ingresá la dirección manualmente.');
           setLoading(false);
           return;
         }
@@ -43,23 +45,23 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
         };
         if (!detectAddress) {
           onLocation?.(baseLocation);
-          setMessage('Ubicación exacta agregada al pedido.');
+          setMessage(successMessage);
           setLoading(false);
           return;
         }
         try {
           const detectedAddress = await GeocodingService.reverse(position.coords.latitude, position.coords.longitude);
           onLocation?.({ ...baseLocation, detectedAddress });
-          setMessage('Ubicación encontrada. Revise y corrija la dirección detectada antes de continuar.');
+          setMessage('Ubicación encontrada. Revisá y corregí la dirección detectada antes de continuar.');
         } catch {
           onLocation?.(baseLocation);
-          setMessage('Guardamos las coordenadas, pero no pudimos completar la dirección. Selecciónela manualmente.');
+          setMessage('Guardamos las coordenadas, pero no pudimos completar la dirección. Seleccionala manualmente.');
         } finally {
           setLoading(false);
         }
       },
       () => {
-        setMessage('No pudimos obtener la ubicación. Revise permisos del navegador o continúe con las señas.');
+        setMessage('No pudimos obtener la ubicación. Revisá permisos del navegador o continuá con las señas.');
         setLoading(false);
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
@@ -72,14 +74,14 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
         <Button size="md" px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
           <Text as="span">Usar mi ubicación</Text>        </Button>
       </SimpleGrid>
-      <Text fontSize="sm" color="gray.500">Solo necesita aceptar el permiso de ubicación.</Text>
+      <Text fontSize="sm" color="gray.500">Solo necesitás aceptar el permiso de ubicación.</Text>
       {message && <Alert status={coordinates ? 'info' : 'warning'} borderRadius="12px"><AlertIcon />{message}</Alert>}
       {embedUrl && (
         <Box border="1px solid" borderColor="gray.200" borderRadius="16px" overflow="hidden" bg="gray.50">
           <Box as="iframe" title="Vista previa de ubicación en Google Maps" src={embedUrl} w="100%" h={{ base: '220px', md: '280px' }} border="0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
         </Box>
       )}
-      <Text fontSize="xs" color="gray.500">El GPS guarda el punto exacto, pero no cambia el pueblo ni las señas que seleccionaste.</Text>
+      <Text fontSize="xs" color="gray.500">{footnote}</Text>
     </Stack>
   );
 }

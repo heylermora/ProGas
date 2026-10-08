@@ -1,14 +1,12 @@
 import {
-Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Badge, Box, Button, Center, Flex, HStack, Icon, Image,
-Select, SimpleGrid, Stack, Switch, Text, Textarea,
+Badge, Box, Button, Center, Flex, HStack, Icon, Image,
+Select, SimpleGrid, Stack, Switch, Text,
 useColorModeValue, useDisclosure, useToast
 } from '@chakra-ui/react';
 import Card from 'components/card/Card';
 import CategoryManager from 'components/category/CategoryManager';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import EmptyState from 'components/dataDisplay/EmptyState';
-import Form from 'components/form/Form';
-import FormActions from 'components/form/FormActions';
 import FormField from 'components/form/FormField';
 import PageHeader from 'components/layout/PageHeader';
 import DeleteModal from 'components/modal/DeleteModal';
@@ -18,7 +16,6 @@ import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MdAdd, MdDelete, MdDragIndicator, MdEdit, MdSettings, MdStorefront, MdTune, MdVisibility } from 'react-icons/md';
 import { Link as RLink } from 'react-router-dom';
-import SponsorDisplaySettingsService, { defaultSponsorDisplaySettings } from 'services/SponsorDisplaySettingsService';
 import SponsorService from 'services/SponsorService';
 
 export default function SponsorsAdmin() {
@@ -29,8 +26,6 @@ export default function SponsorsAdmin() {
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
-  const [availableCopy, setAvailableCopy] = useState(defaultSponsorDisplaySettings);
-  const [savingAvailableCopy, setSavingAvailableCopy] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<SponsorItem | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const categoryManager = useDisclosure();
@@ -48,7 +43,6 @@ export default function SponsorsAdmin() {
   }, [toast]);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { SponsorDisplaySettingsService.get().then(setAvailableCopy); }, []);
 
   const availableCategories = useMemo(() => Array.from(new Set([...categories, ...sponsors.map((sponsor) => sponsor.category).filter(Boolean)])), [categories, sponsors]);
   const sponsorsByCategory = useMemo(() => availableCategories.reduce<Record<string, SponsorItem[]>>((acc, type) => ({
@@ -112,15 +106,6 @@ export default function SponsorsAdmin() {
     }
   };
 
-  const saveAvailableCopy = async () => {
-    setSavingAvailableCopy(true);
-    try {
-      await SponsorDisplaySettingsService.save(availableCopy);
-      toast({ status: 'success', title: 'Mensaje público actualizado' });
-    } catch { toast({ status: 'error', title: 'No se pudo guardar el mensaje' }); }
-    finally { setSavingAvailableCopy(false); }
-  };
-
   return (
     <Box pt={{ base: '120px', md: '80px' }} pb="32px">
       <PageHeader
@@ -169,11 +154,7 @@ export default function SponsorsAdmin() {
         </Stack>
       )}
 
-      <Accordion allowToggle>
-        <AccordionItem border="0">
-          <Card overflow="hidden"><AccordionButton px={{ base: '14px', md: '18px' }} py="14px"><Box flex="1" textAlign="left"><Text fontWeight="800">Configuración del espacio disponible</Text><Text color={muted} fontSize="sm">Mensaje que se muestra cuando todavía no hay un patrocinador.</Text></Box><AccordionIcon /></AccordionButton><AccordionPanel px={{ base: '14px', md: '18px' }} pb="18px"><Form isSubmitting={savingAvailableCopy} onFormSubmit={(event) => { event.preventDefault(); saveAvailableCopy(); }}><SimpleGrid columns={{ base: 1, md: 2 }} spacing="12px"><FormField  label={<>Título</>}><Textarea value={availableCopy.availableTitle} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableTitle: event.target.value }))} /></FormField><FormField  label={<>Descripción</>}><Textarea value={availableCopy.availableDescription} onChange={(event) => setAvailableCopy((current) => ({ ...current, availableDescription: event.target.value }))} /></FormField></SimpleGrid><FormActions submitLabel="Guardar configuración" isLoading={savingAvailableCopy} /></Form></AccordionPanel></Card>
-        </AccordionItem>
-      </Accordion>
+
 
       <CategoryManager kind="sponsors" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
       <DeleteModal title="Eliminar patrocinador" isOpen={isOpen} onClose={onClose} handle={confirmDelete} isLoading={deleting}

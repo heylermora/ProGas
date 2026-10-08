@@ -21,6 +21,9 @@ interface SponsorItem {
   videoUrl?: string;
   links: string[];
   description?: string;
+  socialLinks?: Partial<Record<'facebook' | 'instagram' | 'tiktok' | 'whatsapp' | 'website' | 'email', string>>;
+  coordinates?: string;
+  directions?: string;
 }
 
 export default SponsorItem;
