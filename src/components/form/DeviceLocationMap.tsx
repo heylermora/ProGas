@@ -73,7 +73,7 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
   return (
     <Stack spacing="10px">
       <SimpleGrid columns={{ base: 1, md: 1 }} spacing={{ base: '6px', md: '10px' }}>
-        <Button size="md" h={compact ? 'auto' : undefined} minH={compact ? '48px' : undefined} py={compact ? 3 : undefined} px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
+        <Button size="md" h={compact ? 'auto' : undefined} minH={compact ? '48px' : undefined} py={compact ? 3 : undefined} px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" variant={compact ? 'outline' : 'solid'} onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
           <Text as="span" whiteSpace="normal">{buttonLabel}</Text>        </Button>
       </SimpleGrid>
       {!compact && <Text fontSize="sm" color="gray.500">Solo necesitás aceptar el permiso de ubicación.</Text>}

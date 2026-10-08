@@ -52,7 +52,7 @@ it.each(['data:video/mp4;base64,AAA', '<iframe src="https://www.facebook.com/plu
 
 it('reveals the video error when an unsupported link is in the collapsed section', async () => {
   showForm();
-  const videoSection = screen.getByRole('button', { name: /Video promocional/ });
+  const videoSection = screen.getByRole('button', { name: /Cómo agregar el video/ });
   fireEvent.click(videoSection);
   fireEvent.change(screen.getByLabelText('Enlace del video'), { target: { value: 'https://drive.google.com/file/d/123' } });
   fireEvent.click(videoSection);
