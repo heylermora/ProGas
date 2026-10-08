@@ -6,6 +6,8 @@ import GeocodingService from 'services/GeocodingService';
 import { ReverseGeocodeItem } from 'interfaces/ReverseGeocodeItem';
 
 type DeviceLocationMapProps = {
+  compact?: boolean;
+  buttonLabel?: string;
   successMessage?: string;
   footnote?: string;
   coordinates?: string;
@@ -14,7 +16,7 @@ type DeviceLocationMapProps = {
   onLocation?: (value: { coordinates: string; locationUrl: string; latitude: number; longitude: number; accuracyMeters?: number; detectedAddress?: ReverseGeocodeItem }) => void;
 };
 
-export default function DeviceLocationMap({ coordinates = '', addressQuery = '', detectAddress = false, onLocation, successMessage = 'Ubicación exacta agregada al pedido.', footnote = 'El GPS guarda el punto exacto, pero no cambia el pueblo ni las señas que seleccionaste.' }: DeviceLocationMapProps) {
+export default function DeviceLocationMap({ coordinates = '', addressQuery = '', detectAddress = false, onLocation, compact = false, buttonLabel = 'Usar mi ubicación', successMessage = 'Ubicación exacta agregada al pedido.', footnote = 'El GPS guarda el punto exacto, pero no cambia el pueblo ni las señas que seleccionaste.' }: DeviceLocationMapProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const query = coordinates || addressQuery;
@@ -71,17 +73,17 @@ export default function DeviceLocationMap({ coordinates = '', addressQuery = '',
   return (
     <Stack spacing="10px">
       <SimpleGrid columns={{ base: 1, md: 1 }} spacing={{ base: '6px', md: '10px' }}>
-        <Button size="md" px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
-          <Text as="span">Usar mi ubicación</Text>        </Button>
+        <Button size="md" h={compact ? 'auto' : undefined} minH={compact ? '48px' : undefined} py={compact ? 3 : undefined} px={{ base: 2, md: 4 }} leftIcon={loading ? <Spinner size="xs" /> : <MdMyLocation />} colorScheme="brand" onClick={requestLocation} isLoading={loading} loadingText="Ubicando">
+          <Text as="span" whiteSpace="normal">{buttonLabel}</Text>        </Button>
       </SimpleGrid>
-      <Text fontSize="sm" color="gray.500">Solo necesitás aceptar el permiso de ubicación.</Text>
+      {!compact && <Text fontSize="sm" color="gray.500">Solo necesitás aceptar el permiso de ubicación.</Text>}
       {message && <Alert status={coordinates ? 'info' : 'warning'} borderRadius="12px"><AlertIcon />{message}</Alert>}
-      {embedUrl && (
+      {!compact && embedUrl && (
         <Box border="1px solid" borderColor="gray.200" borderRadius="16px" overflow="hidden" bg="gray.50">
           <Box as="iframe" title="Vista previa de ubicación en Google Maps" src={embedUrl} w="100%" h={{ base: '220px', md: '280px' }} border="0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
         </Box>
       )}
-      <Text fontSize="xs" color="gray.500">{footnote}</Text>
+      {!compact && <Text fontSize="xs" color="gray.500">{footnote}</Text>}
     </Stack>
   );
 }

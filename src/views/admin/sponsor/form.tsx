@@ -2,24 +2,24 @@ import { Alert, AlertIcon, Box, Button, Image, Input, Select, SimpleGrid, Stack,
 import Card from 'components/card/Card';
 import Form from 'components/form/Form';
 import FormField from 'components/form/FormField';
-import DeviceLocationMap from 'components/form/DeviceLocationMap';
 import ModalSection from 'components/modal/ModalSection';
-import SponsorLocation from 'components/sponsor/SponsorLocation';
+import SponsorLocationFields from 'components/sponsor/SponsorLocationFields';
 import useCategories from 'hooks/useCategories';
 import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import SponsorService from 'services/SponsorService';
-import { networkFor, parseSponsorCoordinates, sponsorContacts, sponsorLinks, sponsorNetworks, sponsorVideoSource } from 'utils/sponsor';
+import { isSponsorMapLink, networkFor, sponsorContacts, sponsorLinks, sponsorNetworks, sponsorVideoSource } from 'utils/sponsor';
 
 type SponsorFormState = Omit<SponsorItem, 'id'>;
-const empty: SponsorFormState = { name: '', category: DEFAULT_BUSINESS_CATEGORY, active: true, order: 1, logoUrl: '', videoUrl: '', links: [], socialLinks: {}, description: '', coordinates: '', directions: '' };
+const empty: SponsorFormState = { name: '', category: DEFAULT_BUSINESS_CATEGORY, active: true, order: 1, logoUrl: '', videoUrl: '', links: [], socialLinks: {}, description: '', coordinates: '', mapsUrl: '', wazeUrl: '', directions: '' };
 
 export default function SponsorForm() {
   const { categories } = useCategories('sponsors');
   const { id } = useParams<{ id?: string }>();
   const history = useHistory();
   const [sponsor, setSponsor] = useState(empty);
+  const [originalCategory, setOriginalCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   const [originalVideo, setOriginalVideo] = useState('');
   const [loading, setLoading] = useState(Boolean(id));
   const [loadError, setLoadError] = useState(false);
@@ -38,6 +38,7 @@ export default function SponsorForm() {
       if (!live) return;
       const contacts = sponsorContacts(item);
       setOriginalVideo(item.videoUrl || '');
+      setOriginalCategory(item.category || DEFAULT_BUSINESS_CATEGORY);
       setSponsor({ ...empty, ...item, socialLinks: contacts.socials, links: contacts.extra });
     }).catch(() => { if (live) setLoadError(true); }).finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
@@ -65,18 +66,21 @@ export default function SponsorForm() {
         nextErrors[network.key] = network.key === 'email' ? 'Ingrese un correo válido.' : `Ingrese el enlace completo de ${network.label}, empezando con https://.`;
       }
     });
-    if (sponsor.coordinates?.trim() && !parseSponsorCoordinates(sponsor.coordinates)) nextErrors.coordinates = 'Ingrese latitud,longitud válidas de Costa Rica, por ejemplo 9.798,-84.162.';
     if (sponsor.videoUrl?.trim() && sponsor.videoUrl !== originalVideo && !sponsorVideoSource(sponsor.videoUrl)) nextErrors.video = 'Use un enlace de YouTube, Vimeo o un archivo público MP4, WebM u OGG.';
-    if (!Number.isFinite(sponsor.order) || sponsor.order < 1 || !Number.isInteger(sponsor.order)) nextErrors.order = 'Ingrese una posición entera mayor o igual a 1.';
+    if (sponsor.mapsUrl?.trim() && !isSponsorMapLink(sponsor.mapsUrl)) nextErrors.mapsUrl = 'Pegue un enlace compartido desde Google Maps.';
+    if (sponsor.wazeUrl?.trim() && !isSponsorMapLink(sponsor.wazeUrl, 'waze')) nextErrors.wazeUrl = 'Pegue un enlace compartido desde Waze.';
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) { setMessage('Revise los campos indicados antes de guardar.'); return; }
     setSaving(true);
     setMessage('');
     try {
-      const payload = { ...sponsor, name: (sponsor.name || '').trim(), description: (sponsor.description || '').trim(), coordinates: (sponsor.coordinates || '').trim(), directions: (sponsor.directions || '').trim(),
+      const payload = { ...sponsor, name: (sponsor.name || '').trim(), description: (sponsor.description || '').trim(), coordinates: (sponsor.coordinates || '').trim(), directions: (sponsor.directions || '').trim(), mapsUrl: (sponsor.mapsUrl || '').trim(), wazeUrl: (sponsor.wazeUrl || '').trim(),
         socialLinks: Object.fromEntries(Object.entries(sponsor.socialLinks || {}).map(([key, value]) => [key, value.trim()])),
         links: sponsorLinks(sponsor), videoUrl: (sponsor.videoUrl || '').trim() };
-      if (id) await SponsorService.edit(id, { ...payload, id });
+      if (id) {
+        if (sponsor.category !== originalCategory) payload.order = await SponsorService.nextOrder(sponsor.category);
+        await SponsorService.edit(id, { ...payload, id });
+      }
       else await SponsorService.create(payload);
       setSaving(false);
       history.push('/admin/sponsor/index');
@@ -122,16 +126,9 @@ export default function SponsorForm() {
           </Card>
           <Card p={{ base: 4, md: 6 }}>
             <Stack spacing={4}>
-              <Box><Text as="h2" fontWeight="700" fontSize="lg">Ubicación y cómo llegar</Text><Text fontSize="sm" color={muted}>Opcional. El punto exacto genera los botones de Google Maps y Waze; las señas lo complementan.</Text></Box>
-              <FormField label="Señas del negocio" help="Indique pueblo, puntos de referencia y cómo reconocer la entrada."><Textarea rows={3} value={sponsor.directions} onChange={event => set('directions', event.target.value)} /></FormField>
-              <FormField label="Coordenadas del negocio" help="En Google Maps, mantenga presionado el punto del negocio y copie su latitud y longitud. También puede usar el GPS si está en el local." error={errors.coordinates}>
-                <Input value={sponsor.coordinates} placeholder="9.798,-84.162" onChange={event => set('coordinates', event.target.value)} />
-              </FormField>
-              <ModalSection title="Ubicar con GPS y revisar el mapa" summary="Use esta opción solo si está físicamente en el negocio.">
-                <DeviceLocationMap coordinates={parseSponsorCoordinates(sponsor.coordinates) ? sponsor.coordinates : ''} onLocation={location => set('coordinates', location.coordinates)}
-                  successMessage="Punto del negocio agregado. Revise que corresponda a la entrada correcta." footnote="El GPS registra su posición actual. Las señas se mantienen como las escribió." />
-              </ModalSection>
-              <SponsorLocation sponsor={sponsor} />
+              <Text as="h2" fontWeight="700" fontSize="lg">Ubicación y cómo llegar</Text>
+              <SponsorLocationFields value={sponsor} errors={errors}
+                onChange={location => setSponsor(previous => ({ ...previous, ...location }))} />
             </Stack>
           </Card>
           <ModalSection title="Video promocional (opcional)" summary={sponsor.videoUrl ? 'Hay un video agregado. Puede reemplazarlo o quitarlo.' : 'Pegue un enlace de YouTube o Vimeo; no necesita subir archivos aquí.'} reveal={Boolean(errors.video)}>
@@ -148,9 +145,7 @@ export default function SponsorForm() {
               <Text fontSize="xs" color={muted}>Compruebe que el video pueda abrirse sin iniciar sesión y que su propietario permita mostrarlo en otros sitios.</Text>
             </Stack>
           </ModalSection>
-          <ModalSection title="Orden en el directorio" summary="Puede cambiar la posición arrastrando el negocio desde el listado." reveal={Boolean(errors.order)}>
-            <FormField label="Posición dentro de la categoría" error={errors.order}><Input type="number" min={1} step={1} value={sponsor.order} onChange={event => set('order', Number(event.target.value))} /></FormField>
-          </ModalSection>
+
         </Stack>
       </Box>}
   </Form>;

@@ -52,12 +52,33 @@ export function parseSponsorCoordinates(value = '') {
   return isCostaRicaCoordinate(latitude, longitude) ? { latitude, longitude } : undefined;
 }
 
-export function sponsorNavigation(coordinates = '') {
+export function isSponsorMapLink(value = '', provider: 'maps' | 'waze' = 'maps') {
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+    if (provider === 'waze') return hostMatches(url.hostname, 'waze.com');
+    return url.hostname === 'maps.app.goo.gl'
+      || (url.hostname === 'goo.gl' && url.pathname.startsWith('/maps'))
+      || (['google.com', 'google.co.cr'].some(host => hostMatches(url.hostname, host))
+        && (url.pathname.startsWith('/maps') || url.hostname.startsWith('maps.')));
+  } catch { return false; }
+}
+
+export function sponsorMapCoordinates(value = '') {
+  if (!isSponsorMapLink(value)) return '';
+  const url = new URL(value.trim());
+  const explicitPoint = url.searchParams.get('query') || url.searchParams.get('q') || url.searchParams.get('destination') || '';
+  if (parseSponsorCoordinates(explicitPoint)) return explicitPoint.trim();
+  const marker = url.pathname.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
+  const coordinates = marker ? `${marker[1]},${marker[2]}` : '';
+  return parseSponsorCoordinates(coordinates) ? coordinates : '';
+}
+
+export function sponsorNavigation(coordinates = '', mapsUrl = '', wazeLink = '') {
   const point = parseSponsorCoordinates(coordinates);
-  return point ? {
-    maps: mapsSearchUrl(`${point.latitude},${point.longitude}`),
-    waze: `https://waze.com/ul?ll=${point.latitude}%2C${point.longitude}&navigate=yes`,
-  } : undefined;
+  const maps = isSponsorMapLink(mapsUrl) ? mapsUrl.trim() : point ? mapsSearchUrl(`${point.latitude},${point.longitude}`) : '';
+  const waze = isSponsorMapLink(wazeLink, 'waze') ? wazeLink.trim() : point ? `https://waze.com/ul?ll=${point.latitude}%2C${point.longitude}&navigate=yes` : '';
+  return maps || waze ? { maps, waze } : undefined;
 }
 
 export function sponsorVideoSource(value = '') {

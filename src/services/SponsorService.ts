@@ -36,7 +36,14 @@ const SponsorService = {
   // Compatibilidad temporal con la tira anterior; las pantallas públicas nuevas usan categorías.
   getPublicByType: async (type: SponsorType, max: number) => SponsorService.getPublicByCategory(LEGACY_CATEGORY[type]).then((data) => data.slice(0, max)),
   get: async (key: string) => fetchDataById(COLLECTION, key) as Promise<SponsorItem>,
-  create: async (newSponsor: Omit<SponsorItem, 'id'>) => addData(COLLECTION, newSponsor),
+  nextOrder: async (category: BusinessCategory) => {
+    const items = (await SponsorService.getAll()).filter(item => item.category === category);
+    return Math.max(0, ...items.map(item => Number.isFinite(item.order) ? item.order : 0)) + 1;
+  },
+  create: async (newSponsor: Omit<SponsorItem, 'id'>) => addData(COLLECTION, {
+    ...newSponsor,
+    order: await SponsorService.nextOrder(newSponsor.category),
+  }),
   edit: async (key: string, editedSponsor: SponsorItem) => updateData(COLLECTION, key, editedSponsor),
   enforceCapacity: async (type: SponsorType) => {
     const sponsorsOfType = (await SponsorService.getAll())

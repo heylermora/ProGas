@@ -1,4 +1,4 @@
-import { networkFor, sponsorContactHref, sponsorContacts, sponsorLinks, sponsorNavigation, sponsorVideoSource } from './sponsor';
+import { isSponsorMapLink, networkFor, sponsorContactHref, sponsorContacts, sponsorLinks, sponsorMapCoordinates, sponsorNavigation, sponsorVideoSource } from './sponsor';
 
 it('identifies social networks by hostname rather than text inside a URL', () => {
   expect(networkFor('https://www.instagram.com/local')).toBe('instagram');
@@ -7,6 +7,15 @@ it('identifies social networks by hostname rather than text inside a URL', () =>
   expect(networkFor('ftp://example.com/file')).toBeUndefined();
   expect(sponsorContactHref('https://www.tiktok.com/@local')).toBe('https://www.tiktok.com/@local');
   expect(sponsorContactHref('local@example.com')).toBe('mailto:local@example.com');
+});
+
+it('accepts shared map links and only extracts an explicit destination', () => {
+  expect(isSponsorMapLink('https://maps.app.goo.gl/place123')).toBe(true);
+  expect(isSponsorMapLink('https://waze.com/ul?place=123', 'waze')).toBe(true);
+  expect(isSponsorMapLink('https://maps.app.goo.gl.example.com/place123')).toBe(false);
+  expect(sponsorMapCoordinates('https://www.google.com/maps?query=9.798,-84.162')).toBe('9.798,-84.162');
+  expect(sponsorMapCoordinates('https://www.google.com/maps/@9.798,-84.162,15z')).toBe('');
+  expect(sponsorNavigation('', 'https://maps.app.goo.gl/place123')).toEqual({ maps: 'https://maps.app.goo.gl/place123', waze: '' });
 });
 
 it('maps historic links to named fields without losing duplicates or extra contacts', () => {
