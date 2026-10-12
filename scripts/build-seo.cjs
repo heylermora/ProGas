@@ -21,11 +21,11 @@ if (siteUrl.protocol !== 'https:' || siteUrl.username || siteUrl.password || sit
   throw new Error('REACT_APP_SITE_URL debe ser una URL pública HTTPS sin credenciales, query ni hash.');
 }
 if (!siteUrl.pathname.endsWith('/')) siteUrl.pathname += '/';
-const imageUrl = new URL('acosta-fondo.png', siteUrl).href;
+const imageUrl = new URL('social-preview.jpg', siteUrl).href;
 const escapeAttribute = (value) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const buildDirectory = path.resolve(__dirname, '..', 'build');
-if (!fs.existsSync(path.join(buildDirectory, 'acosta-fondo.png'))) {
-  throw new Error('Falta la imagen de portada acosta-fondo.png en el build.');
+if (!fs.existsSync(path.join(buildDirectory, 'social-preview.jpg'))) {
+  throw new Error('Falta la imagen social-preview.jpg en el build.');
 }
 const htmlPath = path.join(buildDirectory, 'index.html');
 let html = fs.readFileSync(htmlPath, 'utf8');
@@ -34,9 +34,9 @@ html = html.replace(/<meta\b[^>]*(?:property|name)="(?:og:url|og:image(?::(?:typ
 const tags = [
   ['property', 'og:url', siteUrl.href],
   ['property', 'og:image', imageUrl],
-  ['property', 'og:image:type', 'image/png'],
-  ['property', 'og:image:width', '1672'],
-  ['property', 'og:image:height', '941'],
+  ['property', 'og:image:type', 'image/jpeg'],
+  ['property', 'og:image:width', '1200'],
+  ['property', 'og:image:height', '630'],
   ['name', 'twitter:image', imageUrl],
 ].map(([attribute, name, value]) => `<meta ${attribute}="${name}" content="${escapeAttribute(value)}" />`).join('');
 if (!html.includes('</head>')) throw new Error('El HTML generado no contiene </head>.');

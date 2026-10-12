@@ -25,10 +25,13 @@ de clientes o pedidos en metadatos públicos.
 - Título: `Negocios de Acosta | Gas Memo`, de `public/index.html`.
 - Descripción: texto original de `public/index.html`, también usado para OG y X.
 - Marca: `Gas Memo`, del título, `PublicHeader.tsx` y `PublicFooter.tsx`.
-- Imagen: `public/acosta-fondo.png`, usada en `Home.tsx`; PNG de 1672 × 941,
-  1.24 MB, sin modificaciones. Su formato horizontal es adecuado para
-  `summary_large_image`; cada plataforma puede recortarla de manera diferente.
-  Los logos cuadrados también existen, pero no se sustituyó la portada por ellos.
+- Imagen: `public/social-preview.jpg`, creada por solicitud del propietario
+  exclusivamente para previsualizaciones. JPEG de 1200 × 630, 143685 bytes
+  (aproximadamente 144 KB). Incluye los textos existentes «Negocios de Acosta»,
+  «Gas Memo», «Productos y servicios de nuestra comunidad, reunidos en un solo
+  lugar.» y «Ver negocios», de `public/index.html` y `Home.tsx`.
+  El paisaje y los comercios son una ilustración, no una fotografía de negocios
+  reales. La portada de la interfaz `acosta-fondo.png` se conserva sin cambios.
 - `robots.txt` permite rastreo. Se eliminó el sitemap de `simmmple.com`, ajeno
   al proyecto. No hay sitemap propio comprobado para reemplazarlo.
 
@@ -36,7 +39,7 @@ de clientes o pedidos en metadatos públicos.
 
 La URL pública confirmada por el propietario es `https://progasmemo.netlify.app`.
 Está configurada en `.env.production` mediante `REACT_APP_SITE_URL`; la imagen
-se resuelve a `https://progasmemo.netlify.app/acosta-fondo.png`.
+se resuelve a `https://progasmemo.netlify.app/social-preview.jpg`.
 El entorno del build o `.env.production.local` pueden sobrescribirla si cambia
 el destino. Ejecutar `npm run build`. `postbuild` agrega `og:url`, `og:image`, tipo y
 dimensiones, y `twitter:image` al HTML generado. La imagen se resuelve bajo la
@@ -59,7 +62,7 @@ No se agregó una cuenta `twitter:site` porque no hay una cuenta X verificada.
    sin ejecutar JavaScript, tanto con un navegador como con User-Agent
    `facebookexternalhit`, `Twitterbot`, `LinkedInBot` y `Discordbot`.
    Verificar que no haya login, bloqueo de bots ni challenge del hosting.
-3. Abrir la URL de `og:image` sin sesión: respuesta 200, `Content-Type: image/png`,
+3. Abrir la URL de `og:image` sin sesión: respuesta 200, `Content-Type: image/jpeg`,
    archivo real y acceso permitido por robots/CDN. Repetir desde fuera de la red
    local. Verificar también la URL de `twitter:image`.
 4. Facebook: usar Sharing Debugger y solicitar un nuevo rastreo.
