@@ -5,8 +5,8 @@
 React 17, TypeScript, Create React App 5 y React Router 5 con `HashRouter`.
 No hay SSR, prerender ni servidor de metadatos. `public/index.html` es la fuente
 del head inicial. No se encontró Helmet ni otra administración de metadatos.
-La descripción y el título existentes se conservan; el título ya identifica
-el contenido y la marca. Se retira `itemprop` del título por no existir un scope
+La descripción existente se conserva; el título se amplía a 52 caracteres con
+«comercios y servicios», reutilizado de esa descripción. Se retira `itemprop` del título por no existir un scope
 de datos estructurados que lo utilice.
 
 Rutas públicas: `/`, `/mall`, `/portfolio`, `/customer/data`, `/customer/info`,
@@ -22,24 +22,31 @@ de clientes o pedidos en metadatos públicos.
 
 ## Valores reutilizados
 
-- Título: `Negocios de Acosta | Gas Memo`, de `public/index.html`.
+- Título: `Negocios de Acosta: comercios y servicios | Gas Memo`, combina
+  el título original con «comercios y servicios» de la descripción existente.
 - Descripción: texto original de `public/index.html`, también usado para OG y X.
 - Marca: `Gas Memo`, del título, `PublicHeader.tsx` y `PublicFooter.tsx`.
 - Imagen: `public/social-preview.jpg`, creada por solicitud del propietario
-  exclusivamente para previsualizaciones. JPEG de 1200 × 630, 143685 bytes
-  (aproximadamente 144 KB). Incluye los textos existentes «Negocios de Acosta»,
-  «Gas Memo», «Productos y servicios de nuestra comunidad, reunidos en un solo
+  exclusivamente para previsualizaciones. JPEG de 1200 × 630, 91094 bytes
+  (aproximadamente 91 KB). Incluye los textos existentes «Negocios de Acosta»,
+  «Productos y servicios de nuestra comunidad, reunidos en un solo
   lugar.» y «Ver negocios», de `public/index.html` y `Home.tsx`.
-  El paisaje y los comercios son una ilustración, no una fotografía de negocios
-  reales. La portada de la interfaz `acosta-fondo.png` se conserva sin cambios.
+  Conserva la iglesia y el paisaje ilustrados de la portada original; no incluye
+  la marca Gas Memo dentro de la imagen. La portada de la interfaz `acosta-fondo.png` se conserva sin cambios.
 - `robots.txt` permite rastreo. Se eliminó el sitemap de `simmmple.com`, ajeno
   al proyecto. No hay sitemap propio comprobado para reemplazarlo.
 
-## Configuración pendiente
+## Configuración y despliegue
 
 La URL pública confirmada por el propietario es `https://progasmemo.netlify.app`.
 Está configurada en `.env.production` mediante `REACT_APP_SITE_URL`; la imagen
 se resuelve a `https://progasmemo.netlify.app/social-preview.jpg`.
+`netlify.toml` configura `npm run build` y la publicación de `build/`, donde
+CRA copia `public/social-preview.jpg`. Un 404 en producción requiere comprobar
+que el despliegue incluya esta rama y publique la imagen; cambiar las etiquetas
+por sí solo no publica el recurso. El PR debe integrarse y desplegarse antes de
+validar su URL de producción.
+
 El entorno del build o `.env.production.local` pueden sobrescribirla si cambia
 el destino. Ejecutar `npm run build`. `postbuild` agrega `og:url`, `og:image`, tipo y
 dimensiones, y `twitter:image` al HTML generado. La imagen se resuelve bajo la
