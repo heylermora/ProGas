@@ -39,4 +39,22 @@ describe('VirtualMall flight navigation', () => {
     expect(screen.getAllByRole('button', { name: /Abrir ficha de/ })).toHaveLength(8);
   });
 
+  it('moves the astronaut to the selected station and remembers exploration during the visit', async () => {
+    (SponsorService.getAll as jest.Mock).mockResolvedValue([1, 2].map((id) => ({
+      id: String(id), name: `Negocio ${id}`, category: 'Restaurantes/Sodas', active: true, order: id, logoUrl: '', links: [],
+    })));
+    renderMall();
+    fireEvent.click(await screen.findByRole('button', { name: 'Entrar a Restaurantes/Sodas, 2 negocios' }));
+    expect(screen.getByLabelText('Astronauta listo para explorar')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir ficha de Negocio 1' }));
+    expect(screen.getByLabelText('Astronauta en Negocio 1')).toBeTruthy();
+    expect(screen.getByText('1 / 2 EXPLORADAS')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir ficha de Negocio 2' }));
+    expect(screen.getByLabelText('Astronauta en Negocio 2')).toBeTruthy();
+    expect(screen.getByText('2 / 2 EXPLORADAS')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al mapa principal' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar a Restaurantes/Sodas, 2 negocios' }));
+    expect(screen.getByText('2 / 2 EXPLORADAS')).toBeTruthy();
+  });
+
 });
