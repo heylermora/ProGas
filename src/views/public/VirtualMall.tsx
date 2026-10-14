@@ -185,16 +185,19 @@ export default function VirtualMall() {
   };
   return (
     <PublicPage maxW="1280px">
-      <Stack spacing={{ base: '16px', md: '22px' }}>
-        <Box borderRadius={{ base: '24px', md: '34px' }} overflow="hidden" p={{ base: '20px', md: '30px' }} bgGradient="linear(135deg, #111827 0%, #312E81 48%, #0284C7 100%)" color="white" position="relative">
+      <Stack spacing={{ base: '10px', md: '18px' }}>
+        <Box borderRadius={{ base: '24px', md: '34px' }} overflow="hidden" p={{ base: '14px', md: '22px' }} bgGradient="linear(135deg, #111827 0%, #312E81 48%, #0284C7 100%)" color="white" position="relative">
           <Box position="absolute" right="-25px" top="-60px" fontSize={{ base: '140px', md: '190px' }} opacity=".11">🕹️</Box>
-          <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" direction={{ base: 'column', md: 'row' }}>
-          <Stack spacing="8px" maxW="760px">
-            <Badge w="fit-content" px="10px" py="4px" borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MODO EXPLORACIÓN</Badge>
-            <Heading fontSize={{ base: '29px', md: '48px' }} lineHeight="1.04">Centro Comercial Virtual</Heading>
-            <Text fontSize={{ base: 'sm', md: 'lg' }} color="whiteAlpha.900">Viajá por el mapa, entrá a una categoría y descubrí cada negocio en su propia estación.</Text>
+          <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap={{ base: '8px', md: '14px' }} direction={{ base: 'column', md: 'row' }}>
+          <Stack spacing={{ base: '4px', md: '6px' }} maxW="760px" minW="0">
+            <Badge w="fit-content" px="10px" py="2px" fontSize={{ base: '10px', md: 'xs' }} borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MODO EXPLORACIÓN</Badge>
+            <Heading fontSize={{ base: '22px', md: '36px' }} lineHeight="1.1">Centro Comercial Virtual</Heading>
+            <Text fontSize={{ base: 'xs', md: 'md' }} lineHeight="1.4" color="whiteAlpha.900">
+              <Box as="span" display={{ base: 'inline', md: 'none' }}>Elegí una categoría y explorá sus negocios.</Box>
+              <Box as="span" display={{ base: 'none', md: 'inline' }}>Viajá por el mapa, entrá a una categoría y descubrí cada negocio en su propia estación.</Box>
+            </Text>
           </Stack>
-          <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="lg" flexShrink={0} onClick={() => setSimpleView((value) => !value)} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
+          <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="md" minH="44px" fontSize={{ base: 'sm', md: 'md' }} px={{ base: '16px', md: '20px' }} flexShrink={0} onClick={() => setSimpleView((value) => !value)} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
           </Flex>
         </Box>
 
