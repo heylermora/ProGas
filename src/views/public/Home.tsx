@@ -1,5 +1,6 @@
 import SocialLink, { SocialContact } from 'components/social/SocialLink';
-import React from 'react';
+import React, { useEffect } from 'react';
+import AnalyticsService from 'services/AnalyticsService';
 import {
   Box,
   Button,
@@ -183,6 +184,7 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
 }
 
 export default function Home() {
+  useEffect(() => { void AnalyticsService.track({ type: 'page_view', source: 'home' }); }, []);
   const cardBg = useColorModeValue('rgba(255,255,255,.94)', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.300');
   const border = useColorModeValue('brand.100', 'whiteAlpha.200');
@@ -202,6 +204,7 @@ export default function Home() {
             <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Lo que busca, en Acosta.</Heading>
             <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Productos y servicios de nuestra comunidad, reunidos en un solo lugar.</Text>
             <Button as={RLink} to={{ pathname: '/mall', state: { from: '/', fromLabel: 'Volver al inicio' } }}
+              onClick={() => { void AnalyticsService.track({ type: 'browse_click', source: 'home' }); }}
               alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"
               bg="linear-gradient(115deg, #5930E8, #3520AD)" color="white" px={{ base: 5, md: 7 }}
               borderRadius="full" fontWeight="800" boxShadow="0 8px 22px rgba(70,39,191,.28)"

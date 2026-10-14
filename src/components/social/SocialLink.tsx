@@ -1,3 +1,5 @@
+import AnalyticsService from 'services/AnalyticsService';
+import { AnalyticsSource } from 'interfaces/AnalyticsEvent';
 import { Flex, Icon, IconButton, IconButtonProps, Text, Tooltip } from '@chakra-ui/react';
 import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { MdEmail, MdLink } from 'react-icons/md';
@@ -15,13 +17,15 @@ export const socialPresentation = (href = '', network?: SponsorNetwork) => netwo
 
 type SocialLinkProps = Omit<IconButtonProps, 'icon' | 'as' | 'size' | 'aria-label'> & {
   href?: string;
+  businessId?: string;
+  source?: AnalyticsSource;
   network?: SponsorNetwork;
   label?: string;
   'aria-label'?: string;
   size?: 'compact' | 'regular' | 'large';
 };
 
-export default function SocialLink({ href, network, label, size = 'regular', 'aria-label': ariaLabel, ...props }: SocialLinkProps) {
+export default function SocialLink({ href, businessId, source = 'mall', network, label, size = 'regular', 'aria-label': ariaLabel, ...props }: SocialLinkProps) {
   const meta = socialPresentation(href, network);
   const destination = href ? sponsorContactHref(href) : undefined;
   const external = Boolean(destination && /^https?:/i.test(destination));
@@ -29,6 +33,10 @@ export default function SocialLink({ href, network, label, size = 'regular', 'ar
   const name = ariaLabel || label || meta.label;
   const buttonProps: IconButtonProps = {
     ...props,
+    onClick: (event) => {
+      props.onClick?.(event);
+      if (!event.defaultPrevented && destination && businessId) void AnalyticsService.track({ type: 'link_click', businessId, url: destination, source });
+    },
     'aria-label': name,
     icon: <Icon as={meta.icon} boxSize={size === 'large' ? '26px' : '22px'} aria-hidden="true" />,
     w: diameter, h: diameter, minW: diameter, maxW: diameter, minH: diameter, maxH: diameter,

@@ -131,7 +131,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
                         { left: '8px', top: '0' }, { left: '50%', top: '0', transform: 'translateX(-50%)' }, { right: '8px', top: '0' },
                         { left: '34px', bottom: '0' }, { right: '34px', bottom: '0' },
                       ]; return (
-                        <SocialLink key={contact} size="compact" href={contact} label={`${meta.label} de ${business.name}`} position="absolute" {...positions[index]} pointerEvents="auto" animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} />
+                        <SocialLink businessId={business.id} source="mall-preview" key={contact} size="compact" href={contact} label={`${meta.label} de ${business.name}`} position="absolute" {...positions[index]} pointerEvents="auto" animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} />
                       ); })}
                     </Box>
                   )}

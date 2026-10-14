@@ -1,6 +1,7 @@
+import AnalyticsService from 'services/AnalyticsService';
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Home from './Home';
 import theme from 'theme/theme';
@@ -97,4 +98,14 @@ describe('Home', () => {
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' })).toBeTruthy();
   });
+  it('records the landing visit and the Ver negocios click without changing its destination', () => {
+    (AnalyticsService.track as jest.Mock).mockClear();
+    renderHome();
+    expect(AnalyticsService.track).toHaveBeenCalledWith({ type: 'page_view', source: 'home' });
+    const link = screen.getByRole('link', { name: /^ver negocios$/i });
+    expect(link.getAttribute('href')).toBe('/mall');
+    fireEvent.click(link);
+    expect(AnalyticsService.track).toHaveBeenCalledWith({ type: 'browse_click', source: 'home' });
+  });
+
 });
