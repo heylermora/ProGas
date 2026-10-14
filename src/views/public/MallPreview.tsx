@@ -1,4 +1,5 @@
-import SocialLink, { socialPresentation as linkMeta } from 'components/social/SocialLink';
+import { sponsorLinks } from 'utils/sponsor';
+import { SocialLinksRow } from 'components/social/SocialLink';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Flex, Heading, Icon, Image, Stack, Text, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
@@ -41,15 +42,6 @@ const marquee = keyframes`
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
 `;
-const contactBurst = keyframes`
-  from { opacity: 0; scale: .2; }
-  70% { opacity: 1; scale: 1.14; }
-  to { opacity: 1; scale: 1; }
-`;
-
-
-
-
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
 export default function MallPreview({ compact = false, embedded = false }: MallPreviewProps) {
@@ -113,9 +105,9 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
             {!loading && previewBusinesses.map((business) => {
               const businessKey = `${copy}:${business.id}`;
               const selected = selectedBusinessKey === businessKey;
-              const contacts = (business.links || []).filter(Boolean).slice(0, 5);
+              const contacts = sponsorLinks(business);
               return (
-                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} h={{ base: '142px', md: '150px' }} pt="22px">
+                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} minH={{ base: '164px', md: '172px' }} py="8px">
                   <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
                     <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                       {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
@@ -125,16 +117,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
                       <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'ELIJA UNA RED' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
                     </Stack>
                   </Flex>
-                  {selected && contacts.length > 0 && (
-                    <Box position="absolute" inset="0" zIndex={4} pointerEvents="none">
-                      {contacts.map((contact, index) => { const meta = linkMeta(contact); const positions = [
-                        { left: '8px', top: '0' }, { left: '50%', top: '0', transform: 'translateX(-50%)' }, { right: '8px', top: '0' },
-                        { left: '34px', bottom: '0' }, { right: '34px', bottom: '0' },
-                      ]; return (
-                        <SocialLink businessId={business.id} source="mall-preview" key={contact} size="compact" href={contact} label={`${meta.label} de ${business.name}`} position="absolute" {...positions[index]} pointerEvents="auto" animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} />
-                      ); })}
-                    </Box>
-                  )}
+                  {selected && contacts.length > 0 && <SocialLinksRow links={contacts} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" />}
                 </Box>
               );
             })}

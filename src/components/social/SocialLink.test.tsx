@@ -1,7 +1,7 @@
 import AnalyticsService from 'services/AnalyticsService';
 import { ChakraProvider } from '@chakra-ui/react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import SocialLink, { SocialContact } from './SocialLink';
+import SocialLink, { SocialContact, SocialLinksRow } from './SocialLink';
 
 describe('shared social links', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -44,6 +44,13 @@ describe('shared social links', () => {
     fireEvent.click(screen.getByRole('link', { name: 'Cancelado' }));
     fireEvent.click(screen.getByRole('link', { name: 'Contacto general' }));
     expect(AnalyticsService.track).not.toHaveBeenCalled();
+  });
+
+  it('keeps every destination in the social row and removes duplicate URLs', () => {
+    const links = ['https://facebook.com/negocio', 'https://instagram.com/negocio', 'https://wa.me/50600000000', 'https://tiktok.com/@negocio', 'mailto:contacto@negocio.test', 'https://negocio.test'];
+    render(<ChakraProvider><SocialLinksRow links={[...links, links[0]]} label="Redes sociales de Negocio" businessId="business-a" /></ChakraProvider>);
+    expect(screen.getAllByRole('link')).toHaveLength(6);
+    expect(screen.getAllByRole('link').map(link => link.getAttribute('href'))).toEqual(links);
   });
 
 });

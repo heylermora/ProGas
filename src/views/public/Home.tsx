@@ -1,4 +1,4 @@
-import SocialLink, { SocialContact } from 'components/social/SocialLink';
+import { SocialLinksRow, SocialContact } from 'components/social/SocialLink';
 import React, { useEffect } from 'react';
 import AnalyticsService from 'services/AnalyticsService';
 import {
@@ -30,27 +30,22 @@ const socialLinks = [
   {
     label: 'Facebook',
     href: 'https://www.facebook.com/gasmemoymandaditos',
-    position: { base: { top: '-10px', left: '16px' }, md: { top: '10px', left: '-12px' } },
   },
   {
     label: 'Instagram',
     href: 'https://www.instagram.com/gasmemo2022?fbclid=IwY2xjawSsA2NleHRuA2FlbQIxMABicmlkETFCaFlvTGI1Uzh6RjRib3Exc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHo1bl06kfyGsphsRCNX3LobPoAtg2XoVSNuYklk43R3Y0DQ7CYlc55Y8BHXO_aem_V-fXi2Lvxja2m-IWN6wAiQ',
-    position: { base: { top: '-16px', right: '22px' }, md: { top: '-8px', right: '12px' } },
   },
   {
     label: 'WhatsApp',
     href: 'https://api.whatsapp.com/send/?phone=50683978524&text&type=phone_number&app_absent=0&utm_source=ig',
-    position: { base: { bottom: '-12px', left: '20px' }, md: { bottom: '10px', left: '-18px' } },
   },
   {
     label: 'TikTok',
     href: 'https://www.tiktok.com/@gas.memo',
-    position: { base: { bottom: '-16px', right: '24px' }, md: { bottom: '2px', right: '4px' } },
   },
   {
     label: 'Correo',
     href: 'mailto:facturasgasmemo@gmail.com',
-    position: { base: { bottom: '42px', right: '-10px' }, md: { top: '50%', right: '-28px' } },
   },
 ];
 
@@ -137,9 +132,7 @@ function DonationBanner() {
         justify="space-between" gap={3} borderTop="1px solid" borderColor={border} bg={footer} backdropFilter="blur(8px)"
         px={{ base: 5, md: 7 }} py={3}>
         <Text color={muted} fontSize="sm">Conozca la Banda y manténgase en contacto</Text>
-        <Flex role="group" aria-label="Redes sociales de Banda Municipal de Acosta" gap={2} flexWrap="wrap">
-          {bmaSocialLinks.map((social) => <SocialLink key={social.label} href={social.href} label={social.label} size="large" />)}
-        </Flex>
+        <Box w={{ base: '100%', md: 'auto' }} minW="0" maxW="100%"><SocialLinksRow links={bmaSocialLinks.map(social => social.href)} label="Redes sociales de Banda Municipal de Acosta" size="large" /></Box>
       </Flex>
     </Box>
   );
@@ -158,7 +151,7 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
       aria-label={`Redes sociales de ${organization}`}
       bg={background}
       borderRadius={{ base: '22px', md: '32px' }}
-      p={{ base: '20px', md: '22px' }}
+      py={{ base: '20px', md: '22px' }} px={{ base: 0, md: '12px' }}
       minW="0" w="100%"
       textAlign="center"
       boxShadow="xl"
@@ -178,7 +171,7 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
         <Image src={logo} alt={organization} maxH={{ base: '70px', md: '82px' }} mx="auto" objectFit="contain" pointerEvents="none" />
       </Box>
 
-      {links.map((social) => <SocialLink key={social.label} href={social.href} label={social.label} size="compact" position="absolute" {...social.position.base} sx={{ '@media screen and (min-width: 48em)': social.position.md }} />)}
+      <SocialLinksRow links={links.map(social => social.href)} label={`Contactos de ${organization}`} size="compact" />
     </Box>
   );
 }
@@ -228,7 +221,7 @@ export default function Home() {
             <Heading id="gas-coming-title" fontSize={{ base: 'xl', md: '2xl' }}>Pedidos en línea con Gas Memo</Heading>
             <Text color={muted} fontSize="sm">Este servicio aún no está disponible. Consulte las novedades en nuestras redes.</Text>
           </Stack>
-          <Box w="210px" alignSelf="center" flexShrink={0} mx={3} my={2}><SocialLogoHub /></Box>
+          <Box w={{ base: '100%', md: '300px' }} maxW="100%" alignSelf="center" flexShrink={0} mx={3} my={2}><SocialLogoHub /></Box>
         </Flex>
       </Box>
       <DonationBanner />

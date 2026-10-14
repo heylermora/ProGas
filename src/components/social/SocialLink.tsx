@@ -23,13 +23,15 @@ type SocialLinkProps = Omit<IconButtonProps, 'icon' | 'as' | 'size' | 'aria-labe
   label?: string;
   'aria-label'?: string;
   size?: 'compact' | 'regular' | 'large';
+  compactOnMobile?: boolean;
 };
 
-export default function SocialLink({ href, businessId, source = 'mall', network, label, size = 'regular', 'aria-label': ariaLabel, ...props }: SocialLinkProps) {
+export default function SocialLink({ href, businessId, source = 'mall', network, label, size = 'regular', compactOnMobile = false, 'aria-label': ariaLabel, ...props }: SocialLinkProps) {
   const meta = socialPresentation(href, network);
   const destination = href ? sponsorContactHref(href) : undefined;
   const external = Boolean(destination && /^https?:/i.test(destination));
-  const diameter = { compact: '44px', regular: '48px', large: '56px' }[size];
+  const desktopDiameter = { compact: '44px', regular: '48px', large: '56px' }[size];
+  const diameter = compactOnMobile ? { base: '44px', md: desktopDiameter } : desktopDiameter;
   const name = ariaLabel || label || meta.label;
   const buttonProps: IconButtonProps = {
     ...props,
@@ -38,7 +40,7 @@ export default function SocialLink({ href, businessId, source = 'mall', network,
       if (!event.defaultPrevented && destination && businessId) void AnalyticsService.track({ type: 'link_click', businessId, url: destination, source });
     },
     'aria-label': name,
-    icon: <Icon as={meta.icon} boxSize={size === 'large' ? '26px' : '22px'} aria-hidden="true" />,
+    icon: <Icon as={meta.icon} boxSize={compactOnMobile ? { base: '22px', md: size === 'large' ? '26px' : '22px' } : size === 'large' ? '26px' : '22px'} aria-hidden="true" />,
     w: diameter, h: diameter, minW: diameter, maxW: diameter, minH: diameter, maxH: diameter,
     flexShrink: 0, p: 0, borderRadius: 'full', color: 'white', border: '0', bg: meta.bg,
     boxShadow: '0 6px 14px rgba(15,23,42,.16)',
@@ -54,4 +56,11 @@ export default function SocialLink({ href, businessId, source = 'mall', network,
 
 export function SocialContact({ caption, ...props }: SocialLinkProps & { caption: string }) {
   return <Flex align="center" gap="10px" maxW="100%"><SocialLink {...props} label={props.label || caption} /><Text fontSize="sm" fontWeight="700">{caption}</Text></Flex>;
+}
+
+
+export function SocialLinksRow({ links, label, businessId, source, size = 'regular', labelPrefix = '' }: { links: string[]; label: string; businessId?: string; source?: AnalyticsSource; size?: SocialLinkProps['size']; labelPrefix?: string }) {
+  return <Flex role="group" aria-label={label} w="100%" minW={0} maxW="100%" flexWrap="nowrap" gap={{ base: '4px', md: '8px' }} overflowX="auto" overflowY="hidden" py="8px" px="4px" sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
+    {Array.from(new Set(links.filter(Boolean))).map(href => <SocialLink compactOnMobile key={href} href={href} businessId={businessId} source={source} size={size} label={businessId ? `${labelPrefix}${socialPresentation(href).label} de ${label.replace(/^Redes sociales de /, '')}` : socialPresentation(href).label} />)}
+  </Flex>;
 }

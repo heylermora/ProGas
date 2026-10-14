@@ -1,4 +1,5 @@
-import SocialLink, { socialPresentation as getLinkMeta } from 'components/social/SocialLink';
+import { sponsorLinks } from 'utils/sponsor';
+import { SocialLinksRow } from 'components/social/SocialLink';
 import {
 AspectRatio,
 Box,
@@ -140,14 +141,6 @@ const logoSize = (variant: string) => {
   return { h: { base: '48px', md: '58px' }, placeholderH: { base: '48px', md: '58px' }, icon: { base: '32px', md: '34px' } };
 };
 
-const bubblePlacements = [
-  { base: { top: '-8px', left: '18px' }, md: { top: '6px', left: '-10px' } },
-  { base: { top: '-10px', right: '20px' }, md: { top: '-6px', right: '10px' } },
-  { base: { bottom: '-8px', left: '22px' }, md: { bottom: '6px', left: '-12px' } },
-  { base: { bottom: '-10px', right: '22px' }, md: { bottom: '0', right: '4px' } },
-];
-
-
 function SponsorLogoHub({ sponsor, visual, muted, links = [] }: { sponsor: DisplaySponsor; visual: any; muted: string; links?: string[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const cleanLinks = links.filter(Boolean);
@@ -189,14 +182,7 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }: { sponsor: Displ
         </Text>
       )}
 
-      {cleanLinks.slice(0, 4).map((link, index) => {
-        const meta = getLinkMeta(link);
-        const placement = bubblePlacements[index] || bubblePlacements[0];
-
-        return (
-          <SocialLink businessId={sponsor.id} source="sponsor-strip" key={`${link}-${index}`} size="compact" href={link} label={`Abrir ${meta.label} de ${sponsor.name || 'patrocinador'}`} position="absolute" zIndex={3} {...placement.base} sx={{ '@media screen and (min-width: 48em)': placement.md }} opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,12px,0) scale(.6)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} />
-        );
-      })}
+      {isOpen && <SocialLinksRow labelPrefix="Abrir " links={cleanLinks} businessId={sponsor.id} source="sponsor-strip" label={`Redes sociales de ${sponsor.name || 'patrocinador'}`} size="compact" />}
     </Box>
   );
 }
@@ -270,7 +256,7 @@ function SponsorVideoFrame({ sponsor, onBack }: { sponsor: DisplaySponsor; onBac
   );
 }
 
-function SponsorCard({ sponsor, visual, linkMax = 4, muted }: { sponsor: DisplaySponsor; visual: any; linkMax?: number; muted: string }) {
+function SponsorCard({ sponsor, visual, muted }: { sponsor: DisplaySponsor; visual: any; muted: string }) {
   const [showVideo, setShowVideo] = useState(false);
   const hasVideo = Boolean(sponsor.videoUrl);
   const { _hover, minH, ...cardStyles } = visual.card;
@@ -292,7 +278,7 @@ function SponsorCard({ sponsor, visual, linkMax = 4, muted }: { sponsor: Display
   return (
     <Box key={sponsor.id} {...cardStyles} border="1px solid" minW="0" overflow="visible" position="relative" transition="transform .22s ease, box-shadow .22s ease, border-color .22s ease">
       <Stack spacing={{ base: '8px', md: '10px' }} h="100%" align="center" justify="space-between" textAlign="center" minW={0}>
-        <SponsorLogoHub sponsor={sponsor} visual={visual} muted={muted} links={(sponsor.links || []).slice(0, linkMax)} />
+        <SponsorLogoHub sponsor={sponsor} visual={visual} muted={muted} links={sponsorLinks(sponsor)} />
         {hasVideo && (
           <IconButton
             type="button"
@@ -416,10 +402,9 @@ export default function SponsorStrip({ type, max, title, offset = 0, sponsors: i
     if (!sponsor) return null;
     if (sponsor.isAvailable) return renderAvailableCard(sponsor);
     const sponsorType: SponsorType = sponsor?.type || type;
-    const linkMax = sponsorType === 'General' ? 1 : 4;
     const visual = sponsorVisual(sponsorType, Boolean(sponsor.videoUrl));
 
-    return <SponsorCard key={sponsor.id} sponsor={sponsor} visual={visual} linkMax={linkMax} muted={muted} />;
+    return <SponsorCard key={sponsor.id} sponsor={sponsor} visual={visual} muted={muted} />;
   };
 
   return (

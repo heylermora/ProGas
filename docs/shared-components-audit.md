@@ -85,8 +85,9 @@ cada red, el tamaño táctil mínimo de 44 px, el nombre accesible, tooltip y fo
 conservar indicaciones como «Consultar por WhatsApp» o «Quiero apoyar».
 
 Las vistas aportan el destino original y, cuando corresponde, el nombre del
-negocio. Los hubs conservan sus posiciones y animaciones; no redefinen el
-aspecto del enlace. Los grupos pueden envolver los botones al reducir el ancho.
+negocio. Los grupos usan `SocialLinksRow`: una fila horizontal sin saltos ni posiciones
+absolutas alrededor del logo. Si no caben, se desplaza sólo el grupo; los botones
+no se deforman ni reducen por debajo del tamaño táctil mínimo.
 `socialPresentation` provee iconos y etiquetas también a `SocialNetworkLabel`,
 que sigue siendo una etiqueta de formulario y no una acción de navegación.
 
