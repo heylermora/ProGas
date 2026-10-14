@@ -154,6 +154,8 @@ Si un nuevo listado usa la búsqueda global, añadir su ruta a `SEARCHABLE_PAGES
 - Si cambian colecciones o consultas, revisar `firestore.rules` y `firestore.indexes.json`. Versionar una regla no implica que esté desplegada.
 - No exponer datos personales en vistas públicas, logs o mensajes de error. Usar datos ficticios en pruebas.
 
+Las métricas públicas se administran en `services/AnalyticsService` y `views/admin/analytics`. Al agregar un enlace de negocio, pasar su ID real y procedencia a `SocialLink`; no registrar URLs de pedidos ni datos de clientes. Los eventos de `PublicAnalyticsEvents` son inmutables y sólo administradores pueden leerlos. Consultar `docs/public-analytics.md` para sesiones y despliegue de reglas.
+
 Las variables `REACT_APP_*` son públicas en el bundle. Usar `.env.example` como referencia y archivos locales ignorados para configuración; nunca incluir credenciales privadas. Las pruebas de persistencia deben usar mocks o un entorno aislado, sin modificar datos de producción.
 
 ## 9. Flujo para añadir un módulo

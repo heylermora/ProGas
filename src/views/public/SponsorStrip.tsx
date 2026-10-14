@@ -194,7 +194,7 @@ function SponsorLogoHub({ sponsor, visual, muted, links = [] }: { sponsor: Displ
         const placement = bubblePlacements[index] || bubblePlacements[0];
 
         return (
-          <SocialLink key={`${link}-${index}`} size="compact" href={link} label={`Abrir ${meta.label} de ${sponsor.name || 'patrocinador'}`} position="absolute" zIndex={3} {...placement.base} sx={{ '@media screen and (min-width: 48em)': placement.md }} opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,12px,0) scale(.6)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} />
+          <SocialLink businessId={sponsor.id} source="sponsor-strip" key={`${link}-${index}`} size="compact" href={link} label={`Abrir ${meta.label} de ${sponsor.name || 'patrocinador'}`} position="absolute" zIndex={3} {...placement.base} sx={{ '@media screen and (min-width: 48em)': placement.md }} opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,12px,0) scale(.6)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} />
         );
       })}
     </Box>

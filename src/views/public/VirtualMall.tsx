@@ -283,7 +283,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
             <Flex gap="14px" align="center"><Flex w="64px" h="64px" borderRadius="16px" bg="gray.50" align="center" justify="center" p="8px" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}</Flex><Box minW={0}><Heading fontSize="lg">{business.name || 'Negocio local'}</Heading><Badge mt="5px" colorScheme="purple">{business.category}</Badge></Box></Flex>
             {business.description && <Text color={muted} fontSize="sm" lineHeight="1.6" mt="12px">{business.description}</Text>}
             <SponsorLocation sponsor={business} />
-            {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <SocialLink key={`${link}-${index}`} href={link} label={`${meta.label} de ${business.name}`} />; })}</Flex>}
+            {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <SocialLink businessId={business.id} source="mall" key={`${link}-${index}`} href={link} label={`${meta.label} de ${business.name}`} />; })}</Flex>}
           </Box>;
         })}</SimpleGrid> : <Box textAlign="center" py="40px"><Icon as={MdStorefront} boxSize="42px" color="gray.300" /><Text fontWeight="800" mt="10px">No encontramos negocios</Text><Text color={muted}>Probá con otra categoría o borrá la búsqueda.</Text></Box>}
       </Stack>
@@ -427,7 +427,7 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
         </Stack>
       </Flex>
       <SponsorLocation sponsor={business} />
-      {sponsorLinks(business).length > 4 && <Flex gap={2} wrap="wrap" mt={3}>{sponsorLinks(business).slice(4).map(link => <SocialLink key={link} href={link} label={`${linkMeta(link).label} de ${business.name}`} />)}</Flex>}
+      {sponsorLinks(business).length > 4 && <Flex gap={2} wrap="wrap" mt={3}>{sponsorLinks(business).slice(4).map(link => <SocialLink businessId={business.id} source="mall" key={link} href={link} label={`${linkMeta(link).label} de ${business.name}`} />)}</Flex>}
     </Box>
   );
 }
@@ -443,7 +443,7 @@ function BusinessContactHub({ business, links, isOpen, onToggle }: { business: S
       {links.map((link, index) => {
         const meta = linkMeta(link);
         return (
-          <SocialLink size="compact" key={`${link}-${index}`} href={link} label={`Abrir ${meta.label} de ${business.name || 'negocio'}`} position="absolute" zIndex={3} {...dossierBubblePositions[index]} opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,10px,0) scale(.55)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} />
+          <SocialLink businessId={business.id} source="mall" size="compact" key={`${link}-${index}`} href={link} label={`Abrir ${meta.label} de ${business.name || 'negocio'}`} position="absolute" zIndex={3} {...dossierBubblePositions[index]} opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,10px,0) scale(.55)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} />
         );
       })}
     </Box>
