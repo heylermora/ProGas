@@ -66,7 +66,7 @@ export function SocialContact({ caption, description, ...props }: SocialLinkProp
 
 
 export function SocialLinksRow({ links, label, businessId, source, size = 'regular', labelPrefix = '' }: { links: string[]; label: string; businessId?: string; source?: AnalyticsSource; size?: SocialLinkProps['size']; labelPrefix?: string }) {
-  return <Flex role="group" aria-label={label} w="100%" minW={0} maxW="100%" flexWrap="nowrap" gap={{ base: '4px', md: '8px' }} overflowX="auto" overflowY="hidden" py="8px" px="4px" sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
-    {Array.from(new Set(links.filter(Boolean))).map(href => <SocialLink compactOnMobile key={href} href={href} businessId={businessId} source={source} size={size} label={businessId ? `${labelPrefix}${socialPresentation(href).label} de ${label.replace(/^Redes sociales de /, '')}` : socialPresentation(href).label} />)}
+  return <Flex role="group" aria-label={label} w="100%" minW={0} maxW="100%" flexWrap="nowrap" gap={{ base: '4px', md: '8px' }} overflowX="auto" overflowY="hidden" pt="8px" pb="16px" px="10px" sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
+    {Array.from(new Set(links.filter(Boolean))).map(href => <SocialLink compactOnMobile sx={{ boxShadow: '0 3px 8px rgba(15,23,42,.16)' }} key={href} href={href} businessId={businessId} source={source} size={size} label={businessId ? `${labelPrefix}${socialPresentation(href).label} de ${label.replace(/^Redes sociales de /, '')}` : socialPresentation(href).label} />)}
   </Flex>;
 }
