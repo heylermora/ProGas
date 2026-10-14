@@ -63,6 +63,36 @@ service cloud.firestore {
       allow write: if hasRole('admin');
     }
 
+    // Anonymous, immutable measurements. URLs must belong to an active public business.
+    match /PublicAnalyticsEvents/{eventId} {
+      function publishedLink(d) {
+        let sponsor = get(/databases/$(database)/documents/Sponsors/$(d.businessId)).data;
+        return (!('active' in sponsor) || sponsor.active != false)
+          && ((('links' in sponsor) && sponsor.links is list
+              && (d.url in sponsor.links || (d.network == 'email' && d.url.matches('mailto:.*') && d.url.split('mailto:')[1] in sponsor.links)))
+            || (('socialLinks' in sponsor) && sponsor.socialLinks is map
+              && d.network in sponsor.socialLinks
+              && (d.url == sponsor.socialLinks[d.network]
+                || (d.network == 'email' && d.url == 'mailto:' + sponsor.socialLinks[d.network]))));
+      }
+      allow create: if request.resource.data.keys().hasAll(['type', 'sessionId', 'digest', 'businessId', 'url', 'network', 'source', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['type', 'sessionId', 'digest', 'businessId', 'url', 'network', 'source', 'createdAt'])
+        && request.resource.data.sessionId is string
+        && request.resource.data.sessionId.matches('[a-f0-9-]{36}')
+        && request.resource.data.digest is string && request.resource.data.digest.matches('[a-f0-9]{64}')
+        && eventId == request.resource.data.sessionId + '_' + request.resource.data.type + '_' + request.resource.data.digest
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.businessId is string && request.resource.data.businessId.size() <= 128
+        && request.resource.data.url is string && request.resource.data.url.size() <= 2048
+        && request.resource.data.network in ['', 'facebook', 'instagram', 'whatsapp', 'tiktok', 'email', 'website', 'other']
+        && request.resource.data.source in ['home', 'mall', 'mall-preview', 'sponsor-strip']
+        && ((request.resource.data.type in ['page_view', 'browse_click'] && request.resource.data.source == 'home'
+            && request.resource.data.businessId == '' && request.resource.data.url == '' && request.resource.data.network == '')
+          || (request.resource.data.type == 'link_click' && request.resource.data.businessId.matches('[^/]{1,128}') && publishedLink(request.resource.data)));
+      allow read: if hasRole('admin');
+      allow update, delete: if false;
+    }
+
     // Deny every collection that has not been explicitly reviewed above.
     match /{document=**} { allow read, write: if false; }
   }

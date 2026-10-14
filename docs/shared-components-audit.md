@@ -76,3 +76,22 @@ Crear y editar reutilizan `SponsorForm` como página con layout administrativo a
 `utils/sponsor` define los campos opcionales por red, reconoce contactos históricos y conserva los enlaces adicionales. El contrato mantiene `links` para consumidores anteriores y agrega `socialLinks` por nombre. `SponsorLocation` presenta las señas y enlaces a Maps/Waze tanto en el formulario como en las dos vistas del directorio. `SponsorLocationFields` pide enlaces compartidos de Google Maps/Waze y señas, sin campos de coordenadas. El GPS completa los destinos desde el local. Se conservan coordenadas históricas y se reconoce un destino explícito en Maps; los enlaces cortos se guardan sin inventar un destino de Waze a partir de las señas o del centro del mapa. `DeviceLocationMap` admite mensajes contextuales sin cambiar el flujo de pedidos.
 
 El video se configura mediante enlace compartido de YouTube/Vimeo o archivo público MP4/WebM/OGG. No ofrecer carga directa de nuevos videos a Firestore: su límite documental no sirve para videos habituales. Los videos históricos se conservan y pueden quitarse o reemplazarse. La configuración del espacio disponible se retiró del listado administrativo porque correspondía a `SponsorStrip`, que ya no se monta en el directorio actual; se mantienen servicio y documentos históricos.
+
+## Enlaces de redes
+
+`components/social/SocialLink` centraliza el círculo, el icono blanco, el color de
+cada red, el tamaño táctil mínimo de 44 px, el nombre accesible, tooltip y foco.
+`SocialContact` presenta el texto de una acción junto al mismo círculo; permite
+conservar indicaciones como «Consultar por WhatsApp» o «Quiero apoyar».
+
+Las vistas aportan el destino original y, cuando corresponde, el nombre del
+negocio. Los hubs conservan sus posiciones y animaciones; no redefinen el
+aspecto del enlace. Los grupos pueden envolver los botones al reducir el ancho.
+`socialPresentation` provee iconos y etiquetas también a `SocialNetworkLabel`,
+que sigue siendo una etiqueta de formulario y no una acción de navegación.
+
+La detección usa `networkFor` y el correo se normaliza con `sponsorContactHref`.
+Los enlaces HTTP(S) abren una pestaña con `noopener noreferrer`; el correo usa
+`mailto:`. Las acciones de compartir conservan la semántica de botón y su
+callback. No detectar correos buscando simplemente «@», porque rompe URLs de
+TikTok e Instagram que contienen ese carácter.

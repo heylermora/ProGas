@@ -37,6 +37,7 @@ ReactDOM.render(
 							<Route path={`/auth`} component={AuthLayout} />
 							<PrivateRoute path={`/admin/order`} roles={['admin', 'colaborador']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/product`} roles={['admin', 'colaborador']} component={AdminLayout} />
+							<PrivateRoute path={`/admin/analytics`} roles={['admin']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/sponsor`} roles={['admin']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/client`} roles={['admin']} component={AdminLayout} />
 							<PrivateRoute path={`/admin/user`} roles={['admin']} component={AdminLayout} />

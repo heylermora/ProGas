@@ -1,9 +1,9 @@
+import SocialLink, { socialPresentation as linkMeta } from 'components/social/SocialLink';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Icon, Image, Stack, Text, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
-import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdExplore, MdLink, MdStorefront } from 'react-icons/md';
+import { MdExplore, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
 
@@ -47,19 +47,8 @@ const contactBurst = keyframes`
   to { opacity: 1; scale: 1; }
 `;
 
-const emailPattern = /^[^\s@/:]+@[^\s@/:]+\.[^\s@/:]+$/;
-const linkMeta = (link = '') => {
-  const value = link.toLowerCase();
-  if (value.includes('facebook.com')) return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
-  if (value.includes('instagram.com')) return { label: 'Instagram', icon: FaInstagram, bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' };
-  if (value.includes('whatsapp.com') || value.includes('wa.me')) return { label: 'WhatsApp', icon: FaWhatsapp, bg: '#25D366' };
-  if (value.includes('tiktok.com')) return { label: 'TikTok', icon: FaTiktok, bg: '#111111' };
-  if (value.startsWith('mailto:') || emailPattern.test(link.trim())) return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
-  if (value.startsWith('http')) return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
-  return { label: 'Contacto', icon: MdLink, bg: '#64748B' };
-};
 
-const hrefFor = (link = '') => emailPattern.test(link.trim()) ? `mailto:${link.trim()}` : link;
+
 
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
@@ -142,9 +131,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
                         { left: '8px', top: '0' }, { left: '50%', top: '0', transform: 'translateX(-50%)' }, { right: '8px', top: '0' },
                         { left: '34px', bottom: '0' }, { right: '34px', bottom: '0' },
                       ]; return (
-                        <Tooltip key={contact} label={meta.label} hasArrow>
-                          <IconButton as={Link} href={hrefFor(contact)} isExternal={!hrefFor(contact).startsWith('mailto:')} aria-label={`${meta.label} de ${business.name}`} icon={<Icon as={meta.icon} boxSize="16px" />} position="absolute" {...positions[index]} pointerEvents="auto" minW="36px" minH="36px" maxW="36px" maxH="36px" w="36px" h="36px" p="0" flexShrink={0} borderRadius="full" color="white" border="2px solid" borderColor="white" boxShadow="0 8px 18px rgba(0,0,0,.28)" sx={{ background: meta.bg, aspectRatio: '1 / 1' }} animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} _hover={{ marginTop: '-3px', textDecoration: 'none', filter: 'brightness(1.08)' }} />
-                        </Tooltip>
+                        <SocialLink businessId={business.id} source="mall-preview" key={contact} size="compact" href={contact} label={`${meta.label} de ${business.name}`} position="absolute" {...positions[index]} pointerEvents="auto" animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} />
                       ); })}
                     </Box>
                   )}

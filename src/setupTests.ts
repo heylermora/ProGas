@@ -24,3 +24,6 @@ Object.defineProperty(window, 'ResizeObserver', {
 });
 
 export {};
+
+// Analytics must never write to the connected production database in UI tests.
+jest.mock('services/AnalyticsService', () => ({ __esModule: true, default: { track: jest.fn().mockResolvedValue(undefined), getReport: jest.fn() } }));
