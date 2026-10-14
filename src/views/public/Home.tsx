@@ -123,10 +123,9 @@ function DonationBanner() {
         <Text display={{ base: 'block', md: 'none' }} color={muted} fontSize="sm" lineHeight="1.6">
           Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
         </Text>
-        <Stack spacing={2} flexShrink={0} w={{ base: '100%', lg: '240px' }}>
-          <SocialContact href={bmaDonationUrl} caption="Quiero apoyar" />
-          <Text color={muted} fontSize="xs" textAlign="center">Coordine su aporte por WhatsApp.</Text>
-        </Stack>
+        <Box flexShrink={0} w={{ base: '100%', lg: '260px' }} p="12px" borderRadius="18px" bg={footer} border="1px solid" borderColor={border}>
+          <SocialContact href={bmaDonationUrl} caption="Quiero apoyar" description="Coordine su aporte por WhatsApp." />
+        </Box>
       </Flex>
       <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }}
         justify="space-between" gap={3} borderTop="1px solid" borderColor={border} bg={footer} backdropFilter="blur(8px)"

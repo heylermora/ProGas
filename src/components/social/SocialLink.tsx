@@ -54,8 +54,14 @@ export default function SocialLink({ href, businessId, source = 'mall', network,
   }</Tooltip>;
 }
 
-export function SocialContact({ caption, ...props }: SocialLinkProps & { caption: string }) {
-  return <Flex align="center" gap="10px" maxW="100%"><SocialLink {...props} label={props.label || caption} /><Text fontSize="sm" fontWeight="700">{caption}</Text></Flex>;
+export function SocialContact({ caption, description, ...props }: SocialLinkProps & { caption: string; description?: string }) {
+  return <Flex align="center" gap="10px" maxW="100%">
+    <SocialLink {...props} label={props.label || caption} />
+    <Flex direction="column" minW="0" gap="2px">
+      <Text fontSize="sm" fontWeight="700">{caption}</Text>
+      {description && <Text fontSize="xs" lineHeight="1.4">{description}</Text>}
+    </Flex>
+  </Flex>;
 }
 
 
