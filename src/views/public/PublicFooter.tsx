@@ -12,15 +12,20 @@ export default function PublicFooter() {
 
   return (
     <Box as="footer" mt={{ base: '24px', md: '40px' }} overflow="hidden" bg="brand.500" color="white" borderRadius={{ base: '20px', md: '24px' }} boxShadow="0 14px 36px rgba(51, 17, 219, .18)">
-      <Flex align={{ base: 'flex-start', md: 'center' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap={{ base: '6px', md: '24px' }} px={{ base: '16px', md: '26px' }} pt={{ base: '16px', md: '20px' }} pb={{ base: '8px', md: '20px' }}>
-        <Flex align="center" gap="10px" minW="0">
+      <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} gap={{ base: '10px', md: '24px' }} px={{ base: '16px', md: '26px' }} pt={{ base: '16px', md: '20px' }} pb={{ base: '12px', md: '20px' }}>
+        <Flex align="center" justify={{ base: 'center', md: 'flex-start' }} gap="12px" minW="0" w={{ base: '100%', md: 'auto' }}>
           <Image src={`${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`} alt="" boxSize="40px" objectFit="contain" flexShrink={0} />
           <Box minW="0"><Text fontSize="sm" fontWeight="800" lineHeight="1.3">Gas Memo</Text><Text color="whiteAlpha.800" fontSize="xs" lineHeight="1.4">Un espacio para el comercio local</Text></Box>
         </Flex>
-        <Flex wrap="wrap" align="center" gap={{ base: '4px', md: '8px' }} w={{ base: '100%', md: 'auto' }}>
+        <Flex wrap="wrap" align="center" justify={{ base: 'center', md: 'flex-end' }} borderTopWidth={{ base: '1px', md: 0 }} borderColor="whiteAlpha.200" pt={{ base: '6px', md: 0 }} gap={{ base: '4px', md: '8px' }} w={{ base: '100%', md: 'auto' }}>
           {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" color="white" size="sm" minH="44px" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Inicio</Button>}
           {location.pathname.startsWith('/customer/') && location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" color="white" size="sm" minH="44px" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
-          {isPortfolio ? <SocialContact href={portfolioContactUrl} caption="Contactar" /> : <Button as={RLink} to="/portfolio" leftIcon={<MdCode />} size="sm" variant="ghost" minH="44px" maxW="100%" px="8px" whiteSpace="normal" borderRadius="12px" fontSize="xs" fontWeight="500" color="white" _hover={{ bg: 'whiteAlpha.100', color: 'white' }}>Creado por Johel Mora</Button>}
+          {isPortfolio ? <SocialContact href={portfolioContactUrl} caption="Contactar" /> : <Button as={RLink} to="/portfolio" leftIcon={<MdCode />} size="sm" variant="ghost" minH="44px" maxW="100%" px="8px" whiteSpace="normal" borderRadius="12px" fontSize="xs" fontWeight="500" color="white" _hover={{ bg: 'whiteAlpha.100', color: 'white' }} textAlign="left">
+            <Box as="span" display="flex" flexDirection="column" gap="2px">
+              <Text as="span" fontSize="10px" color="whiteAlpha.800" lineHeight="1.2">Creado por</Text>
+              <Text as="span" fontSize="xs" fontWeight="700" lineHeight="1.3">Johel Mora Calderón</Text>
+            </Box>
+          </Button>}
         </Flex>
       </Flex>
 

@@ -16,7 +16,7 @@ describe('PublicFooter', () => {
     );
 
     expect(screen.getByText(`Versión ${packageInfo.version}`)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /^creado por johel mora$/i }).getAttribute('href')).toBe('/portfolio');
+    expect(screen.getByRole('link', { name: /^creado por johel mora calderón$/i }).getAttribute('href')).toBe('/portfolio');
     expect(screen.getByRole('link', { name: /acceso administrativo/i }).getAttribute('href')).toBe('/auth/sign-in');
     expect(screen.getByText(/un espacio para el comercio local/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /explorar comercios/i })).toBeNull();
@@ -43,7 +43,7 @@ describe('PublicFooter', () => {
       </ChakraProvider>,
     );
 
-    expect(screen.queryByRole('link', { name: /^creado por johel mora$/i })).toBeNull();
+    expect(screen.queryByRole('link', { name: /^creado por johel mora calderón$/i })).toBeNull();
     expect(screen.getByRole('link', { name: /contactar/i }).getAttribute('href')).toContain('wa.me/50683508585');
   });
 });
