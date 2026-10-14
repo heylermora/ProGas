@@ -1,7 +1,7 @@
 import { SocialContact } from 'components/social/SocialLink';
 import { Box, Button, Flex, Icon, Link, Text } from '@chakra-ui/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
-import { MdHome, MdLogin, MdShoppingCart, MdWork } from 'react-icons/md';
+import { MdHome, MdLogin, MdShoppingCart, MdCode } from 'react-icons/md';
 import packageInfo from '../../../package.json';
 
 const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi su portafolio y me gustaría conversar sobre un proyecto.')}`;
@@ -20,7 +20,7 @@ export default function PublicFooter() {
         <Flex wrap="wrap" gap="8px" w={{ base: '100%', md: 'auto' }}>
           {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Inicio</Button>}
           {location.pathname.startsWith('/customer/') && location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" color="white" size="sm" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
-          {isPortfolio ? <SocialContact href={portfolioContactUrl} caption="Contactar" /> : <Button as={RLink} to="/portfolio" leftIcon={<MdWork />} size="sm" borderRadius="full" bg="white" color="brand.800" _hover={{ bg: 'brand.100' }}>Portafolio</Button>}
+          {isPortfolio ? <SocialContact href={portfolioContactUrl} caption="Contactar" /> : <Button as={RLink} to="/portfolio" leftIcon={<MdCode />} size="sm" minH="44px" maxW="100%" whiteSpace="normal" borderRadius="full" bg="white" color="brand.800" _hover={{ bg: 'brand.100' }}>Creado por Johel Mora</Button>}
         </Flex>
       </Flex>
 
