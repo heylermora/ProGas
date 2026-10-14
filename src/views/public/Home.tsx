@@ -149,26 +149,24 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
     <Box
       role="group"
       aria-label={`Redes sociales de ${organization}`}
-      bg={background}
-      borderRadius={{ base: '22px', md: '32px' }}
-      py={{ base: '20px', md: '22px' }} px={{ base: 0, md: '12px' }}
       minW="0" w="100%"
       textAlign="center"
-      boxShadow="xl"
-      position="relative"
-      overflow="visible"
     >
       <Box
+        bg={background}
+        borderRadius={{ base: '22px', md: '32px' }}
+        py={{ base: '24px', md: '28px' }}
+        px="12px"
+        mb="8px"
+        boxShadow="xl"
         position="relative"
         mx="auto"
         display="block"
-        borderRadius="28px"
-        p={0}
         transition="transform .2s ease, filter .2s ease"
         _hover={{ transform: 'translateY(-3px) scale(1.01)', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.20))' }}
         _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '6px' }}
       >
-        <Image src={logo} alt={organization} maxH={{ base: '70px', md: '82px' }} mx="auto" objectFit="contain" pointerEvents="none" />
+        <Image src={logo} alt={organization} w={{ base: '140px', md: '160px' }} h={{ base: '140px', md: '160px' }} maxW="100%" mx="auto" objectFit="contain" pointerEvents="none" />
       </Box>
 
       <SocialLinksRow links={links.map(social => social.href)} label={`Contactos de ${organization}`} size="compact" />
