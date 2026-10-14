@@ -332,7 +332,30 @@ function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, sele
   return (
     <>
       <Stack position="absolute" top="12px" left="16px" right="16px" align="center" spacing="6px" zIndex={6}>
-        <Button aria-label="Volver al mapa principal" onClick={onBack} leftIcon={<Icon as={MdMap} boxSize="24px" />} alignSelf="flex-start" h="46px" px="14px" bg="rgba(30,27,75,.95)" color="yellow.100" border="1px solid" borderColor="yellow.300" borderRadius="6px 18px 18px 6px" boxShadow="inset 4px 0 0 #FDE047, 0 0 18px rgba(250,204,21,.12)" _hover={{ bg: 'purple.900', boxShadow: '0 0 24px rgba(250,204,21,.3)' }} _focusVisible={{ outline: '3px solid white', outlineOffset: '3px' }}>Regresar a la galaxia</Button>
+        <Button
+          aria-label="Volver al mapa principal"
+          onClick={onBack}
+          leftIcon={<Flex as="span" align="center" justify="center" boxSize="28px" borderRadius="full" bg="rgba(103,232,249,.12)" color="cyan.200"><Icon as={MdChevronLeft} boxSize="22px" /></Flex>}
+          alignSelf="flex-start"
+          h="44px"
+          maxW="100%"
+          pl="7px"
+          pr="16px"
+          iconSpacing="8px"
+          bg="rgba(7,11,31,.92)"
+          color="whiteAlpha.900"
+          border="1px solid"
+          borderColor="rgba(103,232,249,.3)"
+          borderRadius="full"
+          fontSize="sm"
+          fontWeight="600"
+          boxShadow="0 4px 12px rgba(0,0,0,.18)"
+          _hover={{ bg: 'rgba(22,40,65,.98)', borderColor: 'cyan.200', color: 'white' }}
+          _active={{ bg: 'rgba(30,55,80,.98)' }}
+          _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}
+        >
+          Volver al mapa
+        </Button>
         <Flex w="100%" gap="6px" align="center" justify="space-between" aria-label={`${totalBusinesses} negocios en esta zona`}>
           <Text color="white" fontWeight="800" fontSize="xs" noOfLines={1}>{categoryIcon} {category}</Text>
           <Badge flexShrink={0} bg="rgba(103,232,249,.12)" color="cyan.100" borderRadius="full" px="8px" fontSize="9px">{businesses.filter((business) => visitedIds.includes(business.id)).length} / {businesses.length} EXPLORADAS</Badge>
