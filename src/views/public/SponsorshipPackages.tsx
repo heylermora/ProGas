@@ -1,5 +1,6 @@
+import { SocialContact } from 'components/social/SocialLink';
 import React from 'react';
-import { Badge, Box, Button, Heading, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
+import { Badge, Box, Heading, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import BackButton from 'components/button/BackButton';
 import { PublicCard, PublicPage } from './PublicPage';
 
@@ -69,17 +70,7 @@ export default function SponsorshipPackages() {
                     ))}
                   </Stack>
 
-                  <Button
-                    as="a"
-                    href={packageRequestUrl(item.name)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    colorScheme={isVip ? 'yellow' : 'brand'}
-                    size={isVip ? 'lg' : 'md'}
-                    mt="auto"
-                  >
-                    Solicitar paquete
-                  </Button>
+                  <Box mt="auto"><SocialContact href={packageRequestUrl(item.name)} caption="Solicitar paquete" /></Box>
                 </Stack>
               </PublicCard>
             </Box>

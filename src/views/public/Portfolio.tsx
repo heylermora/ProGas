@@ -1,8 +1,8 @@
+import { SocialContact } from 'components/social/SocialLink';
 import React from 'react';
 import { Badge, Box, Button, Flex, Heading, Icon, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
 import { MdArrowForward, MdCheckCircle, MdDevices, MdInsights, MdLocalShipping, MdMap, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
-import { FaWhatsapp } from 'react-icons/fa';
 import { PublicPage } from './PublicPage';
 import BackButton from 'components/button/BackButton';
 
@@ -63,7 +63,7 @@ export default function Portfolio() {
             <Text fontSize={{ base: 'lg', md: '2xl' }} fontWeight="700">Desarrollador de software enfocado en soluciones que sí se usan.</Text>
             <Text color="whiteAlpha.800" fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.7" maxW="650px">Soy Johel, desarrollador de Acosta. Combino tecnología, diseño y conocimiento del entorno local para convertir procesos complejos en herramientas sencillas para negocios y organizaciones.</Text>
             <Flex direction={{ base: 'column', md: 'row' }} wrap="wrap" gap="10px" pt="8px" w="100%">
-              <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} bg="white" color="brand.800" borderRadius="full" size="lg" w={{ base: '100%', md: 'auto' }} maxW="100%" h="auto" py="12px" _hover={{ bg: 'brand.100', transform: 'translateY(-2px)' }}>Conversemos por WhatsApp</Button>
+              <SocialContact href={whatsappUrl} caption="Conversemos por WhatsApp" />
               <BackButton to="/" color="white" borderRadius="full" size="lg" w={{ base: '100%', md: 'auto' }} maxW="100%" h="auto" py="12px" _hover={{ bg: 'whiteAlpha.200' }}>Volver a Gas Memo</BackButton>
             </Flex>
           </Stack>
@@ -93,7 +93,7 @@ export default function Portfolio() {
                 {project.to ? (
                   <Button as={RLink} to={project.to} rightIcon={<MdArrowForward />} alignSelf="flex-start" size="sm" borderRadius="full" bg={index === 0 ? 'white' : 'brand.100'} color="brand.800" _hover={{ bg: index === 0 ? 'brand.100' : 'brand.200' }}>{project.action}</Button>
                 ) : (
-                  <Button as="a" href={project.href} target="_blank" rel="noopener noreferrer" rightIcon={<MdArrowForward />} alignSelf="flex-start" size="sm" borderRadius="full" bg="brand.100" color="brand.800" _hover={{ bg: 'brand.200' }}>{project.action}</Button>
+                  <SocialContact href={project.href} caption={project.action} />
                 )}
               </Stack>
             ))}
@@ -116,7 +116,7 @@ export default function Portfolio() {
 
         <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="18px" bg={surface} border="1px solid" borderColor={border} borderRadius="24px" p={{ base: '22px', md: '30px' }}>
           <Flex gap="14px" align="center"><Flex w="50px" h="50px" borderRadius="full" bg="brand.500" color="white" align="center" justify="center"><Icon as={MdRocketLaunch} boxSize="26px" /></Flex><Box><Heading fontSize={{ base: 'xl', md: '2xl' }}>¿Tiene una idea?</Heading><Text color={muted}>Démosle forma y pongámosla al alcance de sus clientes.</Text></Box></Flex>
-          <Button as="a" href={whatsappUrl} target="_blank" rel="noopener noreferrer" leftIcon={<FaWhatsapp />} colorScheme="brand" borderRadius="full" size="lg" flexShrink={0} w={{ base: '100%', md: 'auto' }}>Escribirme por WhatsApp</Button>
+          <SocialContact href={whatsappUrl} caption="Escribirme por WhatsApp" />
         </Flex>
       </Stack>
     </PublicPage>

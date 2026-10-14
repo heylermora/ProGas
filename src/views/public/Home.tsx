@@ -1,3 +1,4 @@
+import SocialLink, { SocialContact } from 'components/social/SocialLink';
 import React from 'react';
 import {
   Box,
@@ -5,17 +6,13 @@ import {
   Flex,
   Heading,
   Icon,
-  IconButton,
   Image,
-  Link,
   Stack,
   Text,
-  Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdFavorite, MdAccessTime, MdArrowForward } from 'react-icons/md';
+import { MdAccessTime, MdArrowForward } from 'react-icons/md';
 import MallPreview from './MallPreview';
 import BusinessPromotion from './BusinessPromotion';
 import { PublicPage } from './PublicPage';
@@ -32,36 +29,26 @@ const socialLinks = [
   {
     label: 'Facebook',
     href: 'https://www.facebook.com/gasmemoymandaditos',
-    icon: FaFacebookF,
-    bg: '#1877F2',
     position: { base: { top: '-10px', left: '16px' }, md: { top: '10px', left: '-12px' } },
   },
   {
     label: 'Instagram',
     href: 'https://www.instagram.com/gasmemo2022?fbclid=IwY2xjawSsA2NleHRuA2FlbQIxMABicmlkETFCaFlvTGI1Uzh6RjRib3Exc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHo1bl06kfyGsphsRCNX3LobPoAtg2XoVSNuYklk43R3Y0DQ7CYlc55Y8BHXO_aem_V-fXi2Lvxja2m-IWN6wAiQ',
-    icon: FaInstagram,
-    bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)',
     position: { base: { top: '-16px', right: '22px' }, md: { top: '-8px', right: '12px' } },
   },
   {
     label: 'WhatsApp',
     href: 'https://api.whatsapp.com/send/?phone=50683978524&text&type=phone_number&app_absent=0&utm_source=ig',
-    icon: FaWhatsapp,
-    bg: '#25D366',
     position: { base: { bottom: '-12px', left: '20px' }, md: { bottom: '10px', left: '-18px' } },
   },
   {
     label: 'TikTok',
     href: 'https://www.tiktok.com/@gas.memo',
-    icon: FaTiktok,
-    bg: '#111111',
     position: { base: { bottom: '-16px', right: '24px' }, md: { bottom: '2px', right: '4px' } },
   },
   {
     label: 'Correo',
     href: 'mailto:facturasgasmemo@gmail.com',
-    icon: MdEmail,
-    bg: '#F97316',
     position: { base: { bottom: '42px', right: '-10px' }, md: { top: '50%', right: '-28px' } },
   },
 ];
@@ -141,14 +128,7 @@ function DonationBanner() {
           Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
         </Text>
         <Stack spacing={2} flexShrink={0} w={{ base: '100%', lg: '240px' }}>
-          <Button as="a" href={bmaDonationUrl} target="_blank" rel="noopener noreferrer"
-            leftIcon={<MdFavorite />} rightIcon={<MdArrowForward />} minH="48px"
-            bg="linear-gradient(110deg, #F8D760, #EFC044)" color="gray.900" fontWeight="800" borderRadius="full" px={6}
-            boxShadow="0 6px 18px rgba(184, 125, 15, .20)"
-            _hover={{ bg: 'yellow.300', transform: 'translateY(-1px)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.600', outlineOffset: '3px' }}>
-            Quiero apoyar
-          </Button>
+          <SocialContact href={bmaDonationUrl} caption="Quiero apoyar" />
           <Text color={muted} fontSize="xs" textAlign="center">Coordine su aporte por WhatsApp.</Text>
         </Stack>
       </Flex>
@@ -157,16 +137,7 @@ function DonationBanner() {
         px={{ base: 5, md: 7 }} py={3}>
         <Text color={muted} fontSize="sm">Conozca la Banda y manténgase en contacto</Text>
         <Flex role="group" aria-label="Redes sociales de Banda Municipal de Acosta" gap={2} flexWrap="wrap">
-          {bmaSocialLinks.map((social) => (
-            <Tooltip key={social.label} label={social.label === 'Correo' ? 'bandamunicipalacostacr@gmail.com' : social.label} hasArrow>
-              <IconButton as={Link} href={social.href} isExternal={!social.href.startsWith('mailto:')}
-                aria-label={social.label} icon={<Icon as={social.icon} boxSize="18px" />}
-                sx={{ background: social.bg }} color="white" boxSize="44px" minW="44px"
-                borderRadius="full" boxShadow="0 3px 8px rgba(0,0,0,.10)"
-                _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.08)' }}
-                _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.600', outlineOffset: '3px' }} />
-            </Tooltip>
-          ))}
+          {bmaSocialLinks.map((social) => <SocialLink key={social.label} href={social.href} label={social.label} size="large" />)}
         </Flex>
       </Flex>
     </Box>
@@ -206,34 +177,7 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
         <Image src={logo} alt={organization} maxH={{ base: '70px', md: '82px' }} mx="auto" objectFit="contain" pointerEvents="none" />
       </Box>
 
-      {links.map((social) => (
-        <Tooltip key={social.label} label={social.label} hasArrow placement="top">
-          <IconButton
-            as={Link}
-            href={social.href}
-            isExternal={!social.href.startsWith('mailto:')}
-            aria-label={social.label}
-            icon={<Icon as={social.icon} w="22px" h="22px" />}
-            position="absolute"
-            {...social.position.base}
-            sx={{
-              '@media screen and (min-width: 48em)': social.position.md,
-              background: social.bg,
-            }}
-            color="white"
-            w="44px"
-            h="44px"
-            minW="44px"
-            borderRadius="full"
-            boxShadow="0 18px 30px rgba(15, 23, 42, .28)"
-            border="3px solid"
-            borderColor="white"
-            transition="transform .2s ease, filter .2s ease"
-            _hover={{ transform: 'translate3d(0, -4px, 0) scale(1.08)', textDecoration: 'none', filter: 'brightness(1.05)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '3px' }}
-          />
-        </Tooltip>
-      ))}
+      {links.map((social) => <SocialLink key={social.label} href={social.href} label={social.label} size="compact" position="absolute" {...social.position.base} sx={{ '@media screen and (min-width: 48em)': social.position.md }} />)}
     </Box>
   );
 }

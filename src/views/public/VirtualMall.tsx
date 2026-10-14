@@ -1,3 +1,4 @@
+import SocialLink, { socialPresentation as linkMeta } from 'components/social/SocialLink';
 import {
 Badge,
 Box,
@@ -15,17 +16,15 @@ useColorModeValue
 import { keyframes } from '@emotion/react';
 import AppModal from 'components/modal/AppModal';
 import SponsorLocation from 'components/sponsor/SponsorLocation';
-import { networkFor, sponsorContactHref, sponsorLinks, sponsorVideoSource } from 'utils/sponsor';
+import { sponsorLinks, sponsorVideoSource } from 'utils/sponsor';
 import useCategories from 'hooks/useCategories';
 import SearchableCategorySelect from 'components/category/SearchableCategorySelect';
 import SponsorItem from 'interfaces/SponsorItem';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import {
 MdChevronLeft,
 MdChevronRight,
 MdClose,
-MdEmail,
 MdLink, MdMap, MdMyLocation,
 MdPlayArrow,
 MdStorefront,
@@ -86,17 +85,7 @@ const goldenActionStyles = {
   _focusVisible: { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' },
 };
 
-const hrefFor = sponsorContactHref;
-const linkMeta = (link = '') => {
-  const network = networkFor(link);
-  if (network === 'facebook') return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
-  if (network === 'instagram') return { label: 'Instagram', icon: FaInstagram, bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' };
-  if (network === 'whatsapp') return { label: 'WhatsApp', icon: FaWhatsapp, bg: '#25D366' };
-  if (network === 'tiktok') return { label: 'TikTok', icon: FaTiktok, bg: '#111111' };
-  if (network === 'email') return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
-  if (network === 'website') return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
-  return { label: 'Contacto', icon: MdLink, bg: '#64748B' };
-};
+
 const videoSource = (value = '') => sponsorVideoSource(value) || value.match(/src=["']([^"']+)["']/i)?.[1] || value;
 const isDirectVideo = (value = '') => value.startsWith('data:video') || /\.(mp4|webm|ogg)(?:\?|$)/i.test(value);
 const businessPosition = (index: number, total: number): number[] => {
@@ -294,7 +283,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
             <Flex gap="14px" align="center"><Flex w="64px" h="64px" borderRadius="16px" bg="gray.50" align="center" justify="center" p="8px" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}</Flex><Box minW={0}><Heading fontSize="lg">{business.name || 'Negocio local'}</Heading><Badge mt="5px" colorScheme="purple">{business.category}</Badge></Box></Flex>
             {business.description && <Text color={muted} fontSize="sm" lineHeight="1.6" mt="12px">{business.description}</Text>}
             <SponsorLocation sponsor={business} />
-            {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <Button key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" size="sm" leftIcon={<Icon as={meta.icon} />} colorScheme="brand" variant="outline">{meta.label}</Button>; })}</Flex>}
+            {links.length > 0 && <Flex gap="8px" wrap="wrap" mt="14px">{links.map((link, index) => { const meta = linkMeta(link); return <SocialLink key={`${link}-${index}`} href={link} label={`${meta.label} de ${business.name}`} />; })}</Flex>}
           </Box>;
         })}</SimpleGrid> : <Box textAlign="center" py="40px"><Icon as={MdStorefront} boxSize="42px" color="gray.300" /><Text fontWeight="800" mt="10px">No encontramos negocios</Text><Text color={muted}>Probá con otra categoría o borrá la búsqueda.</Text></Box>}
       </Stack>
@@ -438,7 +427,7 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
         </Stack>
       </Flex>
       <SponsorLocation sponsor={business} />
-      {sponsorLinks(business).length > 4 && <Flex gap={2} wrap="wrap" mt={3}>{sponsorLinks(business).slice(4).map(link => <Button key={link} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" size="sm" {...goldenActionStyles}>{linkMeta(link).label}</Button>)}</Flex>}
+      {sponsorLinks(business).length > 4 && <Flex gap={2} wrap="wrap" mt={3}>{sponsorLinks(business).slice(4).map(link => <SocialLink key={link} href={link} label={`${linkMeta(link).label} de ${business.name}`} />)}</Flex>}
     </Box>
   );
 }
@@ -446,7 +435,7 @@ function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onCont
 function BusinessContactHub({ business, links, isOpen, onToggle }: { business: SponsorItem; links: string[]; isOpen: boolean; onToggle: () => void }) {
   const hasLinks = links.length > 0;
   return (
-    <Box position="relative" w={{ base: '88px', md: '104px' }} h={{ base: '86px', md: '100px' }} flex="0 0 auto" overflow="visible">
+    <Box position="relative" w={{ base: '104px', md: '112px' }} h={{ base: '104px', md: '112px' }} flex="0 0 auto" overflow="visible">
       <Flex as="button" type="button" aria-label={hasLinks ? `${isOpen ? 'Ocultar' : 'Mostrar'} redes de ${business.name || 'negocio'}` : `Logo de ${business.name || 'negocio'}`} aria-expanded={hasLinks ? isOpen : undefined} onClick={() => hasLinks && onToggle()} position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" zIndex={2} w={{ base: '60px', md: '72px' }} h={{ base: '60px', md: '72px' }} borderRadius={{ base: '18px', md: '20px' }} bg="white" align="center" justify="center" p="8px" cursor={hasLinks ? 'pointer' : 'default'} boxShadow={isOpen ? '0 0 0 4px rgba(212,175,55,.28), 0 12px 28px rgba(0,0,0,.32)' : '0 10px 24px rgba(0,0,0,.26)'} transition="transform .2s ease, box-shadow .2s ease" _hover={hasLinks ? { transform: 'translate(-50%, -50%) scale(1.04)' } : undefined} _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' } : undefined}>
         {business.logoUrl ? <Image src={business.logoUrl} alt={business.name || 'Logo del negocio'} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="38px" color="brand.500" />}
       </Flex>
@@ -454,9 +443,7 @@ function BusinessContactHub({ business, links, isOpen, onToggle }: { business: S
       {links.map((link, index) => {
         const meta = linkMeta(link);
         return (
-          <Flex key={`${link}-${index}`} as="a" href={hrefFor(link)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${meta.label} de ${business.name || 'negocio'}`} position="absolute" zIndex={3} {...dossierBubblePositions[index]} w={{ base: '34px', md: '38px' }} h={{ base: '34px', md: '38px' }} borderRadius="full" bg={meta.bg} color="white" border="2px solid" borderColor="white" align="center" justify="center" boxShadow="0 12px 22px rgba(0,0,0,.38)" opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,10px,0) scale(.55)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} _hover={{ textDecoration: 'none', transform: 'translate3d(0,-3px,0) scale(1.08)', filter: 'brightness(1.08)' }} _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '2px' }}>
-            <Icon as={meta.icon} boxSize={{ base: '15px', md: '17px' }} />
-          </Flex>
+          <SocialLink size="compact" key={`${link}-${index}`} href={link} label={`Abrir ${meta.label} de ${business.name || 'negocio'}`} position="absolute" zIndex={3} {...dossierBubblePositions[index]} opacity={isOpen ? 1 : 0} visibility={isOpen ? 'visible' : 'hidden'} transform={isOpen ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,10px,0) scale(.55)'} transition={`all .26s cubic-bezier(.2,.8,.2,1) ${isOpen ? index * 45 : 0}ms`} />
         );
       })}
     </Box>

@@ -101,10 +101,13 @@ Mantener los textos de interfaz en español y los nombres técnicos coherentes c
 | Modal de formulario | `components/modal/FormModal` |
 | Detalles opcionales / listas acotadas | `components/modal/ModalSection`, `ModalList` |
 | Confirmación de eliminación | `components/modal/DeleteModal` |
+| Enlaces y acciones de redes | `components/social/SocialLink`, `SocialContact` |
 | Estructura de páginas públicas | `views/public/PublicPage`, `PublicHeader`, `PublicFooter` |
 | Búsqueda de listados administrativos | `PageSearchContext` y `SearchBar` |
 
 Revisar las props reales antes de utilizar un componente. `components/form/FormField` es el componente visual; `interfaces/FormField` es el contrato del formulario declarativo.
+
+Los enlaces de redes usan `SocialLink`: círculo con icono blanco, color de la red, nombre accesible y foco visible. `SocialContact` conserva el texto de una acción junto al círculo. No duplicar colores, iconos ni detección de redes en las vistas; usar `socialPresentation` y los helpers de `utils/sponsor`. Los formularios mantienen `SocialNetworkLabel` como etiqueta, no como enlace.
 
 Las diferencias de apariencia se resuelven primero en `src/theme/`. Usar tokens y variantes existentes para colores, controles y espaciado, con valores responsive de Chakra. Evitar repetir estilos de botones, inputs o labels en cada página.
 
