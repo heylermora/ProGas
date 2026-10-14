@@ -74,9 +74,10 @@ function DonationBanner() {
 
   return (
     <Box as="section" aria-labelledby="band-support-title" bg={bg} color={text}
-      border="1px solid" borderColor={border} borderRadius={{ base: '28px', md: '36px' }}
+      border="1px solid" borderColor={border} borderRadius={{ base: '24px', md: '30px' }}
       position="relative" isolation="isolate" overflow="hidden" boxShadow="0 14px 38px rgba(113, 63, 18, .10)">
-      <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice"
+      <Box position="absolute" top="0" left="24px" right="24px" h="2px" bgGradient="linear(to-r, transparent, #E8BA50, transparent)" aria-hidden="true" />
+      <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 1200 300"  preserveAspectRatio="xMidYMid slice"
         display={{ base: 'none', md: 'block' }} position="absolute" inset="0" w="100%" h="100%" pointerEvents="none" zIndex={-1}>
         <path d="M900 -100 C790 5 1120 45 1050 145 S1100 305 1300 270" fill="none" stroke={ribbon} strokeWidth="78" opacity=".15" />
         <path d="M1080 -100 C965 0 1270 60 1190 155 S1240 330 1380 300" fill="none" stroke={ribbon} strokeWidth="22" opacity=".28" />
@@ -99,39 +100,39 @@ function DonationBanner() {
           <ellipse cx="0" cy="22" rx="7" ry="5" /><path d="M5 22 V-10 H8 V22Z M5 -10 Q25 -7 19 7 Q17 -2 5 -3Z" />
         </g>
       </Box>
-      <Flex direction={{ base: 'column', lg: 'row' }} gap={{ base: 5, lg: 7 }}
-        align={{ base: 'stretch', lg: 'center' }} p={{ base: 5, md: 7 }}>
-        <Flex align={{ base: 'flex-start', md: 'center' }} gap={{ base: 4, md: 5 }} flex="1" minW="0">
-          <Box flexShrink={0} p="6px" bg="white" borderRadius="20px" transform="rotate(-5deg)"
+      <Flex direction={{ base: 'column', lg: 'row' }} gap={{ base: 3, lg: 5 }}
+        align={{ base: 'stretch', lg: 'center' }} p={{ base: 4, md: 5 }}>
+        <Flex align={{ base: 'flex-start', md: 'center' }} gap={{ base: 3, md: 4 }} flex="1" minW="0">
+          <Box flexShrink={0} p="5px" bg="white" borderRadius="18px" transform="rotate(-6deg)"
             boxShadow="0 8px 18px rgba(113,63,18,.16)" border="1px solid" borderColor="yellow.100">
             <Image src={bmaLogo} alt="Banda Municipal de Acosta" objectFit="contain"
-              boxSize={{ base: '64px', md: '92px' }} borderRadius="14px" bg="yellow.400" />
+              boxSize={{ base: '62px', md: '80px' }} borderRadius="14px" bg="yellow.400" />
           </Box>
-          <Stack spacing={2} minW="0">
-            <Text color={accent} fontSize="10px" fontWeight="800" letterSpacing=".12em" textTransform="uppercase"
-              alignSelf="flex-start" border="1px solid" borderColor={border} borderRadius="full" px={3} py={1} bg={footer}>
+          <Stack spacing="5px" minW="0">
+            <Text color={accent} fontSize={{ base: '9px', md: '10px' }} fontWeight="800" letterSpacing=".1em" textTransform="uppercase"
+              alignSelf="flex-start">
               Música que une a Acosta
             </Text>
-            <Heading id="band-support-title" fontSize={{ base: 'xl', md: '28px' }} lineHeight="1.2" letterSpacing="-.025em">
+            <Heading id="band-support-title" fontSize={{ base: '20px', md: '26px' }} lineHeight="1.2" letterSpacing="-.025em">
               Apoye a nuestra Banda Municipal
             </Heading>
-            <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize="sm" lineHeight="1.6" maxW="550px">
+            <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize={{ base: '13px', md: 'sm' }} lineHeight="1.45" maxW="550px">
               Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
             </Text>
           </Stack>
         </Flex>
-        <Text display={{ base: 'block', md: 'none' }} color={muted} fontSize="sm" lineHeight="1.6">
+        <Text display={{ base: 'block', md: 'none' }} color={muted} fontSize={{ base: '13px', md: 'sm' }} lineHeight="1.45">
           Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
         </Text>
-        <Box flexShrink={0} w={{ base: '100%', lg: '260px' }} p="12px" borderRadius="18px" bg={footer} border="1px solid" borderColor={border}>
-          <SocialContact href={bmaDonationUrl} caption="Quiero apoyar" description="Coordine su aporte por WhatsApp." />
+        <Box flexShrink={0} w={{ base: '100%', lg: '260px' }} p="8px" borderRadius="16px" bg={footer} border="1px solid" borderColor={border}>
+          <SocialContact size="compact" href={bmaDonationUrl} caption="Quiero apoyar" description="Coordine su aporte por WhatsApp." />
         </Box>
       </Flex>
       <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }}
-        justify="space-between" gap={3} borderTop="1px solid" borderColor={border} bg={footer} backdropFilter="blur(8px)"
-        px={{ base: 5, md: 7 }} py={3}>
-        <Text color={muted} fontSize="sm">Conozca la Banda y manténgase en contacto</Text>
-        <Box w={{ base: '100%', md: 'auto' }} minW="0" maxW="100%"><SocialLinksRow links={bmaSocialLinks.map(social => social.href)} label="Redes sociales de Banda Municipal de Acosta" size="large" /></Box>
+        justify="space-between" gap={{ base: 0, md: 3 }} borderTop="1px solid" borderColor={border} bg={footer} backdropFilter="blur(8px)"
+        px={{ base: 4, md: 5 }} py={2}>
+        <Text color={muted} fontSize="xs">Conozca la Banda y manténgase en contacto</Text>
+        <Box w={{ base: '100%', md: 'auto' }} minW="0" maxW="100%"><SocialLinksRow links={bmaSocialLinks.map(social => social.href)} label="Redes sociales de Banda Municipal de Acosta" size="compact" /></Box>
       </Flex>
     </Box>
   );
