@@ -16,7 +16,7 @@ useColorModeValue
 import { keyframes } from '@emotion/react';
 import AppModal from 'components/modal/AppModal';
 import SponsorLocation from 'components/sponsor/SponsorLocation';
-import { sponsorLinks, sponsorVideoSource } from 'utils/sponsor';
+import { sponsorLinks, sponsorNavigation, sponsorVideoSource } from 'utils/sponsor';
 import useCategories from 'hooks/useCategories';
 import SearchableCategorySelect from 'components/category/SearchableCategorySelect';
 import SponsorItem from 'interfaces/SponsorItem';
@@ -24,8 +24,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
 MdChevronLeft,
 MdChevronRight,
-MdClose,
-MdLink, MdMap, MdMyLocation,
+MdMap, MdMyLocation,
 MdPlayArrow,
 MdStorefront,
 MdViewList
@@ -52,10 +51,6 @@ const shadowPulse = keyframes`
   0%, 100% { transform: translateX(-50%) scale(.95); opacity: .38; }
   50% { transform: translateX(-50%) scale(.62); opacity: .16; }
 `;
-const panelArrival = keyframes`
-  from { opacity: 0; transform: translateY(18px) scale(.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-`;
 const mapArrival = keyframes`
   from { opacity: 0; transform: scale(.92); filter: blur(5px); }
   to { opacity: 1; transform: scale(1); filter: blur(0); }
@@ -64,10 +59,6 @@ const stationArrival = keyframes`
   0% { box-shadow: 0 0 0 0 rgba(103,232,249,.75); }
   70% { box-shadow: 0 0 0 16px rgba(103,232,249,0); }
   100% { box-shadow: 0 0 0 0 rgba(103,232,249,0); }
-`;
-const actionInvite = keyframes`
-  0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 0 rgba(250,204,21,0)); }
-  50% { transform: translateY(-4px); filter: drop-shadow(0 0 8px rgba(250,204,21,.72)); }
 `;
 const goldenActionStyles = {
   bgGradient: 'linear(135deg, #FFE29F 0%, #D4AF37 45%, #8A5A00 100%)',
@@ -101,7 +92,9 @@ export default function VirtualMall() {
   const [selectedBusinessId, setSelectedBusinessId] = useState('');
   const [visitedBusinessIds, setVisitedBusinessIds] = useState<string[]>([]);
   const [arrivedBusinessId, setArrivedBusinessId] = useState('');
-  const [contactsOpen, setContactsOpen] = useState(false);
+  const [dossierOpen, setDossierOpen] = useState(false);
+  const stationTrigger = useRef<HTMLButtonElement | null>(null);
+  const videoTrigger = useRef<HTMLButtonElement | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [mobileSector, setMobileSector] = useState(0);
   const [businessSector, setBusinessSector] = useState(0);
@@ -130,6 +123,7 @@ export default function VirtualMall() {
           setBusinessSector(Math.max(0, Math.floor(requestedIndex / BUSINESSES_PER_SECTOR)));
           setSelectedBusinessId(requestedBusiness.id);
           setArrivedBusinessId(requestedBusiness.id);
+          setDossierOpen(true);
         }
         setLoadStatus('success');
       })
@@ -158,30 +152,31 @@ export default function VirtualMall() {
     setSelectedCategory(category);
     setSelectedBusinessId('');
     setArrivedBusinessId('');
-    setContactsOpen(false);
+    setDossierOpen(false);
     setBusinessSector(0);
   };
   const returnToGalaxy = () => {
     setSelectedCategory('');
     setSelectedBusinessId('');
     setArrivedBusinessId('');
-    setContactsOpen(false);
+    setDossierOpen(false);
     setBusinessSector(0);
   };
-  const selectBusiness = (id: string) => {
+  const selectBusiness = (id: string, trigger: HTMLButtonElement) => {
+    stationTrigger.current = trigger;
     clearTimeout(travelTimer.current);
     setSelectedBusinessId(id);
     setVisitedBusinessIds((ids) => ids.includes(id) ? ids : [...ids, id]);
     setArrivedBusinessId('');
-    setContactsOpen(false);
-    travelTimer.current = setTimeout(() => setArrivedBusinessId(id), 480);
+    setDossierOpen(false);
+    travelTimer.current = setTimeout(() => { setArrivedBusinessId(id); setDossierOpen(true); }, 480);
   };
   const changeBusinessSector = (sector: number) => {
     clearTimeout(travelTimer.current);
     setBusinessSector((sector + businessSectorCount) % businessSectorCount);
     setSelectedBusinessId('');
     setArrivedBusinessId('');
-    setContactsOpen(false);
+    setDossierOpen(false);
   };
   return (
     <PublicPage maxW="1280px">
@@ -238,20 +233,21 @@ export default function VirtualMall() {
             {loadStatus === 'success' && arrivedBusiness && (
               <BusinessDossier
                 business={arrivedBusiness}
-                contactsOpen={contactsOpen}
+                key={arrivedBusiness.id}
+                isOpen={dossierOpen}
+                finalFocusRef={stationTrigger}
                 contactLinks={contactLinks}
-                onClose={() => { setSelectedBusinessId(''); setContactsOpen(false); }}
-                onContacts={() => setContactsOpen((open) => !open)}
-                onVideo={() => setVideoOpen(true)}
+                onClose={() => { setDossierOpen(false); setVideoOpen(false); }}
+                onVideo={(trigger) => { videoTrigger.current = trigger; setVideoOpen(true); }}
               />
             )}
           </Box>
         </Box>}
       </Stack>
 
-      <AppModal isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" appearance="media" title={arrivedBusiness?.name || 'Video del negocio'}>
+      <AppModal finalFocusRef={videoTrigger} isOpen={videoOpen} onClose={() => setVideoOpen(false)} size="4xl" appearance="media" title={arrivedBusiness?.name || 'Video del negocio'}>
             {isDirectVideo(arrivedBusiness?.videoUrl || '') ? (
-              <Box as="video" src={arrivedBusiness?.videoUrl} controls autoPlay playsInline w="100%" maxH="60vh" borderRadius="16px" />
+              <Box as="video" aria-label={`Video de ${arrivedBusiness?.name || 'negocio'}`} src={arrivedBusiness?.videoUrl} controls autoPlay playsInline w="100%" maxH="60vh" borderRadius="16px" />
             ) : (
               <Box as="iframe" title={`Video de ${arrivedBusiness?.name || 'negocio'}`} src={videoSource(arrivedBusiness?.videoUrl)} w="100%" h={{ base: '220px', md: '440px' }} maxH="60vh" border="0" borderRadius="16px" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
             )}
@@ -328,7 +324,7 @@ function CategoryMap({ categories, businesses, mobileSector, onSectorChange, onS
   );
 }
 
-function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, visitedIds, sector, sectorCount, onSectorChange, onBack, onSelect }: { businesses: SponsorItem[]; totalBusinesses: number; category: string; categoryIcon: string; selectedId?: string; visitedIds: string[]; sector: number; sectorCount: number; onSectorChange: (sector: number) => void; onBack: () => void; onSelect: (id: string) => void }) {
+function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, visitedIds, sector, sectorCount, onSectorChange, onBack, onSelect }: { businesses: SponsorItem[]; totalBusinesses: number; category: string; categoryIcon: string; selectedId?: string; visitedIds: string[]; sector: number; sectorCount: number; onSectorChange: (sector: number) => void; onBack: () => void; onSelect: (id: string, trigger: HTMLButtonElement) => void }) {
   return (
     <>
       <Stack position="absolute" top="12px" left="16px" right="16px" align="center" spacing="6px" zIndex={6}>
@@ -371,7 +367,7 @@ function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, sele
           const selected = business.id === selectedId;
           const visited = visitedIds.includes(business.id);
           return (
-            <Button key={business.id} aria-label={`Abrir ficha de ${business.name || 'negocio'}`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${top * .78 + 7}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={businesses.length % 2 === 1 && index === businesses.length - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: businesses.length === 1 ? '180px' : 'min(100%, 150px)', md: '116px' }} h={{ base: '112px', md: '104px' }} minW="0" p="6px" variant="unstyled" bg={selected ? 'cyan.100' : 'white'} color="navy.800" border="2px solid" borderColor={selected ? 'cyan.300' : visited ? 'purple.300' : 'white'} borderRadius="30%" boxShadow={selected ? '0 0 0 3px rgba(103,232,249,.25), 0 0 20px #67E8F9' : '0 0 0 4px rgba(167,139,250,.12), 0 10px 25px rgba(0,0,0,.3)'} animation={selected ? `${stationArrival} .7s ease-out` : undefined} onClick={() => onSelect(business.id)} display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
+            <Button key={business.id} aria-label={`Abrir ficha de ${business.name || 'negocio'}`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${top * .78 + 7}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={businesses.length % 2 === 1 && index === businesses.length - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: businesses.length === 1 ? '180px' : 'min(100%, 150px)', md: '116px' }} h={{ base: '112px', md: '104px' }} minW="0" p="6px" variant="unstyled" bg={selected ? 'cyan.100' : 'white'} color="navy.800" border="2px solid" borderColor={selected ? 'cyan.300' : visited ? 'purple.300' : 'white'} borderRadius="30%" boxShadow={selected ? '0 0 0 3px rgba(103,232,249,.25), 0 0 20px #67E8F9' : '0 0 0 4px rgba(167,139,250,.12), 0 10px 25px rgba(0,0,0,.3)'} animation={selected ? `${stationArrival} .7s ease-out` : undefined} onClick={(event) => onSelect(business.id, event.currentTarget)} display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
               <Flex w="100%" h={{ base: '78px', md: '70px' }} align="center" justify="center">
                 {business.logoUrl ? <Image src={business.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="48px" color="brand.500" />}
               </Flex>
@@ -416,51 +412,40 @@ function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, 
   );
 }
 
-function BusinessDossier({ business, contactsOpen, contactLinks, onClose, onContacts, onVideo }: { business: SponsorItem; contactsOpen: boolean; contactLinks: string[]; onClose: () => void; onContacts: () => void; onVideo: () => void }) {
+function BusinessDossier({ business, isOpen, finalFocusRef, contactLinks, onClose, onVideo }: { business: SponsorItem; isOpen: boolean; finalFocusRef: React.RefObject<HTMLButtonElement>; contactLinks: string[]; onClose: () => void; onVideo: (trigger: HTMLButtonElement) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasLocation = Boolean(business.directions || sponsorNavigation(business.coordinates, business.mapsUrl, business.wazeUrl));
   return (
-    <Box position="absolute" zIndex={8} right={{ base: '8px', md: '18px' }} bottom={{ base: '8px', md: '18px' }} w={{ base: 'calc(100% - 16px)', md: '430px' }} maxH={{ base: '260px', md: 'calc(100% - 36px)' }} overflowY="auto" p={{ base: '12px', md: '14px' }} borderRadius={{ base: '22px', md: '26px' }} bg="rgba(8, 14, 38, .94)" color="white" border="1px solid" borderColor="cyan.300" boxShadow="0 24px 65px rgba(0,0,0,.52), inset 0 0 28px rgba(34,211,238,.05)" backdropFilter="blur(16px)" animation={`${panelArrival} .24s ease-out`}>
-      <Flex align="center" justify="space-between" mb={{ base: '6px', md: '8px' }}>
-        <Badge bg="cyan.300" color="navy.900" borderRadius="full" px="9px">FICHA DE ESTACIÓN</Badge>
-        <IconButton aria-label="Cerrar ficha" icon={<MdClose />} size="sm" variant="ghost" color="white" onClick={onClose} />
-      </Flex>
-      <Flex gap={{ base: '10px', md: '14px' }} align="center">
-        <BusinessContactHub business={business} links={contactLinks} isOpen={contactsOpen} onToggle={onContacts} />
-        <Stack spacing={{ base: '6px', md: '8px' }} minW="0" flex="1">
-          {(business.name || business.description) && (
-            <Stack spacing="3px" minW="0">
-              {business.name && <Heading fontSize={{ base: 'lg', md: 'xl' }} lineHeight="1.06">{business.name}</Heading>}
-              {business.description && <Text fontSize={{ base: 'xs', md: 'sm' }} color="whiteAlpha.800" noOfLines={{ base: 2, md: 3 }}>{business.description}</Text>}
-            </Stack>
-          )}
-          <Flex gap="10px" wrap="wrap" align="center">
-            {business.videoUrl && (
-              <Box animation={`${actionInvite} 1.8s ease-in-out infinite`}>
-                <IconButton aria-label={`Abrir video de ${business.name || 'negocio'}`} icon={<Icon as={MdPlayArrow} boxSize="24px" />} w="48px" h="48px" minW="48px" borderRadius="full" {...goldenActionStyles} onClick={onVideo} />
-              </Box>
-            )}
-            {contactLinks.length > 0 && (
-              <Box animation={`${actionInvite} 1.8s ease-in-out .3s infinite`}>
-                <IconButton aria-label={`${contactsOpen ? 'Ocultar' : 'Abrir'} contactos de ${business.name || 'negocio'}`} aria-expanded={contactsOpen} icon={<Icon as={MdLink} boxSize="21px" />} w="48px" h="48px" minW="48px" borderRadius="full" {...goldenActionStyles} boxShadow={contactsOpen ? '0 0 0 5px rgba(250,204,21,.24), 0 14px 26px rgba(184,134,11,.42)' : goldenActionStyles.boxShadow} onClick={onContacts} />
-              </Box>
-            )}
-          </Flex>
-        </Stack>
-      </Flex>
-      <SponsorLocation sponsor={business} />
-      {contactsOpen && <SocialLinksRow links={contactLinks} businessId={business.id} source="mall" label={`Redes sociales de ${business.name}`} size="compact" />}
-    </Box>
-  );
-}
-
-function BusinessContactHub({ business, links, isOpen, onToggle }: { business: SponsorItem; links: string[]; isOpen: boolean; onToggle: () => void }) {
-  const hasLinks = links.length > 0;
-  return (
-    <Box position="relative" w={{ base: '104px', md: '112px' }} h={{ base: '104px', md: '112px' }} flex="0 0 auto" overflow="visible">
-      <Flex as="button" type="button" aria-label={hasLinks ? `${isOpen ? 'Ocultar' : 'Mostrar'} redes de ${business.name || 'negocio'}` : `Logo de ${business.name || 'negocio'}`} aria-expanded={hasLinks ? isOpen : undefined} onClick={() => hasLinks && onToggle()} position="absolute" left="50%" top="50%" transform="translate(-50%, -50%)" zIndex={2} w={{ base: '60px', md: '72px' }} h={{ base: '60px', md: '72px' }} borderRadius={{ base: '18px', md: '20px' }} bg="white" align="center" justify="center" p="8px" cursor={hasLinks ? 'pointer' : 'default'} boxShadow={isOpen ? '0 0 0 4px rgba(212,175,55,.28), 0 12px 28px rgba(0,0,0,.32)' : '0 10px 24px rgba(0,0,0,.26)'} transition="transform .2s ease, box-shadow .2s ease" _hover={hasLinks ? { transform: 'translate(-50%, -50%) scale(1.04)' } : undefined} _focusVisible={hasLinks ? { outline: '3px solid', outlineColor: 'yellow.300', outlineOffset: '3px' } : undefined}>
-        {business.logoUrl ? <Image src={business.logoUrl} alt={business.name || 'Logo del negocio'} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="38px" color="brand.500" />}
-      </Flex>
-
-
-    </Box>
+    <AppModal
+      isOpen={isOpen}
+      onClose={onClose}
+      finalFocusRef={finalFocusRef.current ? finalFocusRef : undefined}
+      appearance="media"
+      placement="station"
+      title={<Flex align="center" gap="14px" pr="4px">
+        <Flex boxSize="80px" flexShrink={0} bg="white" borderRadius="20px" p="6px" align="center" justify="center">
+          {business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="44px" color="brand.500" />}
+        </Flex>
+        <Text minW="0" overflowWrap="anywhere">{business.name || 'Negocio local'}</Text>
+      </Flex>}
+      description={business.category ? `ESTACIÓN · ${business.category}` : 'ESTACIÓN'}
+      footer={<Button onClick={onClose} w="100%" minH="44px" leftIcon={<MdChevronLeft />} bg="cyan.200" color="navy.900" borderRadius="full" _hover={{ bg: 'cyan.100' }}>Seguir explorando</Button>}
+    >
+      <Stack spacing="20px">
+        {business.description && <Box>
+          <Text fontSize="sm" lineHeight="1.6" color="whiteAlpha.900" whiteSpace="pre-line" overflowWrap="anywhere">{!expanded && business.description.length > 180 ? `${business.description.slice(0, 180).trimEnd()}…` : business.description}</Text>
+          {business.description.length > 180 && <Button variant="link" color="cyan.200" minH="44px" fontSize="sm" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded}>{expanded ? 'Ver menos' : 'Ver más'}</Button>}
+        </Box>}
+        {contactLinks.length > 0 && <Box>
+          <Text fontSize="xs" fontWeight="700" letterSpacing=".06em" color="cyan.100">CONTACTÁ AL NEGOCIO</Text>
+          <SocialLinksRow links={contactLinks} businessId={business.id} source="mall" label={`Redes sociales de ${business.name}`} size="regular" />
+        </Box>}
+        {hasLocation && <Box borderTop="1px solid" borderColor="whiteAlpha.200" pt="16px">
+          <Text fontSize="sm" fontWeight="700">Cómo llegar</Text>
+          <SponsorLocation sponsor={business} />
+        </Box>}
+        {business.videoUrl && <Button onClick={(event) => onVideo(event.currentTarget)} leftIcon={<MdPlayArrow />} variant="outline" color="cyan.100" borderColor="whiteAlpha.400" minH="44px" borderRadius="full" _hover={{ bg: 'whiteAlpha.100' }}>Ver video del negocio</Button>}
+      </Stack>
+    </AppModal>
   );
 }

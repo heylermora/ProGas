@@ -60,6 +60,8 @@ Los candidatos de prioridad alta y media ya cuentan con una implementación comp
 
 `AppModal` centraliza superficie, borde, radios, cierre, foco, bloqueo del fondo y altura máxima dinámica. Solo el cuerpo se desplaza; encabezado y pie permanecen visibles. `FormModal` agrega formulario semántico, validación del flujo mediante callback, guardado y acciones compartidas, sin botones Volver ni formularios anidados.
 
+La ficha del mapa usa `AppModal` con `placement="station"`: panel inferior en móvil y lateral en escritorio, fondo inactivo, cierre y pie siempre visibles. Mantiene la selección al cerrar y devuelve el foco a su estación mediante `finalFocusRef`. Sus contactos se muestran directamente con `SocialLinksRow`; el logo no es un control oculto. La posición centrada sigue siendo el valor predeterminado de los demás modales.
+
 - Clientes y colaboradores: formularios breves dentro del modal, sin desplazar ni reiniciar el listado.
 - Pagos: resumen de importes, un método expandido a la vez, referencias obligatorias visibles y fecha/nota general plegables. Los errores abren el método o la sección correspondiente.
 - Categorías: lista de cuatro elementos por página en móvil y cinco en escritorio, con edición y eliminación; no hay scroll interno adicional.
