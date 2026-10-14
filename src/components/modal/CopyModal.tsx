@@ -1,5 +1,5 @@
 import { Button, Stack, Textarea, useToast } from '@chakra-ui/react';
-import { FaWhatsapp } from 'react-icons/fa';
+import { SocialContact } from 'components/social/SocialLink';
 import AppModal from './AppModal';
 
 type CopyModalProps = {
@@ -48,7 +48,7 @@ function CopyModal(props: CopyModalProps) {
 
   return <AppModal title="Copiar información" isOpen={isOpen} onClose={onClose}
     footer={<Stack direction={{ base: 'column', md: 'row' }} spacing={3}>
-      <Button type="button" flex="1" colorScheme="whatsapp" onClick={handleSendWhatsApp} leftIcon={<FaWhatsapp />}>Enviar por WhatsApp</Button>
+      <SocialContact network="whatsapp" onClick={handleSendWhatsApp} caption="Enviar por WhatsApp" />
       <Button type="button" flex="1" variant="brand" onClick={handleCopy}>Copiar</Button>
     </Stack>}>
     <Stack spacing={3}>{message}

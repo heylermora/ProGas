@@ -60,6 +60,8 @@ Los candidatos de prioridad alta y media ya cuentan con una implementación comp
 
 `AppModal` centraliza superficie, borde, radios, cierre, foco, bloqueo del fondo y altura máxima dinámica. Solo el cuerpo se desplaza; encabezado y pie permanecen visibles. `FormModal` agrega formulario semántico, validación del flujo mediante callback, guardado y acciones compartidas, sin botones Volver ni formularios anidados.
 
+La ficha del mapa usa `AppModal` con `placement="station"`: panel inferior en móvil y lateral en escritorio, fondo inactivo, cierre y pie siempre visibles. Mantiene la selección al cerrar y devuelve el foco a su estación mediante `finalFocusRef`. Sus contactos se muestran directamente con `SocialLinksRow`; el logo no es un control oculto. La posición centrada sigue siendo el valor predeterminado de los demás modales.
+
 - Clientes y colaboradores: formularios breves dentro del modal, sin desplazar ni reiniciar el listado.
 - Pagos: resumen de importes, un método expandido a la vez, referencias obligatorias visibles y fecha/nota general plegables. Los errores abren el método o la sección correspondiente.
 - Categorías: lista de cuatro elementos por página en móvil y cinco en escritorio, con edición y eliminación; no hay scroll interno adicional.
@@ -76,3 +78,23 @@ Crear y editar reutilizan `SponsorForm` como página con layout administrativo a
 `utils/sponsor` define los campos opcionales por red, reconoce contactos históricos y conserva los enlaces adicionales. El contrato mantiene `links` para consumidores anteriores y agrega `socialLinks` por nombre. `SponsorLocation` presenta las señas y enlaces a Maps/Waze tanto en el formulario como en las dos vistas del directorio. `SponsorLocationFields` pide enlaces compartidos de Google Maps/Waze y señas, sin campos de coordenadas. El GPS completa los destinos desde el local. Se conservan coordenadas históricas y se reconoce un destino explícito en Maps; los enlaces cortos se guardan sin inventar un destino de Waze a partir de las señas o del centro del mapa. `DeviceLocationMap` admite mensajes contextuales sin cambiar el flujo de pedidos.
 
 El video se configura mediante enlace compartido de YouTube/Vimeo o archivo público MP4/WebM/OGG. No ofrecer carga directa de nuevos videos a Firestore: su límite documental no sirve para videos habituales. Los videos históricos se conservan y pueden quitarse o reemplazarse. La configuración del espacio disponible se retiró del listado administrativo porque correspondía a `SponsorStrip`, que ya no se monta en el directorio actual; se mantienen servicio y documentos históricos.
+
+## Enlaces de redes
+
+`components/social/SocialLink` centraliza el círculo, el icono blanco, el color de
+cada red, el tamaño táctil mínimo de 44 px, el nombre accesible, tooltip y foco.
+`SocialContact` presenta el texto de una acción junto al mismo círculo; permite
+conservar indicaciones como «Consultar por WhatsApp» o «Quiero apoyar».
+
+Las vistas aportan el destino original y, cuando corresponde, el nombre del
+negocio. Los grupos usan `SocialLinksRow`: una fila horizontal sin saltos ni posiciones
+absolutas alrededor del logo. Si no caben, se desplaza sólo el grupo; los botones
+no se deforman ni reducen por debajo del tamaño táctil mínimo.
+`socialPresentation` provee iconos y etiquetas también a `SocialNetworkLabel`,
+que sigue siendo una etiqueta de formulario y no una acción de navegación.
+
+La detección usa `networkFor` y el correo se normaliza con `sponsorContactHref`.
+Los enlaces HTTP(S) abren una pestaña con `noopener noreferrer`; el correo usa
+`mailto:`. Las acciones de compartir conservan la semántica de botón y su
+callback. No detectar correos buscando simplemente «@», porque rompe URLs de
+TikTok e Instagram que contienen ese carácter.

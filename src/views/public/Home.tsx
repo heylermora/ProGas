@@ -1,21 +1,19 @@
-import React from 'react';
+import { SocialLinksRow, SocialContact } from 'components/social/SocialLink';
+import React, { useEffect } from 'react';
+import AnalyticsService from 'services/AnalyticsService';
 import {
   Box,
   Button,
   Flex,
   Heading,
   Icon,
-  IconButton,
   Image,
-  Link,
   Stack,
   Text,
-  Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdFavorite, MdAccessTime, MdArrowForward } from 'react-icons/md';
+import { MdAccessTime, MdArrowForward } from 'react-icons/md';
 import MallPreview from './MallPreview';
 import BusinessPromotion from './BusinessPromotion';
 import { PublicPage } from './PublicPage';
@@ -32,37 +30,22 @@ const socialLinks = [
   {
     label: 'Facebook',
     href: 'https://www.facebook.com/gasmemoymandaditos',
-    icon: FaFacebookF,
-    bg: '#1877F2',
-    position: { base: { top: '-10px', left: '16px' }, md: { top: '10px', left: '-12px' } },
   },
   {
     label: 'Instagram',
     href: 'https://www.instagram.com/gasmemo2022?fbclid=IwY2xjawSsA2NleHRuA2FlbQIxMABicmlkETFCaFlvTGI1Uzh6RjRib3Exc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHo1bl06kfyGsphsRCNX3LobPoAtg2XoVSNuYklk43R3Y0DQ7CYlc55Y8BHXO_aem_V-fXi2Lvxja2m-IWN6wAiQ',
-    icon: FaInstagram,
-    bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)',
-    position: { base: { top: '-16px', right: '22px' }, md: { top: '-8px', right: '12px' } },
   },
   {
     label: 'WhatsApp',
     href: 'https://api.whatsapp.com/send/?phone=50683978524&text&type=phone_number&app_absent=0&utm_source=ig',
-    icon: FaWhatsapp,
-    bg: '#25D366',
-    position: { base: { bottom: '-12px', left: '20px' }, md: { bottom: '10px', left: '-18px' } },
   },
   {
     label: 'TikTok',
     href: 'https://www.tiktok.com/@gas.memo',
-    icon: FaTiktok,
-    bg: '#111111',
-    position: { base: { bottom: '-16px', right: '24px' }, md: { bottom: '2px', right: '4px' } },
   },
   {
     label: 'Correo',
     href: 'mailto:facturasgasmemo@gmail.com',
-    icon: MdEmail,
-    bg: '#F97316',
-    position: { base: { bottom: '42px', right: '-10px' }, md: { top: '50%', right: '-28px' } },
   },
 ];
 
@@ -91,9 +74,10 @@ function DonationBanner() {
 
   return (
     <Box as="section" aria-labelledby="band-support-title" bg={bg} color={text}
-      border="1px solid" borderColor={border} borderRadius={{ base: '28px', md: '36px' }}
+      border="1px solid" borderColor={border} borderRadius={{ base: '24px', md: '30px' }}
       position="relative" isolation="isolate" overflow="hidden" boxShadow="0 14px 38px rgba(113, 63, 18, .10)">
-      <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice"
+      <Box position="absolute" top="0" left="24px" right="24px" h="2px" bgGradient="linear(to-r, transparent, #E8BA50, transparent)" aria-hidden="true" />
+      <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 1200 300"  preserveAspectRatio="xMidYMid slice"
         display={{ base: 'none', md: 'block' }} position="absolute" inset="0" w="100%" h="100%" pointerEvents="none" zIndex={-1}>
         <path d="M900 -100 C790 5 1120 45 1050 145 S1100 305 1300 270" fill="none" stroke={ribbon} strokeWidth="78" opacity=".15" />
         <path d="M1080 -100 C965 0 1270 60 1190 155 S1240 330 1380 300" fill="none" stroke={ribbon} strokeWidth="22" opacity=".28" />
@@ -116,58 +100,39 @@ function DonationBanner() {
           <ellipse cx="0" cy="22" rx="7" ry="5" /><path d="M5 22 V-10 H8 V22Z M5 -10 Q25 -7 19 7 Q17 -2 5 -3Z" />
         </g>
       </Box>
-      <Flex direction={{ base: 'column', lg: 'row' }} gap={{ base: 5, lg: 7 }}
-        align={{ base: 'stretch', lg: 'center' }} p={{ base: 5, md: 7 }}>
-        <Flex align={{ base: 'flex-start', md: 'center' }} gap={{ base: 4, md: 5 }} flex="1" minW="0">
-          <Box flexShrink={0} p="6px" bg="white" borderRadius="20px" transform="rotate(-5deg)"
+      <Flex direction={{ base: 'column', lg: 'row' }} gap={{ base: 3, lg: 5 }}
+        align={{ base: 'stretch', lg: 'center' }} p={{ base: 4, md: 5 }}>
+        <Flex align={{ base: 'flex-start', md: 'center' }} gap={{ base: 3, md: 4 }} flex="1" minW="0">
+          <Box flexShrink={0} p="5px" bg="white" borderRadius="18px" transform="rotate(-6deg)"
             boxShadow="0 8px 18px rgba(113,63,18,.16)" border="1px solid" borderColor="yellow.100">
             <Image src={bmaLogo} alt="Banda Municipal de Acosta" objectFit="contain"
-              boxSize={{ base: '64px', md: '92px' }} borderRadius="14px" bg="yellow.400" />
+              boxSize={{ base: '62px', md: '80px' }} borderRadius="14px" bg="yellow.400" />
           </Box>
-          <Stack spacing={2} minW="0">
-            <Text color={accent} fontSize="10px" fontWeight="800" letterSpacing=".12em" textTransform="uppercase"
-              alignSelf="flex-start" border="1px solid" borderColor={border} borderRadius="full" px={3} py={1} bg={footer}>
+          <Stack spacing="5px" minW="0">
+            <Text color={accent} fontSize={{ base: '9px', md: '10px' }} fontWeight="800" letterSpacing=".1em" textTransform="uppercase"
+              alignSelf="flex-start">
               Música que une a Acosta
             </Text>
-            <Heading id="band-support-title" fontSize={{ base: 'xl', md: '28px' }} lineHeight="1.2" letterSpacing="-.025em">
+            <Heading id="band-support-title" fontSize={{ base: '20px', md: '26px' }} lineHeight="1.2" letterSpacing="-.025em">
               Apoye a nuestra Banda Municipal
             </Heading>
-            <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize="sm" lineHeight="1.6" maxW="550px">
+            <Text display={{ base: 'none', md: 'block' }} color={muted} fontSize={{ base: '13px', md: 'sm' }} lineHeight="1.45" maxW="550px">
               Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
             </Text>
           </Stack>
         </Flex>
-        <Text display={{ base: 'block', md: 'none' }} color={muted} fontSize="sm" lineHeight="1.6">
+        <Text display={{ base: 'block', md: 'none' }} color={muted} fontSize={{ base: '13px', md: 'sm' }} lineHeight="1.45">
           Su aporte contribuye a la formación musical del cantón. Ayude a que la música siga creciendo en nuestra comunidad.
         </Text>
-        <Stack spacing={2} flexShrink={0} w={{ base: '100%', lg: '240px' }}>
-          <Button as="a" href={bmaDonationUrl} target="_blank" rel="noopener noreferrer"
-            leftIcon={<MdFavorite />} rightIcon={<MdArrowForward />} minH="48px"
-            bg="linear-gradient(110deg, #F8D760, #EFC044)" color="gray.900" fontWeight="800" borderRadius="full" px={6}
-            boxShadow="0 6px 18px rgba(184, 125, 15, .20)"
-            _hover={{ bg: 'yellow.300', transform: 'translateY(-1px)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.600', outlineOffset: '3px' }}>
-            Quiero apoyar
-          </Button>
-          <Text color={muted} fontSize="xs" textAlign="center">Coordine su aporte por WhatsApp.</Text>
-        </Stack>
+        <Box flexShrink={0} w={{ base: '100%', lg: '260px' }} p="8px" borderRadius="16px" bg={footer} border="1px solid" borderColor={border}>
+          <SocialContact size="compact" href={bmaDonationUrl} caption="Quiero apoyar" description="Coordine su aporte por WhatsApp." />
+        </Box>
       </Flex>
       <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }}
-        justify="space-between" gap={3} borderTop="1px solid" borderColor={border} bg={footer} backdropFilter="blur(8px)"
-        px={{ base: 5, md: 7 }} py={3}>
-        <Text color={muted} fontSize="sm">Conozca la Banda y manténgase en contacto</Text>
-        <Flex role="group" aria-label="Redes sociales de Banda Municipal de Acosta" gap={2} flexWrap="wrap">
-          {bmaSocialLinks.map((social) => (
-            <Tooltip key={social.label} label={social.label === 'Correo' ? 'bandamunicipalacostacr@gmail.com' : social.label} hasArrow>
-              <IconButton as={Link} href={social.href} isExternal={!social.href.startsWith('mailto:')}
-                aria-label={social.label} icon={<Icon as={social.icon} boxSize="18px" />}
-                sx={{ background: social.bg }} color="white" boxSize="44px" minW="44px"
-                borderRadius="full" boxShadow="0 3px 8px rgba(0,0,0,.10)"
-                _hover={{ transform: 'translateY(-2px)', filter: 'brightness(1.08)' }}
-                _focusVisible={{ outline: '3px solid', outlineColor: 'yellow.600', outlineOffset: '3px' }} />
-            </Tooltip>
-          ))}
-        </Flex>
+        justify="space-between" gap={{ base: 0, md: 3 }} borderTop="1px solid" borderColor={border} bg={footer} backdropFilter="blur(8px)"
+        px={{ base: 4, md: 5 }} py={2}>
+        <Text color={muted} fontSize="xs">Conozca la Banda y manténgase en contacto</Text>
+        <Box w={{ base: '100%', md: 'auto' }} minW="0" maxW="100%"><SocialLinksRow links={bmaSocialLinks.map(social => social.href)} label="Redes sociales de Banda Municipal de Acosta" size="compact" /></Box>
       </Flex>
     </Box>
   );
@@ -184,61 +149,33 @@ function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = 
     <Box
       role="group"
       aria-label={`Redes sociales de ${organization}`}
-      bg={background}
-      borderRadius={{ base: '22px', md: '32px' }}
-      p={{ base: '20px', md: '22px' }}
       minW="0" w="100%"
       textAlign="center"
-      boxShadow="xl"
-      position="relative"
-      overflow="visible"
     >
       <Box
+        bg={background}
+        borderRadius={{ base: '22px', md: '32px' }}
+        py={{ base: '24px', md: '28px' }}
+        px="12px"
+        mb="8px"
+        boxShadow="xl"
         position="relative"
         mx="auto"
         display="block"
-        borderRadius="28px"
-        p={0}
         transition="transform .2s ease, filter .2s ease"
         _hover={{ transform: 'translateY(-3px) scale(1.01)', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.20))' }}
         _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '6px' }}
       >
-        <Image src={logo} alt={organization} maxH={{ base: '70px', md: '82px' }} mx="auto" objectFit="contain" pointerEvents="none" />
+        <Image src={logo} alt={organization} w={{ base: '140px', md: '160px' }} h={{ base: '140px', md: '160px' }} maxW="100%" mx="auto" objectFit="contain" pointerEvents="none" />
       </Box>
 
-      {links.map((social) => (
-        <Tooltip key={social.label} label={social.label} hasArrow placement="top">
-          <IconButton
-            as={Link}
-            href={social.href}
-            isExternal={!social.href.startsWith('mailto:')}
-            aria-label={social.label}
-            icon={<Icon as={social.icon} w="22px" h="22px" />}
-            position="absolute"
-            {...social.position.base}
-            sx={{
-              '@media screen and (min-width: 48em)': social.position.md,
-              background: social.bg,
-            }}
-            color="white"
-            w="44px"
-            h="44px"
-            minW="44px"
-            borderRadius="full"
-            boxShadow="0 18px 30px rgba(15, 23, 42, .28)"
-            border="3px solid"
-            borderColor="white"
-            transition="transform .2s ease, filter .2s ease"
-            _hover={{ transform: 'translate3d(0, -4px, 0) scale(1.08)', textDecoration: 'none', filter: 'brightness(1.05)' }}
-            _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '3px' }}
-          />
-        </Tooltip>
-      ))}
+      <SocialLinksRow links={links.map(social => social.href)} label={`Contactos de ${organization}`} size="compact" />
     </Box>
   );
 }
 
 export default function Home() {
+  useEffect(() => { void AnalyticsService.track({ type: 'page_view', source: 'home' }); }, []);
   const cardBg = useColorModeValue('rgba(255,255,255,.94)', 'navy.800');
   const muted = useColorModeValue('gray.600', 'gray.300');
   const border = useColorModeValue('brand.100', 'whiteAlpha.200');
@@ -258,6 +195,7 @@ export default function Home() {
             <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Lo que busca, en Acosta.</Heading>
             <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Productos y servicios de nuestra comunidad, reunidos en un solo lugar.</Text>
             <Button as={RLink} to={{ pathname: '/mall', state: { from: '/', fromLabel: 'Volver al inicio' } }}
+              onClick={() => { void AnalyticsService.track({ type: 'browse_click', source: 'home' }); }}
               alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"
               bg="linear-gradient(115deg, #5930E8, #3520AD)" color="white" px={{ base: 5, md: 7 }}
               borderRadius="full" fontWeight="800" boxShadow="0 8px 22px rgba(70,39,191,.28)"
@@ -281,7 +219,7 @@ export default function Home() {
             <Heading id="gas-coming-title" fontSize={{ base: 'xl', md: '2xl' }}>Pedidos en línea con Gas Memo</Heading>
             <Text color={muted} fontSize="sm">Este servicio aún no está disponible. Consulte las novedades en nuestras redes.</Text>
           </Stack>
-          <Box w="210px" alignSelf="center" flexShrink={0} mx={3} my={2}><SocialLogoHub /></Box>
+          <Box w={{ base: '100%', md: '300px' }} maxW="100%" alignSelf="center" flexShrink={0} mx={3} my={2}><SocialLogoHub /></Box>
         </Flex>
       </Box>
       <DonationBanner />

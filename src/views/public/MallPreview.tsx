@@ -1,9 +1,10 @@
+import { sponsorLinks } from 'utils/sponsor';
+import { SocialLinksRow } from 'components/social/SocialLink';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Icon, IconButton, Image, Link, Stack, Text, Tooltip, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Icon, Image, Stack, Text, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
-import { FaFacebookF, FaGlobe, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
-import { MdEmail, MdExplore, MdLink, MdStorefront } from 'react-icons/md';
+import { MdExplore, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
 
@@ -41,26 +42,6 @@ const marquee = keyframes`
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
 `;
-const contactBurst = keyframes`
-  from { opacity: 0; scale: .2; }
-  70% { opacity: 1; scale: 1.14; }
-  to { opacity: 1; scale: 1; }
-`;
-
-const emailPattern = /^[^\s@/:]+@[^\s@/:]+\.[^\s@/:]+$/;
-const linkMeta = (link = '') => {
-  const value = link.toLowerCase();
-  if (value.includes('facebook.com')) return { label: 'Facebook', icon: FaFacebookF, bg: '#1877F2' };
-  if (value.includes('instagram.com')) return { label: 'Instagram', icon: FaInstagram, bg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' };
-  if (value.includes('whatsapp.com') || value.includes('wa.me')) return { label: 'WhatsApp', icon: FaWhatsapp, bg: '#25D366' };
-  if (value.includes('tiktok.com')) return { label: 'TikTok', icon: FaTiktok, bg: '#111111' };
-  if (value.startsWith('mailto:') || emailPattern.test(link.trim())) return { label: 'Correo', icon: MdEmail, bg: '#F97316' };
-  if (value.startsWith('http')) return { label: 'Sitio web', icon: FaGlobe, bg: '#2563EB' };
-  return { label: 'Contacto', icon: MdLink, bg: '#64748B' };
-};
-
-const hrefFor = (link = '') => emailPattern.test(link.trim()) ? `mailto:${link.trim()}` : link;
-
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
 export default function MallPreview({ compact = false, embedded = false }: MallPreviewProps) {
@@ -124,9 +105,9 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
             {!loading && previewBusinesses.map((business) => {
               const businessKey = `${copy}:${business.id}`;
               const selected = selectedBusinessKey === businessKey;
-              const contacts = (business.links || []).filter(Boolean).slice(0, 5);
+              const contacts = sponsorLinks(business);
               return (
-                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} h={{ base: '142px', md: '150px' }} pt="22px">
+                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} minH={{ base: '164px', md: '172px' }} py="8px">
                   <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
                     <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                       {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
@@ -136,18 +117,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
                       <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'ELIJA UNA RED' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
                     </Stack>
                   </Flex>
-                  {selected && contacts.length > 0 && (
-                    <Box position="absolute" inset="0" zIndex={4} pointerEvents="none">
-                      {contacts.map((contact, index) => { const meta = linkMeta(contact); const positions = [
-                        { left: '8px', top: '0' }, { left: '50%', top: '0', transform: 'translateX(-50%)' }, { right: '8px', top: '0' },
-                        { left: '34px', bottom: '0' }, { right: '34px', bottom: '0' },
-                      ]; return (
-                        <Tooltip key={contact} label={meta.label} hasArrow>
-                          <IconButton as={Link} href={hrefFor(contact)} isExternal={!hrefFor(contact).startsWith('mailto:')} aria-label={`${meta.label} de ${business.name}`} icon={<Icon as={meta.icon} boxSize="16px" />} position="absolute" {...positions[index]} pointerEvents="auto" minW="36px" minH="36px" maxW="36px" maxH="36px" w="36px" h="36px" p="0" flexShrink={0} borderRadius="full" color="white" border="2px solid" borderColor="white" boxShadow="0 8px 18px rgba(0,0,0,.28)" sx={{ background: meta.bg, aspectRatio: '1 / 1' }} animation={`${contactBurst} .34s cubic-bezier(.2,.9,.2,1) ${index * 45}ms both`} _hover={{ marginTop: '-3px', textDecoration: 'none', filter: 'brightness(1.08)' }} />
-                        </Tooltip>
-                      ); })}
-                    </Box>
-                  )}
+                  {selected && contacts.length > 0 && <SocialLinksRow links={contacts} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" />}
                 </Box>
               );
             })}

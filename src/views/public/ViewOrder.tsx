@@ -1,3 +1,4 @@
+import { SocialContact } from 'components/social/SocialLink';
 import {
 Alert,
 AlertIcon,
@@ -15,7 +16,6 @@ import Form from 'components/form/Form';
 import FormField from 'components/form/FormField';
 import type { OrderItem } from 'interfaces/OrderItem';
 import React, { useState } from 'react';
-import { FaWhatsapp } from 'react-icons/fa';
 import { MdCheckCircle, MdContentCopy, MdLocalShipping, MdPayment, MdSchedule, MdShoppingBag } from 'react-icons/md';
 import orderService from 'services/OrderService';
 import { getPublicOrderStatus } from 'utils/order';
@@ -126,7 +126,7 @@ export default function ViewOrder() {
                 </Stack>
                 <Divider />
                 <Box textAlign="right"><Text color="gray.500" fontSize="xs">Total</Text><Text fontWeight="900" fontSize="lg">₡{Number(order.totalAmount || 0).toLocaleString('es-CR')}</Text></Box>
-                <Button as="a" href={`https://wa.me/50683978524?text=${encodeURIComponent(`Hola, necesito más información sobre mi pedido ${order.orderCode}.`)}`} target="_blank" rel="noopener noreferrer" colorScheme="green" leftIcon={<FaWhatsapp />}>Consultar por WhatsApp</Button>
+                <SocialContact href={`https://wa.me/50683978524?text=${encodeURIComponent(`Hola, necesito más información sobre mi pedido ${order.orderCode}.`)}`} caption="Consultar por WhatsApp" />
                 </>; })()}
               </Stack>
             </Box>

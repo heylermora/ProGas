@@ -101,10 +101,13 @@ Mantener los textos de interfaz en español y los nombres técnicos coherentes c
 | Modal de formulario | `components/modal/FormModal` |
 | Detalles opcionales / listas acotadas | `components/modal/ModalSection`, `ModalList` |
 | Confirmación de eliminación | `components/modal/DeleteModal` |
+| Enlaces y acciones de redes | `components/social/SocialLink`, `SocialContact` |
 | Estructura de páginas públicas | `views/public/PublicPage`, `PublicHeader`, `PublicFooter` |
 | Búsqueda de listados administrativos | `PageSearchContext` y `SearchBar` |
 
 Revisar las props reales antes de utilizar un componente. `components/form/FormField` es el componente visual; `interfaces/FormField` es el contrato del formulario declarativo.
+
+Los grupos de redes usan `SocialLinksRow`: siempre una fila horizontal, con desplazamiento dentro del grupo si no caben; no usar órbitas, posiciones absolutas ni flexWrap wrap. Cada enlace usa `SocialLink`: círculo con icono blanco, color de la red, nombre accesible y foco visible. `SocialContact` conserva el texto de una acción junto al círculo. No duplicar colores, iconos ni detección de redes en las vistas; usar `socialPresentation` y los helpers de `utils/sponsor`. Los formularios mantienen `SocialNetworkLabel` como etiqueta, no como enlace.
 
 Las diferencias de apariencia se resuelven primero en `src/theme/`. Usar tokens y variantes existentes para colores, controles y espaciado, con valores responsive de Chakra. Evitar repetir estilos de botones, inputs o labels en cada página.
 
@@ -150,6 +153,8 @@ Si un nuevo listado usa la búsqueda global, añadir su ruta a `SEARCHABLE_PAGES
 - No confiar en totales, roles o disponibilidad enviados desde la interfaz. Aplicar la validación también en la frontera de persistencia/autorización que corresponda.
 - Si cambian colecciones o consultas, revisar `firestore.rules` y `firestore.indexes.json`. Versionar una regla no implica que esté desplegada.
 - No exponer datos personales en vistas públicas, logs o mensajes de error. Usar datos ficticios en pruebas.
+
+Las métricas públicas se administran en `services/AnalyticsService` y `views/admin/analytics`. Al agregar un enlace de negocio, pasar su ID real y procedencia a `SocialLink`; no registrar URLs de pedidos ni datos de clientes. Los eventos de `PublicAnalyticsEvents` son inmutables y sólo administradores pueden leerlos. Consultar `docs/public-analytics.md` para sesiones y despliegue de reglas.
 
 Las variables `REACT_APP_*` son públicas en el bundle. Usar `.env.example` como referencia y archivos locales ignorados para configuración; nunca incluir credenciales privadas. Las pruebas de persistencia deben usar mocks o un entorno aislado, sin modificar datos de producción.
 
