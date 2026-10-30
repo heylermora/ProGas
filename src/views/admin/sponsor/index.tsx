@@ -1,3 +1,4 @@
+import { sortCategories } from 'utils/categories';
 import {
 Badge, Box, Button, Center, Flex, HStack, Icon, Image,
 Select, SimpleGrid, Stack, Switch, Text,
@@ -42,7 +43,7 @@ export default function SponsorsAdmin() {
 
   useEffect(() => { load(); }, [load]);
 
-  const availableCategories = useMemo(() => Array.from(new Set([...categories, ...sponsors.map((sponsor) => sponsor.category).filter(Boolean)])), [categories, sponsors]);
+  const availableCategories = useMemo(() => sortCategories([...categories, ...sponsors.map((sponsor) => sponsor.category).filter(Boolean)]), [categories, sponsors]);
   const sponsorsByCategory = useMemo(() => availableCategories.reduce<Record<string, SponsorItem[]>>((acc, type) => ({
     ...acc,
     [type]: sponsors.filter((sponsor) => sponsor.category === type),

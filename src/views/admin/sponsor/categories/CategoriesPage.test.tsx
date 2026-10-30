@@ -1,3 +1,4 @@
+import { categoryId } from 'utils/categories';
 import { ChakraProvider } from '@chakra-ui/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -35,13 +36,15 @@ it('creates a specific category inside the selected tab and saves its single ico
   fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 5000 });
   fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
-  await waitFor(() => expect(CategoryService.saveBusinessSettings).toHaveBeenCalledWith(['Sodas', 'Tiendas', 'Panaderías'], expect.objectContaining({ groups: expect.arrayContaining([expect.objectContaining({ name: 'Comida', categories: ['Sodas', 'Panaderías'] })]), icons: expect.objectContaining({ Panaderías: '🥐' }) })));
+  await waitFor(() => expect(CategoryService.saveBusinessSettings).toHaveBeenCalledWith(['Panaderías', 'Sodas', 'Tiendas'], expect.objectContaining({ groups: expect.arrayContaining([expect.objectContaining({ name: 'Comida', categories: ['Panaderías', 'Sodas'] })]), icons: expect.objectContaining({ Panaderías: '🥐' }) })));
 });
 it('keeps unsaved changes available when saving fails', async () => {
   await setup();
   (CategoryService.saveBusinessSettings as jest.Mock).mockRejectedValue(new Error('offline'));
   fireEvent.click(screen.getByRole('button', { name: 'Editar Sodas' }));
-  fireEvent.change(screen.getByLabelText('Categoría general'), { target: { value: 'Compras' } });
+  const parent = screen.getByLabelText('Categoría general');
+  const compras = screen.getByRole('option', { name: 'Compras' }) as HTMLOptionElement;
+  fireEvent.change(parent, { target: { value: compras.value } });
   fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 5000 });
   expect(screen.getByRole('button', { name: 'Editar Sodas' })).toBeTruthy();
@@ -67,4 +70,25 @@ it('rejects duplicate category names before applying', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
   expect(screen.getByText('Ya existe una categoría con ese nombre.')).toBeTruthy();
   expect(CategoryService.saveBusinessSettings).not.toHaveBeenCalled();
+});
+
+it('allows renaming a specific category without changing its ID or its group', async () => {
+  await setup();
+  fireEvent.click(screen.getByRole('button', { name: 'Editar Sodas' }));
+  const name = screen.getByLabelText('Nombre') as HTMLInputElement;
+  expect(name.readOnly).toBe(false);
+  fireEvent.change(name, { target: { value: 'Restaurantes' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 5000 });
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+  await waitFor(() => expect(CategoryService.saveBusinessSettings).toHaveBeenCalled());
+  const settings = (CategoryService.saveBusinessSettings as jest.Mock).mock.calls[0][1];
+  const renamed = settings.catalog.find((record: { name: string }) => record.name === 'Restaurantes');
+  expect(renamed.id).toBe(categoryId('sponsors', 'Sodas'));
+  expect(renamed.aliases).toContain('Sodas');
+  expect(settings.groups.find((group: { name: string }) => group.name === 'Comida').categories).toEqual(['Restaurantes']);
+});
+it('shows general tabs and specific cards in Spanish alphabetical order', async () => {
+  await setup();
+  expect(screen.getAllByRole('tab').map(tab => tab.textContent?.replace(/\d+$/, ''))).toEqual(['🍽️Comida', '🛍️Compras']);
 });

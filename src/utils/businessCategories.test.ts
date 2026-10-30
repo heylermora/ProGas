@@ -8,7 +8,7 @@ it('classifies every existing category exactly once', () => {
 });
 it('preserves custom icons and groups, and includes unassigned historical categories', () => {
   const settings = completeBusinessSettings(['Sodas', 'Nueva'], { groups: [{ name: 'Comida', icon: '🥗', categories: ['Sodas', 'Eliminada'] }], icons: { Sodas: '🍲' } });
-  expect(settings.groups[0]).toEqual({ name: 'Comida', icon: '🥗', categories: ['Sodas'] });
+  expect(settings.groups[0]).toEqual(expect.objectContaining({ name: 'Comida', icon: '🥗', categories: ['Sodas'] }));
   expect(settings.groups[1].categories).toEqual(['Nueva']);
   expect(settings.icons.Sodas).toBe('🍲');
 });

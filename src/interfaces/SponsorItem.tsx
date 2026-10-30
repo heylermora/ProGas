@@ -14,6 +14,7 @@ interface SponsorItem {
   id: string;
   name: string;
   type?: SponsorType;
+  categoryId?: string;
   category: BusinessCategory;
   active: boolean;
   order: number;
