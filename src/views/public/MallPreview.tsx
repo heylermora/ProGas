@@ -6,6 +6,7 @@ import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
 import { MdExplore, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
+import useInteractiveCarousel from 'hooks/useInteractiveCarousel';
 import SponsorService from 'services/SponsorService';
 
 let cachedBusinesses: SponsorItem[] | undefined;
@@ -38,10 +39,6 @@ const ctaPulse = keyframes`
   0%, 100% { box-shadow: 0 12px 28px rgba(250, 204, 21, .28), 0 0 0 0 rgba(253, 224, 71, .35); }
   50% { box-shadow: 0 16px 34px rgba(250, 204, 21, .42), 0 0 0 8px rgba(253, 224, 71, 0); }
 `;
-const marquee = keyframes`
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-`;
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
 export default function MallPreview({ compact = false, embedded = false }: MallPreviewProps) {
@@ -64,6 +61,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
     return () => { mounted = false; };
   }, [attempt]);
 
+  const carousel = useInteractiveCarousel(Boolean(selectedBusinessKey), !prefersReducedMotion && businesses.length > 1);
   const previewBusinesses = businesses;
   const originLabels: Record<string, string> = {
     '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
@@ -98,8 +96,8 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
       {!loading && !error && !previewBusinesses.length && <Flex role="status" minH="100px" align="center" justify="center" gap={3} py={4}>
         <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
       </Flex>}
-      {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
+      {!loading && !error && previewBusinesses.length > 0 && <Box {...carousel} onDragStart={event => event.preventDefault()} sx={{ touchAction: 'pan-y', userSelect: 'none', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }} cursor="grab" position="relative" overflowX="auto" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
+        <Flex w="max-content" py="6px">
           {(previewBusinesses.length > 1 ? [0, 1] : [0]).map((copy) => (
           <Flex key={copy} gap="14px" pr="14px">
             {!loading && previewBusinesses.map((business) => {
@@ -107,7 +105,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
               const selected = selectedBusinessKey === businessKey;
               const contacts = sponsorLinks(business);
               return (
-                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} minH={{ base: '164px', md: '172px' }} py="8px">
+                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} py="8px">
                   <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
                     <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                       {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}

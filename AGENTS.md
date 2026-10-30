@@ -196,3 +196,7 @@ Un cambio exclusivamente documental requiere revisar exactitud, rutas y Markdown
 - Las comprobaciones pertinentes pasan, o se explican los fallos y sus límites.
 - No se incluyen cambios ajenos, secretos ni ediciones manuales del build.
 - El resumen final indica qué cambió, cómo se verificó y cualquier limitación pendiente.
+
+## Categorías del centro comercial
+
+`utils/businessCategories` define las generales iniciales y completa categorías históricas sin asignación. `CategorySettings/sponsors` conserva `values` (categorías específicas compatibles con los comercios existentes) y agrega `businessSettings` con `groups` e `icons`. `BusinessCategoryManager` administra ambos niveles e íconos emoji/símbolos; productos conserva `CategoryManager`. El centro comercial filtra general → específica → comercio, sin reescribir la categoría de cada patrocinador. El carrusel público usa `useInteractiveCarousel` para avance automático, arrastre con puntero y pausa por interacción; no reservar altura para contactos cerrados.

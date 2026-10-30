@@ -21,6 +21,7 @@ describe('VirtualMall flight navigation', () => {
       description, directions: 'Frente al parque', videoUrl: 'https://example.com/video.mp4',
     }]);
     renderMall();
+    fireEvent.click(await screen.findByRole('button', { name: /Entrar a Alimentos \/ Bebidas/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Entrar a Restaurantes/Sodas, 1 negocios' }));
     const station = screen.getByRole('button', { name: 'Abrir ficha de Negocio de prueba' });
     station.focus();
@@ -76,6 +77,7 @@ describe('VirtualMall flight navigation', () => {
       id: String(i), name: `Negocio ${i + 1}`, category: 'Restaurantes/Sodas', active: true, order: i, logoUrl: '', links: [],
     })));
     renderMall();
+    fireEvent.click(await screen.findByRole('button', { name: /Entrar a Alimentos \/ Bebidas/ }));
     fireEvent.click(await screen.findByRole('button', { name: `Entrar a Restaurantes/Sodas, ${count} negocios` }));
     expect(screen.getAllByRole('button', { name: /Abrir ficha de/ })).toHaveLength(Math.min(count, 8));
     const next = screen.getByRole('button', { name: 'Ruta: siguiente' });
@@ -89,6 +91,7 @@ describe('VirtualMall flight navigation', () => {
       id: String(i), name: `Negocio ${i + 1}`, category: 'Restaurantes/Sodas', active: true, order: i, logoUrl: '', links: [],
     })));
     renderMall();
+    fireEvent.click(await screen.findByRole('button', { name: /Entrar a Alimentos \/ Bebidas/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Entrar a Restaurantes/Sodas, 9 negocios' }));
     expect(screen.getAllByRole('button', { name: /Abrir ficha de/ })).toHaveLength(8);
     fireEvent.click(screen.getByRole('button', { name: 'Ruta: siguiente' }));
@@ -103,6 +106,7 @@ describe('VirtualMall flight navigation', () => {
       id: String(id), name: `Negocio ${id}`, category: 'Restaurantes/Sodas', active: true, order: id, logoUrl: '', links: [],
     })));
     renderMall();
+    fireEvent.click(await screen.findByRole('button', { name: /Entrar a Alimentos \/ Bebidas/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Entrar a Restaurantes/Sodas, 2 negocios' }));
     expect(screen.getByLabelText('Astronauta listo para explorar')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Abrir ficha de Negocio 1' }));

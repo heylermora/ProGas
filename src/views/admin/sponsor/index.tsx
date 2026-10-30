@@ -4,7 +4,7 @@ Select, SimpleGrid, Stack, Switch, Text,
 useColorModeValue, useDisclosure, useToast
 } from '@chakra-ui/react';
 import Card from 'components/card/Card';
-import CategoryManager from 'components/category/CategoryManager';
+import BusinessCategoryManager from 'components/category/BusinessCategoryManager';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import FormField from 'components/form/FormField';
@@ -156,7 +156,7 @@ export default function SponsorsAdmin() {
 
 
 
-      <CategoryManager kind="sponsors" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
+      <BusinessCategoryManager categories={availableCategories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
       <DeleteModal title="Eliminar patrocinador" isOpen={isOpen} onClose={onClose} handle={confirmDelete} isLoading={deleting}
         message={<>¿Querés eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</>} />
     </Box>
