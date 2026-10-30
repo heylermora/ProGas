@@ -13,6 +13,7 @@ import EditOrder from 'views/admin/order/edit';
 // Sponsor Imports
 import SponsorsAdmin from 'views/admin/sponsor';
 import SponsorForm from 'views/admin/sponsor/form';
+import BusinessCategoriesPage from 'views/admin/sponsor/categories';
 
 // Product Imports
 import Product from 'views/admin/product';
@@ -170,6 +171,7 @@ const routes: RoutesType[] = [
     secondary: true,
     roles: ['admin'],
   },
+  { name: 'Categorías de comercios', layout: '/admin', path: '/sponsor/categories', component: BusinessCategoriesPage, secondary: true, fullLayout: true, roles: ['admin'] },
   // PRODUCTS
   {
     name: 'Productos',

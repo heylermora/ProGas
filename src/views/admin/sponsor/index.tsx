@@ -4,7 +4,6 @@ Select, SimpleGrid, Stack, Switch, Text,
 useColorModeValue, useDisclosure, useToast
 } from '@chakra-ui/react';
 import Card from 'components/card/Card';
-import BusinessCategoryManager from 'components/category/BusinessCategoryManager';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import FormField from 'components/form/FormField';
@@ -20,7 +19,7 @@ import SponsorService from 'services/SponsorService';
 
 export default function SponsorsAdmin() {
   const { query } = usePageSearch();
-  const { categories, reload: reloadCategories } = useCategories('sponsors');
+  const { categories } = useCategories('sponsors');
   const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   const [draggedSponsorId, setDraggedSponsorId] = useState('');
@@ -28,7 +27,6 @@ export default function SponsorsAdmin() {
   const [savingOrder, setSavingOrder] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<SponsorItem | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const categoryManager = useDisclosure();
   const [deleting, setDeleting] = useState(false);
   const toast = useToast();
   const textColor = useColorModeValue('navy.700', 'white');
@@ -125,7 +123,7 @@ export default function SponsorsAdmin() {
       <Card p={{ base: '16px', md: '20px' }} mb="18px">
         <Flex align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="14px">
           <Box flex="1" maxW={{ md: '520px' }}><Text fontWeight="900" color={textColor}>Filtrar por categoría</Text><Text color={muted} fontSize="sm" mb="9px">Seleccioná una categoría; el buscador superior filtra por nombre y descripción.</Text><Select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} size="lg" borderRadius="xl">{availableCategories.map((category) => <option key={category} value={category}>{category} · {sponsorsByCategory[category]?.length || 0}</option>)}</Select></Box>
-          <HStack wrap="wrap"><Button variant="outline" leftIcon={<MdSettings />} onClick={categoryManager.onOpen}>Administrar categorías</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
+          <HStack wrap="wrap"><Button variant="outline" leftIcon={<MdSettings />} as={RLink} to="/admin/sponsor/categories">Administrar categorías</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
         </Flex>
       </Card>
 
@@ -156,7 +154,6 @@ export default function SponsorsAdmin() {
 
 
 
-      <BusinessCategoryManager categories={availableCategories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
       <DeleteModal title="Eliminar patrocinador" isOpen={isOpen} onClose={onClose} handle={confirmDelete} isLoading={deleting}
         message={<>¿Querés eliminar a <b>{pendingDelete?.name || 'este patrocinador'}</b>? Esta acción no se puede deshacer.</>} />
     </Box>

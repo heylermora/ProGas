@@ -21,6 +21,7 @@
     "apexcharts": "^3.35.2",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
+    "emoji-picker-react": "^4.22.3",
     "firebase": "^11.1.0",
     "formik": "^2.4.3",
     "framer-motion": "^4.1.17",
