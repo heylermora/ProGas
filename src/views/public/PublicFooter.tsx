@@ -1,7 +1,7 @@
 import { SocialContact } from 'components/social/SocialLink';
 import { Box, Button, Flex, Icon, Image, Link, Text } from '@chakra-ui/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
-import { MdHome, MdLogin, MdShoppingCart, MdCode } from 'react-icons/md';
+import { MdHome, MdLogin, MdShoppingCart } from 'react-icons/md';
 import packageInfo from '../../../package.json';
 
 const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi su portafolio y me gustaría conversar sobre un proyecto.')}`;
@@ -11,25 +11,25 @@ export default function PublicFooter() {
   const isPortfolio = location.pathname === '/portfolio';
 
   return (
-    <Box as="footer" mt={{ base: '24px', md: '40px' }} overflow="hidden" bg="brand.500" color="white" borderRadius={{ base: '20px', md: '24px' }} boxShadow="0 14px 36px rgba(51, 17, 219, .18)">
-      <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} gap={{ base: '10px', md: '24px' }} px={{ base: '16px', md: '26px' }} pt={{ base: '16px', md: '20px' }} pb={{ base: '12px', md: '20px' }}>
-        <Flex align="center" justify={{ base: 'center', md: 'flex-start' }} gap="12px" minW="0" w={{ base: '100%', md: 'auto' }}>
-          <Image src={`${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`} alt="Gas Memo" boxSize={{ base: '60px', md: '68px' }} objectFit="contain" flexShrink={0} />
-          <Box minW="0"><Text fontSize="sm" fontWeight="800" lineHeight="1.3">Negocios de Acosta</Text><Text color="whiteAlpha.800" fontSize="xs" lineHeight="1.4">Un espacio para el comercio local</Text></Box>
+    <Box as="footer" mt={{ base: '24px', md: '40px' }} overflow="hidden" bg="#17213A" color="white" borderRadius={{ base: '18px', md: '22px' }} border="1px solid" borderColor="whiteAlpha.100">
+      <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} gap="12px" px={{ base: '20px', md: '28px' }} py={{ base: '20px', md: '24px' }}>
+        <Flex align="center" justify="flex-start" gap="16px" minW="0" w={{ base: '100%', md: 'auto' }}>
+          <Image src={`${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`} alt="Gas Memo" w="42px" h="72px" objectFit="cover" flexShrink={0} />
+          <Box minW="0"><Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="700" lineHeight="1.3">Negocios de Acosta</Text><Text color="#B9C4D8" mt="5px" fontSize="xs" lineHeight="1.5" maxW="210px">Un espacio para el comercio local</Text></Box>
         </Flex>
-        <Flex wrap="wrap" align="center" justify={{ base: 'center', md: 'flex-end' }} borderTopWidth={{ base: '1px', md: 0 }} borderColor="whiteAlpha.200" pt={{ base: '6px', md: 0 }} gap={{ base: '4px', md: '8px' }} w={{ base: '100%', md: 'auto' }}>
+        {(location.pathname !== '/' || isPortfolio) && <Flex wrap="wrap" align="center" justify="flex-start" gap={{ base: '4px', md: '8px' }} w={{ base: '100%', md: 'auto' }}>
           {location.pathname !== '/' && <Button as={RLink} to="/" leftIcon={<MdHome />} variant="ghost" color="white" size="sm" minH="44px" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Inicio</Button>}
           {location.pathname.startsWith('/customer/') && location.pathname !== '/customer/data' && <Button as={RLink} to="/customer/data" leftIcon={<MdShoppingCart />} variant="ghost" color="white" size="sm" minH="44px" borderRadius="full" _hover={{ bg: 'whiteAlpha.200' }}>Hacer pedido</Button>}
-          {isPortfolio ? <SocialContact href={portfolioContactUrl} caption="Contactar" /> : <Button as={RLink} to="/portfolio" leftIcon={<MdCode />} size="sm" variant="ghost" minH="44px" maxW="100%" px="8px" whiteSpace="normal" borderRadius="12px" fontSize="xs" fontWeight="500" color="white" _hover={{ bg: 'whiteAlpha.100', color: 'white' }} textAlign="left">
-            <Box as="span" display="flex" flexDirection="column" gap="2px">
-              <Text as="span" fontSize="10px" color="whiteAlpha.800" lineHeight="1.2">Creado por</Text>
-              <Text as="span" fontSize="xs" fontWeight="700" lineHeight="1.3">Johel Mora Calderón</Text>
-            </Box>
-          </Button>}
-        </Flex>
+          {isPortfolio && <SocialContact href={portfolioContactUrl} caption="Contactar" />}
+        </Flex>}
       </Flex>
 
-      <Flex px={{ base: '16px', md: '26px' }} py={{ base: '4px', md: '6px' }} bg="brand.600" borderTop="1px solid" borderColor="whiteAlpha.100" direction="row" align="center" justify="space-between" gap="8px">
+      {!isPortfolio && <Box px={{ base: '20px', md: '28px' }} pb="16px">
+        <Link as={RLink} to="/portfolio" display="inline-flex" alignItems="center" flexWrap="wrap" columnGap="5px" minH="44px" fontSize="xs" color="#B9C4D8" _hover={{ color: 'white', textDecoration: 'underline' }} _focusVisible={{ outline: '2px solid', outlineColor: 'white', outlineOffset: '4px', borderRadius: '4px' }}>
+          <Text as="span">Creado por</Text><Text as="span" fontWeight="600" color="white">Johel Mora Calderón</Text>
+        </Link>
+      </Box>}
+      <Flex px={{ base: '20px', md: '28px' }} py="8px" borderTop="1px solid" borderColor="whiteAlpha.100" direction="row" align="center" justify="space-between" gap="8px">
         <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'flex-start', sm: 'center' }} minW="0" flexWrap="wrap" columnGap="8px" rowGap="2px" color="whiteAlpha.800" fontSize="11px">
           <Text>© {new Date().getFullYear()} Gas Memo</Text><Text aria-hidden="true" display={{ base: 'none', sm: 'block' }}>•</Text><Text>Versión {packageInfo.version}</Text>
         </Flex>
