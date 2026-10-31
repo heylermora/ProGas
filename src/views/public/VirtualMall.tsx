@@ -30,15 +30,11 @@ MdStorefront,
 MdViewList
 } from 'react-icons/md';
 import { useLocation } from 'react-router-dom';
+import { categoryMapPosition } from 'utils/mallLayout';
 import { completeBusinessSettings } from 'utils/businessCategories';
 import SponsorService from 'services/SponsorService';
 import { PublicPage } from './PublicPage';
 
-const categoryPositions = [
-  [50, 9], [68, 13], [84, 25], [91, 43], [85, 62], [70, 79], [50, 89],
-  [30, 79], [15, 62], [9, 43], [16, 25], [32, 13], [39, 29], [61, 29],
-  [73, 44], [62, 60], [38, 60], [27, 44], [50, 21], [76, 70], [24, 70],
-];
 const CATEGORIES_PER_SECTOR = 8;
 const BUSINESSES_PER_SECTOR = 8;
 
@@ -139,6 +135,10 @@ export default function VirtualMall() {
   const settings = completeBusinessSettings(Array.from(new Set([...categories, ...activeBusinesses.map(business => business.category)])), businessSettings);
   const group = settings.groups.find(item => item.name === general);
   const mapCategories = group ? group.categories : settings.groups.map(item => item.name);
+  const sectorCategories = mapCategories.slice(mobileSector * CATEGORIES_PER_SECTOR, (mobileSector + 1) * CATEGORIES_PER_SECTOR);
+  const categoryRows = Math.max(1, Math.ceil(sectorCategories.length / 2));
+  const categoryRowHeight = Math.max(132, 88 + Math.ceil(Math.max(0, ...sectorCategories.map(name => name.length)) / 14) * 16);
+  const categoryMapHeight = Math.max(560, 202 + categoryRows * categoryRowHeight + (categoryRows - 1) * 24);
   const icons = group ? settings.icons : Object.fromEntries(settings.groups.map(item => [item.name, item.icon]));
   const categoryBusinesses = useMemo(
     () => activeBusinesses.filter((business) => business.category === selectedCategory),
@@ -216,7 +216,7 @@ export default function VirtualMall() {
             </Stack>
           )}
 
-          <Box position="relative" minH={{ base: '800px', sm: '800px', md: '740px' }} borderRadius={{ base: '18px', md: '26px' }} overflow="hidden" bg="radial-gradient(circle at 50% 46%, #4338CA 0%, #1E1B4B 38%, #070B1F 78%)" _before={{ content: '""', position: 'absolute', inset: 0, opacity: .75, bgImage: 'radial-gradient(circle at 12% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 2px), radial-gradient(circle at 42% 88%, #fff 0 1.5px, transparent 2.5px)', bgSize: '42px 42px, 58px 58px, 73px 73px' }}>
+          <Box role="region" aria-label={selectedCategory ? 'Mapa de comercios' : 'Mapa de categorías'} position="relative" minH={{ base: selectedCategory ? '800px' : `${categoryMapHeight}px`, md: '640px' }} borderRadius={{ base: '18px', md: '26px' }} overflow="hidden" bg="radial-gradient(circle at 50% 46%, #4338CA 0%, #1E1B4B 38%, #070B1F 78%)" _before={{ content: '""', position: 'absolute', inset: 0, opacity: .75, bgImage: 'radial-gradient(circle at 12% 20%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 35%, #fff 0 1px, transparent 2px), radial-gradient(circle at 42% 88%, #fff 0 1.5px, transparent 2.5px)', bgSize: '42px 42px, 58px 58px, 73px 73px' }}>
             <Box display={{ base: 'block', md: 'none' }} position="absolute" top="120px" bottom="132px" left="50%" borderLeft="1px dashed" borderColor="cyan.300" opacity=".4" pointerEvents="none" />
             <Box position="absolute" inset="8%" border="1px dashed" borderColor="cyan.200" borderRadius="45%" opacity=".24" />
             <Box position="absolute" inset="21%" border="1px dashed" borderColor="purple.200" borderRadius="44%" opacity=".2" />
@@ -316,17 +316,17 @@ function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChan
   return (
     <>
       <Text display={{ base: 'block', md: 'none' }} position="absolute" top="20px" left="20px" right="20px" color="cyan.100" textAlign="center" fontWeight="800">Elegí tu próximo destino</Text>
-      <FlightControls sector={mobileSector} sectorCount={sectorCount} label="Sector" mobileOnly onPrevious={() => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount)} onNext={() => onSectorChange((mobileSector + 1) % sectorCount)} />
+      <FlightControls sector={mobileSector} sectorCount={sectorCount} label="Sector" mobileOnly={sectorCount <= 1} onPrevious={() => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount)} onNext={() => onSectorChange((mobileSector + 1) % sectorCount)} />
       <Box display={{ base: 'grid', md: 'contents' }} position={{ base: 'absolute', md: 'static' }} top="70px" bottom="132px" left="16px" right="16px" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gridTemplateRows={`repeat(${Math.max(1, Math.ceil(visibleCount / 2))}, minmax(0, 1fr))`} columnGap="44px" rowGap="24px" alignItems="center">
         {categories.map((category, index) => {
           const total = businesses.filter((business) => business.category === category).length;
           const categorySector = Math.floor(index / CATEGORIES_PER_SECTOR);
           const mobileIndex = index % CATEGORIES_PER_SECTOR;
-          const [left, top] = categoryPositions[index] || businessPosition(index, categories.length);
+          const [left, top] = categoryMapPosition(mobileIndex, visibleCount);
           return (
-            <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${top}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={visibleCount % 2 === 1 && mobileIndex === visibleCount - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: visibleCount === 1 ? '170px' : 'min(100%, 150px)', md: '94px' }} h={{ base: '112px', md: '78px' }} minW="0" p="8px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="2px solid white" borderRadius="38%" boxShadow="0 0 0 5px rgba(167,139,250,.12), 0 0 22px rgba(167,139,250,.35)" onClick={() => onSelect(category)} display={{ base: categorySector === mobileSector ? 'flex' : 'none', md: 'flex' }} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
-              <Text fontSize={{ base: '36px', md: '28px' }} lineHeight="1">{icons[category] || '🏪'}</Text>
-              <Text mt="6px" w="100%" noOfLines={2} fontSize={{ base: '12px', md: '10px' }} fontWeight="900">{category}</Text>
+            <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${top}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={visibleCount % 2 === 1 && mobileIndex === visibleCount - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: visibleCount === 1 ? '170px' : 'min(100%, 152px)', md: '128px' }} h="auto" minH={{ base: '128px', md: '118px' }} minW="0" px="8px" py="12px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="2px solid white" borderRadius="28px" boxShadow="0 0 0 5px rgba(167,139,250,.12), 0 0 22px rgba(167,139,250,.35)" onClick={() => onSelect(category)} display={categorySector === mobileSector ? 'flex' : 'none'} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
+              <Text fontSize="32px" lineHeight="1" flexShrink={0}>{icons[category] || '🏪'}</Text>
+              <Text mt="8px" w="100%" flexShrink={0} whiteSpace="normal" overflowWrap="anywhere" lineHeight="1.3" fontSize="12px" fontWeight="800">{category}</Text>
               {total > 0 && <Badge position="absolute" right="5px" top="5px" minW="22px" fontSize="10px" borderRadius="full" colorScheme="purple">{total}</Badge>}
             </Button>
           );
@@ -405,7 +405,7 @@ function MapStatus({ icon, title, description, action, onAction }: { icon: React
 
 function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, businesses, travelling }: { selectedCategory: string; selectedCategoryIndex: number; selectedBusiness?: SponsorItem; businesses: SponsorItem[]; travelling: boolean }) {
   let position = selectedCategory ? [50, 49] : [50, 50];
-  if (!selectedCategory) position = [50, 50];
+  if (!selectedCategory) position = [50, 36];
   else if (selectedBusiness) position = businessPosition(Math.max(0, businesses.findIndex((item) => item.id === selectedBusiness.id)), Math.min(businesses.length, 16));
   else if (selectedCategoryIndex >= 0) position = [50, 60];
   const index = Math.max(0, businesses.findIndex((business) => business.id === selectedBusiness?.id));

@@ -121,3 +121,15 @@ describe('VirtualMall flight navigation', () => {
   });
 
 });
+
+it('paginates categories on desktop too instead of overlapping more than eight stations', async () => {
+  (SponsorService.getAll as jest.Mock).mockResolvedValue(Array.from({ length: 9 }, (_, index) => ({
+    id: String(index), name: `Local ${index}`, category: `Categoría ${index + 1}`, active: true, logoUrl: '', links: [], order: index,
+  })));
+  renderMall();
+  fireEvent.click(await screen.findByRole('button', { name: 'Entrar a Otros, 9 negocios' }));
+  expect(screen.getAllByRole('button', { name: /^Entrar a Categoría / })).toHaveLength(8);
+  fireEvent.click(screen.getByRole('button', { name: 'Sector: siguiente' }));
+  expect(screen.getAllByRole('button', { name: /^Entrar a Categoría / })).toHaveLength(1);
+  expect(screen.getByRole('button', { name: 'Entrar a Categoría 9, 1 negocios' })).toBeTruthy();
+});

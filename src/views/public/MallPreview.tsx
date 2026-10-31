@@ -61,8 +61,9 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
     return () => { mounted = false; };
   }, [attempt]);
 
-  const carousel = useInteractiveCarousel(Boolean(selectedBusinessKey), !prefersReducedMotion && businesses.length > 1);
+  const carousel = useInteractiveCarousel(Boolean(selectedBusinessKey), !prefersReducedMotion && businesses.length > 1, businesses.length > 1);
   const previewBusinesses = businesses;
+  const copies = previewBusinesses.length > 1 ? Math.max(2, Math.ceil(8 / previewBusinesses.length) + 1) : 1;
   const originLabels: Record<string, string> = {
     '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
     '/customer/products': 'Volver al pedido', '/customer/view-order': 'Volver a consultar pedido',
@@ -96,16 +97,16 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
       {!loading && !error && !previewBusinesses.length && <Flex role="status" minH="100px" align="center" justify="center" gap={3} py={4}>
         <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
       </Flex>}
-      {!loading && !error && previewBusinesses.length > 0 && <Box {...carousel} onDragStart={event => event.preventDefault()} sx={{ touchAction: 'pan-y', userSelect: 'none', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }} cursor="grab" position="relative" overflowX="auto" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
+      {!loading && !error && previewBusinesses.length > 0 && <Box {...carousel} role="region" aria-label="Carrusel de negocios" onDragStart={event => event.preventDefault()} sx={{ touchAction: 'pan-y', userSelect: 'none', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }} cursor="grab" position="relative" overflowX="auto" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
         <Flex w="max-content" py="6px">
-          {(previewBusinesses.length > 1 ? [0, 1] : [0]).map((copy) => (
-          <Flex key={copy} gap="14px" pr="14px">
+          {Array.from({ length: copies }, (_, copy) => copy).map((copy) => (
+          <Flex key={copy} flexShrink={0} gap="14px" pr="14px">
             {!loading && previewBusinesses.map((business) => {
               const businessKey = `${copy}:${business.id}`;
               const selected = selectedBusinessKey === businessKey;
               const contacts = sponsorLinks(business);
               return (
-                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} py="8px">
+                <Box key={`${copy}-${business.id}`} position="relative" w={{ base: '188px', md: '224px' }} flexShrink={0} py="8px">
                   <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
                     <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                       {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
