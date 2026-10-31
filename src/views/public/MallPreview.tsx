@@ -64,6 +64,8 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
   const carousel = useInteractiveCarousel(Boolean(selectedBusinessKey), !prefersReducedMotion && businesses.length > 1, businesses.length > 1);
   const previewBusinesses = businesses;
   const copies = previewBusinesses.length > 1 ? Math.max(2, Math.ceil(8 / previewBusinesses.length) + 1) : 1;
+  const selectedBusiness = businesses.find(business => business.id === selectedBusinessKey.substring(selectedBusinessKey.indexOf(':') + 1));
+  const selectedContacts = selectedBusiness ? sponsorLinks(selectedBusiness) : [];
   const originLabels: Record<string, string> = {
     '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
     '/customer/products': 'Volver al pedido', '/customer/view-order': 'Volver a consultar pedido',
@@ -107,16 +109,15 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
               const contacts = sponsorLinks(business);
               return (
                 <Box key={`${copy}-${business.id}`} position="relative" w={{ base: '188px', md: '224px' }} flexShrink={0} py="8px">
-                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
+                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 2px 6px rgba(15,23,42,.10)' : '0 2px 5px rgba(15,23,42,.08)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
                     <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                       {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
                     </Flex>
                     <Stack spacing="4px" minW="0">
                       <Text fontWeight="800" fontSize="sm" noOfLines={2} lineHeight="1.12">{business.name || 'Negocio local'}</Text>
-                      <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'ELIJA UNA RED' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
+                      <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'OCULTAR CONTACTOS' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
                     </Stack>
                   </Flex>
-                  {selected && contacts.length > 0 && <SocialLinksRow links={contacts} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" />}
                 </Box>
               );
             })}
@@ -124,9 +125,14 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
           </Flex>
           ))}
         </Flex>
-        {selectedBusinessKey && <Text textAlign="center" color={embedded ? '#475569' : 'whiteAlpha.600'} fontSize="10px">Carrusel pausado mientras consulta los contactos.</Text>}
       </Box>}
-
+      {selectedBusiness && <Box mt="8px" p="12px" w="100%" maxW="440px" borderRadius="14px" bg={embedded ? 'white' : 'whiteAlpha.100'} border="1px solid" borderColor={embedded ? 'gray.200' : 'whiteAlpha.200'}>
+        <Text fontSize="xs" fontWeight="700">Contactos de {selectedBusiness.name || 'Negocio local'}</Text>
+        {selectedContacts.length > 0
+          ? <SocialLinksRow links={selectedContacts} businessId={selectedBusiness.id} source="mall-preview" label={`Redes sociales de ${selectedBusiness.name}`} size="compact" appearance="carousel" />
+          : <Text fontSize="xs" mt="6px" color={embedded ? 'gray.600' : 'whiteAlpha.800'}>Este negocio aún no tiene contactos publicados.</Text>}
+        <Text mt="4px" color={embedded ? '#475569' : 'whiteAlpha.700'} fontSize="10px">Carrusel pausado mientras consulta los contactos.</Text>
+      </Box>}
     </Box>
   );
 }

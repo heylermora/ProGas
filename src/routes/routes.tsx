@@ -1,6 +1,6 @@
 import AnalyticsAdmin from 'views/admin/analytics';
 import { Icon } from '@chakra-ui/react';
-import { MdHome, MdInventory, MdCampaign, MdPeople, MdPointOfSale, MdManageAccounts } from 'react-icons/md';
+import { MdHome, MdInventory, MdCampaign, MdBarChart, MdPeople, MdPointOfSale, MdManageAccounts } from 'react-icons/md';
 import Clients from 'views/admin/client';
 import Users from 'views/admin/user';
 
@@ -144,7 +144,7 @@ const routes: RoutesType[] = [
     roles: ['admin', 'colaborador'],
   },
 
-  { name: 'Visitas y clics', layout: '/admin', path: '/analytics/index', icon: <Icon as={MdCampaign} width="20px" height="20px" />, component: AnalyticsAdmin, roles: ['admin'] },
+  { name: 'Visitas y clics', layout: '/admin', path: '/analytics/index', icon: <Icon as={MdBarChart} width="20px" height="20px" />, component: AnalyticsAdmin, roles: ['admin'] },
   {
     name: 'Patrocinadores',
     layout: '/admin',
