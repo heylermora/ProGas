@@ -109,13 +109,13 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
               const contacts = sponsorLinks(business);
               return (
                 <Box key={`${copy}-${business.id}`} position="relative" w={{ base: '188px', md: '224px' }} flexShrink={0} py="8px">
-                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 2px 6px rgba(15,23,42,.10)' : '0 2px 5px rgba(15,23,42,.08)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
-                    <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
-                      {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
+                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '210px', md: '238px' }} p="12px" gap="10px" direction="column" align="center" justify="center" textAlign="center" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 2px 6px rgba(15,23,42,.10)' : '0 2px 5px rgba(15,23,42,.08)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
+                    <Flex w="100%" h={{ base: '132px', md: '156px' }} flex="0 0 auto" borderRadius="12px" bg="white" align="center" justify="center" p="7px" overflow="hidden">
+                      {business.logoUrl ? <Image src={business.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="56px" color="brand.500" />}
                     </Flex>
-                    <Stack spacing="4px" minW="0">
-                      <Text fontWeight="800" fontSize="sm" noOfLines={2} lineHeight="1.12">{business.name || 'Negocio local'}</Text>
-                      <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'OCULTAR CONTACTOS' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
+                    <Stack spacing="4px" minW="0" w="100%" align="center">
+                      <Text fontWeight="600" fontSize="xs" noOfLines={2} lineHeight="1.3">{business.name || 'Negocio local'}</Text>
+                      <Text color={selected ? 'cyan.700' : 'gray.600'} fontSize="10px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'OCULTAR CONTACTOS' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
                     </Stack>
                   </Flex>
                 </Box>

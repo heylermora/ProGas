@@ -54,7 +54,7 @@ describe('VirtualMall flight navigation', () => {
     await screen.findByRole('dialog');
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape', code: 'Escape', keyCode: 27 });
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(screen.getByRole('button', { name: 'Volver al mapa principal' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Volver a categorías específicas' })).toBeTruthy();
   }, 15000);
 
   it('opens a linked business without inventing unavailable contacts, location or video', async () => {
@@ -82,7 +82,7 @@ describe('VirtualMall flight navigation', () => {
     expect(screen.getAllByRole('button', { name: /Abrir ficha de/ })).toHaveLength(Math.min(count, 8));
     const next = screen.getByRole('button', { name: 'Ruta: siguiente' });
     expect((next as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.click(screen.getByRole('button', { name: 'Volver al mapa principal' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías específicas' }));
     expect(screen.getByRole('button', { name: `Entrar a Restaurantes/Sodas, ${count} negocios` })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Abrir ficha de/ })).toBeNull();
   });
@@ -115,7 +115,7 @@ describe('VirtualMall flight navigation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Abrir ficha de Negocio 2' }));
     expect(screen.getByLabelText('Astronauta en Negocio 2')).toBeTruthy();
     expect(screen.getByText('2 / 2 EXPLORADAS')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Volver al mapa principal' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías específicas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Entrar a Restaurantes/Sodas, 2 negocios' }));
     expect(screen.getByText('2 / 2 EXPLORADAS')).toBeTruthy();
   });
@@ -132,4 +132,31 @@ it('paginates categories on desktop too instead of overlapping more than eight s
   fireEvent.click(screen.getByRole('button', { name: 'Sector: siguiente' }));
   expect(screen.getAllByRole('button', { name: /^Entrar a Categoría / })).toHaveLength(1);
   expect(screen.getByRole('button', { name: 'Entrar a Categoría 9, 1 negocios' })).toBeTruthy();
+});
+
+it('returns one level at a time when opened from a shared business link', async () => {
+  (SponsorService.getAll as jest.Mock).mockResolvedValue([{ id: 'linked-back', name: 'Local compartido', category: 'Restaurantes/Sodas', active: true, logoUrl: '', links: [] }]);
+  render(<ChakraProvider theme={theme}><MemoryRouter initialEntries={['/mall?business=linked-back']}><VirtualMall /></MemoryRouter></ChakraProvider>);
+  const dialog = within(await screen.findByRole('dialog'));
+  expect(dialog.getByRole('button', { name: 'Compartir negocio' })).toBeTruthy();
+  fireEvent.click(dialog.getByRole('button', { name: 'Seguir explorando' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 5000 });
+  fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías específicas' }));
+  expect(screen.getByRole('button', { name: 'Entrar a Restaurantes/Sodas, 1 negocios' })).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías generales' }));
+  expect(screen.getByRole('button', { name: 'Entrar a Alimentos / Bebidas, 1 negocios' })).toBeTruthy();
+});
+it('keeps the current specific category when switching views and supports breadcrumbs', async () => {
+  (SponsorService.getAll as jest.Mock).mockResolvedValue([{ id: 'view', name: 'Local', category: 'Restaurantes/Sodas', active: true, logoUrl: '', links: [] }]);
+  renderMall();
+  fireEvent.click(await screen.findByRole('button', { name: /Entrar a Alimentos \/ Bebidas/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Entrar a Restaurantes/Sodas, 1 negocios' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Usar vista sencilla' }));
+  expect((screen.getAllByRole('combobox')[0] as HTMLSelectElement).value).toBe('Restaurantes/Sodas');
+  fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías específicas' }));
+  expect((screen.getAllByRole('combobox')[0] as HTMLSelectElement).value).toBe('');
+  fireEvent.click(screen.getByRole('button', { name: 'Ver mapa interactivo' }));
+  expect(screen.getByRole('button', { name: 'Entrar a Restaurantes/Sodas, 1 negocios' })).toBeTruthy();
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'Navegación de categorías' })).getByRole('button', { name: 'Categorías generales' }));
+  expect(screen.getByRole('button', { name: 'Entrar a Alimentos / Bebidas, 1 negocios' })).toBeTruthy();
 });

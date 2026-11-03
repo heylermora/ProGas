@@ -27,12 +27,13 @@ const setViewportWidth = (width: number) => {
 };
 
 describe('Home', () => {
-  it('prioritizes local businesses and clearly announces future online orders', () => {
+  it('prioritizes local businesses without the exclusive Gas Memo ordering section', () => {
     renderHome();
     expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /^ver negocios$/i }).getAttribute('href')).toBe('/mall');
-    expect(screen.getByText('PRÓXIMAMENTE')).toBeTruthy();
-    expect(screen.getByText(/este servicio aún no está disponible/i)).toBeTruthy();
+    expect(screen.queryByText('PRÓXIMAMENTE')).toBeNull();
+    expect(screen.queryByText(/este servicio aún no está disponible/i)).toBeNull();
+    expect(screen.queryByRole('heading', { name: /pedidos en línea con gas memo/i })).toBeNull();
     expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
     expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
     const community = screen.getByRole('region', { name: /lo que busca, en acosta/i });
@@ -57,14 +58,10 @@ describe('Home', () => {
     expect(promotion.queryByRole('link', { name: /su contacto directo/i })).toBeNull();
   });
 
-  it('always shows social links for Gas Memo and the band without a toggle', () => {
+  it('preserves the band and removes the dedicated Gas Memo social section', () => {
     renderHome();
-    const gas = within(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' }));
+    expect(screen.queryByRole('group', { name: 'Redes sociales de Gas Memo' })).toBeNull();
     const band = within(screen.getByRole('group', { name: 'Redes sociales de Banda Municipal de Acosta' }));
-    expect(gas.getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain('facebook.com/gasmemoymandaditos');
-    for (const name of ['Facebook', 'Instagram', 'WhatsApp', 'TikTok', 'Correo']) {
-      expect(gas.getByRole('link', { name }).style.visibility).not.toBe('hidden');
-    }
     const bandUrls = {
       Facebook: 'https://www.facebook.com/BandaMunicipaldeAcosta/',
       Instagram: 'https://www.instagram.com/bandamunicipaldeacosta',
@@ -96,7 +93,7 @@ describe('Home', () => {
 
     expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
-    expect(screen.getByRole('group', { name: 'Redes sociales de Gas Memo' })).toBeTruthy();
+    expect(screen.queryByRole('group', { name: 'Redes sociales de Gas Memo' })).toBeNull();
   });
   it('records the landing visit and the Ver negocios click without changing its destination', () => {
     (AnalyticsService.track as jest.Mock).mockClear();

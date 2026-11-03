@@ -11,6 +11,7 @@ Preparada el 2026-10-30. Esta entrada no confirma un despliegue en producción.
 - Página administrativa de categorías con pestañas, renombrado y selección de un emoji por ícono.
 - IDs estables para categorías de comercios y productos, con compatibilidad para nombres históricos.
 - Reglas de versionamiento semántico y registro de entregas de ProGas.
+- Botón para compartir un negocio mediante el menú nativo, copiar su enlace directo o seleccionarlo manualmente cuando el navegador no permite copiarlo.
 
 ### Cambiado
 - Listas y selectores de categorías en orden alfabético en español.
@@ -19,12 +20,15 @@ Preparada el 2026-10-30. Esta entrada no confirma un despliegue en producción.
 - Contactos del negocio en una franja independiente, con sombras pequeñas y sin barra de desplazamiento visible.
 - Pie de página con el morado de la marca y disposición adaptada a móvil.
 - Íconos diferentes para «Visitas y clics» y «Patrocinadores» en el menú.
+- Logos grandes y centrados como elemento principal de las tarjetas del carrusel.
+- Retiro del bloque exclusivo de pedidos y redes de Gas Memo en la portada.
 
 ### Corregido
 - Pérdida de asignaciones al cambiar el nombre de una categoría.
 - Recorte de nombres y distribución incompleta de categorías en el mapa.
 - Detención del avance automático del carrusel por redondeo de posiciones.
 - Espacio reservado innecesariamente para contactos cerrados y sombras recortadas.
+- Navegación de regreso por niveles y conservación de la categoría al cambiar de vista, incluso al entrar desde un negocio compartido.
 
 ## [1.1.0] — Versión de partida
 

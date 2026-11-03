@@ -16,6 +16,7 @@ useColorModeValue
 import { keyframes } from '@emotion/react';
 import AppModal from 'components/modal/AppModal';
 import SponsorLocation from 'components/sponsor/SponsorLocation';
+import ShareBusinessButton from 'components/sponsor/ShareBusinessButton';
 import { sponsorLinks, sponsorNavigation, sponsorVideoSource } from 'utils/sponsor';
 import useCategories from 'hooks/useCategories';
 import SearchableCategorySelect from 'components/category/SearchableCategorySelect';
@@ -79,7 +80,7 @@ const businessPosition = (index: number, total: number): number[] => {
 };
 
 export default function VirtualMall() {
-  const { categories, businessSettings } = useCategories('sponsors');
+  const { categories, businessSettings, loading: categoriesLoading } = useCategories('sponsors');
   const [general, setGeneral] = useState('');
   const location = useLocation();
   const [businesses, setBusinesses] = useState<SponsorItem[]>([]);
@@ -133,7 +134,8 @@ export default function VirtualMall() {
 
   const activeBusinesses = useMemo(() => businesses.filter((business) => business.active !== false), [businesses]);
   const settings = completeBusinessSettings(Array.from(new Set([...categories, ...activeBusinesses.map(business => business.category)])), businessSettings);
-  const group = settings.groups.find(item => item.name === general);
+  const activeCategory = simpleView ? simpleCategory : selectedCategory;
+  const group = settings.groups.find(item => item.categories.includes(activeCategory)) || settings.groups.find(item => item.name === general);
   const mapCategories = group ? group.categories : settings.groups.map(item => item.name);
   const sectorCategories = mapCategories.slice(mobileSector * CATEGORIES_PER_SECTOR, (mobileSector + 1) * CATEGORIES_PER_SECTOR);
   const categoryRows = Math.max(1, Math.ceil(sectorCategories.length / 2));
@@ -160,14 +162,22 @@ export default function VirtualMall() {
     setDossierOpen(false);
     setBusinessSector(0);
   };
+  const openGeneral = (name: string) => {
+    clearTimeout(travelTimer.current);
+    setGeneral(name); setSelectedCategory(''); setSimpleCategory(''); setMobileSector(0);
+    setSelectedBusinessId(''); setArrivedBusinessId(''); setDossierOpen(false); setVideoOpen(false); setBusinessSector(0);
+  };
   const returnToGalaxy = () => {
-    if (!selectedCategory) setGeneral('');
-    setSelectedCategory('');
-    setMobileSector(0);
-    setSelectedBusinessId('');
-    setArrivedBusinessId('');
-    setDossierOpen(false);
-    setBusinessSector(0);
+    const parentName = activeCategory ? group?.name || '' : '';
+    const sector = activeCategory && group ? Math.max(0, Math.floor(group.categories.indexOf(activeCategory) / CATEGORIES_PER_SECTOR)) : 0;
+    openGeneral(parentName); setMobileSector(sector);
+  };
+  const toggleView = () => {
+    clearTimeout(travelTimer.current);
+    if (simpleView) setSelectedCategory(simpleCategory); else setSimpleCategory(selectedCategory);
+    if (group) setGeneral(group.name);
+    setSelectedBusinessId(''); setArrivedBusinessId(''); setDossierOpen(false); setVideoOpen(false); setBusinessSector(0);
+    setSimpleView(value => !value);
   };
   const selectBusiness = (id: string, trigger: HTMLButtonElement) => {
     stationTrigger.current = trigger;
@@ -199,19 +209,24 @@ export default function VirtualMall() {
               <Box as="span" display={{ base: 'none', md: 'inline' }}>Viajá por el mapa, entrá a una categoría y descubrí cada negocio en su propia estación.</Box>
             </Text>
           </Stack>
-          <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="md" minH="44px" fontSize={{ base: 'sm', md: 'md' }} px={{ base: '16px', md: '20px' }} flexShrink={0} onClick={() => setSimpleView((value) => !value)} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
+          <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="md" minH="44px" fontSize={{ base: 'sm', md: 'md' }} px={{ base: '16px', md: '20px' }} flexShrink={0} onClick={toggleView} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>
           </Flex>
         </Box>
 
-        <Flex gap="8px" align="center" flexWrap="wrap">
-          <Button size="sm" onClick={() => { setGeneral(''); setSelectedCategory(''); setSimpleCategory(''); setMobileSector(0); }}>Todas las categorías</Button>
-          {settings.groups.map(item => <Button key={item.name} size="sm" aria-pressed={general === item.name} onClick={() => { setGeneral(item.name); setSelectedCategory(''); setSimpleCategory(''); setMobileSector(0); }}>{item.icon} {item.name}</Button>)}
+        <Flex as="nav" aria-label="Navegación de categorías" position="sticky" top="76px" zIndex={20} bg={panelBg} borderRadius="14px" p="8px" gap="6px" align="center" flexWrap="wrap">
+          <Button size="sm" variant="ghost" onClick={() => openGeneral('')} aria-current={!group ? 'page' : undefined}>Categorías generales</Button>
+          {group && <><Icon as={MdChevronRight} aria-hidden="true" /><Button size="sm" variant="ghost" isDisabled={categoriesLoading} onClick={() => openGeneral(group.name)} aria-label={`Ver categorías específicas de ${group.name}`} aria-current={!activeCategory ? 'page' : undefined}>{group.icon} {group.name}</Button></>}
+          {activeCategory && <><Icon as={MdChevronRight} aria-hidden="true" /><Text fontSize="sm" fontWeight="700" aria-current="page">{activeCategory}</Text></>}
         </Flex>
-        {simpleView ? <SimpleMall categories={group?.categories || []} businesses={general ? activeBusinesses.filter(business => group?.categories.includes(business.category)) : activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
+        {simpleView && <Flex gap="8px" flexWrap="wrap">
+          {group && <Button size="sm" leftIcon={<MdChevronLeft />} isDisabled={categoriesLoading} onClick={returnToGalaxy}>{simpleCategory ? 'Volver a categorías específicas' : 'Volver a categorías generales'}</Button>}
+          {!group && settings.groups.map(item => <Button key={item.id} size="sm" onClick={() => openGeneral(item.name)}>{item.icon} {item.name}</Button>)}
+        </Flex>}
+        {simpleView ? <SimpleMall categories={group?.categories || []} businesses={group ? activeBusinesses.filter(business => group?.categories.includes(business.category)) : activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
-              <Heading fontSize={{ base: 'lg', md: 'xl' }}>{general || 'Categorías generales'}</Heading>
-              {general && <Button size="sm" alignSelf="flex-start" onClick={returnToGalaxy}>Volver a categorías generales</Button>}
+              <Heading fontSize={{ base: 'lg', md: 'xl' }}>{group?.name || 'Categorías generales'}</Heading>
+              {group && <Button size="sm" alignSelf="flex-start" onClick={returnToGalaxy}>Volver a categorías generales</Button>}
               <Text color="gray.500" fontSize="xs">Elegí una categoría para viajar a su submapa.</Text>
             </Stack>
           )}
@@ -228,7 +243,7 @@ export default function VirtualMall() {
                 {!selectedCategory ? (
                   <CategoryMap icons={icons} categories={mapCategories} businesses={group ? activeBusinesses : activeBusinesses.map(business => ({ ...business, category: settings.groups.find(item => item.categories.includes(business.category))?.name || business.category }))} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
                 ) : (
-                  <BusinessMap businesses={visibleBusinesses} totalBusinesses={categoryBusinesses.length} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} visitedIds={visitedBusinessIds} sector={businessSector} sectorCount={businessSectorCount} onSectorChange={changeBusinessSector} onBack={returnToGalaxy} onSelect={selectBusiness} />
+                  <BusinessMap businesses={visibleBusinesses} totalBusinesses={categoryBusinesses.length} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} visitedIds={visitedBusinessIds} sector={businessSector} sectorCount={businessSectorCount} onSectorChange={changeBusinessSector} onBack={returnToGalaxy} isBackDisabled={categoriesLoading} backLabel={group ? 'Volver a categorías específicas' : 'Volver a categorías generales'} onSelect={selectBusiness} />
                 )}
                 <Astronaut selectedCategory={selectedCategory} selectedCategoryIndex={selectedCategoryIndex} selectedBusiness={selectedBusiness} businesses={visibleBusinesses} travelling={Boolean(selectedBusiness && !arrivedBusiness)} />
               </Box>
@@ -238,7 +253,7 @@ export default function VirtualMall() {
               <Stack position="absolute" left="50%" bottom="10%" transform="translateX(-50%)" align="center" textAlign="center" color="white" zIndex={3} w="80%" pointerEvents="none">
                 <Text fontSize="38px">🛰️</Text>
                 <Heading fontSize="xl">No hay estaciones disponibles</Heading>
-                <Text color="whiteAlpha.700" fontSize="sm">Usá «Volver al mapa principal» para explorar otra categoría.</Text>
+                <Text color="whiteAlpha.700" fontSize="sm">Usá el botón Volver para explorar otra categoría.</Text>
               </Stack>
             )}
 
@@ -336,12 +351,13 @@ function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChan
   );
 }
 
-function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, visitedIds, sector, sectorCount, onSectorChange, onBack, onSelect }: { businesses: SponsorItem[]; totalBusinesses: number; category: string; categoryIcon: string; selectedId?: string; visitedIds: string[]; sector: number; sectorCount: number; onSectorChange: (sector: number) => void; onBack: () => void; onSelect: (id: string, trigger: HTMLButtonElement) => void }) {
+function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, visitedIds, sector, sectorCount, onSectorChange, onBack, backLabel, isBackDisabled, onSelect }: { businesses: SponsorItem[]; totalBusinesses: number; category: string; categoryIcon: string; selectedId?: string; visitedIds: string[]; sector: number; sectorCount: number; onSectorChange: (sector: number) => void; onBack: () => void; backLabel: string; isBackDisabled?: boolean; onSelect: (id: string, trigger: HTMLButtonElement) => void }) {
   return (
     <>
       <Stack position="absolute" top="12px" left="16px" right="16px" align="center" spacing="6px" zIndex={6}>
         <Button
-          aria-label="Volver al mapa principal"
+          aria-label={backLabel}
+          isDisabled={isBackDisabled}
           onClick={onBack}
           leftIcon={<Flex as="span" align="center" justify="center" boxSize="28px" borderRadius="full" bg="rgba(103,232,249,.12)" color="cyan.200"><Icon as={MdChevronLeft} boxSize="22px" /></Flex>}
           alignSelf="flex-start"
@@ -362,7 +378,7 @@ function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, sele
           _active={{ bg: 'rgba(30,55,80,.98)' }}
           _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}
         >
-          Volver al mapa
+          {backLabel}
         </Button>
         <Flex w="100%" gap="6px" align="center" justify="space-between" aria-label={`${totalBusinesses} negocios en esta zona`}>
           <Text color="white" fontWeight="800" fontSize="xs" noOfLines={1}>{categoryIcon} {category}</Text>
@@ -441,7 +457,7 @@ function BusinessDossier({ business, isOpen, finalFocusRef, contactLinks, onClos
         <Text minW="0" overflowWrap="anywhere">{business.name || 'Negocio local'}</Text>
       </Flex>}
       description={business.category ? `ESTACIÓN · ${business.category}` : 'ESTACIÓN'}
-      footer={<Button onClick={onClose} w="100%" minH="44px" leftIcon={<MdChevronLeft />} bg="cyan.200" color="navy.900" borderRadius="full" _hover={{ bg: 'cyan.100' }}>Seguir explorando</Button>}
+      footer={<Flex direction={{ base: 'column', md: 'row' }} gap={2}><ShareBusinessButton businessId={business.id} name={business.name} /><Button onClick={onClose} flex="1.4" minW={0} minH="44px" fontSize="sm" leftIcon={<MdChevronLeft />} bg="cyan.200" color="navy.900" borderRadius="full" _hover={{ bg: 'cyan.100' }}>Seguir explorando</Button></Flex>}
     >
       <Stack spacing="20px">
         {business.description && <Box>
