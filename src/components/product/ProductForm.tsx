@@ -7,6 +7,7 @@ import StatusBadge from 'components/dataDisplay/StatusBadge';
 import ActiveSwitch from 'components/form/ActiveSwitch';
 import Form from 'components/form/Form';
 import FormField from 'components/form/FormField';
+import { sortCategories } from 'utils/categories';
 import useCategories from 'hooks/useCategories';
 import { Product, ProductCategory } from 'interfaces/ProductItem';
 import { useMemo, useState } from 'react';
@@ -28,7 +29,7 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   const history = useHistory();
   const toast = useToast();
   const [values, setValues] = useState<ProductDraft>(() => product ? {
-    description: product.description || '', sku: product.sku || '', category: product.category || 'Otros',
+    description: product.description || '', sku: product.sku || '', categoryId: product.categoryId || '', category: product.category || 'Otros',
     price: Number(product.price || 0), costPrice: Number(product.costPrice || 0), stock: Number(product.stock || 0),
     lowStockThreshold: Number(product.lowStockThreshold ?? 5), active: product.active !== false,
   } : defaults);
@@ -38,12 +39,12 @@ export default function ProductForm({ product, isLoading = false }: Props) {
   const muted = useColorModeValue('gray.600', 'gray.400');
   const subtleBg = useColorModeValue('gray.50', 'whiteAlpha.50');
 
-  const set = (key: keyof ProductDraft, value: any) => setValues((current) => ({ ...current, [key]: value }));
+  const set = (key: keyof ProductDraft, value: any) => setValues((current) => ({ ...current, ...(key === 'category' ? { categoryId: '' } : {}), [key]: value }));
   const invalid = !values.description.trim() || !values.category || values.price <= 0 || values.costPrice < 0 || values.stock < 0 || Number(values.lowStockThreshold) < 0;
   const margin = values.price - values.costPrice;
   const marginPercent = values.price > 0 ? (margin / values.price) * 100 : 0;
   const inventoryValue = values.stock * values.costPrice;
-  const categoryOptions = useMemo(() => Array.from(new Set([values.category, ...categories].filter(Boolean))), [categories, values.category]);
+  const categoryOptions = useMemo(() => sortCategories([values.category, ...categories]), [categories, values.category]);
 
   const goBack = () => history.push('/admin/product/index');
   const save = async () => {

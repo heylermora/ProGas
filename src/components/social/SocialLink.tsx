@@ -65,8 +65,8 @@ export function SocialContact({ caption, description, ...props }: SocialLinkProp
 }
 
 
-export function SocialLinksRow({ links, label, businessId, source, size = 'regular', labelPrefix = '' }: { links: string[]; label: string; businessId?: string; source?: AnalyticsSource; size?: SocialLinkProps['size']; labelPrefix?: string }) {
-  return <Flex role="group" aria-label={label} w="100%" minW={0} maxW="100%" flexWrap="nowrap" gap={{ base: '4px', md: '8px' }} overflowX="auto" overflowY="hidden" pt="8px" pb="16px" px="10px" sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
-    {Array.from(new Set(links.filter(Boolean))).map(href => <SocialLink compactOnMobile sx={{ boxShadow: '0 3px 8px rgba(15,23,42,.16)' }} key={href} href={href} businessId={businessId} source={source} size={size} label={businessId ? `${labelPrefix}${socialPresentation(href).label} de ${label.replace(/^Redes sociales de /, '')}` : socialPresentation(href).label} />)}
+export function SocialLinksRow({ links, label, businessId, source, size = 'regular', labelPrefix = '', appearance = 'default' }: { links: string[]; label: string; businessId?: string; source?: AnalyticsSource; size?: SocialLinkProps['size']; labelPrefix?: string; appearance?: 'default' | 'carousel' }) {
+  return <Flex role="group" aria-label={label} w="100%" minW={0} maxW="100%" flexWrap="nowrap" gap={{ base: appearance === 'carousel' ? '3px' : '4px', md: '8px' }} overflowX="auto" overflowY="hidden" pt={appearance === 'carousel' ? '6px' : '8px'} pb={appearance === 'carousel' ? '6px' : '16px'} px={appearance === 'carousel' ? '3px' : '10px'} sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: appearance === 'carousel' ? 'none' : 'thin', ...(appearance === 'carousel' ? { '&::-webkit-scrollbar': { display: 'none' } } : {}) }}>
+    {Array.from(new Set(links.filter(Boolean))).map(href => <SocialLink compactOnMobile sx={{ boxShadow: appearance === 'carousel' ? '0 1px 3px rgba(15,23,42,.10)' : '0 3px 8px rgba(15,23,42,.16)' }} key={href} href={href} businessId={businessId} source={source} size={size} label={businessId ? `${labelPrefix}${socialPresentation(href).label} de ${label.replace(/^Redes sociales de /, '')}` : socialPresentation(href).label} />)}
   </Flex>;
 }

@@ -6,56 +6,30 @@ import {
   Button,
   Flex,
   Heading,
-  Icon,
   Image,
   Stack,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { MdAccessTime, MdArrowForward } from 'react-icons/md';
+import { MdArrowForward } from 'react-icons/md';
 import MallPreview from './MallPreview';
 import BusinessPromotion from './BusinessPromotion';
 import { PublicPage } from './PublicPage';
 
 const acostaBackground = `${process.env.PUBLIC_URL}/acosta-fondo.png`;
-const gasMemoLogo = `${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`;
 const bmaLogo = `${process.env.PUBLIC_URL}/Banda%20Municipal%20de%20Acosta/logo.png`;
 const bmaDonationUrl =
   'https://api.whatsapp.com/send/?phone=50662787984&text=' +
   encodeURIComponent('Hola, quiero apoyar a la Banda Municipal de Acosta con una donación. ¿Me comparten la información?') +
   '&type=phone_number&app_absent=0';
 
-const socialLinks = [
-  {
-    label: 'Facebook',
-    href: 'https://www.facebook.com/gasmemoymandaditos',
-  },
-  {
-    label: 'Instagram',
-    href: 'https://www.instagram.com/gasmemo2022?fbclid=IwY2xjawSsA2NleHRuA2FlbQIxMABicmlkETFCaFlvTGI1Uzh6RjRib3Exc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHo1bl06kfyGsphsRCNX3LobPoAtg2XoVSNuYklk43R3Y0DQ7CYlc55Y8BHXO_aem_V-fXi2Lvxja2m-IWN6wAiQ',
-  },
-  {
-    label: 'WhatsApp',
-    href: 'https://api.whatsapp.com/send/?phone=50683978524&text&type=phone_number&app_absent=0&utm_source=ig',
-  },
-  {
-    label: 'TikTok',
-    href: 'https://www.tiktok.com/@gas.memo',
-  },
-  {
-    label: 'Correo',
-    href: 'mailto:facturasgasmemo@gmail.com',
-  },
-];
-
-
 const bmaSocialLinks = [
-  { ...socialLinks[0], href: 'https://www.facebook.com/BandaMunicipaldeAcosta/' },
-  { ...socialLinks[1], href: 'https://www.instagram.com/bandamunicipaldeacosta' },
-  { ...socialLinks[2], href: 'https://wa.me/50662787984' },
-  { ...socialLinks[3], href: 'https://www.tiktok.com/@bandamunicipaldeacosta' },
-  { ...socialLinks[4], href: 'mailto:bandamunicipalacostacr@gmail.com' },
+  { href: 'https://www.facebook.com/BandaMunicipaldeAcosta/' },
+  { href: 'https://www.instagram.com/bandamunicipaldeacosta' },
+  { href: 'https://wa.me/50662787984' },
+  { href: 'https://www.tiktok.com/@bandamunicipaldeacosta' },
+  { href: 'mailto:bandamunicipalacostacr@gmail.com' },
 ];
 
 
@@ -138,47 +112,8 @@ function DonationBanner() {
   );
 }
 
-function SocialLogoHub({ organization = 'Gas Memo', logo = gasMemoLogo, links = socialLinks, background = 'brand.500' }: {
-  organization?: string;
-  logo?: string;
-  links?: typeof socialLinks;
-  background?: string;
-}) {
-
-  return (
-    <Box
-      role="group"
-      aria-label={`Redes sociales de ${organization}`}
-      minW="0" w="100%"
-      textAlign="center"
-    >
-      <Box
-        bg={background}
-        borderRadius={{ base: '22px', md: '32px' }}
-        py={{ base: '24px', md: '28px' }}
-        px="12px"
-        mb="8px"
-        boxShadow="xl"
-        position="relative"
-        mx="auto"
-        display="block"
-        transition="transform .2s ease, filter .2s ease"
-        _hover={{ transform: 'translateY(-3px) scale(1.01)', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.20))' }}
-        _focusVisible={{ outline: '3px solid', outlineColor: 'white', outlineOffset: '6px' }}
-      >
-        <Image src={logo} alt={organization} w={{ base: '140px', md: '160px' }} h={{ base: '140px', md: '160px' }} maxW="100%" mx="auto" objectFit="contain" pointerEvents="none" />
-      </Box>
-
-      <SocialLinksRow links={links.map(social => social.href)} label={`Contactos de ${organization}`} size="compact" />
-    </Box>
-  );
-}
-
 export default function Home() {
   useEffect(() => { void AnalyticsService.track({ type: 'page_view', source: 'home' }); }, []);
-  const cardBg = useColorModeValue('rgba(255,255,255,.94)', 'navy.800');
-  const muted = useColorModeValue('gray.600', 'gray.300');
-  const border = useColorModeValue('brand.100', 'whiteAlpha.200');
 
   return (
     <PublicPage maxW="1200px">
@@ -207,20 +142,6 @@ export default function Home() {
         </Box>
         <MallPreview embedded />
         <BusinessPromotion />
-      </Box>
-      <Box as="section" aria-labelledby="gas-coming-title" mb={{ base: 6, md: 8 }}
-        bg={cardBg} border="1px solid" borderColor={border} borderRadius="24px"
-        px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
-        <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'center' }} gap={5}>
-          <Stack flex="1" spacing={2}>
-            <Flex align="center" gap={2} color="#6B4300" bg="#FFF0C2" borderRadius="full" px={3} py={1} alignSelf="flex-start">
-              <Icon as={MdAccessTime} boxSize="16px" /><Text fontSize="xs" fontWeight="800">PRÓXIMAMENTE</Text>
-            </Flex>
-            <Heading id="gas-coming-title" fontSize={{ base: 'xl', md: '2xl' }}>Pedidos en línea con Gas Memo</Heading>
-            <Text color={muted} fontSize="sm">Este servicio aún no está disponible. Consulte las novedades en nuestras redes.</Text>
-          </Stack>
-          <Box w={{ base: '100%', md: '300px' }} maxW="100%" alignSelf="center" flexShrink={0} mx={3} my={2}><SocialLogoHub /></Box>
-        </Flex>
       </Box>
       <DonationBanner />
       <Box h={{ base: '14px', md: '18px' }} />

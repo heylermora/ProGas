@@ -6,6 +6,7 @@ import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
 import { MdExplore, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
+import useInteractiveCarousel from 'hooks/useInteractiveCarousel';
 import SponsorService from 'services/SponsorService';
 
 let cachedBusinesses: SponsorItem[] | undefined;
@@ -38,10 +39,6 @@ const ctaPulse = keyframes`
   0%, 100% { box-shadow: 0 12px 28px rgba(250, 204, 21, .28), 0 0 0 0 rgba(253, 224, 71, .35); }
   50% { box-shadow: 0 16px 34px rgba(250, 204, 21, .42), 0 0 0 8px rgba(253, 224, 71, 0); }
 `;
-const marquee = keyframes`
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-`;
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
 export default function MallPreview({ compact = false, embedded = false }: MallPreviewProps) {
@@ -64,7 +61,11 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
     return () => { mounted = false; };
   }, [attempt]);
 
+  const carousel = useInteractiveCarousel(Boolean(selectedBusinessKey), !prefersReducedMotion && businesses.length > 1, businesses.length > 1);
   const previewBusinesses = businesses;
+  const copies = previewBusinesses.length > 1 ? Math.max(2, Math.ceil(8 / previewBusinesses.length) + 1) : 1;
+  const selectedBusiness = businesses.find(business => business.id === selectedBusinessKey.substring(selectedBusinessKey.indexOf(':') + 1));
+  const selectedContacts = selectedBusiness ? sponsorLinks(selectedBusiness) : [];
   const originLabels: Record<string, string> = {
     '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
     '/customer/products': 'Volver al pedido', '/customer/view-order': 'Volver a consultar pedido',
@@ -98,26 +99,25 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
       {!loading && !error && !previewBusinesses.length && <Flex role="status" minH="100px" align="center" justify="center" gap={3} py={4}>
         <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
       </Flex>}
-      {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" overflow="hidden" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Flex w="max-content" py="6px" animation={!prefersReducedMotion && previewBusinesses.length > 1 ? `${marquee} ${Math.max(38, previewBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running' }}>
-          {(previewBusinesses.length > 1 ? [0, 1] : [0]).map((copy) => (
-          <Flex key={copy} gap="14px" pr="14px">
+      {!loading && !error && previewBusinesses.length > 0 && <Box {...carousel} role="region" aria-label="Carrusel de negocios" onDragStart={event => event.preventDefault()} sx={{ touchAction: 'pan-y', userSelect: 'none', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }} cursor="grab" position="relative" overflowX="auto" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
+        <Flex w="max-content" py="6px">
+          {Array.from({ length: copies }, (_, copy) => copy).map((copy) => (
+          <Flex key={copy} flexShrink={0} gap="14px" pr="14px">
             {!loading && previewBusinesses.map((business) => {
               const businessKey = `${copy}:${business.id}`;
               const selected = selectedBusinessKey === businessKey;
               const contacts = sponsorLinks(business);
               return (
-                <Box key={`${copy}-${business.id}`} position="relative" flex={{ base: '0 0 188px', md: '0 0 224px' }} minH={{ base: '164px', md: '172px' }} py="8px">
-                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p="11px" gap="10px" align="center" textAlign="left" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
-                    <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
-                      {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
+                <Box key={`${copy}-${business.id}`} position="relative" w={{ base: '188px', md: '224px' }} flexShrink={0} py="8px">
+                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '210px', md: '238px' }} p="12px" gap="10px" direction="column" align="center" justify="center" textAlign="center" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 2px 6px rgba(15,23,42,.10)' : '0 2px 5px rgba(15,23,42,.08)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
+                    <Flex w="100%" h={{ base: '132px', md: '156px' }} flex="0 0 auto" borderRadius="12px" bg="white" align="center" justify="center" p="7px" overflow="hidden">
+                      {business.logoUrl ? <Image src={business.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="56px" color="brand.500" />}
                     </Flex>
-                    <Stack spacing="4px" minW="0">
-                      <Text fontWeight="800" fontSize="sm" noOfLines={2} lineHeight="1.12">{business.name || 'Negocio local'}</Text>
-                      <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'ELIJA UNA RED' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
+                    <Stack spacing="4px" minW="0" w="100%" align="center">
+                      <Text fontWeight="600" fontSize="xs" noOfLines={2} lineHeight="1.3">{business.name || 'Negocio local'}</Text>
+                      <Text color={selected ? 'cyan.700' : 'gray.600'} fontSize="10px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'OCULTAR CONTACTOS' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
                     </Stack>
                   </Flex>
-                  {selected && contacts.length > 0 && <SocialLinksRow links={contacts} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" />}
                 </Box>
               );
             })}
@@ -125,9 +125,14 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
           </Flex>
           ))}
         </Flex>
-        {selectedBusinessKey && <Text textAlign="center" color={embedded ? '#475569' : 'whiteAlpha.600'} fontSize="10px">Carrusel pausado mientras consulta los contactos.</Text>}
       </Box>}
-
+      {selectedBusiness && <Box mt="8px" p="12px" w="100%" maxW="440px" borderRadius="14px" bg={embedded ? 'white' : 'whiteAlpha.100'} border="1px solid" borderColor={embedded ? 'gray.200' : 'whiteAlpha.200'}>
+        <Text fontSize="xs" fontWeight="700">Contactos de {selectedBusiness.name || 'Negocio local'}</Text>
+        {selectedContacts.length > 0
+          ? <SocialLinksRow links={selectedContacts} businessId={selectedBusiness.id} source="mall-preview" label={`Redes sociales de ${selectedBusiness.name}`} size="compact" appearance="carousel" />
+          : <Text fontSize="xs" mt="6px" color={embedded ? 'gray.600' : 'whiteAlpha.800'}>Este negocio aún no tiene contactos publicados.</Text>}
+        <Text mt="4px" color={embedded ? '#475569' : 'whiteAlpha.700'} fontSize="10px">Carrusel pausado mientras consulta los contactos.</Text>
+      </Box>}
     </Box>
   );
 }
