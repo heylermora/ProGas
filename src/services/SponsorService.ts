@@ -1,4 +1,6 @@
 import { fetchAllData, fetchDataById, addData, updateData, deleteData } from 'apiConfig';
+import CategoryService from './CategoryService';
+import { findCategory, resolveCategory } from 'utils/categories';
 import SponsorItem, { BusinessCategory, DEFAULT_BUSINESS_CATEGORY, SponsorType } from 'interfaces/SponsorItem';
 
 const COLLECTION = 'Sponsors';
@@ -27,24 +29,30 @@ const SponsorService = {
     // El mapa pagina visualmente por sectores; usamos un límite amplio para no ocultar
     // negocios activos por el límite genérico de 50 documentos de la utilidad compartida.
     const data = await fetchAllData<SponsorItem>(COLLECTION, undefined, 500);
-    return data.map(normalize).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+    const normalized = data.map(normalize);
+    const catalog = await CategoryService.getCatalog('sponsors', normalized.map(item => item.category));
+    return normalized.map(item => resolveCategory(item, catalog)).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
   },
   getPublicByCategory: async (category: BusinessCategory) => {
     const data = await SponsorService.getAll();
-    return data.filter((s) => s.active && s.category === category);
+    const catalog = await CategoryService.getCatalog('sponsors');
+    const target = findCategory(catalog, category);
+    return data.filter(s => s.active && (target ? s.categoryId === target.id : s.category === category));
   },
   // Compatibilidad temporal con la tira anterior; las pantallas públicas nuevas usan categorías.
   getPublicByType: async (type: SponsorType, max: number) => SponsorService.getPublicByCategory(LEGACY_CATEGORY[type]).then((data) => data.slice(0, max)),
-  get: async (key: string) => fetchDataById(COLLECTION, key) as Promise<SponsorItem>,
+  get: async (key: string) => CategoryService.resolveItem('sponsors', normalize(await fetchDataById(COLLECTION, key) as SponsorItem)),
   nextOrder: async (category: BusinessCategory) => {
-    const items = (await SponsorService.getAll()).filter(item => item.category === category);
+    const all = await SponsorService.getAll();
+    const target = findCategory(await CategoryService.getCatalog('sponsors'), category);
+    const items = all.filter(item => target ? item.categoryId === target.id : item.category === category);
     return Math.max(0, ...items.map(item => Number.isFinite(item.order) ? item.order : 0)) + 1;
   },
-  create: async (newSponsor: Omit<SponsorItem, 'id'>) => addData(COLLECTION, {
-    ...newSponsor,
-    order: await SponsorService.nextOrder(newSponsor.category),
-  }),
-  edit: async (key: string, editedSponsor: SponsorItem) => updateData(COLLECTION, key, editedSponsor),
+  create: async (newSponsor: Omit<SponsorItem, 'id'>) => {
+    const payload = await CategoryService.resolveItem('sponsors', newSponsor);
+    return addData(COLLECTION, { ...payload, order: await SponsorService.nextOrder(payload.category) });
+  },
+  edit: async (key: string, editedSponsor: SponsorItem) => updateData(COLLECTION, key, await CategoryService.resolveItem('sponsors', editedSponsor)),
   enforceCapacity: async (type: SponsorType) => {
     const sponsorsOfType = (await SponsorService.getAll())
       .filter((sponsor) => sponsor.type === type)

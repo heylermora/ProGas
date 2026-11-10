@@ -1,3 +1,4 @@
+import { sortCategories } from 'utils/categories';
 import {
 Badge, Box, Button, Flex, HStack, Icon, IconButton,
 Input, Menu, MenuButton, MenuItem, MenuList, Select, SimpleGrid, Table, Tbody, Td,
@@ -53,7 +54,7 @@ export default function Products() {
     ...product, category: product.category || 'Otros', costPrice: Number(product.costPrice || 0),
     stock: Number(product.stock || 0), active: product.active !== false,
   } as Product)), [products]);
-  const availableCategories = useMemo(() => Array.from(new Set([...categories, ...normalized.map(product => product.category).filter(Boolean)])), [categories, normalized]);
+  const availableCategories = useMemo(() => sortCategories([...categories, ...normalized.map(product => product.category).filter(Boolean)]), [categories, normalized]);
   const filtered = useMemo(() => normalized.filter(product => {
     const term = search.toLocaleLowerCase();
     return (!term || product.description.toLocaleLowerCase().includes(term) || product.sku?.toLocaleLowerCase().includes(term))
@@ -129,7 +130,7 @@ export default function Products() {
           <Button type="button" size="sm" leftIcon={<MdArrowDownward />} onClick={() => setAdjustment(-Math.abs(Math.trunc(adjustment) || 1))}>Salida</Button></HStack>
         <Text fontSize="sm" color={Number(adjusting?.stock || 0) + adjustment < 0 ? 'red.500' : muted} mt={4}>Nuevo total: <b>{Number(adjusting?.stock || 0) + adjustment} unidades</b></Text>
       </FormModal>
-      <CategoryManager kind="products" categories={categories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
+      <CategoryManager kind="products" categories={availableCategories} isOpen={categoryManager.isOpen} onClose={categoryManager.onClose} onSaved={reloadCategories} />
     </Box>
   );
 }
