@@ -127,3 +127,13 @@ En el juego se coloca dentro del mapa, arriba a la izquierda, con espacio reserv
 para el astronauta y las estaciones. Conserva los nombres accesibles de las acciones,
 el estado deshabilitado y un foco visible; reduce las transiciones cuando se solicita
 movimiento reducido.
+
+### Carrusel de negocios en portada
+
+`MallPreview` presenta grupos de tres tarjetas completas, con logos contenidos y
+nombres de hasta dos líneas. Evita la marquesina continua de tarjetas angostas y
+el texto de contacto repetido por tarjeta. Cambia automáticamente cada seis segundos
+mediante una transición breve; se pausa al enfocar, pasar el cursor o consultar
+contactos. Incluye controles anterior/siguiente, contador de grupo y pausa manual.
+La preferencia de movimiento reducido desactiva el avance automático y la transición.
+Los contactos permanecen debajo del grupo; no se agrega una barra de scroll.

@@ -1,10 +1,10 @@
 import { sponsorLinks } from 'utils/sponsor';
 import { SocialLinksRow } from 'components/social/SocialLink';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Icon, Image, Stack, Text, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Icon, Image, IconButton, SimpleGrid, Stack, Text, Spinner, usePrefersReducedMotion } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
-import { MdExplore, MdStorefront } from 'react-icons/md';
+import { MdChevronLeft, MdChevronRight, MdExplore, MdPause, MdPlayArrow, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
 
@@ -38,9 +38,9 @@ const ctaPulse = keyframes`
   0%, 100% { box-shadow: 0 12px 28px rgba(250, 204, 21, .28), 0 0 0 0 rgba(253, 224, 71, .35); }
   50% { box-shadow: 0 16px 34px rgba(250, 204, 21, .42), 0 0 0 8px rgba(253, 224, 71, 0); }
 `;
-const marquee = keyframes`
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
+const revealBusinesses = keyframes`
+  from { opacity: .35; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 `;
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
@@ -50,6 +50,10 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
   const [loading, setLoading] = useState(!cachedBusinesses);
   const [selectedBusinessKey, setSelectedBusinessKey] = useState('');
+  const [page, setPage] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const retry = useCallback(() => { setError(false); setLoading(true); setAttempt(value => value + 1); }, []);
@@ -65,10 +69,18 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
   }, [attempt]);
 
   const previewBusinesses = businesses;
-  // Four slots keep at least three complete cards visible while the row moves.
-  const cycleBusinesses = businesses.length > 1 && businesses.length < 7
-    ? Array.from({ length: Math.ceil(7 / businesses.length) }, () => businesses).flat()
-    : businesses;
+  const pageCount = Math.ceil(businesses.length / 3);
+  const currentPage = pageCount ? page % pageCount : 0;
+  const visibleBusinesses = Array.from({ length: Math.min(3, businesses.length) }, (_, index) => businesses[(currentPage * 3 + index) % businesses.length]);
+  const changePage = (direction: number) => {
+    setSelectedBusinessKey('');
+    setPage(previous => (previous + direction + pageCount) % pageCount);
+  };
+  useEffect(() => {
+    if (pageCount <= 1 || prefersReducedMotion || paused || hovering || focused || selectedBusinessKey) return;
+    const timer = window.setInterval(() => setPage(previous => (previous + 1) % pageCount), 6000);
+    return () => window.clearInterval(timer);
+  }, [pageCount, prefersReducedMotion, paused, hovering, focused, selectedBusinessKey]);
   const originLabels: Record<string, string> = {
     '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
     '/customer/products': 'Volver al pedido', '/customer/view-order': 'Volver a consultar pedido',
@@ -91,7 +103,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         <Button as={RLink} to={mallDestination} {...secondaryWindow} leftIcon={<MdExplore />} flexShrink={0} w={{ base: '100%', sm: 'auto' }} size="lg" borderRadius="full" bgGradient="linear(135deg, #FFF2A8 0%, #FACC15 48%, #E98A00 100%)" color="#281900" fontWeight="900" px="26px" animation={prefersReducedMotion ? undefined : `${ctaPulse} 2.3s ease-in-out infinite`} _hover={{ transform: 'translateY(-3px) scale(1.03)', filter: 'brightness(1.04)', textDecoration: 'none' }}>Explorar todos los negocios{compact ? ' ↗' : ''}</Button>
       </Flex>}
 
-      {embedded && !loading && !error && previewBusinesses.length > 0 && <Text color="#475569" fontSize="sm" px="2px" mb="4px">Seleccione un negocio para ver sus contactos.</Text>}
+      {embedded && !loading && !error && previewBusinesses.length > 0 && <Text color="#475569" fontSize="sm" px="2px" mb="10px">Toque un logo para ver sus contactos.</Text>}
       {loading && <Flex role="status" aria-live="polite" minH="100px" align="center" justify="center" gap={3}>
         <Spinner size="sm" /><Text fontSize="sm">Cargando negocios…</Text>
       </Flex>}
@@ -102,36 +114,30 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
       {!loading && !error && !previewBusinesses.length && <Flex role="status" minH="100px" align="center" justify="center" gap={3} py={4}>
         <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
       </Flex>}
-      {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" overflow="visible" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Box role="region" aria-label="Carrusel de negocios" py="6px" overflow="hidden" sx={{ containerType: "inline-size" }}>
-          <Flex w="max-content" animation={!prefersReducedMotion && businesses.length > 1 ? `${marquee} ${Math.max(38, cycleBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running', '&:focus-within': { animationPlayState: 'paused' } }}>
-          {(businesses.length > 1 ? [0, 1] : [0]).map((copy) => (
-          <Flex key={copy} flexShrink={0} gap={{ base: "8px", md: "12px" }} pr={{ base: "8px", md: "12px" }}>
-            {!loading && cycleBusinesses.map((business, index) => {
-              const businessKey = `${copy}:${index}:${business.id}`;
-              const selected = selectedBusinessKey === businessKey;
-              const contacts = sponsorLinks(business);
-              return (
-                <Box key={businessKey} position="relative" minW="0" flexShrink={0} w={{ base: "calc((100cqw - 24px) / 4)", md: "calc((100cqw - 72px) / 7)" }}>
-                  <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p={{ base: "7px", md: "10px" }} gap="7px" direction="column" align="center" textAlign="center" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
-                    <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
-                      {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
-                    </Flex>
-                    <Stack spacing="4px" minW="0">
-                      <Text fontWeight="800" fontSize={{ base: "xs", md: "sm" }} noOfLines={2} lineHeight="1.25">{business.name || 'Negocio local'}</Text>
-                      <Text color={selected ? 'cyan.600' : 'gray.500'} fontSize="9px" fontWeight="800" letterSpacing=".04em">{selected ? (contacts.length ? 'ELIJA UNA RED' : 'SIN REDES PUBLICADAS') : 'VER CONTACTOS'}</Text>
-                    </Stack>
-                  </Flex>
-
-                </Box>
-              );
+      {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" maxW="760px" mx="auto">
+        <Box role="region" aria-label="Carrusel de negocios" aria-roledescription="carrusel" onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setFocused(false); }}>
+          <SimpleGrid key={currentPage} columns={Math.min(3, businesses.length)} spacing={{ base: '8px', md: '14px' }} py="4px" animation={prefersReducedMotion ? undefined : `${revealBusinesses} .3s ease-out`}>
+            {visibleBusinesses.map(business => {
+              const selected = selectedBusinessKey === business.id;
+              return <Flex key={business.id} as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(business.id)}
+                minW={0} w="100%" minH={{ base: '132px', md: '154px' }} p={{ base: '8px', md: '14px' }} gap="10px" direction="column" align="center" justify="center" textAlign="center"
+                bg="white" color="navy.900" border="2px solid" borderColor={selected ? 'brand.500' : 'transparent'} borderRadius="14px" boxShadow="0 3px 10px rgba(15,23,42,.06)"
+                _hover={{ borderColor: 'brand.200' }} _focusVisible={{ outline: '3px solid', outlineColor: 'brand.400', outlineOffset: '2px' }}>
+                <Flex w="100%" h={{ base: '64px', md: '80px' }} flexShrink={0} align="center" justify="center">
+                  {business.logoUrl ? <Image src={business.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="36px" color="brand.500" />}
+                </Flex>
+                <Text w="100%" minH="32px" fontWeight="700" fontSize={{ base: '12px', md: 'sm' }} noOfLines={2} lineHeight="1.35" overflowWrap="normal" wordBreak="normal">{business.name || 'Negocio local'}</Text>
+              </Flex>;
             })}
-
-          </Flex>
-          ))}
-          </Flex>
+          </SimpleGrid>
+          {pageCount > 1 && <Flex justify="center" align="center" gap={1} mt={2} color={embedded ? 'navy.900' : 'white'}>
+            <IconButton variant="ghost" aria-label="Negocios anteriores" icon={<MdChevronLeft size={22} />} onClick={() => changePage(-1)} w="44px" h="44px" />
+            <Text fontSize="xs" minW="44px" textAlign="center" aria-label={`Grupo ${currentPage + 1} de ${pageCount}`}>{currentPage + 1} / {pageCount}</Text>
+            <IconButton variant="ghost" aria-label="Negocios siguientes" icon={<MdChevronRight size={22} />} onClick={() => changePage(1)} w="44px" h="44px" />
+            {!prefersReducedMotion && <IconButton variant="ghost" aria-label={paused ? 'Reanudar carrusel' : 'Pausar carrusel'} aria-pressed={paused} icon={paused ? <MdPlayArrow size={18} /> : <MdPause size={18} />} onClick={() => setPaused(value => !value)} w="44px" h="44px" />}
+          </Flex>}
         </Box>
-        {previewBusinesses.filter(business => selectedBusinessKey.endsWith(`:${business.id}`)).map(business => <Box key={business.id} mt={3} p={3} borderRadius="12px" bg={embedded ? 'white' : 'whiteAlpha.100'}>
+        {previewBusinesses.filter(business => selectedBusinessKey === business.id).map(business => <Box key={business.id} mt={3} p={3} borderRadius="12px" bg={embedded ? 'white' : 'whiteAlpha.100'}>
           <Text fontSize="sm" fontWeight="700" mb={2}>Contactos de {business.name || 'Negocio local'}</Text>
           {sponsorLinks(business).length > 0 ? <SocialLinksRow links={sponsorLinks(business)} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" appearance="carousel" /> : <Text fontSize="sm">Sin contactos publicados.</Text>}
         </Box>)}
