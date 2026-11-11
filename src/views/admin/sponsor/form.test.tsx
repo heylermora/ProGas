@@ -15,7 +15,7 @@ beforeEach(() => jest.clearAllMocks());
 
 it('creates a sponsor with optional networks empty and saves location and directions', async () => {
   showForm();
-  fireEvent.change(screen.getByLabelText('Nombre del negocio'), { target: { value: 'Negocio prueba' } });
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: 'Negocio prueba' } });
   fireEvent.change(screen.getByLabelText('Señas del negocio'), { target: { value: 'Frente al parque' } });
   expect(screen.queryByLabelText('Posición dentro de la categoría')).toBeNull();
   expect(screen.queryByLabelText('Coordenadas del negocio')).toBeNull();
@@ -29,6 +29,7 @@ it('creates a sponsor with optional networks empty and saves location and direct
 it('rejects a link from a different network and preserves fields after a failed save', async () => {
   (SponsorService.create as jest.Mock).mockRejectedValueOnce(new Error('offline'));
   showForm();
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: 'Negocio prueba' } });
   const facebook = screen.getByLabelText('Facebook');
   fireEvent.change(facebook, { target: { value: 'https://instagram.com/local' } });
   fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
@@ -52,6 +53,7 @@ it.each(['data:video/mp4;base64,AAA', '<iframe src="https://www.facebook.com/plu
 
 it('reveals the video error when an unsupported link is in the collapsed section', async () => {
   showForm();
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: 'Negocio prueba' } });
   const videoSection = screen.getByRole('button', { name: /Cómo agregar el video/ });
   fireEvent.click(videoSection);
   fireEvent.change(screen.getByLabelText('Enlace del video'), { target: { value: 'https://drive.google.com/file/d/123' } });
@@ -66,9 +68,56 @@ it('moves an edited sponsor to the end only when its category changes', async ()
   (SponsorService.get as jest.Mock).mockResolvedValue({ id: 'one', name: 'Local', category: 'Otros', active: true, order: 2, logoUrl: '', links: [] });
   (SponsorService.nextOrder as jest.Mock).mockResolvedValue(7);
   showForm('/admin/sponsor/edit/one');
-  const category = await screen.findByLabelText('Categoría');
-  fireEvent.change(category, { target: { value: 'Tiendas' } });
+  fireEvent.click(await screen.findByRole('checkbox', { name: 'Tiendas' }));
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Otros' }));
   fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
   await waitFor(() => expect(SponsorService.edit).toHaveBeenCalledWith('one', expect.objectContaining({ category: 'Tiendas', order: 7 })));
   expect(SponsorService.nextOrder).toHaveBeenCalledWith('Tiendas');
+});
+
+it.each(['', '   ', '\t\n', '\u00a0'])('blocks creation with a blank name: %j', async name => {
+  showForm();
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: name } });
+  fireEvent.submit(screen.getByRole('form', { name: /patrocinador/ }));
+  expect(await screen.findByText('Ingrese el nombre del negocio.')).toBeTruthy();
+  expect(SponsorService.create).not.toHaveBeenCalled();
+});
+
+it('requires a name when updating a legacy business and trims the corrected name', async () => {
+  (SponsorService.get as jest.Mock).mockResolvedValue({ id: 'one', name: '', category: 'Otros', active: true, order: 2, logoUrl: '', links: [] });
+  showForm('/admin/sponsor/edit/one');
+  const name = await screen.findByLabelText(/Nombre del negocio/);
+  fireEvent.submit(screen.getByRole('form', { name: /patrocinador/ }));
+  expect(await screen.findByText('Ingrese el nombre del negocio.')).toBeTruthy();
+  expect(SponsorService.edit).not.toHaveBeenCalled();
+  fireEvent.change(name, { target: { value: '  Comercio Central  ' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
+  await waitFor(() => expect(SponsorService.edit).toHaveBeenCalledWith('one', expect.objectContaining({ name: 'Comercio Central' })));
+});
+
+it('saves multiple specific categories', async () => {
+  showForm();
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: 'Comercio mixto' } });
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Tiendas' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
+  await waitFor(() => expect(SponsorService.create).toHaveBeenCalledWith(expect.objectContaining({ categories: ['Otros', 'Tiendas'] })));
+});
+
+it('prevents removing every category selection', async () => {
+  showForm();
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: 'Comercio mixto' } });
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Otros' }));
+  fireEvent.submit(screen.getByRole('form', { name: /patrocinador/ }));
+  expect(await screen.findByText('Seleccione al menos una categoría específica.')).toBeTruthy();
+  expect(SponsorService.create).not.toHaveBeenCalled();
+});
+
+it('preserves every saved category when editing only the name', async () => {
+  (SponsorService.get as jest.Mock).mockResolvedValue({ id: 'one', name: 'Mixto', category: 'Otros', categories: ['Otros', 'Tiendas'], categoryIds: ['other-id', 'shop-id'], active: true, order: 2, logoUrl: '', links: [] });
+  showForm('/admin/sponsor/edit/one');
+  const name = await screen.findByLabelText(/Nombre del negocio/);
+  expect((screen.getByRole('checkbox', { name: 'Tiendas' }) as HTMLInputElement).checked).toBe(true);
+  fireEvent.change(name, { target: { value: 'Nuevo nombre' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
+  await waitFor(() => expect(SponsorService.edit).toHaveBeenCalledWith('one', expect.objectContaining({ name: 'Nuevo nombre', categories: ['Otros', 'Tiendas'], categoryIds: ['other-id', 'shop-id'] })));
 });

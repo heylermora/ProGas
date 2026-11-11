@@ -2,22 +2,22 @@
 
 ProGas usa versionamiento semántico: `MAYOR.MENOR.PARCHE`.
 
-La versión de esta entrega es **1.2.0**, pendiente de publicación. La versión de
+La versión de esta entrega es **1.3.0**, pendiente de publicación. La versión de
 partida del proyecto era `1.1.0`. Los números del historial de Horizon UI pertenecen
 a la plantilla y no representan entregas de ProGas.
 
 ## Cuándo cambiar la versión
 
-| Tipo | Cuándo corresponde | Ejemplo desde 1.2.0 |
+| Tipo | Cuándo corresponde | Ejemplo desde 1.3.0 |
 | --- | --- | --- |
-| PARCHE | Correcciones y ajustes visuales que mantienen el comportamiento compatible. | 1.2.1 |
-| MENOR | Funcionalidades nuevas compatibles con los datos y flujos existentes. | 1.3.0 |
+| PARCHE | Correcciones y ajustes visuales que mantienen el comportamiento compatible. | 1.3.1 |
+| MENOR | Funcionalidades nuevas compatibles con los datos y flujos existentes. | 1.4.0 |
 | MAYOR | Cambios incompatibles que requieren adaptar consumidores, datos o flujos. | 2.0.0 |
 
 Se asigna una versión por entrega agrupada, no por cada commit. Las correcciones
 de un PR que todavía no se ha publicado mantienen la versión de esa entrega.
-Por ejemplo, las categorías por niveles, su gestión y el carrusel interactivo se
-agrupan en `1.2.0`; sus ajustes durante la revisión no generan nuevas versiones.
+Por ejemplo, las categorías múltiples, las estadísticas y los ajustes del directorio se
+agrupan en `1.3.0`; sus ajustes durante la revisión no generan nuevas versiones.
 
 ## Archivos que deben coincidir
 
@@ -43,7 +43,7 @@ Horizon UI son independientes de la versión de ProGas.
    Para fijar un número acordado, usar por ejemplo:
 
    ```bash
-   npm version 1.2.0 --no-git-tag-version
+   npm version 1.3.0 --no-git-tag-version
    ```
 
 3. Agregar al inicio de `CHANGELOG.md` una entrada con el estado **Pendiente de
@@ -69,8 +69,8 @@ Una versión en el código o un PR aprobado no confirma que esté desplegada.
    `COMMIT_PUBLICADO` por su SHA verificado:
 
    ```bash
-   git tag -a v1.2.0 COMMIT_PUBLICADO -m "ProGas 1.2.0"
-   git push origin v1.2.0
+   git tag -a v1.3.0 COMMIT_PUBLICADO -m "ProGas 1.3.0"
+   git push origin v1.3.0
    ```
 
 5. Si se crea una GitHub Release, usar esa etiqueta y las notas de `CHANGELOG.md`.

@@ -16,6 +16,8 @@ interface SponsorItem {
   type?: SponsorType;
   categoryId?: string;
   category: BusinessCategory;
+  categories?: BusinessCategory[];
+  categoryIds?: string[];
   active: boolean;
   order: number;
   logoUrl: string;

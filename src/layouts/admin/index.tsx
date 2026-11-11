@@ -2,7 +2,7 @@ import { Portal, Box, useDisclosure } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
 import Sidebar from 'components/sidebar/Sidebar';
 import { SidebarContext } from 'contexts/SidebarContext';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import routes from 'routes/routes';
 import { useState } from 'react';
 import Navbar from 'components/navbar/Navbar';
@@ -16,7 +16,7 @@ export default function Dashboard(props: { [x: string]: any }) {
   const { onOpen } = useDisclosure();
   const { hasRole } = useAuth();
 
-  const currentPath = window.location.href;
+  const { pathname: currentPath } = useLocation();
 
   const getActiveRoute = (routes: RoutesType[]): string => {
 	const matchingRoute = routes.find(route => currentPath.includes(route.layout + route.path.replace(/\/:.*/, "")));
@@ -83,7 +83,7 @@ export default function Dashboard(props: { [x: string]: any }) {
 								{...rest}
 							/>
 						</Portal>
-						<Box mx='auto' p={adminPadding} minH='100vh' pt={{ base: '70px', md: '62px' }} maxW='1600px'>
+						<Box mx='auto' p={adminPadding} minH='100vh' pt={{ base: '172px', md: '140px' }} maxW='1600px'>
 							<Switch>
 								{getRoutes(routes)}
 								<Redirect from='/' to='/admin/order/index' />

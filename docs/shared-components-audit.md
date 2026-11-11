@@ -98,3 +98,44 @@ Los enlaces HTTP(S) abren una pestaña con `noopener noreferrer`; el correo usa
 `mailto:`. Las acciones de compartir conservan la semántica de botón y su
 callback. No detectar correos buscando simplemente «@», porque rompe URLs de
 TikTok e Instagram que contienen ese carácter.
+
+
+### Negocios con varias categorías específicas
+
+`SponsorItem.categories` y `categoryIds` contienen todas las pertenencias de un
+negocio. `category` y `categoryId` conservan la primera selección para lectores
+anteriores. `utils/sponsorCategories` adapta registros históricos de una sola
+categoría y resuelve nombres actuales usando IDs estables y alias del catálogo.
+El formulario permite marcar varias categorías y exige al menos una; editar
+otros campos conserva todas las selecciones. No se crean copias del negocio.
+
+Los filtros públicos y administrativos usan pertenencia a cualquiera de las
+categorías. El mapa cuenta cada negocio una vez por categoría general, incluso
+si tiene varias específicas dentro de ella. El directorio, el carrusel y las
+estadísticas mantienen una sola identidad por negocio. La posición `order`
+continúa siendo compartida entre sus categorías; no se introduce orden por
+categoría. Los registros existentes se leen sin migración y se escriben con
+ambos formatos al crear o editar. No hacen falta nuevos índices ni permisos:
+las lecturas siguen usando el catálogo y el filtrado se realiza en memoria.
+
+### Regreso entre mapas
+
+`components/button/MapReturnButton` unifica el regreso a categorías generales y
+específicas, también en la vista sencilla. Usa la variante `mapReturn` del tema:
+control dorado con relieve, flecha en un recuadro, texto «Volver al mapa» y destino.
+En el juego se coloca dentro del mapa, arriba a la izquierda, con espacio reservado
+para el astronauta y las estaciones. Conserva los nombres accesibles de las acciones,
+el estado deshabilitado y un foco visible; reduce las transiciones cuando se solicita
+movimiento reducido.
+
+### Carrusel de negocios en portada
+
+`MallPreview` usa una pista de movimiento continuo, con ancho para tres tarjetas
+en móvil y tarjetas de ancho fijo que permiten mostrar más negocios en
+escritorio. Conserva logos contenidos y nombres de dos líneas, sin el texto de
+contacto repetido. No tiene paginación, barra de controles ni botón de pausa.
+Se detiene mientras se enfoca, se pasa el cursor o se consultan contactos, que
+aparecen debajo. Las copias del bucle se excluyen de la navegación por teclado y
+del árbol de accesibilidad. Movimiento reducido desactiva la animación y permite
+recorrer la pista sin mostrar una barra de scroll. Con tres o menos negocios se
+muestran las tarjetas sin duplicarlas.

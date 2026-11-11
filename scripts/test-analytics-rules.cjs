@@ -14,6 +14,21 @@ const { doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp } 
       await setDoc(doc(db, 'users', 'admin'), { active: true, roles: ['admin'], userId: 'admin' });
       await setDoc(doc(db, 'users', 'staff'), { active: true, roles: ['colaborador'], userId: 'staff' });
     });
+    const adminDb = env.authenticatedContext('admin').firestore();
+    const namedSponsor = doc(adminDb, 'Sponsors', 'named');
+    await assertSucceeds(setDoc(namedSponsor, { name: 'Comercio Central', active: true, links: [] }));
+    await assertSucceeds(updateDoc(namedSponsor, { name: 'Nuevo nombre' }));
+    for (const name of ['', '   ', '\t\n', '\u00a0', null, 42]) {
+      await assertFails(setDoc(doc(adminDb, 'Sponsors', 'invalid-name'), { name, active: true }));
+      await assertFails(updateDoc(namedSponsor, { name }));
+    }
+    await assertFails(setDoc(doc(adminDb, 'Sponsors', 'missing-name'), { active: true }));
+    // Legacy rows remain readable/deletable, but every update must add a name.
+    await assertSucceeds(getDoc(doc(adminDb, 'Sponsors', 'inactive')));
+    await assertFails(updateDoc(doc(adminDb, 'Sponsors', 'active'), { active: false }));
+    await assertSucceeds(updateDoc(doc(adminDb, 'Sponsors', 'active'), { name: 'Negocio existente' }));
+    await assertSucceeds(deleteDoc(doc(adminDb, 'Sponsors', 'inactive')));
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), 'Sponsors', 'inactive'), { active: false, links: ['https://example.test'] }));
     const db = env.unauthenticatedContext().firestore();
     let count = 0;
     const write = (overrides = {}) => {

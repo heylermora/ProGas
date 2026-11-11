@@ -76,7 +76,7 @@ describe('MallPreview', () => {
     expect(screen.queryByRole('button', { name: /ver más negocios/i })).toBeNull();
   });
 
-  it('opens contacts below the full carousel and pauses it', async () => {
+  it('opens contacts below the automatic carousel', async () => {
     renderPreview();
 
     const [business] = await screen.findAllByRole('button', { name: /ver contactos de café central/i });
@@ -86,7 +86,7 @@ describe('MallPreview', () => {
     expect(screen.getByLabelText(/instagram de café central/i).getAttribute('href')).toContain('instagram.com');
     expect(screen.getByLabelText(/tiktok de café central/i).getAttribute('href')).toBe('https://www.tiktok.com/@cafe-central');
     expect(screen.getByLabelText(/correo de café central/i).getAttribute('href')).toBe('mailto:cafe@example.com');
-    expect(screen.getByText(/carrusel pausado/i)).toBeTruthy();
+    expect(screen.getByText('Contactos de Café Central')).toBeTruthy();
     const group = screen.getByRole('group', { name: 'Redes sociales de Café Central' });
     expect(screen.getByRole('region', { name: 'Carrusel de negocios' }).contains(group)).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: /ocultar contactos de café central/i }));

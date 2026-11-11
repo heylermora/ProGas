@@ -2,6 +2,21 @@
 
 Reglas de versiones y publicación: [VERSIONAMIENTO.md](VERSIONAMIENTO.md).
 
+## [1.3.0] — Pendiente de publicación
+
+### Agregado
+- Varias categorías específicas por negocio, con compatibilidad para los registros actuales.
+- Nombre comercial obligatorio al crear y actualizar negocios, validado en formulario, servicio y reglas de Firestore.
+
+### Cambiado
+- Estadísticas con ranking por negocio, distribución por canal y URLs completas desplegables.
+- Carrusel de movimiento continuo, con ancho para tres tarjetas en móvil y más negocios visibles en escritorio, sin barra inferior.
+- Controles de regreso integrados en el juego y retiro de la navegación de categorías duplicada.
+
+### Corregido
+- Icono original de la pestaña enlazado explícitamente en formato PNG.
+- Espacio reservado y título de la barra superior administrativa.
+
 ## [1.2.0] — Pendiente de publicación
 
 Preparada el 2026-10-30. Esta entrada no confirma un despliegue en producción.
