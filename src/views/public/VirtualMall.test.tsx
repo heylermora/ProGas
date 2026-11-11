@@ -146,7 +146,7 @@ it('returns one level at a time when opened from a shared business link', async 
   fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías generales' }));
   expect(screen.getByRole('button', { name: 'Entrar a Alimentos / Bebidas, 1 negocios' })).toBeTruthy();
 });
-it('keeps the current specific category when switching views and supports breadcrumbs', async () => {
+it('keeps the selected category when switching views and returns using game controls', async () => {
   (SponsorService.getAll as jest.Mock).mockResolvedValue([{ id: 'view', name: 'Local', category: 'Restaurantes/Sodas', active: true, logoUrl: '', links: [] }]);
   renderMall();
   fireEvent.click(await screen.findByRole('button', { name: /Entrar a Alimentos \/ Bebidas/ }));
@@ -157,7 +157,8 @@ it('keeps the current specific category when switching views and supports breadc
   expect((screen.getAllByRole('combobox')[0] as HTMLSelectElement).value).toBe('');
   fireEvent.click(screen.getByRole('button', { name: 'Ver mapa interactivo' }));
   expect(screen.getByRole('button', { name: 'Entrar a Restaurantes/Sodas, 1 negocios' })).toBeTruthy();
-  fireEvent.click(within(screen.getByRole('navigation', { name: 'Navegación de categorías' })).getByRole('button', { name: 'Categorías generales' }));
+  expect(screen.queryByRole('navigation', { name: 'Navegación de categorías' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías generales' }));
   expect(screen.getByRole('button', { name: 'Entrar a Alimentos / Bebidas, 1 negocios' })).toBeTruthy();
 });
 

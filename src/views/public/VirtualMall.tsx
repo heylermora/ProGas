@@ -215,11 +215,6 @@ export default function VirtualMall() {
           </Flex>
         </Box>
 
-        <Flex as="nav" aria-label="Navegación de categorías" position="sticky" top="76px" zIndex={20} bg={panelBg} borderRadius="14px" p="8px" gap="6px" align="center" flexWrap="wrap">
-          <Button size="sm" variant="ghost" onClick={() => openGeneral('')} aria-current={!group ? 'page' : undefined}>Categorías generales</Button>
-          {group && <><Icon as={MdChevronRight} aria-hidden="true" /><Button size="sm" variant="ghost" isDisabled={categoriesLoading} onClick={() => openGeneral(group.name)} aria-label={`Ver categorías específicas de ${group.name}`} aria-current={!activeCategory ? 'page' : undefined}>{group.icon} {group.name}</Button></>}
-          {activeCategory && <><Icon as={MdChevronRight} aria-hidden="true" /><Text fontSize="sm" fontWeight="700" aria-current="page">{activeCategory}</Text></>}
-        </Flex>
         {simpleView && <Flex gap="8px" flexWrap="wrap">
           {group && <MapReturnButton destination={simpleCategory ? 'específicas' : 'generales'} isDisabled={categoriesLoading} onClick={returnToGalaxy} />}
           {!group && settings.groups.map(item => <Button key={item.id} size="sm" onClick={() => openGeneral(item.name)}>{item.icon} {item.name}</Button>)}
