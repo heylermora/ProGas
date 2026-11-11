@@ -1,4 +1,5 @@
 import { sortCategories } from 'utils/categories';
+import { normalizeBusinessName } from 'utils/businessName';
 import {
 Badge, Box, Button, Center, Flex, HStack, Icon, Image,
 Select, SimpleGrid, Stack, Switch, Text,
@@ -61,6 +62,10 @@ export default function SponsorsAdmin() {
   const categoriesInUse = availableCategories.filter((category) => sponsorsByCategory[category]?.length).length;
 
   const toggleActive = async (sponsor: SponsorItem) => {
+    if (!normalizeBusinessName(sponsor.name)) {
+      toast({ status: 'error', title: 'Complete el nombre del negocio', description: 'Edite el patrocinador y agregue su nombre antes de cambiar la visibilidad.' });
+      return;
+    }
     const next = { ...sponsor, active: !sponsor.active };
     setSponsors((items) => items.map((item) => item.id === sponsor.id ? next : item));
     try { await SponsorService.edit(sponsor.id, next); }
@@ -92,6 +97,10 @@ export default function SponsorsAdmin() {
     const [moved] = nextSponsors.splice(fromIndex, 1);
     nextSponsors.splice(Math.max(0, Math.min(targetIndex, nextSponsors.length)), 0, moved);
     const ordered = nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1 }));
+    if (ordered.some(sponsor => !normalizeBusinessName(sponsor.name))) {
+      toast({ status: 'error', title: 'Hay negocios sin nombre', description: 'Complete sus nombres en Editar antes de guardar el orden de esta categoría.' });
+      return;
+    }
     setSavingOrder(true);
     setSponsors((items) => [...items.filter((item) => item.category !== selectedCategory), ...ordered]);
     try {

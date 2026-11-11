@@ -1,3 +1,4 @@
+import { normalizeBusinessName, requireBusinessName } from 'utils/businessName';
 import { fetchAllData, fetchDataById, addData, updateData, deleteData } from 'apiConfig';
 import CategoryService from './CategoryService';
 import { findCategory, resolveCategory } from 'utils/categories';
@@ -18,6 +19,7 @@ const CATEGORY_ALIASES: Record<string, BusinessCategory> = {
 
 const normalize = (item: SponsorItem): SponsorItem => ({
   ...item,
+  name: normalizeBusinessName(item.name),
   category: CATEGORY_ALIASES[item.category] || item.category || LEGACY_CATEGORY[item.type || 'General'] || DEFAULT_BUSINESS_CATEGORY,
   active: item.active !== false,
   order: Number(item.order ?? 0),
@@ -49,10 +51,10 @@ const SponsorService = {
     return Math.max(0, ...items.map(item => Number.isFinite(item.order) ? item.order : 0)) + 1;
   },
   create: async (newSponsor: Omit<SponsorItem, 'id'>) => {
-    const payload = await CategoryService.resolveItem('sponsors', newSponsor);
+    const payload = await CategoryService.resolveItem('sponsors', { ...newSponsor, name: requireBusinessName(newSponsor.name) });
     return addData(COLLECTION, { ...payload, order: await SponsorService.nextOrder(payload.category) });
   },
-  edit: async (key: string, editedSponsor: SponsorItem) => updateData(COLLECTION, key, await CategoryService.resolveItem('sponsors', editedSponsor)),
+  edit: async (key: string, editedSponsor: SponsorItem) => updateData(COLLECTION, key, await CategoryService.resolveItem('sponsors', { ...editedSponsor, name: requireBusinessName(editedSponsor.name) })),
   enforceCapacity: async (type: SponsorType) => {
     const sponsorsOfType = (await SponsorService.getAll())
       .filter((sponsor) => sponsor.type === type)

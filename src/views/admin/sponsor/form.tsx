@@ -7,6 +7,7 @@ import SocialNetworkLabel from 'components/sponsor/SocialNetworkLabel';
 import ModalSection from 'components/modal/ModalSection';
 import SponsorLocationFields from 'components/sponsor/SponsorLocationFields';
 import { sortCategories } from 'utils/categories';
+import { BUSINESS_NAME_REQUIRED, normalizeBusinessName } from 'utils/businessName';
 import useCategories from 'hooks/useCategories';
 import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import { useEffect, useState } from 'react';
@@ -62,6 +63,7 @@ export default function SponsorForm() {
   const save = async () => {
     if (saving || loading || loadError || readingLogo) return;
     const nextErrors: Record<string, string> = {};
+    if (!normalizeBusinessName(sponsor.name)) nextErrors.name = BUSINESS_NAME_REQUIRED;
     sponsorNetworks.forEach(network => {
       const value = sponsor.socialLinks?.[network.key]?.trim();
       if (value && (network.key === 'website' ? !/^https?:\/\//i.test(value) || !networkFor(value) : networkFor(value) !== network.key)) {
@@ -90,7 +92,7 @@ export default function SponsorForm() {
 
   };
 
-  return <Card maxW="1000px" mx="auto" mt="24px" mb="36px" p={{ base: 4, md: 6 }}><Form title={id ? 'Editar patrocinador' : 'Nuevo patrocinador'} description="Prepare la información que verán los clientes en el directorio."
+  return <Card maxW="1000px" mx="auto" mt="24px" mb="36px" p={{ base: 4, md: 6 }}><Form aria-label={id ? 'Editar patrocinador' : 'Nuevo patrocinador'} title={id ? 'Editar patrocinador' : 'Nuevo patrocinador'} description="Prepare la información que verán los clientes en el directorio."
     onBack={() => history.push('/admin/sponsor/index')} submitLabel="Guardar patrocinador" isSubmitting={saving}
     isDisabled={loading || loadError || readingLogo} pt={0} pb={0}
     onFormSubmit={event => { event.preventDefault(); save(); }}>
@@ -100,7 +102,7 @@ export default function SponsorForm() {
           {message && <Alert status="error" borderRadius="12px"><AlertIcon />{message}</Alert>}
           <FormSection title="Información del negocio" first>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                <FormField label="Nombre del negocio" help="Opcional. Si lo deja vacío, se mostrará el logo."><Input value={sponsor.name} onChange={event => set('name', event.target.value)} placeholder="Nombre comercial" /></FormField>
+                <FormField label="Nombre del negocio" isRequired error={errors.name} help="Nombre comercial que se mostrará en el directorio y las estadísticas."><Input value={sponsor.name || ''} onChange={event => set('name', event.target.value)} placeholder="Nombre comercial" /></FormField>
                 <FormField label="Categoría"><Select value={sponsor.category} onChange={event => set('category', event.target.value)}>{sortCategories([sponsor.category, ...categories]).map(category => <option key={category}>{category}</option>)}</Select></FormField>
               </SimpleGrid>
               <FormField label="Descripción" help="Opcional. Una frase sobre lo que ofrece."><Textarea value={sponsor.description} onChange={event => set('description', event.target.value)} rows={3} /></FormField>
