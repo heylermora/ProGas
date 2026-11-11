@@ -1,3 +1,4 @@
+import MapReturnButton from 'components/button/MapReturnButton';
 import { sponsorCategories, hasSponsorCategory } from 'utils/sponsorCategories';
 import { SocialLinksRow } from 'components/social/SocialLink';
 import {
@@ -141,7 +142,7 @@ export default function VirtualMall() {
   const sectorCategories = mapCategories.slice(mobileSector * CATEGORIES_PER_SECTOR, (mobileSector + 1) * CATEGORIES_PER_SECTOR);
   const categoryRows = Math.max(1, Math.ceil(sectorCategories.length / 2));
   const categoryRowHeight = Math.max(132, 88 + Math.ceil(Math.max(0, ...sectorCategories.map(name => name.length)) / 14) * 16);
-  const categoryMapHeight = Math.max(560, 202 + categoryRows * categoryRowHeight + (categoryRows - 1) * 24);
+  const categoryMapHeight = Math.max(560, 202 + categoryRows * categoryRowHeight + (categoryRows - 1) * 24) + (group ? 58 : 0);
   const icons = group ? settings.icons : Object.fromEntries(settings.groups.map(item => [item.name, item.icon]));
   const categoryBusinesses = useMemo(
     () => activeBusinesses.filter((business) => hasSponsorCategory(business, selectedCategory)),
@@ -220,14 +221,13 @@ export default function VirtualMall() {
           {activeCategory && <><Icon as={MdChevronRight} aria-hidden="true" /><Text fontSize="sm" fontWeight="700" aria-current="page">{activeCategory}</Text></>}
         </Flex>
         {simpleView && <Flex gap="8px" flexWrap="wrap">
-          {group && <Button size="sm" leftIcon={<MdChevronLeft />} isDisabled={categoriesLoading} onClick={returnToGalaxy}>{simpleCategory ? 'Volver a categorías específicas' : 'Volver a categorías generales'}</Button>}
+          {group && <MapReturnButton destination={simpleCategory ? 'específicas' : 'generales'} isDisabled={categoriesLoading} onClick={returnToGalaxy} />}
           {!group && settings.groups.map(item => <Button key={item.id} size="sm" onClick={() => openGeneral(item.name)}>{item.icon} {item.name}</Button>)}
         </Flex>}
         {simpleView ? <SimpleMall categories={group?.categories || []} businesses={group ? activeBusinesses.filter(business => sponsorCategories(business).some(category => group.categories.includes(category))) : activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
               <Heading fontSize={{ base: 'lg', md: 'xl' }}>{group?.name || 'Categorías generales'}</Heading>
-              {group && <Button size="sm" alignSelf="flex-start" onClick={returnToGalaxy}>Volver a categorías generales</Button>}
               <Text color="gray.500" fontSize="xs">Elegí una categoría para viajar a su submapa.</Text>
             </Stack>
           )}
@@ -242,11 +242,11 @@ export default function VirtualMall() {
             {loadStatus === 'success' && (
               <Box key={selectedCategory || 'galaxy'} position="absolute" inset="0" animation={`${mapArrival} .38s ease-out`}>
                 {!selectedCategory ? (
-                  <CategoryMap icons={icons} categories={mapCategories} businesses={group ? activeBusinesses : activeBusinesses.flatMap(business => settings.groups.filter(item => sponsorCategories(business).some(category => item.categories.includes(category))).map(item => ({ ...business, category: item.name, categories: [item.name] })))} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
+                  <CategoryMap icons={icons} categories={mapCategories} onBack={group ? returnToGalaxy : undefined} isBackDisabled={categoriesLoading} businesses={group ? activeBusinesses : activeBusinesses.flatMap(business => settings.groups.filter(item => sponsorCategories(business).some(category => item.categories.includes(category))).map(item => ({ ...business, category: item.name, categories: [item.name] })))} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
                 ) : (
                   <BusinessMap businesses={visibleBusinesses} totalBusinesses={categoryBusinesses.length} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} visitedIds={visitedBusinessIds} sector={businessSector} sectorCount={businessSectorCount} onSectorChange={changeBusinessSector} onBack={returnToGalaxy} isBackDisabled={categoriesLoading} backLabel={group ? 'Volver a categorías específicas' : 'Volver a categorías generales'} onSelect={selectBusiness} />
                 )}
-                <Astronaut selectedCategory={selectedCategory} selectedCategoryIndex={selectedCategoryIndex} selectedBusiness={selectedBusiness} businesses={visibleBusinesses} travelling={Boolean(selectedBusiness && !arrivedBusiness)} />
+                <Astronaut hasBackControl={Boolean(group)} selectedCategory={selectedCategory} selectedCategoryIndex={selectedCategoryIndex} selectedBusiness={selectedBusiness} businesses={visibleBusinesses} travelling={Boolean(selectedBusiness && !arrivedBusiness)} />
               </Box>
             )}
 
@@ -326,21 +326,22 @@ function FlightControls({ sector, sectorCount, onPrevious, onNext, label, mobile
   );
 }
 
-function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChange, onSelect }: { icons: Record<string, string>; categories: string[]; businesses: SponsorItem[]; mobileSector: number; onSectorChange: (sector: number) => void; onSelect: (category: string) => void }) {
+function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChange, onSelect, onBack, isBackDisabled }: { onBack?: () => void; isBackDisabled?: boolean; icons: Record<string, string>; categories: string[]; businesses: SponsorItem[]; mobileSector: number; onSectorChange: (sector: number) => void; onSelect: (category: string) => void }) {
   const sectorCount = Math.max(1, Math.ceil(categories.length / CATEGORIES_PER_SECTOR));
   const visibleCount = categories.slice(mobileSector * CATEGORIES_PER_SECTOR, (mobileSector + 1) * CATEGORIES_PER_SECTOR).length;
   return (
     <>
-      <Text display={{ base: 'block', md: 'none' }} position="absolute" top="20px" left="20px" right="20px" color="cyan.100" textAlign="center" fontWeight="800">Elegí tu próximo destino</Text>
+      {onBack && <Box position="absolute" top="12px" left="16px" right="16px" zIndex={6}><MapReturnButton destination="generales" onClick={onBack} isDisabled={isBackDisabled} /></Box>}
+      <Text display={onBack ? 'none' : { base: 'block', md: 'none' }} position="absolute" top="20px" left="20px" right="20px" color="cyan.100" textAlign="center" fontWeight="800">Elegí tu próximo destino</Text>
       <FlightControls sector={mobileSector} sectorCount={sectorCount} label="Sector" mobileOnly={sectorCount <= 1} onPrevious={() => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount)} onNext={() => onSectorChange((mobileSector + 1) % sectorCount)} />
-      <Box display={{ base: 'grid', md: 'contents' }} position={{ base: 'absolute', md: 'static' }} top="70px" bottom="132px" left="16px" right="16px" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gridTemplateRows={`repeat(${Math.max(1, Math.ceil(visibleCount / 2))}, minmax(0, 1fr))`} columnGap="44px" rowGap="24px" alignItems="center">
+      <Box display={{ base: 'grid', md: 'contents' }} position={{ base: 'absolute', md: 'static' }} top={onBack ? "128px" : "70px"} bottom="132px" left="16px" right="16px" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gridTemplateRows={`repeat(${Math.max(1, Math.ceil(visibleCount / 2))}, minmax(0, 1fr))`} columnGap="44px" rowGap="24px" alignItems="center">
         {categories.map((category, index) => {
           const total = businesses.filter((business) => hasSponsorCategory(business, category)).length;
           const categorySector = Math.floor(index / CATEGORIES_PER_SECTOR);
           const mobileIndex = index % CATEGORIES_PER_SECTOR;
           const [left, top] = categoryMapPosition(mobileIndex, visibleCount);
           return (
-            <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${top}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={visibleCount % 2 === 1 && mobileIndex === visibleCount - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: visibleCount === 1 ? '170px' : 'min(100%, 152px)', md: '128px' }} h="auto" minH={{ base: '128px', md: '118px' }} minW="0" px="8px" py="12px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="2px solid white" borderRadius="28px" boxShadow="0 0 0 5px rgba(167,139,250,.12), 0 0 22px rgba(167,139,250,.35)" onClick={() => onSelect(category)} display={categorySector === mobileSector ? 'flex' : 'none'} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
+            <Button key={category} aria-label={`Entrar a ${category}, ${total} negocios`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${onBack ? top * .8 + 12 : top}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={visibleCount % 2 === 1 && mobileIndex === visibleCount - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: visibleCount === 1 ? '170px' : 'min(100%, 152px)', md: '128px' }} h="auto" minH={{ base: '128px', md: '118px' }} minW="0" px="8px" py="12px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="2px solid white" borderRadius="28px" boxShadow="0 0 0 5px rgba(167,139,250,.12), 0 0 22px rgba(167,139,250,.35)" onClick={() => onSelect(category)} display={categorySector === mobileSector ? 'flex' : 'none'} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
               <Text fontSize="32px" lineHeight="1" flexShrink={0}>{icons[category] || '🏪'}</Text>
               <Text mt="8px" w="100%" flexShrink={0} whiteSpace="normal" overflowWrap="anywhere" lineHeight="1.3" fontSize="12px" fontWeight="800">{category}</Text>
               {total > 0 && <Badge position="absolute" right="5px" top="5px" minW="22px" fontSize="10px" borderRadius="full" colorScheme="purple">{total}</Badge>}
@@ -355,32 +356,8 @@ function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChan
 function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, selectedId, visitedIds, sector, sectorCount, onSectorChange, onBack, backLabel, isBackDisabled, onSelect }: { businesses: SponsorItem[]; totalBusinesses: number; category: string; categoryIcon: string; selectedId?: string; visitedIds: string[]; sector: number; sectorCount: number; onSectorChange: (sector: number) => void; onBack: () => void; backLabel: string; isBackDisabled?: boolean; onSelect: (id: string, trigger: HTMLButtonElement) => void }) {
   return (
     <>
-      <Stack position="absolute" top="12px" left="16px" right="16px" align="center" spacing="6px" zIndex={6}>
-        <Button
-          aria-label={backLabel}
-          isDisabled={isBackDisabled}
-          onClick={onBack}
-          leftIcon={<Flex as="span" align="center" justify="center" boxSize="28px" borderRadius="full" bg="rgba(103,232,249,.12)" color="cyan.200"><Icon as={MdChevronLeft} boxSize="22px" /></Flex>}
-          alignSelf="flex-start"
-          h="44px"
-          maxW="100%"
-          pl="7px"
-          pr="16px"
-          iconSpacing="8px"
-          bg="rgba(7,11,31,.92)"
-          color="whiteAlpha.900"
-          border="1px solid"
-          borderColor="rgba(103,232,249,.3)"
-          borderRadius="full"
-          fontSize="sm"
-          fontWeight="600"
-          boxShadow="0 4px 12px rgba(0,0,0,.18)"
-          _hover={{ bg: 'rgba(22,40,65,.98)', borderColor: 'cyan.200', color: 'white' }}
-          _active={{ bg: 'rgba(30,55,80,.98)' }}
-          _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '3px' }}
-        >
-          {backLabel}
-        </Button>
+      <Stack position="absolute" top="12px" left="16px" right="16px" align="flex-start" spacing="10px" zIndex={6}>
+        <MapReturnButton destination={backLabel.includes('específicas') ? 'específicas' : 'generales'} onClick={onBack} isDisabled={isBackDisabled} />
         <Flex w="100%" gap="6px" align="center" justify="space-between" aria-label={`${totalBusinesses} negocios en esta zona`}>
           <Text color="white" fontWeight="800" fontSize="xs" noOfLines={1}>{categoryIcon} {category}</Text>
           <Badge flexShrink={0} bg="rgba(103,232,249,.12)" color="cyan.100" borderRadius="full" px="8px" fontSize="9px">{businesses.filter((business) => visitedIds.includes(business.id)).length} / {businesses.length} EXPLORADAS</Badge>
@@ -396,7 +373,7 @@ function BusinessMap({ businesses, totalBusinesses, category, categoryIcon, sele
           const selected = business.id === selectedId;
           const visited = visitedIds.includes(business.id);
           return (
-            <Button key={business.id} aria-label={`Abrir ficha de ${business.name || 'negocio'}`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${top * .78 + 7}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={businesses.length % 2 === 1 && index === businesses.length - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: businesses.length === 1 ? '180px' : 'min(100%, 150px)', md: '116px' }} h={{ base: '112px', md: '104px' }} minW="0" p="6px" variant="unstyled" bg={selected ? 'cyan.100' : 'white'} color="navy.800" border="2px solid" borderColor={selected ? 'cyan.300' : visited ? 'purple.300' : 'white'} borderRadius="30%" boxShadow={selected ? '0 0 0 3px rgba(103,232,249,.25), 0 0 20px #67E8F9' : '0 0 0 4px rgba(167,139,250,.12), 0 10px 25px rgba(0,0,0,.3)'} animation={selected ? `${stationArrival} .7s ease-out` : undefined} onClick={(event) => onSelect(business.id, event.currentTarget)} display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
+            <Button key={business.id} aria-label={`Abrir ficha de ${business.name || 'negocio'}`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${top * .68 + 16}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={businesses.length % 2 === 1 && index === businesses.length - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: businesses.length === 1 ? '180px' : 'min(100%, 150px)', md: '116px' }} h={{ base: '112px', md: '104px' }} minW="0" p="6px" variant="unstyled" bg={selected ? 'cyan.100' : 'white'} color="navy.800" border="2px solid" borderColor={selected ? 'cyan.300' : visited ? 'purple.300' : 'white'} borderRadius="30%" boxShadow={selected ? '0 0 0 3px rgba(103,232,249,.25), 0 0 20px #67E8F9' : '0 0 0 4px rgba(167,139,250,.12), 0 10px 25px rgba(0,0,0,.3)'} animation={selected ? `${stationArrival} .7s ease-out` : undefined} onClick={(event) => onSelect(business.id, event.currentTarget)} display="flex" flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
               <Flex w="100%" h={{ base: '78px', md: '70px' }} align="center" justify="center">
                 {business.logoUrl ? <Image src={business.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="48px" color="brand.500" />}
               </Flex>
@@ -420,7 +397,7 @@ function MapStatus({ icon, title, description, action, onAction }: { icon: React
   );
 }
 
-function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, businesses, travelling }: { selectedCategory: string; selectedCategoryIndex: number; selectedBusiness?: SponsorItem; businesses: SponsorItem[]; travelling: boolean }) {
+function Astronaut({ hasBackControl, selectedCategory, selectedCategoryIndex, selectedBusiness, businesses, travelling }: { hasBackControl?: boolean; selectedCategory: string; selectedCategoryIndex: number; selectedBusiness?: SponsorItem; businesses: SponsorItem[]; travelling: boolean }) {
   let position = selectedCategory ? [50, 49] : [50, 50];
   if (!selectedCategory) position = [50, 36];
   else if (selectedBusiness) position = businessPosition(Math.max(0, businesses.findIndex((item) => item.id === selectedBusiness.id)), Math.min(businesses.length, 16));
@@ -429,7 +406,7 @@ function Astronaut({ selectedCategory, selectedCategoryIndex, selectedBusiness, 
   const rows = Math.max(1, Math.ceil(businesses.length / 2));
   const fraction = (Math.floor(index / 2) + .5) / rows;
   const centered = businesses.length % 2 === 1 && index === businesses.length - 1;
-  const mobileTop = selectedBusiness ? `calc(${fraction * 100}% + ${112 - fraction * 244 + (centered ? 82 : 0)}px)` : selectedCategory ? '105px' : '70px';
+  const mobileTop = selectedBusiness ? `calc(${fraction * 100}% + ${112 - fraction * 244 + (centered ? 82 : 0)}px)` : selectedCategory ? '112px' : hasBackControl ? '100px' : '70px';
   return (
     <Stack aria-label={selectedBusiness ? `Astronauta en ${selectedBusiness.name}` : 'Astronauta listo para explorar'} position="absolute" left={{ base: '50%', md: `${position[0]}%` }} top={{ base: mobileTop, md: `${Math.min(position[1] * .78 + 16, 78)}%` }} transform="translate(-50%, -50%)" w={{ base: '40px', md: '106px' }} align="center" spacing="0" zIndex={4} transition="left .55s cubic-bezier(.2,.8,.2,1), top .55s cubic-bezier(.2,.8,.2,1)" pointerEvents="none" sx={{ '@media (prefers-reduced-motion: reduce)': { transition: 'none', '& *': { animation: 'none' } } }}>
       <Badge display={{ base: 'none', md: 'block' }} whiteSpace="nowrap" colorScheme="red" borderRadius="full" fontSize={{ base: '8px', md: '10px' }}><Icon as={MdMyLocation} mr="3px" /> {travelling ? 'EN RUTA' : 'ESTÁS AQUÍ'}</Badge>

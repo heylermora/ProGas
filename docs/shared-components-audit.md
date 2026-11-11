@@ -117,3 +117,13 @@ continúa siendo compartida entre sus categorías; no se introduce orden por
 categoría. Los registros existentes se leen sin migración y se escriben con
 ambos formatos al crear o editar. No hacen falta nuevos índices ni permisos:
 las lecturas siguen usando el catálogo y el filtrado se realiza en memoria.
+
+### Regreso entre mapas
+
+`components/button/MapReturnButton` unifica el regreso a categorías generales y
+específicas, también en la vista sencilla. Usa la variante `mapReturn` del tema:
+control dorado con relieve, flecha en un recuadro, texto «Volver al mapa» y destino.
+En el juego se coloca dentro del mapa, arriba a la izquierda, con espacio reservado
+para el astronauta y las estaciones. Conserva los nombres accesibles de las acciones,
+el estado deshabilitado y un foco visible; reduce las transiciones cuando se solicita
+movimiento reducido.

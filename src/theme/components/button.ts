@@ -32,6 +32,19 @@ export const buttonStyles = {
 				}
 			},
 			variants: {
+                mapReturn: {
+                    w: '100%', maxW: '360px', h: '56px', minH: '56px',
+                    px: '10px', gap: '10px', borderRadius: '16px',
+                    bgGradient: 'linear(135deg, #FFF3B0, #FACC15 65%, #F59E0B)',
+                    color: '#172554', border: '2px solid', borderColor: '#FDE68A',
+                    boxShadow: 'inset 0 2px 0 rgba(255,255,255,.65), 0 4px 0 #9A5B08, 0 6px 20px rgba(250,204,21,.3)',
+                    transition: 'transform .15s ease, box-shadow .15s ease',
+                    _hover: { bgGradient: 'linear(135deg, #FFF9DB, #FDE047 65%, #FBBF24)', transform: 'translateY(-2px)' },
+                    _active: { transform: 'translateY(3px)', boxShadow: 'inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #9A5B08' },
+                    _focusVisible: { outline: '3px solid #22D3EE', outlineOffset: '4px' },
+                    _disabled: { opacity: .55, cursor: 'not-allowed', transform: 'none', boxShadow: 'none' },
+                    '@media (prefers-reduced-motion: reduce)': { transition: 'none', _hover: { transform: 'none' }, _active: { transform: 'none' } },
+                },
 				outline: () => ({
 					borderRadius: '16px'
 				}),
