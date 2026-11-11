@@ -160,3 +160,18 @@ it('keeps the current specific category when switching views and supports breadc
   fireEvent.click(within(screen.getByRole('navigation', { name: 'Navegación de categorías' })).getByRole('button', { name: 'Categorías generales' }));
   expect(screen.getByRole('button', { name: 'Entrar a Alimentos / Bebidas, 1 negocios' })).toBeTruthy();
 });
+
+it('includes one business in each specific category without double counting its general group', async () => {
+  (SponsorService.getAll as jest.Mock).mockResolvedValue([{
+    id: 'multi', name: 'Café y soda', category: 'Restaurantes/Sodas', categories: ['Restaurantes/Sodas', 'Cafeterías'], active: true, order: 1, logoUrl: '', links: [],
+  }]);
+  renderMall();
+  fireEvent.click(await screen.findByRole('button', { name: 'Entrar a Alimentos / Bebidas, 1 negocios' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Entrar a Restaurantes/Sodas, 1 negocios' }));
+  expect(screen.getAllByRole('button', { name: 'Abrir ficha de Café y soda' })).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Volver a categorías específicas' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Entrar a Cafeterías, 1 negocios' }));
+  expect(screen.getAllByRole('button', { name: 'Abrir ficha de Café y soda' })).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Usar vista sencilla' }));
+  expect(screen.getAllByRole('heading', { name: 'Café y soda' })).toHaveLength(1);
+});

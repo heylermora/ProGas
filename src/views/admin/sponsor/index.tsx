@@ -1,3 +1,4 @@
+import { sponsorCategories, hasSponsorCategory } from 'utils/sponsorCategories';
 import { sortCategories } from 'utils/categories';
 import { normalizeBusinessName } from 'utils/businessName';
 import {
@@ -44,16 +45,16 @@ export default function SponsorsAdmin() {
 
   useEffect(() => { load(); }, [load]);
 
-  const availableCategories = useMemo(() => sortCategories([...categories, ...sponsors.map((sponsor) => sponsor.category).filter(Boolean)]), [categories, sponsors]);
+  const availableCategories = useMemo(() => sortCategories([...categories, ...sponsors.flatMap(sponsorCategories)]), [categories, sponsors]);
   const sponsorsByCategory = useMemo(() => availableCategories.reduce<Record<string, SponsorItem[]>>((acc, type) => ({
     ...acc,
-    [type]: sponsors.filter((sponsor) => sponsor.category === type),
+    [type]: sponsors.filter((sponsor) => hasSponsorCategory(sponsor, type)),
   }), {}), [availableCategories, sponsors]);
 
   const searchTerm = query.trim().toLocaleLowerCase('es');
   const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
     .sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-  const matchesSearch = (sponsor: SponsorItem) => [sponsor.name, sponsor.description, sponsor.category]
+  const matchesSearch = (sponsor: SponsorItem) => [sponsor.name, sponsor.description, ...sponsorCategories(sponsor)]
     .some((value) => String(value || '').toLocaleLowerCase('es').includes(searchTerm));
   const visibleBusinesses = searchTerm
     ? sponsors.filter(matchesSearch).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order)
@@ -102,7 +103,7 @@ export default function SponsorsAdmin() {
       return;
     }
     setSavingOrder(true);
-    setSponsors((items) => [...items.filter((item) => item.category !== selectedCategory), ...ordered]);
+    setSponsors(items => items.map(item => ordered.find(updated => updated.id === item.id) || item));
     try {
       await Promise.all(ordered.map((sponsor) => SponsorService.edit(sponsor.id, sponsor)));
     } catch {
@@ -142,14 +143,14 @@ export default function SponsorsAdmin() {
       ) : (
         <Stack spacing="10px" mb="18px">
           {visibleBusinesses.map((sponsor) => {
-            const categoryBusinesses = [...(sponsorsByCategory[sponsor.category] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
+            const categoryBusinesses = [...(sponsorsByCategory[searchTerm ? sponsor.category : selectedCategory] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
             const position = categoryBusinesses.findIndex((item) => item.id === sponsor.id);
             return <Card key={sponsor.id} p={{ base: '14px', md: '16px' }} draggable={!searchTerm} cursor={!searchTerm ? 'grab' : 'default'} onDragStart={(event) => { event.dataTransfer.setData('text/plain', sponsor.id); setDraggedSponsorId(sponsor.id); }} onDragOver={(event) => { if (!searchTerm) event.preventDefault(); }} onDrop={(event) => { if (!searchTerm) { event.preventDefault(); reorderSponsors(position, event.dataTransfer.getData('text/plain') || draggedSponsorId); } }}>
               <Flex align={{ base: 'flex-start', md: 'center' }} gap="14px" direction={{ base: 'column', md: 'row' }}>
                 <HStack flex="1" minW="0" align="center" spacing="12px">
                   <Center color={muted} flexShrink={0}><MdDragIndicator size="22px" /></Center>
                   <Center boxSize="58px" borderRadius="14px" bg={subtleBg} overflow="hidden" flexShrink={0}>{sponsor.logoUrl ? <Image src={sponsor.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} color="gray.300" boxSize="26px" />}</Center>
-                  <Box minW="0"><HStack flexWrap="wrap"><Text fontWeight="800" color={textColor} noOfLines={1}>{sponsor.name || 'Sin nombre'}</Text><Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Visible' : 'Oculto'}</Badge>{searchTerm && <Badge colorScheme="purple">{sponsor.category}</Badge>}</HStack><Text color={muted} fontSize="sm" noOfLines={1}>{sponsor.description || 'Sin descripción'}</Text><Text color={muted} fontSize="xs" mt="2px">Posición {position + 1}</Text></Box>
+                  <Box minW="0"><HStack flexWrap="wrap"><Text fontWeight="800" color={textColor} noOfLines={1}>{sponsor.name || 'Sin nombre'}</Text><Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Visible' : 'Oculto'}</Badge>{sponsorCategories(sponsor).map(category => <Badge key={category} colorScheme="purple">{category}</Badge>)}</HStack><Text color={muted} fontSize="sm" noOfLines={1}>{sponsor.description || 'Sin descripción'}</Text><Text color={muted} fontSize="xs" mt="2px">Posición {position + 1}</Text></Box>
                 </HStack>
                 <HStack alignSelf={{ base: 'stretch', md: 'center' }} justify={{ base: 'space-between', md: 'flex-end' }}>
                   <FormField display="flex" alignItems="center" w="auto" label={<>Visible</>}><Switch aria-label={`Visibilidad de ${sponsor.name || 'patrocinador'}`} isChecked={sponsor.active} onChange={() => toggleActive(sponsor)} /></FormField>

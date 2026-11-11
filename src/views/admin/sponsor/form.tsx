@@ -1,4 +1,5 @@
-import { Alert, AlertIcon, Box, Button, Image, Input, Select, SimpleGrid, Stack, Switch, Text, Textarea } from '@chakra-ui/react';
+import { sponsorCategories } from 'utils/sponsorCategories';
+import { Alert, AlertIcon, Box, Button, Image, Checkbox, CheckboxGroup, Input, SimpleGrid, Stack, Switch, Text, Textarea } from '@chakra-ui/react';
 import Card from 'components/card/Card';
 import Form from 'components/form/Form';
 import FormField from 'components/form/FormField';
@@ -42,7 +43,7 @@ export default function SponsorForm() {
       const contacts = sponsorContacts(item);
       setOriginalVideo(item.videoUrl || '');
       setOriginalCategory(item.category || DEFAULT_BUSINESS_CATEGORY);
-      setSponsor({ ...empty, ...item, socialLinks: contacts.socials, links: contacts.extra });
+      setSponsor({ ...empty, ...item, categories: sponsorCategories(item), socialLinks: contacts.socials, links: contacts.extra });
     }).catch(() => { if (live) setLoadError(true); }).finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
   }, [id]);
@@ -64,6 +65,7 @@ export default function SponsorForm() {
     if (saving || loading || loadError || readingLogo) return;
     const nextErrors: Record<string, string> = {};
     if (!normalizeBusinessName(sponsor.name)) nextErrors.name = BUSINESS_NAME_REQUIRED;
+    if (!sponsorCategories(sponsor).length) nextErrors.categories = 'Seleccione al menos una categoría específica.';
     sponsorNetworks.forEach(network => {
       const value = sponsor.socialLinks?.[network.key]?.trim();
       if (value && (network.key === 'website' ? !/^https?:\/\//i.test(value) || !networkFor(value) : networkFor(value) !== network.key)) {
@@ -103,7 +105,14 @@ export default function SponsorForm() {
           <FormSection title="Información del negocio" first>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                 <FormField label="Nombre del negocio" isRequired error={errors.name} help="Nombre comercial que se mostrará en el directorio y las estadísticas."><Input value={sponsor.name || ''} onChange={event => set('name', event.target.value)} placeholder="Nombre comercial" /></FormField>
-                <FormField label="Categoría"><Select value={sponsor.category} onChange={event => set('category', event.target.value)}>{sortCategories([sponsor.category, ...categories]).map(category => <option key={category}>{category}</option>)}</Select></FormField>
+                <FormField label="Categorías específicas" isRequired error={errors.categories} help="Seleccione todas las que correspondan al negocio.">
+                  <CheckboxGroup value={sponsorCategories(sponsor)} onChange={values => {
+                    const selected = values.map(String);
+                    setSponsor(previous => ({ ...previous, categories: selected, categoryIds: [], category: selected[0] || '', categoryId: '' }));
+                  }}><SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2} role="group" aria-label="Categorías específicas">
+                    {sortCategories([...sponsorCategories(sponsor), ...categories]).map(category => <Checkbox key={category} value={category}>{category}</Checkbox>)}
+                  </SimpleGrid></CheckboxGroup>
+                </FormField>
               </SimpleGrid>
               <FormField label="Descripción" help="Opcional. Una frase sobre lo que ofrece."><Textarea value={sponsor.description} onChange={event => set('description', event.target.value)} rows={3} /></FormField>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>

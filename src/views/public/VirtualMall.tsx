@@ -1,3 +1,4 @@
+import { sponsorCategories, hasSponsorCategory } from 'utils/sponsorCategories';
 import { SocialLinksRow } from 'components/social/SocialLink';
 import {
 Badge,
@@ -113,7 +114,7 @@ export default function VirtualMall() {
 
         if (requestedBusiness) {
           const businessesInCategory = data.filter(
-            (business) => business.active !== false && business.category === requestedBusiness.category,
+            (business) => business.active !== false && hasSponsorCategory(business, requestedBusiness.category),
           );
           const requestedIndex = businessesInCategory.findIndex((business) => business.id === requestedBusiness.id);
           setSelectedCategory(requestedBusiness.category);
@@ -133,7 +134,7 @@ export default function VirtualMall() {
   }, [loadBusinesses]);
 
   const activeBusinesses = useMemo(() => businesses.filter((business) => business.active !== false), [businesses]);
-  const settings = completeBusinessSettings(Array.from(new Set([...categories, ...activeBusinesses.map(business => business.category)])), businessSettings);
+  const settings = completeBusinessSettings(Array.from(new Set([...categories, ...activeBusinesses.flatMap(sponsorCategories)])), businessSettings);
   const activeCategory = simpleView ? simpleCategory : selectedCategory;
   const group = settings.groups.find(item => item.categories.includes(activeCategory)) || settings.groups.find(item => item.name === general);
   const mapCategories = group ? group.categories : settings.groups.map(item => item.name);
@@ -143,7 +144,7 @@ export default function VirtualMall() {
   const categoryMapHeight = Math.max(560, 202 + categoryRows * categoryRowHeight + (categoryRows - 1) * 24);
   const icons = group ? settings.icons : Object.fromEntries(settings.groups.map(item => [item.name, item.icon]));
   const categoryBusinesses = useMemo(
-    () => activeBusinesses.filter((business) => business.category === selectedCategory),
+    () => activeBusinesses.filter((business) => hasSponsorCategory(business, selectedCategory)),
     [activeBusinesses, selectedCategory],
   );
   const selectedBusiness = categoryBusinesses.find((business) => business.id === selectedBusinessId);
@@ -222,7 +223,7 @@ export default function VirtualMall() {
           {group && <Button size="sm" leftIcon={<MdChevronLeft />} isDisabled={categoriesLoading} onClick={returnToGalaxy}>{simpleCategory ? 'Volver a categorías específicas' : 'Volver a categorías generales'}</Button>}
           {!group && settings.groups.map(item => <Button key={item.id} size="sm" onClick={() => openGeneral(item.name)}>{item.icon} {item.name}</Button>)}
         </Flex>}
-        {simpleView ? <SimpleMall categories={group?.categories || []} businesses={group ? activeBusinesses.filter(business => group?.categories.includes(business.category)) : activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
+        {simpleView ? <SimpleMall categories={group?.categories || []} businesses={group ? activeBusinesses.filter(business => sponsorCategories(business).some(category => group.categories.includes(category))) : activeBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
               <Heading fontSize={{ base: 'lg', md: 'xl' }}>{group?.name || 'Categorías generales'}</Heading>
@@ -241,7 +242,7 @@ export default function VirtualMall() {
             {loadStatus === 'success' && (
               <Box key={selectedCategory || 'galaxy'} position="absolute" inset="0" animation={`${mapArrival} .38s ease-out`}>
                 {!selectedCategory ? (
-                  <CategoryMap icons={icons} categories={mapCategories} businesses={group ? activeBusinesses : activeBusinesses.map(business => ({ ...business, category: settings.groups.find(item => item.categories.includes(business.category))?.name || business.category }))} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
+                  <CategoryMap icons={icons} categories={mapCategories} businesses={group ? activeBusinesses : activeBusinesses.flatMap(business => settings.groups.filter(item => sponsorCategories(business).some(category => item.categories.includes(category))).map(item => ({ ...business, category: item.name, categories: [item.name] })))} mobileSector={mobileSector} onSectorChange={setMobileSector} onSelect={enterCategory} />
                 ) : (
                   <BusinessMap businesses={visibleBusinesses} totalBusinesses={categoryBusinesses.length} category={selectedCategory} categoryIcon={categoryIcon} selectedId={selectedBusinessId} visitedIds={visitedBusinessIds} sector={businessSector} sectorCount={businessSectorCount} onSectorChange={changeBusinessSector} onBack={returnToGalaxy} isBackDisabled={categoriesLoading} backLabel={group ? 'Volver a categorías específicas' : 'Volver a categorías generales'} onSelect={selectBusiness} />
                 )}
@@ -288,8 +289,8 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
   const border = useColorModeValue('gray.200', 'whiteAlpha.200');
   const surface = useColorModeValue('white', 'navy.800');
   const term = search.trim().toLocaleLowerCase('es');
-  const visible = businesses.filter((business) => (!selectedCategory || business.category === selectedCategory)
-    && (!term || [business.name, business.description, business.category].some((value) => String(value || '').toLocaleLowerCase('es').includes(term))));
+  const visible = businesses.filter((business) => (!selectedCategory || hasSponsorCategory(business, selectedCategory))
+    && (!term || [business.name, business.description, ...sponsorCategories(business)].some((value) => String(value || '').toLocaleLowerCase('es').includes(term))));
   return (
     <Box bg={surface} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '18px', md: '26px' }} boxShadow="lg">
       <Stack spacing="20px">
@@ -300,7 +301,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
         {visible.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px">{visible.map((business) => {
           const links = sponsorLinks(business);
           return <Box key={business.id} border="1px solid" borderColor={border} borderRadius="20px" p={{ base: '16px', md: '18px' }}>
-            <Flex gap="14px" align="center"><Flex w="64px" h="64px" borderRadius="16px" bg="gray.50" align="center" justify="center" p="8px" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}</Flex><Box minW={0}><Heading fontSize="lg">{business.name || 'Negocio local'}</Heading><Badge mt="5px" colorScheme="purple">{business.category}</Badge></Box></Flex>
+            <Flex gap="14px" align="center"><Flex w="64px" h="64px" borderRadius="16px" bg="gray.50" align="center" justify="center" p="8px" flexShrink={0}>{business.logoUrl ? <Image src={business.logoUrl} alt={`Logo de ${business.name || 'negocio'}`} maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="30px" color="brand.500" />}</Flex><Box minW={0}><Heading fontSize="lg">{business.name || 'Negocio local'}</Heading><Flex mt="5px" gap={1} wrap="wrap">{sponsorCategories(business).map(category => <Badge key={category} colorScheme="purple" whiteSpace="normal">{category}</Badge>)}</Flex></Box></Flex>
             {business.description && <Text color={muted} fontSize="sm" lineHeight="1.6" mt="12px">{business.description}</Text>}
             <SponsorLocation sponsor={business} />
             {links.length > 0 && <SocialLinksRow links={links} businessId={business.id} source="mall" label={`Redes sociales de ${business.name}`} />}
@@ -334,7 +335,7 @@ function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChan
       <FlightControls sector={mobileSector} sectorCount={sectorCount} label="Sector" mobileOnly={sectorCount <= 1} onPrevious={() => onSectorChange((mobileSector - 1 + sectorCount) % sectorCount)} onNext={() => onSectorChange((mobileSector + 1) % sectorCount)} />
       <Box display={{ base: 'grid', md: 'contents' }} position={{ base: 'absolute', md: 'static' }} top="70px" bottom="132px" left="16px" right="16px" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gridTemplateRows={`repeat(${Math.max(1, Math.ceil(visibleCount / 2))}, minmax(0, 1fr))`} columnGap="44px" rowGap="24px" alignItems="center">
         {categories.map((category, index) => {
-          const total = businesses.filter((business) => business.category === category).length;
+          const total = businesses.filter((business) => hasSponsorCategory(business, category)).length;
           const categorySector = Math.floor(index / CATEGORIES_PER_SECTOR);
           const mobileIndex = index % CATEGORIES_PER_SECTOR;
           const [left, top] = categoryMapPosition(mobileIndex, visibleCount);
@@ -456,7 +457,7 @@ function BusinessDossier({ business, isOpen, finalFocusRef, contactLinks, onClos
         </Flex>
         <Text minW="0" overflowWrap="anywhere">{business.name || 'Negocio local'}</Text>
       </Flex>}
-      description={business.category ? `ESTACIÓN · ${business.category}` : 'ESTACIÓN'}
+      description={business.category ? `ESTACIÓN · ${sponsorCategories(business).join(' · ')}` : 'ESTACIÓN'}
       footer={<Flex direction={{ base: 'column', md: 'row' }} gap={2}><ShareBusinessButton businessId={business.id} name={business.name} /><Button onClick={onClose} flex="1.4" minW={0} minH="44px" fontSize="sm" leftIcon={<MdChevronLeft />} bg="cyan.200" color="navy.900" borderRadius="full" _hover={{ bg: 'cyan.100' }}>Seguir explorando</Button></Flex>}
     >
       <Stack spacing="20px">

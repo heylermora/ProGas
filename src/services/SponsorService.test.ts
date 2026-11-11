@@ -33,3 +33,25 @@ it('trims the business name on creation and update', async () => {
   expect(addData).toHaveBeenCalledWith('Sponsors', expect.objectContaining({ name: 'Comercio Central' }));
   expect(updateData).toHaveBeenCalledWith('Sponsors', 'one', expect.objectContaining({ name: 'Comercio Central' }));
 });
+
+it('persists multiple memberships and returns a business once for either category', async () => {
+  (fetchAllData as jest.Mock).mockResolvedValue([]);
+  const item = { name: 'Mixto', category: 'Tiendas', categories: ['Tiendas', 'Cafeterías'], order: 1, active: true, logoUrl: '', links: [] as string[] };
+  await SponsorService.create(item);
+  const saved = (addData as jest.Mock).mock.calls[0][1];
+  expect(saved.categories).toEqual(['Tiendas', 'Cafeterías']);
+  expect(saved.categoryIds).toHaveLength(2);
+  await SponsorService.edit('one', { ...saved, id: 'one', name: 'Nuevo nombre' });
+  expect(updateData).toHaveBeenCalledWith('Sponsors', 'one', expect.objectContaining({ categories: saved.categories, categoryIds: saved.categoryIds }));
+  (fetchAllData as jest.Mock).mockResolvedValue([{ ...saved, id: 'one' }, { ...saved, id: 'hidden', active: false }]);
+  expect((await SponsorService.getPublicByCategory('Tiendas')).map(item => item.id)).toEqual(['one']);
+  expect((await SponsorService.getPublicByCategory('Cafeterías')).map(item => item.id)).toEqual(['one']);
+});
+
+it('rejects empty category selections on both create and update', async () => {
+  const item = { name: 'Local', category: 'Tiendas', categories: [] as string[], order: 1, active: true, logoUrl: '', links: [] as string[] };
+  await expect(SponsorService.create(item)).rejects.toThrow('Seleccione al menos una categoría específica.');
+  await expect(SponsorService.edit('one', { ...item, id: 'one' })).rejects.toThrow('Seleccione al menos una categoría específica.');
+  expect(addData).not.toHaveBeenCalled();
+  expect(updateData).not.toHaveBeenCalled();
+});

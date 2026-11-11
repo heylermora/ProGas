@@ -1,3 +1,4 @@
+import { sponsorCategories } from 'utils/sponsorCategories';
 import { Badge, Box, Button, Flex, Heading, HStack, Input, Select, SimpleGrid, Stack, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useColorModeValue, useToast } from '@chakra-ui/react';
 import Card from 'components/card/Card';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
@@ -34,7 +35,7 @@ export default function BusinessCategoriesPage() {
     setLoading(true); setError('');
     try {
       const [categories, businesses] = await Promise.all([CategoryService.get('sponsors'), SponsorService.getAll()]);
-      const all = sortCategories([...categories, ...businesses.map(business => business.category).filter(Boolean)]);
+      const all = sortCategories([...categories, ...businesses.flatMap(sponsorCategories)]);
       const config = await CategoryService.getBusinessSettings(all);
       if (version !== loadVersion.current) return;
       setValues(all); setSettings(completeBusinessSettings(all, config)); setTab(0); setDirty(false);

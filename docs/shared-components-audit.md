@@ -98,3 +98,22 @@ Los enlaces HTTP(S) abren una pestaña con `noopener noreferrer`; el correo usa
 `mailto:`. Las acciones de compartir conservan la semántica de botón y su
 callback. No detectar correos buscando simplemente «@», porque rompe URLs de
 TikTok e Instagram que contienen ese carácter.
+
+
+### Negocios con varias categorías específicas
+
+`SponsorItem.categories` y `categoryIds` contienen todas las pertenencias de un
+negocio. `category` y `categoryId` conservan la primera selección para lectores
+anteriores. `utils/sponsorCategories` adapta registros históricos de una sola
+categoría y resuelve nombres actuales usando IDs estables y alias del catálogo.
+El formulario permite marcar varias categorías y exige al menos una; editar
+otros campos conserva todas las selecciones. No se crean copias del negocio.
+
+Los filtros públicos y administrativos usan pertenencia a cualquiera de las
+categorías. El mapa cuenta cada negocio una vez por categoría general, incluso
+si tiene varias específicas dentro de ella. El directorio, el carrusel y las
+estadísticas mantienen una sola identidad por negocio. La posición `order`
+continúa siendo compartida entre sus categorías; no se introduce orden por
+categoría. Los registros existentes se leen sin migración y se escriben con
+ambos formatos al crear o editar. No hacen falta nuevos índices ni permisos:
+las lecturas siguen usando el catálogo y el filtrado se realiza en memoria.
