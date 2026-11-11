@@ -14,5 +14,5 @@ it('confirms a renamed category with Enter before saving the complete list', asy
   fireEvent.change(input, { target: { value: 'Cilindros' } });
   fireEvent.keyDown(input, { key: 'Enter' });
   fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
-  await waitFor(() => expect(CategoryService.save).toHaveBeenCalledWith('products', ['Cilindros', 'Accesorios', 'Otros', 'Promociones', 'Servicios', 'Hogar']));
+  await waitFor(() => expect(CategoryService.save).toHaveBeenCalledWith('products', ['Accesorios', 'Cilindros', 'Hogar', 'Otros', 'Promociones', 'Servicios'], { Gas: 'Cilindros' }));
 });

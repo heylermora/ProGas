@@ -6,6 +6,7 @@ import FormSection from 'components/form/FormSection';
 import SocialNetworkLabel from 'components/sponsor/SocialNetworkLabel';
 import ModalSection from 'components/modal/ModalSection';
 import SponsorLocationFields from 'components/sponsor/SponsorLocationFields';
+import { sortCategories } from 'utils/categories';
 import useCategories from 'hooks/useCategories';
 import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import { useEffect, useState } from 'react';
@@ -45,7 +46,7 @@ export default function SponsorForm() {
     return () => { live = false; };
   }, [id]);
 
-  const set = <K extends keyof SponsorFormState>(key: K, value: SponsorFormState[K]) => setSponsor(previous => ({ ...previous, [key]: value }));
+  const set = <K extends keyof SponsorFormState>(key: K, value: SponsorFormState[K]) => setSponsor(previous => ({ ...previous, ...(key === 'category' ? { categoryId: '' } : {}), [key]: value }));
   const readLogo = (file?: File) => {
     if (!file) return;
     if (!file.type.startsWith('image/') || file.size > 300 * 1024) {
@@ -100,7 +101,7 @@ export default function SponsorForm() {
           <FormSection title="Información del negocio" first>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                 <FormField label="Nombre del negocio" help="Opcional. Si lo deja vacío, se mostrará el logo."><Input value={sponsor.name} onChange={event => set('name', event.target.value)} placeholder="Nombre comercial" /></FormField>
-                <FormField label="Categoría"><Select value={sponsor.category} onChange={event => set('category', event.target.value)}>{Array.from(new Set([sponsor.category, ...categories])).filter(Boolean).map(category => <option key={category}>{category}</option>)}</Select></FormField>
+                <FormField label="Categoría"><Select value={sponsor.category} onChange={event => set('category', event.target.value)}>{sortCategories([sponsor.category, ...categories]).map(category => <option key={category}>{category}</option>)}</Select></FormField>
               </SimpleGrid>
               <FormField label="Descripción" help="Opcional. Una frase sobre lo que ofrece."><Textarea value={sponsor.description} onChange={event => set('description', event.target.value)} rows={3} /></FormField>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>

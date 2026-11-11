@@ -1,3 +1,4 @@
+import { sortCategories } from 'utils/categories';
 import { Flex, HStack, IconButton, Input, Stack, Text, useToast } from '@chakra-ui/react';
 import FormField from 'components/form/FormField';
 import FormModal from 'components/modal/FormModal';
@@ -9,33 +10,39 @@ import CategoryService, { CategoryKind } from 'services/CategoryService';
 type Props = { kind: CategoryKind; categories: string[]; isOpen: boolean; onClose: () => void; onSaved: () => Promise<void> | void };
 
 export default function CategoryManager({ kind, categories, isOpen, onClose, onSaved }: Props) {
-  const [values, setValues] = useState(categories);
+  const [values, setValues] = useState(sortCategories(categories));
+  const [renames, setRenames] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
   const toast = useToast();
 
-  useEffect(() => { if (isOpen) { setValues(categories); setDraft(''); setEditingIndex(null); } }, [categories, isOpen]);
+  useEffect(() => { if (isOpen) { setValues(sortCategories(categories)); setRenames({}); setDraft(''); setEditingIndex(null); } }, [categories, isOpen]);
   const add = () => {
     const value = draft.trim();
     if (!value || values.some((item) => item.toLocaleLowerCase('es') === value.toLocaleLowerCase('es'))) return;
-    setValues([...values, value]); setDraft('');
+    setValues(sortCategories([...values, value])); setDraft('');
   };
   const startRename = (index: number) => { setEditingIndex(index); setEditValue(values[index]); };
   const confirmRename = () => {
     const next = editValue.trim();
-    if (editingIndex !== null && next && !values.some((item, index) => index !== editingIndex && item.toLocaleLowerCase('es') === next.toLocaleLowerCase('es'))) setValues(values.map((item, index) => index === editingIndex ? next : item));
+    if (editingIndex !== null && next && !values.some((item, index) => index !== editingIndex && item.toLocaleLowerCase('es') === next.toLocaleLowerCase('es'))) {
+      const before = values[editingIndex];
+      const original = Object.keys(renames).find(key => renames[key] === before) || before;
+      setRenames({ ...renames, [original]: next });
+      setValues(sortCategories(values.map((item, index) => index === editingIndex ? next : item)));
+    }
     setEditingIndex(null);
   };
   const save = async () => {
     setSaving(true);
-    try { await CategoryService.save(kind, values); await onSaved(); toast({ status: 'success', title: 'Categorías actualizadas' }); onClose(); }
+    try { await CategoryService.save(kind, values, renames); await onSaved(); toast({ status: 'success', title: 'Categorías actualizadas' }); onClose(); }
     catch { toast({ status: 'error', title: 'No se pudieron guardar las categorías' }); }
     finally { setSaving(false); }
   };
 
-  return <FormModal title="Administrar categorías" description="Cambiar un nombre no actualiza los registros existentes."
+  return <FormModal title="Administrar categorías" description="Los cambios de nombre conservan la asignación de los registros existentes."
     isOpen={isOpen} onClose={onClose} onSubmit={save} submitLabel="Guardar cambios" isSubmitting={saving} isDisabled={editingIndex !== null} size="lg">
     <Stack spacing={4}>
       <FormField label="Nueva categoría"><HStack><Input value={draft} onChange={event => setDraft(event.target.value)}

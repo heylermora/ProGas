@@ -17,6 +17,7 @@ export interface Product {
   price: number;
   costPrice: number;
   stock: number;
+  categoryId?: string;
   category: ProductCategory;
   active: boolean;
   sku?: string;

@@ -1,4 +1,20 @@
-# [Horizon UI TypeScript ⚡️](https://horizon-ui.com/horizon-ui-chakra-ts) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?url=https://horizon-ui.com/&text=Check%20Horizon%20UI,%20the%20trendiest%20open-source%20admin%20template%20for%20Chakra%20UI%20&%20React!)
+# ProGas
+
+Aplicación de gestión de pedidos, inventario y comercios locales.
+
+- [Reglas de versionamiento y publicación](VERSIONAMIENTO.md).
+- [Historial de cambios de ProGas](CHANGELOG.md).
+- [Guía de desarrollo](AGENTS.md).
+
+La versión de la aplicación se declara en `package.json` y se muestra en el pie de página.
+
+---
+
+## Documentación original de la plantilla
+
+El contenido y las insignias siguientes corresponden a Horizon UI, no a las versiones de ProGas.
+
+### [Horizon UI TypeScript ⚡️](https://horizon-ui.com/horizon-ui-chakra-ts) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?url=https://horizon-ui.com/&text=Check%20Horizon%20UI,%20the%20trendiest%20open-source%20admin%20template%20for%20Chakra%20UI%20&%20React!)
 
 ![version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
