@@ -2,22 +2,22 @@
 
 ProGas usa versionamiento semántico: `MAYOR.MENOR.PARCHE`.
 
-La versión de esta entrega es **1.2.0**, pendiente de publicación. La versión de
+La versión de esta entrega es **1.3.0**, pendiente de publicación. La versión de
 partida del proyecto era `1.1.0`. Los números del historial de Horizon UI pertenecen
 a la plantilla y no representan entregas de ProGas.
 
 ## Cuándo cambiar la versión
 
-| Tipo | Cuándo corresponde | Ejemplo desde 1.2.0 |
+| Tipo | Cuándo corresponde | Ejemplo desde 1.3.0 |
 | --- | --- | --- |
-| PARCHE | Correcciones y ajustes visuales que mantienen el comportamiento compatible. | 1.2.1 |
-| MENOR | Funcionalidades nuevas compatibles con los datos y flujos existentes. | 1.3.0 |
+| PARCHE | Correcciones y ajustes visuales que mantienen el comportamiento compatible. | 1.3.1 |
+| MENOR | Funcionalidades nuevas compatibles con los datos y flujos existentes. | 1.4.0 |
 | MAYOR | Cambios incompatibles que requieren adaptar consumidores, datos o flujos. | 2.0.0 |
 
 Se asigna una versión por entrega agrupada, no por cada commit. Las correcciones
 de un PR que todavía no se ha publicado mantienen la versión de esa entrega.
-Por ejemplo, las categorías por niveles, su gestión y el carrusel interactivo se
-agrupan en `1.2.0`; sus ajustes durante la revisión no generan nuevas versiones.
+Por ejemplo, las categorías múltiples, las estadísticas y los ajustes del directorio se
+agrupan en `1.3.0`; sus ajustes durante la revisión no generan nuevas versiones.
 
 ## Archivos que deben coincidir
 
@@ -25,9 +25,8 @@ agrupan en `1.2.0`; sus ajustes durante la revisión no generan nuevas versiones
 - `package-lock.json`: deben coincidir tanto `version` como `packages[""].version`.
 - `CHANGELOG.md`: una entrada de ProGas para la versión, con sus cambios y estado.
 
-El componente compartido `AppVersion` lee `package.json` y muestra la versión
-en el pie público y al final del menú administrativo (también en su menú móvil).
-No escribir otra versión fija en los componentes. Las versiones de las dependencias y los comentarios históricos de
+El pie de página ya lee `package.json`; no escribir otra versión fija en los
+componentes. Las versiones de las dependencias y los comentarios históricos de
 Horizon UI son independientes de la versión de ProGas.
 
 ## Preparar una entrega
@@ -44,7 +43,7 @@ Horizon UI son independientes de la versión de ProGas.
    Para fijar un número acordado, usar por ejemplo:
 
    ```bash
-   npm version 1.2.0 --no-git-tag-version
+   npm version 1.3.0 --no-git-tag-version
    ```
 
 3. Agregar al inicio de `CHANGELOG.md` una entrada con el estado **Pendiente de
@@ -70,8 +69,8 @@ Una versión en el código o un PR aprobado no confirma que esté desplegada.
    `COMMIT_PUBLICADO` por su SHA verificado:
 
    ```bash
-   git tag -a v1.2.0 COMMIT_PUBLICADO -m "ProGas 1.2.0"
-   git push origin v1.2.0
+   git tag -a v1.3.0 COMMIT_PUBLICADO -m "ProGas 1.3.0"
+   git push origin v1.3.0
    ```
 
 5. Si se crea una GitHub Release, usar esa etiqueta y las notas de `CHANGELOG.md`.
@@ -96,34 +95,3 @@ para incluir correcciones posteriores.
 ```
 
 Al publicarse, reemplazar «Pendiente de publicación» por la fecha real de entrega.
-
-
-## Identificar cada despliegue
-
-La versión semántica identifica la entrega agrupada; la revisión identifica cada
-actualización del mismo PR. Por ejemplo:
-
-- `Versión 1.2.0` / `Vista previa PR 38 · abc1234`.
-- `Versión 1.2.0` / `Producción · def5678`.
-- `Versión 1.2.0` / `Desarrollo local` al ejecutar `npm start`.
-
-`npm run build` ejecuta `scripts/build-app.cjs`, comprueba la coherencia de la
-versión y pasa a CRA sólo los metadatos públicos del despliegue. Netlify aporta
-`COMMIT_REF`, `CONTEXT` y `REVIEW_ID`; GitHub Actions usa `GITHUB_SHA` y la referencia
-del PR. Fuera de esos entornos se usa el commit local de Git y la etiqueta neutral
-«Compilación». No se deduce «Producción» del modo optimizado de React. Si falta una
-revisión válida, la interfaz lo indica en vez de inventar un identificador.
-Estos valores quedan incorporados al bundle: no consultan GitHub desde el navegador
-ni afirman que una versión pendiente ya está publicada.
-
-Verificaciones disponibles:
-
-```bash
-npm run check:version
-npm run test:versioning
-```
-
-La primera exige `MAYOR.MENOR.PARCHE`, igualdad entre los tres campos de npm y una
-entrada de la versión en `CHANGELOG.md`. CI ejecuta ambas antes de tipos y pruebas;
-la compilación vuelve a comprobar la versión antes de generar el bundle. No se
-crean etiquetas ni releases automáticamente.

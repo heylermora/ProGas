@@ -23,7 +23,7 @@ if (siteUrl.protocol !== 'https:' || siteUrl.username || siteUrl.password || sit
 if (!siteUrl.pathname.endsWith('/')) siteUrl.pathname += '/';
 const imageUrl = new URL('social-preview.jpg', siteUrl).href;
 const escapeAttribute = (value) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const buildDirectory = path.resolve(__dirname, '..', process.env.BUILD_PATH || 'build');
+const buildDirectory = path.resolve(__dirname, '..', 'build');
 if (!fs.existsSync(path.join(buildDirectory, 'social-preview.jpg'))) {
   throw new Error('Falta la imagen social-preview.jpg en el build.');
 }

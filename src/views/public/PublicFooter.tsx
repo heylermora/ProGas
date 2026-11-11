@@ -2,7 +2,7 @@ import { SocialContact } from 'components/social/SocialLink';
 import { Box, Button, Flex, Icon, Image, Link, Text } from '@chakra-ui/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
 import { MdHome, MdLogin, MdShoppingCart } from 'react-icons/md';
-import AppVersion from 'components/dataDisplay/AppVersion';
+import packageInfo from '../../../package.json';
 
 const portfolioContactUrl = `https://wa.me/50683508585?text=${encodeURIComponent('Hola Johel, vi su portafolio y me gustaría conversar sobre un proyecto.')}`;
 
@@ -32,7 +32,7 @@ export default function PublicFooter() {
       </Flex>
       <Flex px={{ base: '20px', md: '28px' }} py="8px" bg="brand.600" borderTop="1px solid" borderColor="whiteAlpha.200" align="center" justify="space-between" gap="12px">
         <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} minW="0" flexWrap="wrap" columnGap="8px" rowGap="2px" color="whiteAlpha.900" fontSize="11px">
-          <Text>© {new Date().getFullYear()} Gas Memo</Text><Text aria-hidden="true" display={{ base: 'none', md: 'block' }}>•</Text><AppVersion />
+          <Text>© {new Date().getFullYear()} Gas Memo</Text><Text aria-hidden="true" display={{ base: 'none', md: 'block' }}>•</Text><Text>Versión {packageInfo.version}</Text>
         </Flex>
         <Link as={RLink} to="/auth/sign-in" color="whiteAlpha.900" fontSize="11px" minH="44px" flexShrink={0} px="4px" display="inline-flex" alignItems="center" gap="4px" aria-label="Acceso administrativo" _hover={{ color: 'white', textDecoration: 'underline' }}><Icon as={MdLogin} boxSize="12px" /> Acceso</Link>
       </Flex>

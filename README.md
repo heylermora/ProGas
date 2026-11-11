@@ -6,7 +6,7 @@ Aplicación de gestión de pedidos, inventario y comercios locales.
 - [Historial de cambios de ProGas](CHANGELOG.md).
 - [Guía de desarrollo](AGENTS.md).
 
-La versión se declara en `package.json`. Se muestra junto con el entorno y la revisión del despliegue en el pie público y menú administrativo. `npm run check:version` comprueba la coherencia con el lockfile y el historial.
+La versión de la aplicación se declara en `package.json` y se muestra en el pie de página.
 
 ---
 
