@@ -33,3 +33,14 @@ it('shows a recoverable failure instead of false zero counts', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Actualizar' }));
   expect(await screen.findByText('https://wa.me/50600000000')).toBeTruthy();
 });
+
+it('keeps unknown businesses identifiable without using IDs as their display name', async () => {
+  (AnalyticsService.getReport as jest.Mock).mockResolvedValueOnce({ visits: 1, browseClicks: 0, linkClicks: 1, links: [
+    { businessId: 'deleted-business', url: 'https://example.com/?tracking=long', network: 'website', clicks: 1 },
+  ] });
+  render(<ChakraProvider><AnalyticsAdmin /></ChakraProvider>);
+  expect(await screen.findByText('Ver identificador')).toBeTruthy();
+  expect(screen.getByText('deleted-business')).toBeTruthy();
+  expect(screen.getByText('example.com')).toBeTruthy();
+  expect(screen.getByRole('link', { name: 'Abrir enlace ↗' }).getAttribute('href')).toBe('https://example.com/?tracking=long');
+});
