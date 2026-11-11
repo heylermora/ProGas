@@ -1,4 +1,4 @@
-import { isSponsorMapLink, networkFor, sponsorContactHref, sponsorContacts, sponsorLinks, sponsorMapCoordinates, sponsorNavigation, sponsorVideoSource } from './sponsor';
+import { isSponsorContact, isSponsorMapLink, networkFor, sponsorContactHref, sponsorContacts, sponsorLinks, sponsorMapCoordinates, sponsorNavigation, sponsorVideoSource } from './sponsor';
 
 it('identifies social networks by hostname rather than text inside a URL', () => {
   expect(networkFor('https://www.instagram.com/local')).toBe('instagram');
@@ -41,4 +41,12 @@ it('supports share links and historic iframe sources, but rejects unsupported pa
   expect(sponsorVideoSource('<iframe src="https://player.vimeo.com/video/123456"></iframe>')).toBe('https://player.vimeo.com/video/123456');
   expect(sponsorVideoSource('https://example.com/video.mp4?token=123')).toContain('video.mp4?token=123');
   expect(sponsorVideoSource('https://drive.google.com/file/d/123')).toBe('');
+});
+
+it.each(['facebook', 'instagram', 'tiktok'] as const)('validates the actual %s hostname', network => {
+  expect(isSponsorContact(`https://www.${network}.com/local`, network)).toBe(true);
+  expect(isSponsorContact(`https://${network}.com.evil.test/local`, network)).toBe(false);
+  expect(isSponsorContact(`https://evil.test/${network}.com`, network)).toBe(false);
+  expect(isSponsorContact(`https://${network}.com@evil.test/local`, network)).toBe(false);
+  expect(isSponsorContact(`javascript:alert('${network}.com')`, network)).toBe(false);
 });

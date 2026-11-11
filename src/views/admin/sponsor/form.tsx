@@ -1,4 +1,4 @@
-import { Alert, AlertIcon, Box, Button, Image, Input, Select, SimpleGrid, Stack, Switch, Text, Textarea } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Button, Image, Input, InputGroup, InputLeftAddon, Select, SimpleGrid, Stack, Switch, Text, Textarea } from '@chakra-ui/react';
 import Card from 'components/card/Card';
 import Form from 'components/form/Form';
 import FormField from 'components/form/FormField';
@@ -11,7 +11,7 @@ import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import SponsorService from 'services/SponsorService';
-import { isSponsorMapLink, networkFor, sponsorContacts, sponsorLinks, sponsorNetworks, sponsorVideoSource } from 'utils/sponsor';
+import { isSponsorMapLink, isSponsorContact, sponsorWhatsAppLink, sponsorWhatsAppPhone, sponsorContacts, sponsorLinks, sponsorNetworks, sponsorVideoSource } from 'utils/sponsor';
 
 type SponsorFormState = Omit<SponsorItem, 'id'>;
 const empty: SponsorFormState = { name: '', category: DEFAULT_BUSINESS_CATEGORY, active: true, order: 1, logoUrl: '', videoUrl: '', links: [], socialLinks: {}, description: '', coordinates: '', mapsUrl: '', wazeUrl: '', directions: '' };
@@ -63,8 +63,8 @@ export default function SponsorForm() {
     const nextErrors: Record<string, string> = {};
     sponsorNetworks.forEach(network => {
       const value = sponsor.socialLinks?.[network.key]?.trim();
-      if (value && (network.key === 'website' ? !/^https?:\/\//i.test(value) || !networkFor(value) : networkFor(value) !== network.key)) {
-        nextErrors[network.key] = network.key === 'email' ? 'Ingrese un correo válido.' : `Ingrese el enlace completo de ${network.label}, empezando con https://.`;
+      if (value && !isSponsorContact(value, network.key)) {
+        nextErrors[network.key] = network.key === 'whatsapp' ? 'Ingrese un número de WhatsApp válido con 8 dígitos.' : network.key === 'email' ? 'Ingrese un correo válido.' : `Ingrese el enlace completo de ${network.label}, empezando con https://.`;
       }
     });
     if (sponsor.videoUrl?.trim() && sponsor.videoUrl !== originalVideo && !sponsorVideoSource(sponsor.videoUrl)) nextErrors.video = 'Use un enlace de YouTube, Vimeo o un archivo público MP4, WebM u OGG.';
@@ -110,9 +110,12 @@ export default function SponsorForm() {
           </FormSection>
           <FormSection title="Redes y contacto" description="Todos son opcionales. Complete únicamente los canales del negocio.">
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                {sponsorNetworks.map(network => <FormField key={network.key} label={<SocialNetworkLabel network={network.key} label={network.label} />} error={errors[network.key]}>
-                  <Input type={network.key === 'email' ? 'email' : 'url'} value={sponsor.socialLinks?.[network.key] || ''} placeholder={network.placeholder}
-                    onChange={event => set('socialLinks', { ...sponsor.socialLinks, [network.key]: event.target.value })} />
+                {sponsorNetworks.map(network => <FormField key={network.key} label={<SocialNetworkLabel network={network.key} label={network.label} />} error={errors[network.key]} help={network.key === 'whatsapp' ? 'Costa Rica (+506). Ingrese los 8 dígitos del teléfono.' : undefined}>
+                  <InputGroup>
+                    {network.key === 'whatsapp' && <InputLeftAddon px={2} fontSize="sm">https://wa.me/506</InputLeftAddon>}
+                  <Input minW={0} type={network.key === 'whatsapp' ? 'tel' : network.key === 'email' ? 'email' : 'url'} value={network.key === 'whatsapp' ? sponsorWhatsAppPhone(sponsor.socialLinks?.whatsapp) : sponsor.socialLinks?.[network.key] || ''} placeholder={network.key === 'whatsapp' ? '8888-8888' : network.placeholder}
+                    onChange={event => set('socialLinks', { ...sponsor.socialLinks, [network.key]: network.key === 'whatsapp' ? sponsorWhatsAppLink(event.target.value) : event.target.value })} />
+                  </InputGroup>
                 </FormField>)}
               </SimpleGrid>
               {sponsor.links.length > 0 && <ModalSection title="Otros enlaces existentes" summary="Se conservan los contactos anteriores que no corresponden a un campo de arriba.">

@@ -1,3 +1,4 @@
+import { formatPhoneDisplay, onlyDigits } from './phone';
 import SponsorItem from 'interfaces/SponsorItem';
 import { isCostaRicaCoordinate, mapsSearchUrl } from './location';
 
@@ -22,6 +23,38 @@ export function networkFor(value: string): SponsorNetwork | undefined {
     if (hostMatches(url.hostname, 'whatsapp.com')) return 'whatsapp';
     return 'website';
   } catch { return undefined; }
+}
+
+// Keep historic WhatsApp URLs intact until the user changes the phone field.
+export function sponsorWhatsAppPhone(value = '') {
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    if (networkFor(value) !== 'whatsapp') return value;
+    const digits = onlyDigits(url.hostname === 'wa.me' ? url.pathname : url.searchParams.get('phone') || '');
+    return digits.startsWith('506') && digits.length <= 11
+      ? formatPhoneDisplay(digits.slice(3)) : digits ? `+${digits}` : value;
+  } catch { return value; }
+}
+
+export function sponsorWhatsAppLink(value: string) {
+  let digits = onlyDigits(value);
+  if (digits.startsWith('506') && digits.length === 11) digits = digits.slice(3);
+  return digits ? `https://wa.me/506${digits.slice(0, 8)}` : '';
+}
+
+export function isSponsorContact(value: string, network: SponsorNetwork) {
+  if (!value.trim()) return true;
+  if (network === 'email') return networkFor(value) === 'email';
+  try {
+    const url = new URL(value.trim());
+    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) return false;
+    if (network === 'website') return Boolean(networkFor(value));
+    if (networkFor(value) !== network) return false;
+    if (network !== 'whatsapp') return true;
+    const phone = url.hostname === 'wa.me' ? url.pathname.slice(1) : url.searchParams.get('phone') || '';
+    return /^\+?[1-9]\d{6,14}$/.test(phone) && (!phone.replace(/^\+/, '').startsWith('506') || phone.replace(/^\+/, '').length === 11);
+  } catch { return false; }
 }
 
 export const sponsorContactHref = (link = '') => networkFor(link) === 'email' && !link.startsWith('mailto:') ? `mailto:${link}` : link;

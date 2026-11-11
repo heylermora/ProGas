@@ -72,3 +72,19 @@ it('moves an edited sponsor to the end only when its category changes', async ()
   await waitFor(() => expect(SponsorService.edit).toHaveBeenCalledWith('one', expect.objectContaining({ category: 'Tiendas', order: 7 })));
   expect(SponsorService.nextOrder).toHaveBeenCalledWith('Tiendas');
 });
+
+ it('masks WhatsApp, rejects incomplete phones and saves a usable link', async () => {
+  showForm();
+  const phone = screen.getByLabelText('WhatsApp');
+  fireEvent.change(phone, { target: { value: '8888777' } });
+  expect((phone as HTMLInputElement).value).toBe('8888-777');
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
+  expect(await screen.findByText(/Ingrese un número de WhatsApp válido/)).toBeTruthy();
+  expect(SponsorService.create).not.toHaveBeenCalled();
+  fireEvent.change(phone, { target: { value: '88887777' } });
+  expect((phone as HTMLInputElement).value).toBe('8888-7777');
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
+  await waitFor(() => expect(SponsorService.create).toHaveBeenCalledWith(expect.objectContaining({
+    socialLinks: { whatsapp: 'https://wa.me/50688887777' }, links: ['https://wa.me/50688887777'],
+  })));
+});
