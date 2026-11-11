@@ -130,8 +130,8 @@ movimiento reducido.
 
 ### Carrusel de negocios en portada
 
-`MallPreview` usa una pista de movimiento continuo, con al menos tres tarjetas
-completas en móvil y tarjetas de ancho fijo que permiten mostrar más negocios en
+`MallPreview` usa una pista de movimiento continuo, con ancho para tres tarjetas
+en móvil y tarjetas de ancho fijo que permiten mostrar más negocios en
 escritorio. Conserva logos contenidos y nombres de dos líneas, sin el texto de
 contacto repetido. No tiene paginación, barra de controles ni botón de pausa.
 Se detiene mientras se enfoca, se pasa el cursor o se consultan contactos, que

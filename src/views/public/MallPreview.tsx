@@ -112,7 +112,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
               const selected = selectedBusinessKey === business.id;
               const duplicate = copy > 0 || index >= businesses.length;
               return <Flex key={`${business.id}:${index}`} as="button" type="button" aria-hidden={duplicate || undefined} tabIndex={duplicate ? -1 : 0} aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(business.id)}
-                minW={0} flexShrink={0} w={{ base: moving ? 'calc((100cqw - 24px) / 4)' : 'calc((100cqw - 16px) / 3)', md: '150px', xl: '168px' }} minH={{ base: '116px', md: '148px' }} p={{ base: '6px', md: '12px' }} gap="8px" direction="column" align="center" justify="center" textAlign="center"
+                minW={0} flexShrink={0} w={{ base: 'calc((100cqw - 16px) / 3)', md: '150px', xl: '168px' }} minH={{ base: '116px', md: '148px' }} p={{ base: '6px', md: '12px' }} gap="8px" direction="column" align="center" justify="center" textAlign="center"
                 bg="white" color="navy.900" border="2px solid" borderColor={selected ? 'brand.500' : 'transparent'} borderRadius="14px" boxShadow="0 3px 10px rgba(15,23,42,.06)"
                 _hover={{ borderColor: 'brand.200' }} _focusVisible={{ outline: '3px solid', outlineColor: 'brand.400', outlineOffset: '2px' }}>
                 <Flex w="100%" h={{ base: '56px', md: '76px' }} flexShrink={0} align="center" justify="center">
