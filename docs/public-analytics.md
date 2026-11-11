@@ -44,7 +44,8 @@ los datos actuales; no hay un listener permanente ni un contador público.
 
 La consulta usa el índice de `createdAt` y páginas de 500 documentos hasta
 agotarlas, sin truncar resultados. Agrega por ID y URL. Los nombres se leen del
-catálogo actual; negocios eliminados conservan sus métricas y aparecen por ID.
+catálogo actual; negocios eliminados conservan sus métricas y aparecen como
+«Negocio no disponible», con el identificador desplegable.
 No hay cifras previas a la activación. La lectura es exclusiva de administradores.
 El volumen de visitas determina las escrituras y lecturas de Firestore; aplicar
 la política de retención del proyecto si se acumulan grandes volúmenes.
@@ -94,3 +95,20 @@ lecturas, enlaces publicados, inmutabilidad y datos inválidos. El intento en es
 entorno no pudo descargar `cloud-firestore-emulator-v1.22.0.jar` de Google Storage;
 por tanto, la prueba de reglas no se declara aprobada. Debe ejecutarse en un
 entorno con acceso a esa descarga antes de activar la medición en producción.
+
+
+## Nombre obligatorio de los negocios
+
+Las altas y actualizaciones de patrocinadores requieren un nombre comercial que
+contenga texto: se rechazan valores ausentes, vacíos o formados sólo por espacios.
+El formulario indica el error y el servicio recorta los espacios al guardar.
+Las reglas de `Sponsors` también lo exigen para crear y actualizar, sin cambiar
+los permisos de lectura o eliminación. Hay que desplegar estas reglas en Firebase;
+publicar sólo la web no aplica esta validación a escrituras directas.
+
+Los registros históricos sin nombre deben completarse antes de actualizar su
+visibilidad u orden. No se inventan nombres ni se modifican datos de producción.
+El informe relaciona los eventos con el ID del catálogo actual: un negocio
+eliminado puede seguir apareciendo como no disponible aunque ahora el nombre
+sea obligatorio. La prueba aislada de reglas también cubre nombres inválidos,
+actualizaciones de registros antiguos y la conservación del permiso de eliminación.

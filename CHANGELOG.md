@@ -2,12 +2,27 @@
 
 Reglas de versiones y publicación: [VERSIONAMIENTO.md](VERSIONAMIENTO.md).
 
-## [1.2.1] — Pendiente de publicación
+## [1.3.1] — Pendiente de publicación
 
 ### Corregido
 - WhatsApp usa máscara telefónica y muestra el prefijo del enlace al ingresar el número.
 - Validación del número de WhatsApp y del dominio real de las URLs de redes sociales.
 - Conservación de enlaces de WhatsApp existentes mientras no se editen.
+
+## [1.3.0] — Pendiente de publicación
+
+### Agregado
+- Varias categorías específicas por negocio, con compatibilidad para los registros actuales.
+- Nombre comercial obligatorio al crear y actualizar negocios, validado en formulario, servicio y reglas de Firestore.
+
+### Cambiado
+- Estadísticas con ranking por negocio, distribución por canal y URLs completas desplegables.
+- Carrusel de movimiento continuo, con ancho para tres tarjetas en móvil y más negocios visibles en escritorio, sin barra inferior.
+- Controles de regreso integrados en el juego y retiro de la navegación de categorías duplicada.
+
+### Corregido
+- Icono original de la pestaña enlazado explícitamente en formato PNG.
+- Espacio reservado y título de la barra superior administrativa.
 
 ## [1.2.0] — Pendiente de publicación
 

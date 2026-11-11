@@ -32,7 +32,11 @@ service cloud.firestore {
     }
     match /Sponsors/{documentId} {
       allow read: if true;
-      allow write: if hasRole('admin');
+      allow create, update: if hasRole('admin')
+        && request.resource.data.keys().hasAll(['name'])
+        && request.resource.data.name is string
+        && request.resource.data.name.trim().size() > 0;
+      allow delete: if hasRole('admin');
     }
     match /CategorySettings/{documentId} {
       allow read: if true;
