@@ -38,6 +38,10 @@ const ctaPulse = keyframes`
   0%, 100% { box-shadow: 0 12px 28px rgba(250, 204, 21, .28), 0 0 0 0 rgba(253, 224, 71, .35); }
   50% { box-shadow: 0 16px 34px rgba(250, 204, 21, .42), 0 0 0 8px rgba(253, 224, 71, 0); }
 `;
+const marquee = keyframes`
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+`;
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
 export default function MallPreview({ compact = false, embedded = false }: MallPreviewProps) {
@@ -61,6 +65,10 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
   }, [attempt]);
 
   const previewBusinesses = businesses;
+  // Four slots keep at least three complete cards visible while the row moves.
+  const cycleBusinesses = businesses.length > 1 && businesses.length < 7
+    ? Array.from({ length: Math.ceil(7 / businesses.length) }, () => businesses).flat()
+    : businesses;
   const originLabels: Record<string, string> = {
     '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
     '/customer/products': 'Volver al pedido', '/customer/view-order': 'Volver a consultar pedido',
@@ -95,15 +103,16 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
       </Flex>}
       {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" overflow="visible" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Box role="region" aria-label="Carrusel de negocios" py="6px" overflowX="auto" sx={{ scrollSnapType: "x mandatory" }}>
-          {[0].map((copy) => (
-          <Box key={copy} display="grid" gridAutoFlow="column" gridAutoColumns={{ base: "calc((100% - 16px) / 3)", md: "calc((100% - 60px) / 6)" }} gap={{ base: "8px", md: "12px" }}>
-            {!loading && previewBusinesses.map((business) => {
-              const businessKey = `${copy}:${business.id}`;
+        <Box role="region" aria-label="Carrusel de negocios" py="6px" overflow="hidden" sx={{ containerType: "inline-size" }}>
+          <Flex w="max-content" animation={!prefersReducedMotion && businesses.length > 1 ? `${marquee} ${Math.max(38, cycleBusinesses.length * 7)}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey ? 'paused' : 'running', '&:focus-within': { animationPlayState: 'paused' } }}>
+          {(businesses.length > 1 ? [0, 1] : [0]).map((copy) => (
+          <Flex key={copy} flexShrink={0} gap={{ base: "8px", md: "12px" }} pr={{ base: "8px", md: "12px" }}>
+            {!loading && cycleBusinesses.map((business, index) => {
+              const businessKey = `${copy}:${index}:${business.id}`;
               const selected = selectedBusinessKey === businessKey;
               const contacts = sponsorLinks(business);
               return (
-                <Box key={`${copy}-${business.id}`} position="relative" minW="0" sx={{ scrollSnapAlign: "start" }}>
+                <Box key={businessKey} position="relative" minW="0" flexShrink={0} w={{ base: "calc((100cqw - 24px) / 4)", md: "calc((100cqw - 72px) / 7)" }}>
                   <Flex as="button" type="button" aria-label={`${selected ? 'Ocultar contactos de' : 'Ver contactos de'} ${business.name || 'negocio local'}`} aria-expanded={selected} onClick={() => toggleBusiness(businessKey)} w="100%" minH={{ base: '90px', md: '98px' }} p={{ base: "7px", md: "10px" }} gap="7px" direction="column" align="center" textAlign="center" borderRadius="16px" bg={selected ? 'white' : 'rgba(255,255,255,.91)'} color="navy.900" border="1px solid" borderColor={selected ? 'cyan.200' : 'whiteAlpha.700'} boxShadow={selected ? '0 12px 26px rgba(0,0,0,.28)' : '0 7px 18px rgba(0,0,0,.14)'} transition="all .2s ease" _hover={{ transform: 'translateY(-2px)', bg: 'white' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '2px' }}>
                     <Flex w={{ base: '52px', md: '58px' }} h={{ base: '52px', md: '58px' }} flex="0 0 auto" borderRadius="14px" bg="gray.50" align="center" justify="center" p="7px" overflow="hidden">
                       {business.logoUrl ? <Image src={business.logoUrl} alt="" maxW="100%" maxH="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="28px" color="brand.500" />}
@@ -118,10 +127,11 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
               );
             })}
 
-          </Box>
+          </Flex>
           ))}
+          </Flex>
         </Box>
-        {previewBusinesses.filter(business => selectedBusinessKey === `0:${business.id}`).map(business => <Box key={business.id} mt={3} p={3} borderRadius="12px" bg={embedded ? 'white' : 'whiteAlpha.100'}>
+        {previewBusinesses.filter(business => selectedBusinessKey.endsWith(`:${business.id}`)).map(business => <Box key={business.id} mt={3} p={3} borderRadius="12px" bg={embedded ? 'white' : 'whiteAlpha.100'}>
           <Text fontSize="sm" fontWeight="700" mb={2}>Contactos de {business.name || 'Negocio local'}</Text>
           {sponsorLinks(business).length > 0 ? <SocialLinksRow links={sponsorLinks(business)} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" appearance="carousel" /> : <Text fontSize="sm">Sin contactos publicados.</Text>}
         </Box>)}

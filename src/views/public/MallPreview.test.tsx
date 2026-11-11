@@ -76,7 +76,7 @@ describe('MallPreview', () => {
     expect(screen.queryByRole('button', { name: /ver más negocios/i })).toBeNull();
   });
 
-  it('opens contacts below the compact business grid', async () => {
+  it('opens contacts below the automatic carousel', async () => {
     renderPreview();
 
     const [business] = await screen.findAllByRole('button', { name: /ver contactos de café central/i });
