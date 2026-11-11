@@ -87,6 +87,10 @@ describe('MallPreview', () => {
     expect(screen.getByLabelText(/tiktok de café central/i).getAttribute('href')).toBe('https://www.tiktok.com/@cafe-central');
     expect(screen.getByLabelText(/correo de café central/i).getAttribute('href')).toBe('mailto:cafe@example.com');
     expect(screen.getByText('Contactos de Café Central')).toBeTruthy();
+    const group = screen.getByRole('group', { name: 'Redes sociales de Café Central' });
+    expect(screen.getByRole('region', { name: 'Carrusel de negocios' }).contains(group)).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: /ocultar contactos de café central/i }));
+    expect(screen.queryByRole('group', { name: 'Redes sociales de Café Central' })).toBeNull();
     expect(screen.queryByRole('link', { name: /ver estación de café central/i })).toBeNull();
   });
 });

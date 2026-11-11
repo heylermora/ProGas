@@ -1,3 +1,4 @@
+import { sortCategories } from 'utils/categories';
 import React, { useMemo, useState } from 'react';
 import { Box, FormControl, FormLabel, Select as NativeSelect, useColorModeValue } from '@chakra-ui/react';
 import Select, { StylesConfig } from 'react-select';
@@ -19,7 +20,7 @@ export default function SearchableCategorySelect({ categories, value, onChange, 
   const muted = useColorModeValue('#64748B', '#A0AEC0');
   const options = useMemo(() => [
     { value: '', label: 'Todas las categorías' },
-    ...Array.from(new Set(categories)).filter(Boolean).map((category) => ({ value: category, label: category })),
+    ...sortCategories(categories).map((category) => ({ value: category, label: category })),
   ], [categories]);
   const styles: StylesConfig<CategoryOption, false> = {
     control: (base, state) => ({ ...base, backgroundColor: background, borderColor: state.isFocused ? '#5930E8' : border,

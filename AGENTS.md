@@ -196,3 +196,19 @@ Un cambio exclusivamente documental requiere revisar exactitud, rutas y Markdown
 - Las comprobaciones pertinentes pasan, o se explican los fallos y sus límites.
 - No se incluyen cambios ajenos, secretos ni ediciones manuales del build.
 - El resumen final indica qué cambió, cómo se verificó y cualquier limitación pendiente.
+
+## Categorías del centro comercial
+
+`utils/businessCategories` define las generales iniciales y completa categorías históricas sin asignación. `CategorySettings/sponsors` conserva `values` (categorías específicas compatibles con los comercios existentes) y agrega `businessSettings` con `groups` e `icons`. `views/admin/sponsor/categories` administra ambos niveles en una página protegida para administradores; usa las pestañas `Tabs` de Chakra para filtrar específicas por general y `EmojiField` para seleccionar un solo emoji del catálogo de `emoji-picker-react`. Los cambios se aplican en formularios breves y se persisten con «Guardar cambios»; productos conserva `CategoryManager`. El centro comercial filtra general → específica → comercio, sin reescribir la categoría de cada patrocinador. El carrusel público usa `useInteractiveCarousel` para avance automático, arrastre con puntero y pausa por interacción; no reservar altura para contactos cerrados.
+
+Las categorías usan IDs estables (`catalog` con `id`, `name`, `aliases`) y las generales guardan `categoryIds`. Comercios y productos persisten `categoryId`; conservar la resolución de nombres históricos sin escrituras públicas. Todo listado o selector de categorías usa el orden español de `utils/categories`, incluso al añadir la selección actual o registros históricos. Ver `docs/category-identities.md`.
+
+El mapa de categorías usa `utils/mallLayout` para distribuir las estaciones alrededor de toda la elipse según el número visible y limita cada sector a ocho tanto en móvil como en escritorio. Los nombres de categoría no se truncan; la altura móvil contempla las filas y nombres del sector. `useInteractiveCarousel` conserva el avance fraccionario fuera de `scrollLeft` (que puede redondearse), mide el ancho de una copia completa para repetir y distingue hover de ratón de interacción táctil. Mantener pruebas de avance automático con posiciones enteras, pausa/reanudación y arrastre en ambos sentidos.
+
+En `MallPreview`, los contactos abiertos se muestran fuera del viewport desplazable del carrusel, en una franja independiente con el nombre del negocio; no colocarlos dentro de cada tarjeta estrecha. `SocialLinksRow appearance="carousel"` mantiene una fila horizontal con objetivos de 44 px, desplazamiento táctil cuando hace falta, sin barra visible y con sombra pequeña. Las demás vistas conservan su presentación habitual de redes.
+
+## Versionamiento y entregas
+
+Seguir `VERSIONAMIENTO.md`. Versionar cada entrega agrupada con SemVer, mantener sincronizados `package.json`, las dos versiones raíz de `package-lock.json` y su entrada en `CHANGELOG.md`. El pie obtiene la versión de `package.json`. Mantener la versión del PR mientras no esté publicado; no generar una versión por cada corrección de revisión. Una versión preparada no es una publicación: registrar fecha y etiqueta `vX.Y.Z` sólo para una entrega verificada. El historial de la plantilla Horizon UI no es el historial de ProGas.
+
+Las fichas de negocios comparten enlaces `#/mall?business=ID` mediante `ShareBusinessButton`: usar compartir nativo, copia al portapapeles y enlace seleccionable como alternativa. No trasladar parámetros de clientes ni pedidos al enlace. El mapa y la vista sencilla comparten el contexto de categoría y muestran navegación por niveles; un enlace directo debe recuperar la general desde las específicas del catálogo. Los logos son el elemento principal de las tarjetas del carrusel. La portada conserva la comunidad y la Banda Municipal; no reintroducir el bloque exclusivo de pedidos/redes de Gas Memo.

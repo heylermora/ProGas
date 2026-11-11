@@ -95,7 +95,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
       </Flex>}
       {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" overflow="visible" mx={{ base: '-16px', md: '-24px' }} px={{ base: '16px', md: '24px' }}>
-        <Box py="6px" overflowX="auto" sx={{ scrollSnapType: "x mandatory" }}>
+        <Box role="region" aria-label="Carrusel de negocios" py="6px" overflowX="auto" sx={{ scrollSnapType: "x mandatory" }}>
           {[0].map((copy) => (
           <Box key={copy} display="grid" gridAutoFlow="column" gridAutoColumns={{ base: "calc((100% - 16px) / 3)", md: "calc((100% - 60px) / 6)" }} gap={{ base: "8px", md: "12px" }}>
             {!loading && previewBusinesses.map((business) => {
@@ -123,7 +123,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         </Box>
         {previewBusinesses.filter(business => selectedBusinessKey === `0:${business.id}`).map(business => <Box key={business.id} mt={3} p={3} borderRadius="12px" bg={embedded ? 'white' : 'whiteAlpha.100'}>
           <Text fontSize="sm" fontWeight="700" mb={2}>Contactos de {business.name || 'Negocio local'}</Text>
-          {sponsorLinks(business).length > 0 ? <SocialLinksRow links={sponsorLinks(business)} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" /> : <Text fontSize="sm">Sin contactos publicados.</Text>}
+          {sponsorLinks(business).length > 0 ? <SocialLinksRow links={sponsorLinks(business)} businessId={business.id} source="mall-preview" label={`Redes sociales de ${business.name}`} size="compact" appearance="carousel" /> : <Text fontSize="sm">Sin contactos publicados.</Text>}
         </Box>)}
       </Box>}
 
