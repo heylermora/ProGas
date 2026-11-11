@@ -1,5 +1,5 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import MallPreview from './MallPreview';
 import SponsorService from 'services/SponsorService';
@@ -7,12 +7,10 @@ import SponsorService from 'services/SponsorService';
 jest.mock('services/SponsorService', () => ({ __esModule: true, default: { getAll: jest.fn() } }));
 
 beforeEach(() => {
-  jest.useFakeTimers();
   (SponsorService.getAll as jest.Mock).mockResolvedValue(Array.from({ length: 6 }, (_, index) => ({
     id: String(index), name: `Comercio ${index}`, category: 'Otros', active: true, order: index, logoUrl: '', links: ['https://example.com'],
   })));
 });
-afterEach(() => jest.useRealTimers());
 
 const showCarousel = async () => {
   render(<ChakraProvider><MemoryRouter><MallPreview embedded /></MemoryRouter></ChakraProvider>);
@@ -20,32 +18,22 @@ const showCarousel = async () => {
 };
 const visibleNames = () => screen.getAllByRole('button', { name: /Ver contactos de Comercio/ }).map(button => button.getAttribute('aria-label'));
 
-it('shows exactly three businesses, rotates automatically and allows pausing and resuming', async () => {
+it('keeps the catalogue in one continuous track without paging or a control bar', async () => {
   await showCarousel();
-  const first = visibleNames();
-  expect(first).toHaveLength(3);
-  act(() => jest.advanceTimersByTime(6000));
-  const second = visibleNames();
-  expect(second).toHaveLength(3);
-  expect(second).not.toEqual(first);
-  fireEvent.click(screen.getByRole('button', { name: 'Pausar carrusel' }));
-  act(() => jest.advanceTimersByTime(12000));
-  expect(visibleNames()).toEqual(second);
-  fireEvent.click(screen.getByRole('button', { name: 'Reanudar carrusel' }));
-  act(() => jest.advanceTimersByTime(6000));
-  expect(visibleNames()).toEqual(first);
+  expect(visibleNames()).toHaveLength(6);
+  expect(screen.queryByRole('button', { name: 'Pausar carrusel' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Negocios siguientes' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Negocios anteriores' })).toBeNull();
 });
 
-it('pauses on an open contact and changes groups with the controls', async () => {
+it('opens and closes the selected contact without duplicating accessible businesses', async () => {
   await showCarousel();
-  const first = visibleNames();
   fireEvent.click(screen.getAllByRole('button', { name: /Ver contactos de Comercio/ })[0]);
   expect(await screen.findByRole('group', { name: /Redes sociales de Comercio/ })).toBeTruthy();
-  act(() => jest.advanceTimersByTime(12000));
-  expect(screen.getByRole('button', { name: /Ocultar contactos de Comercio/ })).toBeTruthy();
-  fireEvent.click(screen.getByRole('button', { name: 'Negocios siguientes' }));
+  const selected = screen.getByRole('button', { name: /Ocultar contactos de Comercio/ });
+  expect(selected.getAttribute('aria-expanded')).toBe('true');
+  expect(visibleNames()).toHaveLength(5);
+  fireEvent.click(selected);
   expect(screen.queryByRole('group', { name: /Redes sociales de Comercio/ })).toBeNull();
-  expect(visibleNames()).not.toEqual(first);
-  fireEvent.click(screen.getByRole('button', { name: 'Negocios anteriores' }));
-  expect(visibleNames()).toEqual(first);
+  expect(visibleNames()).toHaveLength(6);
 });

@@ -130,10 +130,12 @@ movimiento reducido.
 
 ### Carrusel de negocios en portada
 
-`MallPreview` presenta grupos de tres tarjetas completas, con logos contenidos y
-nombres de hasta dos líneas. Evita la marquesina continua de tarjetas angostas y
-el texto de contacto repetido por tarjeta. Cambia automáticamente cada seis segundos
-mediante una transición breve; se pausa al enfocar, pasar el cursor o consultar
-contactos. Incluye controles anterior/siguiente, contador de grupo y pausa manual.
-La preferencia de movimiento reducido desactiva el avance automático y la transición.
-Los contactos permanecen debajo del grupo; no se agrega una barra de scroll.
+`MallPreview` usa una pista de movimiento continuo, con al menos tres tarjetas
+completas en móvil y tarjetas de ancho fijo que permiten mostrar más negocios en
+escritorio. Conserva logos contenidos y nombres de dos líneas, sin el texto de
+contacto repetido. No tiene paginación, barra de controles ni botón de pausa.
+Se detiene mientras se enfoca, se pasa el cursor o se consultan contactos, que
+aparecen debajo. Las copias del bucle se excluyen de la navegación por teclado y
+del árbol de accesibilidad. Movimiento reducido desactiva la animación y permite
+recorrer la pista sin mostrar una barra de scroll. Con tres o menos negocios se
+muestran las tarjetas sin duplicarlas.
