@@ -2,7 +2,7 @@
 
 ProGas usa versionamiento semántico: `MAYOR.MENOR.PARCHE`.
 
-La versión de esta entrega es **1.3.0**, pendiente de publicación. La versión de
+La versión de esta entrega es **1.3.1**, pendiente de publicación. La versión de
 partida del proyecto era `1.1.0`. Los números del historial de Horizon UI pertenecen
 a la plantilla y no representan entregas de ProGas.
 

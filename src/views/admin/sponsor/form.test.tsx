@@ -75,6 +75,23 @@ it('moves an edited sponsor to the end only when its category changes', async ()
   expect(SponsorService.nextOrder).toHaveBeenCalledWith('Tiendas');
 });
 
+it('masks WhatsApp, rejects incomplete phones and saves a usable link', async () => {
+  showForm();
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: 'Negocio WhatsApp' } });
+  const phone = screen.getByLabelText('WhatsApp');
+  fireEvent.change(phone, { target: { value: '8888777' } });
+  expect((phone as HTMLInputElement).value).toBe('8888-777');
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
+  expect(await screen.findByText(/Ingrese un número de WhatsApp válido/)).toBeTruthy();
+  expect(SponsorService.create).not.toHaveBeenCalled();
+  fireEvent.change(phone, { target: { value: '88887777' } });
+  expect((phone as HTMLInputElement).value).toBe('8888-7777');
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
+  await waitFor(() => expect(SponsorService.create).toHaveBeenCalledWith(expect.objectContaining({
+    socialLinks: { whatsapp: 'https://wa.me/50688887777' }, links: ['https://wa.me/50688887777'],
+  })));
+});
+
 it.each(['', '   ', '\t\n', '\u00a0'])('blocks creation with a blank name: %j', async name => {
   showForm();
   fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: name } });
