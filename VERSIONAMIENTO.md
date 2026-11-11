@@ -25,8 +25,9 @@ agrupan en `1.2.0`; sus ajustes durante la revisión no generan nuevas versiones
 - `package-lock.json`: deben coincidir tanto `version` como `packages[""].version`.
 - `CHANGELOG.md`: una entrada de ProGas para la versión, con sus cambios y estado.
 
-El pie de página ya lee `package.json`; no escribir otra versión fija en los
-componentes. Las versiones de las dependencias y los comentarios históricos de
+El componente compartido `AppVersion` lee `package.json` y muestra la versión
+en el pie público y al final del menú administrativo (también en su menú móvil).
+No escribir otra versión fija en los componentes. Las versiones de las dependencias y los comentarios históricos de
 Horizon UI son independientes de la versión de ProGas.
 
 ## Preparar una entrega
@@ -95,3 +96,34 @@ para incluir correcciones posteriores.
 ```
 
 Al publicarse, reemplazar «Pendiente de publicación» por la fecha real de entrega.
+
+
+## Identificar cada despliegue
+
+La versión semántica identifica la entrega agrupada; la revisión identifica cada
+actualización del mismo PR. Por ejemplo:
+
+- `Versión 1.2.0` / `Vista previa PR 38 · abc1234`.
+- `Versión 1.2.0` / `Producción · def5678`.
+- `Versión 1.2.0` / `Desarrollo local` al ejecutar `npm start`.
+
+`npm run build` ejecuta `scripts/build-app.cjs`, comprueba la coherencia de la
+versión y pasa a CRA sólo los metadatos públicos del despliegue. Netlify aporta
+`COMMIT_REF`, `CONTEXT` y `REVIEW_ID`; GitHub Actions usa `GITHUB_SHA` y la referencia
+del PR. Fuera de esos entornos se usa el commit local de Git y la etiqueta neutral
+«Compilación». No se deduce «Producción» del modo optimizado de React. Si falta una
+revisión válida, la interfaz lo indica en vez de inventar un identificador.
+Estos valores quedan incorporados al bundle: no consultan GitHub desde el navegador
+ni afirman que una versión pendiente ya está publicada.
+
+Verificaciones disponibles:
+
+```bash
+npm run check:version
+npm run test:versioning
+```
+
+La primera exige `MAYOR.MENOR.PARCHE`, igualdad entre los tres campos de npm y una
+entrada de la versión en `CHANGELOG.md`. CI ejecuta ambas antes de tipos y pruebas;
+la compilación vuelve a comprobar la versión antes de generar el bundle. No se
+crean etiquetas ni releases automáticamente.

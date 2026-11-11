@@ -48,14 +48,16 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "node scripts/build-app.cjs",
     "postbuild": "node scripts/build-seo.cjs",
     "test": "react-scripts test",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx --max-warnings=0",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "check:version": "node scripts/check-version.cjs",
+    "test:versioning": "node --test scripts/versioning.test.cjs"
   },
   "eslintConfig": {
     "extends": [

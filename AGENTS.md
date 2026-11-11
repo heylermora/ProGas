@@ -184,6 +184,8 @@ npm test -- --watchAll=false --runInBand
 npm run build
 ```
 
+El versionamiento sigue `VERSIONAMIENTO.md`: `package.json` es la fuente de verdad; mantener ambos campos de versión del lockfile y la entrada de `CHANGELOG.md` coherentes. `AppVersion` presenta versión, entorno y revisión. `npm run build` incorpora esos metadatos mediante `scripts/build-app.cjs`; usar el comando oficial para despliegues. Las correcciones de una entrega aún pendiente no aumentan la versión por commit. Ejecutar `npm run check:version` y `npm run test:versioning` al modificar este flujo.
+
 `npm ci` instala a partir del lockfile; ejecutarlo cuando sea necesario preparar dependencias. CI usa Node 20 y ejecuta tipos, lint, tests, cobertura y build. `npm run deploy` publica mediante `gh-pages`; reservarlo para una solicitud de publicación.
 
 Para cambios de lógica, cubrir casos normales, errores y límites, especialmente importes, stock, reintentos y permisos. Para UI interactiva nueva, probar su comportamiento principal y accesibilidad con React Testing Library. Preferir consultas por rol y nombre accesible a detalles internos.

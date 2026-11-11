@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PublicFooter from './PublicFooter';
 import packageInfo from '../../../package.json';
+import { deployedBuild } from 'utils/appVersion';
 
 describe('PublicFooter', () => {
   it('presents product information, creator portfolio and subtle admin access', () => {
@@ -16,6 +17,7 @@ describe('PublicFooter', () => {
     );
 
     expect(screen.getByText(`Versión ${packageInfo.version}`)).toBeTruthy();
+    expect(screen.getByText(deployedBuild)).toBeTruthy();
     expect(screen.getByRole('link', { name: /^creado por johel mora calderón$/i }).getAttribute('href')).toBe('/portfolio');
     expect(screen.getByRole('link', { name: /acceso administrativo/i }).getAttribute('href')).toBe('/auth/sign-in');
     expect(screen.getByText(/un espacio para el comercio local/i)).toBeTruthy();

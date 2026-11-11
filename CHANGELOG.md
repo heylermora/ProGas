@@ -11,22 +11,28 @@ Preparada el 2026-10-30. Esta entrada no confirma un despliegue en producción.
 - Página administrativa de categorías con pestañas, renombrado y selección de un emoji por ícono.
 - IDs estables para categorías de comercios y productos, con compatibilidad para nombres históricos.
 - Reglas de versionamiento semántico y registro de entregas de ProGas.
+- Versión, entorno y revisión del despliegue visibles en el pie público y menú administrativo; verificación de npm e historial al compilar y en CI.
+- Varias categorías específicas por negocio, conservando compatibilidad con los registros actuales.
+- Nombre comercial obligatorio al crear y actualizar negocios, con validación en formulario, servicio y reglas de Firestore.
+- Estadísticas con ranking por negocio, distribución por canal y URLs completas desplegables.
 - Botón para compartir un negocio mediante el menú nativo, copiar su enlace directo o seleccionarlo manualmente cuando el navegador no permite copiarlo.
 
 ### Cambiado
 - Listas y selectores de categorías en orden alfabético en español.
 - Mapa con distribución equilibrada, nombres completos y sectores de hasta ocho categorías.
-- Carrusel con arrastre táctil o con ratón, pausa y reanudación del avance automático.
+- Carrusel de avance continuo, ancho para tres tarjetas en móvil y más negocios visibles en escritorio, sin barra inferior; pausa al consultar contactos o enfocar.
 - Contactos del negocio en una franja independiente, con sombras pequeñas y sin barra de desplazamiento visible.
 - Pie de página con el morado de la marca y disposición adaptada a móvil.
 - Íconos diferentes para «Visitas y clics» y «Patrocinadores» en el menú.
-- Logos grandes y centrados como elemento principal de las tarjetas del carrusel.
+- Logos contenidos y nombres legibles en dos líneas en las tarjetas del carrusel.
+- Controles de regreso unificados como parte del juego y retiro de la ruta externa redundante de categorías.
 - Retiro del bloque exclusivo de pedidos y redes de Gas Memo en la portada.
 
 ### Corregido
 - Pérdida de asignaciones al cambiar el nombre de una categoría.
 - Recorte de nombres y distribución incompleta de categorías en el mapa.
 - Detención del avance automático del carrusel por redondeo de posiciones.
+- Enlace explícito al favicon original en PNG para la pestaña del navegador.
 - Espacio reservado innecesariamente para contactos cerrados y sombras recortadas.
 - Navegación de regreso por niveles y conservación de la categoría al cambiar de vista, incluso al entrar desde un negocio compartido.
 

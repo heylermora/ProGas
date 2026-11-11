@@ -41,6 +41,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check application version
+        run: npm run check:version && npm run test:versioning
+
       - name: Type-check source
         run: npm run typecheck
 
