@@ -38,6 +38,12 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Check version consistency
+        run: npm run check:version
+
+      - name: Test version validation
+        run: npm run test:version
+
       - name: Install dependencies
         run: npm ci
 

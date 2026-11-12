@@ -1,0 +1,23 @@
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  conventional-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Conventional Commit title
+        uses: actions/github-script@v7
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        with:
+          script: |
+            const title = process.env.PR_TITLE || '';
+            if (!/^(feat|fix|perf|revert|docs|chore|ci|test|refactor|style|build)(\([^()\r\n]+\))?!?: \S.+$/.test(title)) {
+              core.setFailed('Usá un título como "fix: corregir categorías" o "feat: agregar filtros". Para cambios incompatibles: "feat!: cambiar contrato".');
+            }
