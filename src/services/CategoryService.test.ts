@@ -1,5 +1,5 @@
 import { addData, fetchAllData, fetchAllPages, fetchDataById, updateData, upsertData } from 'apiConfig';
-import CategoryService from './CategoryService';
+import CategoryService, { CategoryInUseError } from './CategoryService';
 import SponsorService from './SponsorService';
 import ProductService from './ProductService';
 import { completeBusinessSettings } from 'utils/businessCategories';
@@ -9,6 +9,7 @@ jest.mock('apiConfig', () => ({ addData: jest.fn(), fetchAllData: jest.fn(), fet
 let settings: Record<string, unknown>;
 beforeEach(() => {
   jest.clearAllMocks();
+  (fetchAllPages as jest.Mock).mockResolvedValue([]);
   settings = { sponsors: { values: ['Sodas'], businessSettings: { groups: [{ name: 'Comida', icon: '🍽️', categories: ['Sodas'] }], icons: { Sodas: '🍲' } } }, products: { values: ['Gas'] } };
   (fetchDataById as jest.Mock).mockImplementation((collection, id) => collection === 'CategorySettings' ? settings[id] : { id, category: 'Sodas', name: 'Local', order: 3 });
   (upsertData as jest.Mock).mockImplementation((_collection, id, data) => { settings[id] = data; });
@@ -40,5 +41,26 @@ it('preserves product category IDs and resolves old product names after renaming
 it('does not hide read failures behind defaults when saving category metadata', async () => {
   (fetchDataById as jest.Mock).mockRejectedValue(new Error('Sin conexión'));
   await expect(CategoryService.save('products', ['Gas'])).rejects.toThrow('Sin conexión');
+  expect(upsertData).not.toHaveBeenCalled();
+});
+
+it.each(['products', 'sponsors'] as const)('blocks associated %s categories by stable ID, including secondary categories', async kind => {
+  const catalog = await CategoryService.getCatalog(kind);
+  (fetchAllPages as jest.Mock).mockResolvedValue([{ category: 'Otro', categoryIds: [catalog[0].id], active: false }]);
+  await expect(CategoryService.save(kind, [])).rejects.toBeInstanceOf(CategoryInUseError);
+  expect(upsertData).not.toHaveBeenCalled();
+});
+it('blocks deleting general categories that still contain specific categories', async () => {
+  const before = await CategoryService.getBusinessSettings(['Sodas']);
+  await expect(CategoryService.saveBusinessSettings(['Sodas'], { ...before, groups: [] })).rejects.toBeInstanceOf(CategoryInUseError);
+  expect(upsertData).not.toHaveBeenCalled();
+});
+it('allows deleting unused specific and general categories together', async () => {
+  await CategoryService.saveBusinessSettings([], { catalog: [], groups: [], icons: {} });
+  expect(upsertData).toHaveBeenCalledWith('CategorySettings', 'sponsors', expect.objectContaining({ values: [], catalog: [] }));
+});
+it('keeps settings unchanged if association lookup fails', async () => {
+  (fetchAllPages as jest.Mock).mockRejectedValueOnce(new Error('Sin conexión'));
+  await expect(CategoryService.save('products', [])).rejects.toThrow('Sin conexión');
   expect(upsertData).not.toHaveBeenCalled();
 });

@@ -5,6 +5,7 @@ Reglas de versiones y publicación: [VERSIONAMIENTO.md](VERSIONAMIENTO.md).
 ## [1.3.1] — Pendiente de publicación
 
 ### Corregido
+- Eliminación confirmada de categorías generales vacías y específicas sin comercios asociados, con advertencia y validación al guardar; se conservan IDs, alias y categorías múltiples.
 - WhatsApp usa máscara telefónica y muestra el prefijo del enlace al ingresar el número.
 - Validación del número de WhatsApp y del dominio real de las URLs de redes sociales.
 - Conservación de enlaces de WhatsApp existentes mientras no se editen.

@@ -5,12 +5,13 @@ import AsyncContent from 'components/dataDisplay/AsyncContent';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import FormField from 'components/form/FormField';
 import FormPageHeader from 'components/layout/FormPageHeader';
+import DeleteModal from 'components/modal/DeleteModal';
 import FormModal from 'components/modal/FormModal';
 import EmojiField from 'components/category/EmojiField';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MdAdd, MdCategory, MdEdit } from 'react-icons/md';
+import { MdAdd, MdCategory, MdDelete, MdEdit } from 'react-icons/md';
 import { Prompt } from 'react-router-dom';
-import CategoryService from 'services/CategoryService';
+import CategoryService, { CategoryInUseError } from 'services/CategoryService';
 import SponsorService from 'services/SponsorService';
 import { categoryId, compareCategories, completeCatalog, findCategory, renameCategory, sortCategories } from 'utils/categories';
 import { BusinessCategorySettings, completeBusinessSettings } from 'utils/businessCategories';
@@ -26,6 +27,8 @@ export default function BusinessCategoriesPage() {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editor, setEditor] = useState<Editor | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ level: 'general' | 'specific'; id: string; name: string } | null>(null);
+  const [checking, setChecking] = useState(false);
   const [fieldError, setFieldError] = useState('');
   const toast = useToast();
   const muted = useColorModeValue('gray.600', 'gray.400');
@@ -82,11 +85,34 @@ export default function BusinessCategoriesPage() {
       setDirty(true); setEditor(null);
     } catch (error) { setFieldError(error instanceof Error ? error.message : 'No se pudo actualizar la categoría.'); }
   };
+  const remove = async () => {
+    if (!pendingDelete || checking) return;
+    setChecking(true);
+    try {
+      if (pendingDelete.level === 'general') {
+        const group = settings.groups.find(item => item.id === pendingDelete.id);
+        if (group?.categories.length) throw new CategoryInUseError(group.name);
+        setSettings({ ...settings, groups: settings.groups.filter(item => item.id !== pendingDelete.id) });
+      } else {
+        const record = settings.catalog.find(item => item.id === pendingDelete.id);
+        await CategoryService.assertUnused('sponsors', [record.aliases[0] || record.name]);
+        const catalog = settings.catalog.filter(item => item.id !== pendingDelete.id);
+        const icons = { ...settings.icons };
+        delete icons[pendingDelete.name];
+        setValues(catalog.map(item => item.name));
+        setSettings({ catalog, icons, groups: settings.groups.map(group => ({ ...group, categories: group.categories.filter(name => name !== pendingDelete.name) })) });
+      }
+      setTab(0); setDirty(true); setPendingDelete(null);
+    } catch (error) {
+      toast({ status: error instanceof CategoryInUseError ? 'warning' : 'error', title: error instanceof CategoryInUseError ? error.message : 'No se pudo verificar si la categoría tiene valores asociados. Intentá nuevamente.' });
+      setPendingDelete(null);
+    } finally { setChecking(false); }
+  };
   const save = async () => {
     if (saving || !dirty) return;
     setSaving(true);
     try { await CategoryService.saveBusinessSettings(values, completeBusinessSettings(values, settings)); setDirty(false); toast({ status: 'success', title: 'Categorías guardadas' }); }
-    catch { toast({ status: 'error', title: 'No se pudieron guardar las categorías', description: 'Tus cambios siguen disponibles. Volvé a intentar.' }); }
+    catch (error) { toast({ status: error instanceof CategoryInUseError ? 'warning' : 'error', title: error instanceof CategoryInUseError ? error.message : 'No se pudieron guardar las categorías', description: 'Tus cambios siguen disponibles. Volvé a intentar.' }); }
     finally { setSaving(false); }
   };
   return <Box pt={{ base: '120px', md: '80px' }} pb="32px" minW={0}>
@@ -96,34 +122,37 @@ export default function BusinessCategoriesPage() {
       <Stack spacing={5}>
         <Flex justify="space-between" align={{ base: 'stretch', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap={3}>
           <Box><Heading size="md">Categorías generales</Heading><Text fontSize="sm" color={muted} mt={1}>Seleccioná una pestaña para ver sus categorías específicas.</Text></Box>
-          <Button leftIcon={<MdAdd />} variant="outline" flexShrink={0} whiteSpace="nowrap" isDisabled={saving} onClick={() => openEditor({ level: 'general', name: '', icon: '🏪', parent: '' })}>Nueva general</Button>
+          <Button leftIcon={<MdAdd />} variant="outline" flexShrink={0} whiteSpace="nowrap" isDisabled={saving || checking || pendingDelete !== null} onClick={() => openEditor({ level: 'general', name: '', icon: '🏪', parent: '' })}>Nueva general</Button>
         </Flex>
         {settings.groups.length ? <Tabs index={tab} onChange={setTab} colorScheme="brand" isLazy minW={0}>
           <TabList overflowX="auto" overflowY="hidden" maxW="100%" pb={1}>
-            {settings.groups.map(group => <Tab key={group.id} flexShrink={0} gap={2} whiteSpace="nowrap" isDisabled={saving}><Text as="span" fontSize="xl" aria-hidden="true">{group.icon}</Text>{group.name}<Badge borderRadius="full">{group.categories.length}</Badge></Tab>)}
+            {settings.groups.map(group => <Tab key={group.id} flexShrink={0} gap={2} whiteSpace="nowrap" isDisabled={saving || checking || pendingDelete !== null}><Text as="span" fontSize="xl" aria-hidden="true">{group.icon}</Text>{group.name}<Badge borderRadius="full">{group.categories.length}</Badge></Tab>)}
           </TabList>
           <TabPanels>
             {settings.groups.map(group => <TabPanel key={group.id} px={0} py={5}>
               <Card p={{ base: 4, md: 6 }}>
                 <Flex justify="space-between" direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'center' }} gap={4} mb={5}>
                   <HStack spacing={3}><Box bg={iconBg} borderRadius="14px" p={3} fontSize="28px" aria-hidden="true">{group.icon}</Box><Box><Heading size="md">{group.name}</Heading><Text fontSize="sm" color={muted}>{group.categories.length} categorías específicas</Text></Box></HStack>
-                  <Flex gap={2} flexWrap="wrap"><Button variant="ghost" leftIcon={<MdEdit />} isDisabled={saving} onClick={() => openEditor({ level: 'general', original: group.id, name: group.name, icon: group.icon, parent: '' })}>Editar general</Button><Button colorScheme="brand" leftIcon={<MdAdd />} isDisabled={saving} onClick={() => openEditor({ level: 'specific', name: '', icon: '🏪', parent: group.id })}>Nueva específica</Button></Flex>
+                  <Flex gap={2} flexWrap="wrap"><Button variant="ghost" leftIcon={<MdEdit />} isDisabled={saving || checking || pendingDelete !== null} onClick={() => openEditor({ level: 'general', original: group.id, name: group.name, icon: group.icon, parent: '' })}>Editar general</Button><Button colorScheme="red" variant="ghost" leftIcon={<MdDelete />} aria-label={`Eliminar general ${group.name}`} isDisabled={saving || checking} onClick={() => setPendingDelete({ level: 'general', id: group.id, name: group.name })}>Eliminar general</Button><Button colorScheme="brand" leftIcon={<MdAdd />} isDisabled={saving || checking || pendingDelete !== null} onClick={() => openEditor({ level: 'specific', name: '', icon: '🏪', parent: group.id })}>Nueva específica</Button></Flex>
                 </Flex>
                 {group.categories.length ? <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={3}>
                   {group.categories.map(category => <Flex key={category} borderWidth="1px" borderRadius="14px" p={3} gap={3} align="center" minW={0}>
                     <Box bg={iconBg} borderRadius="12px" boxSize="44px" display="grid" placeItems="center" fontSize="26px" flexShrink={0} aria-hidden="true">{settings.icons[category] || '🏪'}</Box>
                     <Text flex={1} minW={0} fontSize="sm" fontWeight="600" overflowWrap="anywhere">{category.replace(/\//g, ' / ')}</Text>
-                    <Button size="sm" variant="ghost" aria-label={`Editar ${category}`} isDisabled={saving} onClick={() => openEditor({ level: 'specific', original: findCategory(settings.catalog, category)?.id, name: category, icon: settings.icons[category] || '🏪', parent: group.id })}>Editar</Button>
+                    <Button size="sm" variant="ghost" aria-label={`Editar ${category}`} isDisabled={saving || checking || pendingDelete !== null} onClick={() => openEditor({ level: 'specific', original: findCategory(settings.catalog, category)?.id, name: category, icon: settings.icons[category] || '🏪', parent: group.id })}>Editar</Button>
+                    <Button size="sm" variant="ghost" colorScheme="red" aria-label={`Eliminar ${category}`} isDisabled={saving || checking} onClick={() => setPendingDelete({ level: 'specific', id: findCategory(settings.catalog, category).id, name: category })}>Eliminar</Button>
                   </Flex>)}
                 </SimpleGrid> : <EmptyState icon={MdCategory} title="Todavía no hay categorías específicas" description="Agregá la primera categoría a este grupo." />}
               </Card>
             </TabPanel>)}
           </TabPanels>
         </Tabs> : <EmptyState icon={MdCategory} title="Creá tu primera categoría general" description="Después podrás agregar sus categorías específicas." />}
-        <Flex justify="flex-end"><Button colorScheme="brand" w={{ base: '100%', sm: 'auto' }} isDisabled={!dirty} isLoading={saving} onClick={save}>Guardar cambios</Button></Flex>
+        <Flex justify="flex-end"><Button colorScheme="brand" w={{ base: '100%', sm: 'auto' }} isDisabled={!dirty || checking || pendingDelete !== null} isLoading={saving} onClick={save}>Guardar cambios</Button></Flex>
       </Stack>
     </AsyncContent>
     {error && <Button onClick={load}>Reintentar</Button>}
+    <DeleteModal isOpen={pendingDelete !== null} onClose={() => setPendingDelete(null)} handle={remove} isLoading={checking}
+      message={`¿Eliminar la categoría “${pendingDelete?.name}”? Solo se puede eliminar si no tiene valores asociados. El cambio se aplicará al guardar.`} />
     <FormModal title={editor ? `${editor.original ? 'Editar' : 'Nueva'} categoría ${editor.level === 'general' ? 'general' : 'específica'}` : 'Categoría'} isOpen={Boolean(editor)} onClose={() => setEditor(null)} onSubmit={apply} submitLabel="Aplicar" size="lg">
       {editor && <Stack spacing={5}>
         <FormField label="Nombre" error={fieldError}><Input value={editor.name} onChange={event => { setEditor({ ...editor, name: event.target.value }); setFieldError(''); }} maxLength={100} /></FormField>
