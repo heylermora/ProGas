@@ -47,6 +47,8 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
+    "check:version": "node scripts/check-version.cjs",
+    "test:version": "node --test scripts/check-version.test.cjs",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "postbuild": "node scripts/build-seo.cjs",

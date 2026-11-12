@@ -1,97 +1,68 @@
 # Versionamiento de ProGas
 
-ProGas usa versionamiento semántico: `MAYOR.MENOR.PARCHE`.
+ProGas usa SemVer (`MAYOR.MENOR.PARCHE`) y Release Please. `package.json`
+es la fuente de la versión visible en el pie. No editar esa versión en componentes.
 
-La versión de esta entrega es **1.3.1**, pendiente de publicación. La versión de
-partida del proyecto era `1.1.0`. Los números del historial de Horizon UI pertenecen
-a la plantilla y no representan entregas de ProGas.
+## Flujo automático
 
-## Cuándo cambiar la versión
+1. Titular cada PR con Conventional Commits y fusionarlo con **Squash and merge**,
+   conservando ese título en el commit final:
 
-| Tipo | Cuándo corresponde | Ejemplo desde 1.3.0 |
-| --- | --- | --- |
-| PARCHE | Correcciones y ajustes visuales que mantienen el comportamiento compatible. | 1.3.1 |
-| MENOR | Funcionalidades nuevas compatibles con los datos y flujos existentes. | 1.4.0 |
-| MAYOR | Cambios incompatibles que requieren adaptar consumidores, datos o flujos. | 2.0.0 |
+   | Título | Próxima versión |
+   | --- | --- |
+   | `fix: corregir categorías` | Parche: 1.3.1 → 1.3.2 |
+   | `feat: agregar filtros` | Menor: 1.3.1 → 1.4.0 |
+   | `feat!: cambiar contrato` | Mayor: 1.3.1 → 2.0.0 |
+   | `docs:`, `ci:`, `test:`, `chore:` | Sin versión nueva por sí solos |
 
-Se asigna una versión por entrega agrupada, no por cada commit. Las correcciones
-de un PR que todavía no se ha publicado mantienen la versión de esa entrega.
-Por ejemplo, las categorías múltiples, las estadísticas y los ajustes del directorio se
-agrupan en `1.3.0`; sus ajustes durante la revisión no generan nuevas versiones.
+   `perf:` y `revert:` también pueden producir parches. Un `!` o una nota
+   `BREAKING CHANGE:` señala un cambio incompatible. CI valida el formato del título.
+2. Después de cada push a `main`, `.github/workflows/release-please.yml` crea o
+   actualiza un único PR de versión. Agrupa los cambios pendientes, calcula SemVer
+   y sincroniza `package.json`, ambas versiones raíz de `package-lock.json`,
+   `.release-please-manifest.json` y `CHANGELOG.md`.
+3. Revisar y fusionar ese PR cuando la entrega esté lista. El siguiente run crea
+   la etiqueta `vX.Y.Z` y la GitHub Release sobre el commit de la entrega.
+   No se fusionan automáticamente los PR de versión.
+4. La GitHub Release identifica el código entregado; no confirma que el sitio
+   esté desplegado. La publicación del sitio sigue su flujo independiente.
 
-## Archivos que deben coincidir
+No subir manualmente la versión en cada PR funcional. Las correcciones de un PR
+actualizan el mismo PR de versión hasta fusionarlo. No mover etiquetas existentes.
+Las entradas históricas pendientes del changelog conservan su estado: no son
+prueba de despliegue. Las fechas generadas por Release Please corresponden a su
+registro de release, no a una comprobación de publicación del sitio.
 
-- `package.json`: fuente de verdad para la versión de la aplicación.
-- `package-lock.json`: deben coincidir tanto `version` como `packages[""].version`.
-- `CHANGELOG.md`: una entrada de ProGas para la versión, con sus cambios y estado.
+## Configuración inicial de GitHub
 
-El pie de página ya lee `package.json`; no escribir otra versión fija en los
-componentes. Las versiones de las dependencias y los comentarios históricos de
-Horizon UI son independientes de la versión de ProGas.
+En **Settings → Actions → General → Workflow permissions**, habilitar
+**Allow GitHub Actions to create and approve pull requests**. El workflow solicita
+`contents: write`, `pull-requests: write` y `actions: write` y usa el `GITHUB_TOKEN`
+del repositorio; no requiere token personal ni secretos adicionales.
 
-## Preparar una entrega
+Los eventos creados con `GITHUB_TOKEN` no disparan otros workflows automáticamente.
+Por eso el workflow de releases ejecuta explícitamente `main.yml` mediante
+`workflow_dispatch` sobre la rama del PR del bot. CI comprueba esa rama completa.
+Si se exige un check de `pull_request` mediante protección de ramas, comprobar
+que el check de CI despachado esté admitido por esa configuración.
 
-1. Revisar la versión actual y elegir PARCHE, MENOR o MAYOR según el alcance final.
-2. Actualizar los archivos de npm sin crear un commit o etiqueta automáticamente:
+El workflow de releases admite **Run workflow** para reintentar después de habilitar
+permisos. Los bloqueos de una política de organización deben resolverse allí;
+no usar un token personal como sustitución silenciosa.
 
-   ```bash
-   npm version patch --no-git-tag-version
-   # Para funcionalidades compatibles: npm version minor --no-git-tag-version
-   # Para cambios incompatibles: npm version major --no-git-tag-version
-   ```
+## Validación
 
-   Para fijar un número acordado, usar por ejemplo:
-
-   ```bash
-   npm version 1.3.0 --no-git-tag-version
-   ```
-
-3. Agregar al inicio de `CHANGELOG.md` una entrada con el estado **Pendiente de
-   publicación**. Usar las secciones Agregado, Cambiado y Corregido que apliquen.
-   Describir el resultado para el usuario y cualquier migración necesaria.
-4. Incluir versión, lockfile e historial en el mismo PR que entrega los cambios.
-   Actualizar la versión mencionada en este documento al preparar otra entrega.
-5. Ejecutar las verificaciones pertinentes al alcance. Un cambio de versión
-   requiere comprobar la coincidencia de los tres campos de npm y que el pie
-   muestre la versión nueva. Las funcionalidades requieren además los controles
-   de tipos, lint, pruebas y compilación indicados en `AGENTS.md`.
-
-## Publicar y etiquetar
-
-Una versión en el código o un PR aprobado no confirma que esté desplegada.
-
-1. Integrar el PR y publicar la entrega mediante el flujo de despliegue del proyecto.
-2. Comprobar la versión visible y el commit exacto que se publicó.
-3. Marcar la entrada del historial con su fecha real de publicación en formato
-   `AAAA-MM-DD`, usando la fecha de Costa Rica. No cambiar retrospectivamente la
-   versión o los cambios de una entrega publicada: registrar otra entrega.
-4. Crear la etiqueta anotada sobre el commit publicado y subirla. Sustituir
-   `COMMIT_PUBLICADO` por su SHA verificado:
-
-   ```bash
-   git tag -a v1.3.0 COMMIT_PUBLICADO -m "ProGas 1.3.0"
-   git push origin v1.3.0
-   ```
-
-5. Si se crea una GitHub Release, usar esa etiqueta y las notas de `CHANGELOG.md`.
-
-Las etiquetas siguen el formato `vMAYOR.MENOR.PARCHE`. No crear etiquetas ni
-releases para un PR pendiente de publicación, ni mover una etiqueta publicada
-para incluir correcciones posteriores.
-
-## Plantilla de entrada
-
-```markdown
-## [X.Y.Z] — Pendiente de publicación
-
-### Agregado
-- Nueva funcionalidad y su utilidad.
-
-### Cambiado
-- Comportamiento actualizado y compatibilidad.
-
-### Corregido
-- Problema resuelto y resultado esperado.
+```bash
+npm run check:version
+npm run test:version
 ```
 
-Al publicarse, reemplazar «Pendiente de publicación» por la fecha real de entrega.
+CI ejecuta ambos antes de instalar dependencias. La validación exige que las
+versiones de npm y el manifiesto coincidan y que la primera entrada versionada de
+`CHANGELOG.md` tenga esa misma versión. Después se ejecutan tipos, lint, pruebas
+y compilación habituales.
+
+`release-please-config.json` usa el releaser `node` y notas en español.
+El manifiesto parte de `1.3.1`; `bootstrap-sha` delimita el historial anterior a la
+automatización. La primera corrección convencional posterior prepara `1.3.2`.
+La versión del historial de Horizon UI no pertenece al historial de ProGas.
