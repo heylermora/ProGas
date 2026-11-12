@@ -1,14 +1,15 @@
 import { categoryId } from 'utils/categories';
 import { ChakraProvider } from '@chakra-ui/react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import CategoryService from 'services/CategoryService';
+import CategoryService, { CategoryInUseError } from 'services/CategoryService';
 import SponsorService from 'services/SponsorService';
 import BusinessCategoriesPage from './index';
 
 jest.setTimeout(20000);
 
-jest.mock('services/CategoryService', () => ({ __esModule: true, default: { get: jest.fn(), getBusinessSettings: jest.fn(), saveBusinessSettings: jest.fn() } }));
+jest.mock('apiConfig', () => ({}));
+jest.mock('services/CategoryService', () => ({ __esModule: true, ...jest.requireActual('services/CategoryService'), default: { get: jest.fn(), getBusinessSettings: jest.fn(), saveBusinessSettings: jest.fn(), assertUnused: jest.fn().mockResolvedValue(undefined) } }));
 jest.mock('services/SponsorService', () => ({ __esModule: true, default: { getAll: jest.fn() } }));
 jest.mock('components/category/EmojiField', () => ({ __esModule: true, default: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => <button type="button" onClick={() => onChange('🥐')}>Ícono {value}</button> }));
 const setup = async () => {
@@ -91,4 +92,43 @@ it('allows renaming a specific category without changing its ID or its group', a
 it('shows general tabs and specific cards in Spanish alphabetical order', async () => {
   await setup();
   expect(screen.getAllByRole('tab').map(tab => tab.textContent?.replace(/\d+$/, ''))).toEqual(['🍽️Comida', '🛍️Compras']);
+});
+
+it('removes an unused specific category after confirmation', async () => {
+  await setup();
+  fireEvent.click(screen.getByRole('button', { name: 'Eliminar Sodas' }));
+  fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
+  await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull(), { timeout: 5000 });
+  expect(screen.queryByRole('button', { name: 'Editar Sodas' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+  await waitFor(() => expect(CategoryService.saveBusinessSettings).toHaveBeenCalledWith(['Tiendas'], expect.objectContaining({ catalog: [expect.objectContaining({ name: 'Tiendas' })] })));
+});
+it('warns and retains an associated specific category', async () => {
+  await setup();
+  (CategoryService.assertUnused as jest.Mock).mockRejectedValueOnce(new CategoryInUseError('Sodas'));
+  fireEvent.click(screen.getByRole('button', { name: 'Eliminar Sodas' }));
+  fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
+  await screen.findByText('No se puede eliminar la categoría “Sodas” porque tiene valores asociados.');
+  await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull(), { timeout: 5000 });
+  expect(screen.getByRole('button', { name: 'Editar Sodas' })).toBeTruthy();
+  expect(CategoryService.saveBusinessSettings).not.toHaveBeenCalled();
+});
+it('warns and retains a general category containing specific categories', async () => {
+  await setup();
+  fireEvent.click(screen.getByRole('button', { name: 'Eliminar general Comida' }));
+  fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
+  await screen.findByText('No se puede eliminar la categoría “Comida” porque tiene valores asociados.');
+  expect(CategoryService.saveBusinessSettings).not.toHaveBeenCalled();
+});
+it('removes a general category after its unused specific categories have been removed', async () => {
+  await setup();
+  fireEvent.click(screen.getByRole('button', { name: 'Eliminar Sodas' }));
+  fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
+  await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull(), { timeout: 5000 });
+  fireEvent.click(screen.getByRole('button', { name: 'Eliminar general Comida' }));
+  fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
+  await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull(), { timeout: 5000 });
+  expect(screen.queryByRole('tab', { name: /Comida/ })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+  await waitFor(() => expect(CategoryService.saveBusinessSettings).toHaveBeenCalledWith(['Tiendas'], expect.objectContaining({ groups: [expect.objectContaining({ name: 'Compras' })] })));
 });

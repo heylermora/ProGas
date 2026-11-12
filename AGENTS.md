@@ -209,6 +209,8 @@ El mapa de categorías usa `utils/mallLayout` para distribuir las estaciones alr
 
 En `MallPreview`, los contactos abiertos se muestran fuera del viewport desplazable del carrusel, en una franja independiente con el nombre del negocio; no colocarlos dentro de cada tarjeta estrecha. `SocialLinksRow appearance="carousel"` mantiene una fila horizontal con objetivos de 44 px, desplazamiento táctil cuando hace falta, sin barra visible y con sombra pequeña. Las demás vistas conservan su presentación habitual de redes.
 
+La eliminación de categorías reutiliza `DeleteModal`. Las generales deben quedar sin específicas antes de eliminarlas; las específicas y las de productos deben estar sin registros asociados. `CategoryService` valida de nuevo al guardar, consultando todas las páginas e incluyendo IDs, alias y categorías secundarias de negocios.
+
 ## Versionamiento y entregas
 
 Seguir `VERSIONAMIENTO.md`. Versionar cada entrega agrupada con SemVer, mantener sincronizados `package.json`, las dos versiones raíz de `package-lock.json` y su entrada en `CHANGELOG.md`. El pie obtiene la versión de `package.json`. Mantener la versión del PR mientras no esté publicado; no generar una versión por cada corrección de revisión. Una versión preparada no es una publicación: registrar fecha y etiqueta `vX.Y.Z` sólo para una entrega verificada. El historial de la plantilla Horizon UI no es el historial de ProGas.

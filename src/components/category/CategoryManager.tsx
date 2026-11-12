@@ -1,11 +1,12 @@
 import { sortCategories } from 'utils/categories';
 import { Flex, HStack, IconButton, Input, Stack, Text, useToast } from '@chakra-ui/react';
 import FormField from 'components/form/FormField';
+import DeleteModal from 'components/modal/DeleteModal';
 import FormModal from 'components/modal/FormModal';
 import ModalList from 'components/modal/ModalList';
 import { useEffect, useState } from 'react';
 import { MdAdd, MdCheck, MdClose, MdDelete, MdEdit } from 'react-icons/md';
-import CategoryService, { CategoryKind } from 'services/CategoryService';
+import CategoryService, { CategoryInUseError, CategoryKind } from 'services/CategoryService';
 
 type Props = { kind: CategoryKind; categories: string[]; isOpen: boolean; onClose: () => void; onSaved: () => Promise<void> | void };
 
@@ -16,9 +17,26 @@ export default function CategoryManager({ kind, categories, isOpen, onClose, onS
   const [saving, setSaving] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
   const toast = useToast();
+  const remove = async () => {
+    if (pendingDelete === null || checking) return;
+    setChecking(true);
+    try {
+      const original = Object.keys(renames).find(key => renames[key] === pendingDelete) || pendingDelete;
+      await CategoryService.assertUnused(kind, [original]);
+      setValues(items => items.filter(item => item !== pendingDelete));
+      setEditingIndex(null);
+      setPendingDelete(null);
+    } catch (error) {
+      toast({ status: error instanceof CategoryInUseError ? 'warning' : 'error',
+        title: error instanceof CategoryInUseError ? error.message : 'No se pudo verificar si la categoría tiene valores asociados. Intente nuevamente.' });
+      setPendingDelete(null);
+    } finally { setChecking(false); }
+  };
 
-  useEffect(() => { if (isOpen) { setValues(sortCategories(categories)); setRenames({}); setDraft(''); setEditingIndex(null); } }, [categories, isOpen]);
+  useEffect(() => { if (isOpen) { setValues(sortCategories(categories)); setRenames({}); setDraft(''); setEditingIndex(null); setPendingDelete(null); } }, [categories, isOpen]);
   const add = () => {
     const value = draft.trim();
     if (!value || values.some((item) => item.toLocaleLowerCase('es') === value.toLocaleLowerCase('es'))) return;
@@ -38,12 +56,12 @@ export default function CategoryManager({ kind, categories, isOpen, onClose, onS
   const save = async () => {
     setSaving(true);
     try { await CategoryService.save(kind, values, renames); await onSaved(); toast({ status: 'success', title: 'Categorías actualizadas' }); onClose(); }
-    catch { toast({ status: 'error', title: 'No se pudieron guardar las categorías' }); }
+    catch (error) { toast({ status: error instanceof CategoryInUseError ? 'warning' : 'error', title: error instanceof CategoryInUseError ? error.message : 'No se pudieron guardar las categorías' }); }
     finally { setSaving(false); }
   };
 
-  return <FormModal title="Administrar categorías" description="Los cambios de nombre conservan la asignación de los registros existentes."
-    isOpen={isOpen} onClose={onClose} onSubmit={save} submitLabel="Guardar cambios" isSubmitting={saving} isDisabled={editingIndex !== null} size="lg">
+  return <><FormModal title="Administrar categorías" description="Los cambios de nombre conservan la asignación de los registros existentes."
+    isOpen={isOpen} onClose={onClose} onSubmit={save} submitLabel="Guardar cambios" isSubmitting={saving} isDisabled={editingIndex !== null || pendingDelete !== null || checking} size="lg">
     <Stack spacing={4}>
       <FormField label="Nueva categoría"><HStack><Input value={draft} onChange={event => setDraft(event.target.value)}
         onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); add(); } }} />
@@ -56,9 +74,12 @@ export default function CategoryManager({ kind, categories, isOpen, onClose, onS
         {editingIndex === index ? <><IconButton type="button" aria-label="Confirmar nombre" icon={<MdCheck />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} colorScheme="brand" onClick={confirmRename} />
           <IconButton type="button" aria-label="Cancelar edición" icon={<MdClose />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} variant="ghost" onClick={() => setEditingIndex(null)} /></> :
           <IconButton type="button" aria-label={`Renombrar ${value}`} icon={<MdEdit />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} variant="ghost" onClick={() => startRename(index)} />}
-        <IconButton type="button" aria-label={`Eliminar ${value}`} icon={<MdDelete />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} variant="ghost" colorScheme="red" onClick={() => { setValues(values.filter((_, itemIndex) => itemIndex !== index)); setEditingIndex(null); }} />
+        <IconButton type="button" aria-label={`Eliminar ${value}`} icon={<MdDelete />} size="sm" h={{ base: "40px", md: "32px" }} minH={{ base: "40px", md: "32px" }} minW={{ base: "40px", md: "32px" }} variant="ghost" colorScheme="red" isDisabled={editingIndex !== null || saving} onClick={() => setPendingDelete(value)} />
       </Flex>} />
       {editingIndex !== null && <Text fontSize="sm" color="gray.500">Confirme el nombre o cancele la edición antes de guardar.</Text>}
     </Stack>
-  </FormModal>;
+  </FormModal>
+    <DeleteModal isOpen={pendingDelete !== null} onClose={() => setPendingDelete(null)} handle={remove} isLoading={checking}
+      message={`¿Eliminar la categoría “${pendingDelete}”? El cambio se aplicará al guardar. Solo se pueden eliminar categorías sin valores asociados.`} />
+  </>;
 }
