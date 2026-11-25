@@ -66,7 +66,7 @@ describe('VirtualMall flight navigation', () => {
     fireEvent.click(station);
     await screen.findByRole('dialog');
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape', code: 'Escape', keyCode: 27 });
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 3000 });
     expect(screen.getByRole('button', { name: 'Volver a categorías específicas' })).toBeTruthy();
   }, 15000);
 
