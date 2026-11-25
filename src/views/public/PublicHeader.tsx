@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Flex, Icon, IconButton, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Flex, Icon, IconButton, Image, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink, useHistory, useLocation } from 'react-router-dom';
 import { MdHome } from 'react-icons/md';
 import BackButton from 'components/button/BackButton';
@@ -33,7 +33,10 @@ export default function PublicHeader({ onBack, backLabel }: { onBack?: () => voi
           </BackButton>
         ) : (
           <Flex as={location.pathname === '/' ? RLink : undefined} to={location.pathname === '/' ? '/' : undefined} align="center" gap="9px" color="inherit" _hover={{ textDecoration: 'none' }}>
-            <Flex minW="48px" h="38px" px="8px" flex="0 0 auto" borderRadius="13px" bg="brand.500" color="white" align="center" justify="center" fontWeight="900">Ulà</Flex>
+            <Flex boxSize="38px" flex="0 0 auto" borderRadius="13px" bg="brand.100" align="center" justify="center">
+              <Image src={`${process.env.PUBLIC_URL}/ula/isotipo.png`} alt="" h="24px" w="auto" objectFit="contain" />
+            </Flex>
+            <Text fontWeight="700">Ulà</Text>
             <Box display={{ base: 'none', sm: 'block' }}><Text color={muted} fontSize="xs">Negocios de Acosta</Text></Box>
           </Flex>
         )}

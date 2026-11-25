@@ -14,7 +14,10 @@ import { unifiedFormControls } from './components/formControls';
 import { formStyles } from './components/form';
 
 export default extendTheme(
-	{ breakpoints }, // Breakpoints
+	{
+    breakpoints,
+    fonts: { heading: '"DM Sans", Arial, sans-serif', body: '"DM Sans", Arial, sans-serif' },
+  },
 	globalStyles,
 	badgeStyles, // badge styles
 	buttonStyles, // button styles

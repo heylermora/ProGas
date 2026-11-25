@@ -2,10 +2,10 @@ import { mode } from '@chakra-ui/theme-tools';
 export const globalStyles = {
 	colors: {
 		brand: {
-			100: '#E9E3FF',
+			100: '#E8E3FF',
 			200: '#422AFB',
 			300: '#422AFB',
-			400: '#7551FF',
+			400: '#8170FF',
 			500: '#422AFB',
 			600: '#3311DB',
 			700: '#02044A',
@@ -13,10 +13,10 @@ export const globalStyles = {
 			900: '#11047A'
 		},
 		brandScheme: {
-			100: '#E9E3FF',
-			200: '#7551FF',
-			300: '#7551FF',
-			400: '#7551FF',
+			100: '#E8E3FF',
+			200: '#8170FF',
+			300: '#8170FF',
+			400: '#8170FF',
 			500: '#422AFB',
 			600: '#3311DB',
 			700: '#02044A',
@@ -24,7 +24,7 @@ export const globalStyles = {
 			900: '#02044A'
 		},
 		brandTabs: {
-			100: '#E9E3FF',
+			100: '#E8E3FF',
 			200: '#422AFB',
 			300: '#422AFB',
 			400: '#422AFB',
@@ -86,7 +86,7 @@ export const globalStyles = {
 				bg: mode('secondaryGray.300', 'navy.900')(props),
 				fontFamily: '"DM Sans", Arial, sans-serif',
 				letterSpacing: '-0.2px',
-				color: mode('navy.700', 'white')(props),
+				color: mode('navy.900', 'white')(props),
 				WebkitFontSmoothing: 'antialiased',
 				MozOsxFontSmoothing: 'grayscale'
 			},

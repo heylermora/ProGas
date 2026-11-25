@@ -117,9 +117,9 @@ export default function SponsorForm({ publicSubmission, request, onReviewed }: F
 
   };
 
-  if (submitted) return <Alert status="success" role="status"><AlertIcon />Recibimos tu solicitud. Está en revisión para aprobación.</Alert>;
+  if (submitted) return <Alert status="success" role="status"><AlertIcon />Recibimos su solicitud. Está en revisión para aprobación.</Alert>;
   const title = publicSubmission ? 'Quiero promocionar mi negocio' : request ? 'Revisar solicitud' : id ? 'Editar patrocinador' : 'Nuevo patrocinador';
-  return <Card maxW="1000px" mx="auto" mt="24px" mb="36px" p={{ base: 4, md: 6 }}><Form aria-label={title} title={title} description={publicSubmission ? 'Completá los datos de tu comercio. Revisaremos la solicitud antes de publicarla.' : 'Prepará la información que verán los clientes en el directorio.'}
+  return <Card maxW="1000px" mx="auto" mt="24px" mb="36px" p={{ base: 4, md: 6 }}><Form aria-label={title} title={title} description={publicSubmission ? 'Complete los datos de su comercio. Revisaremos la solicitud antes de publicarla.' : 'Prepará la información que verán los clientes en el directorio.'}
     onBack={publicSubmission || request ? undefined : () => history.push('/admin/sponsor/index')} submitLabel={publicSubmission ? 'Enviar solicitud' : request ? 'Guardar edición' : 'Guardar patrocinador'} isSubmitting={saving}
     isDisabled={loading || loadError || readingLogo} pt={0} pb={0}
     onFormSubmit={event => { event.preventDefault(); save(); }}>
@@ -127,7 +127,7 @@ export default function SponsorForm({ publicSubmission, request, onReviewed }: F
       <Box as="fieldset" disabled={saving || readingLogo} border="0" p="0" m="0" minW="0">
         <Stack spacing={5}>
           {message && <Alert status="error" borderRadius="12px"><AlertIcon />{message}</Alert>}
-          {(publicSubmission || request) && <FormField label="Teléfono de contacto" isRequired error={errors.contactPhone} help="Se usa para contactarte sobre la solicitud. Es privado."><Input type="tel" autoComplete="tel-national" value={contactPhone} onChange={event => setContactPhone(event.target.value)} /></FormField>}
+          {(publicSubmission || request) && <FormField label="Teléfono de contacto" isRequired error={errors.contactPhone} help="Se usa para contactarle sobre la solicitud. Es privado."><Input type="tel" autoComplete="tel-national" value={contactPhone} onChange={event => setContactPhone(event.target.value)} /></FormField>}
           <FormSection title="Información del negocio" first>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                 <FormField label="Nombre del negocio" isRequired error={errors.name} help="Nombre comercial que se mostrará en el directorio y las estadísticas."><Input maxLength={publicSubmission ? 200 : undefined} value={sponsor.name || ''} onChange={event => set('name', event.target.value)} placeholder="Nombre comercial" /></FormField>

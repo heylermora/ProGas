@@ -77,7 +77,7 @@ describe('VirtualMall flight navigation', () => {
     render(<ChakraProvider theme={theme}><MemoryRouter initialEntries={['/mall?business=linked']}><VirtualMall /></MemoryRouter></ChakraProvider>);
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByRole('heading', { name: 'Negocio sin contactos' })).toBeTruthy();
-    expect(dialog.queryByText('CONTACTÁ AL NEGOCIO')).toBeNull();
+    expect(dialog.queryByText('CONTACTO DEL NEGOCIO')).toBeNull();
     expect(dialog.queryByText('Cómo llegar')).toBeNull();
     expect(dialog.queryByRole('button', { name: 'Ver video del negocio' })).toBeNull();
     fireEvent.click(dialog.getByRole('button', { name: 'Cerrar' }));

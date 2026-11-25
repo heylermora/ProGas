@@ -11,10 +11,10 @@ export default function PublicFooter() {
   const isPortfolio = location.pathname === '/portfolio';
 
   return (
-    <Box as="footer" mt={{ base: '24px', md: '40px' }} overflow="hidden" bg="brand.500" color="white" borderRadius={{ base: '20px', md: '24px' }}>
+    <Box as="footer" mt={{ base: '24px', md: '40px' }} overflow="hidden" bg="navy.900" color="white" borderRadius={{ base: '20px', md: '24px' }}>
       <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} gap={{ base: '16px', md: '24px' }} px={{ base: '20px', md: '28px' }} py={{ base: '24px', md: '20px' }}>
         <Flex align="center" direction={{ base: 'column', md: 'row' }} gap={{ base: '10px', md: '16px' }} minW="0">
-          <Text as="span" fontWeight="900" fontSize="2xl">Ulà</Text>
+          <Image src={`${process.env.PUBLIC_URL}/ula/logo-blanco.png`} alt="Ulà" h="64px" w="auto" />
           <Box minW="0" textAlign={{ base: 'center', md: 'left' }}>
             <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="700" lineHeight="1.3">Negocios de Acosta</Text>
             <Text color="whiteAlpha.900" mt="4px" fontSize="xs" lineHeight="1.5">Un espacio para el comercio local</Text>
@@ -34,7 +34,7 @@ export default function PublicFooter() {
           </Link>}
         </Flex>
       </Flex>
-      <Flex px={{ base: '20px', md: '28px' }} py="8px" bg="brand.600" borderTop="1px solid" borderColor="whiteAlpha.200" align="center" justify="space-between" gap="12px">
+      <Flex px={{ base: '20px', md: '28px' }} py="8px" bg="whiteAlpha.100" borderTop="1px solid" borderColor="whiteAlpha.200" align="center" justify="space-between" gap="12px">
         <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} minW="0" flexWrap="wrap" columnGap="8px" rowGap="2px" color="whiteAlpha.900" fontSize="11px">
           <Text>© {new Date().getFullYear()} Ulà</Text><Text aria-hidden="true" display={{ base: 'none', md: 'block' }}>•</Text><Text>Versión {packageInfo.version}</Text>
         </Flex>

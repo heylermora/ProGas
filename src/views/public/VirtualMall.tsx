@@ -252,15 +252,15 @@ function Mall({ editing = false }: { editing?: boolean }) {
         <Button colorScheme="brand" onClick={saveOrder} isLoading={saving} isDisabled={!dirty || orderStatus !== 'ready'}>Guardar</Button>
       </Flex>}
       <Stack spacing={{ base: '10px', md: '18px' }}>
-        <Box borderRadius={{ base: '24px', md: '34px' }} overflow="hidden" p={{ base: '14px', md: '22px' }} bgGradient="linear(135deg, #111827 0%, #312E81 48%, #0284C7 100%)" color="white" position="relative">
+        <Box borderRadius={{ base: '24px', md: '34px' }} overflow="hidden" p={{ base: '14px', md: '22px' }} bgGradient="linear(135deg, #0B1437 0%, #27188F 62%, #422AFB 100%)" color="white" position="relative">
           <Box position="absolute" right="-25px" top="-60px" fontSize={{ base: '140px', md: '190px' }} opacity=".11">🕹️</Box>
           <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap={{ base: '8px', md: '14px' }} direction={{ base: 'column', md: 'row' }}>
           <Stack spacing={{ base: '4px', md: '6px' }} maxW="760px" minW="0">
             <Badge w="fit-content" px="10px" py="2px" fontSize={{ base: '10px', md: 'xs' }} borderRadius="full" bg="cyan.300" color="navy.800" letterSpacing=".08em">MODO EXPLORACIÓN</Badge>
             <Heading fontSize={{ base: '22px', md: '36px' }} lineHeight="1.1">Centro Comercial Virtual</Heading>
             <Text fontSize={{ base: 'xs', md: 'md' }} lineHeight="1.4" color="whiteAlpha.900">
-              <Box as="span" display={{ base: 'inline', md: 'none' }}>Elegí una categoría y explorá sus negocios.</Box>
-              <Box as="span" display={{ base: 'none', md: 'inline' }}>Viajá por el mapa, entrá a una categoría y descubrí cada negocio en su propia estación.</Box>
+              <Box as="span" display={{ base: 'inline', md: 'none' }}>Elija una categoría y explore sus negocios.</Box>
+              <Box as="span" display={{ base: 'none', md: 'inline' }}>Explore el mapa y descubra los negocios de cada categoría.</Box>
             </Text>
           </Stack>
           {!editing && <Button leftIcon={<Icon as={simpleView ? MdMap : MdViewList} />} bg="white" color="navy.800" borderRadius="full" size="md" minH="44px" fontSize={{ base: 'sm', md: 'md' }} px={{ base: '16px', md: '20px' }} flexShrink={0} onClick={toggleView} _hover={{ bg: 'cyan.50', transform: 'translateY(-1px)' }}>{simpleView ? 'Ver mapa interactivo' : 'Usar vista sencilla'}</Button>}
@@ -274,7 +274,7 @@ function Mall({ editing = false }: { editing?: boolean }) {
           {!selectedCategory && (
             <Stack px={{ base: '6px', md: '8px' }} pb="12px" spacing="1px">
               <Heading fontSize={{ base: 'lg', md: 'xl' }}>{group?.name || 'Categorías generales'}</Heading>
-              <Text color="gray.500" fontSize="xs">Elegí una categoría para viajar a su submapa.</Text>
+              <Text color="gray.500" fontSize="xs">Seleccione una categoría para explorar su mapa.</Text>
             </Stack>
           )}
 
@@ -300,7 +300,7 @@ function Mall({ editing = false }: { editing?: boolean }) {
               <Stack position="absolute" left="50%" bottom="10%" transform="translateX(-50%)" align="center" textAlign="center" color="white" zIndex={3} w="80%" pointerEvents="none">
                 <Text fontSize="38px">🛰️</Text>
                 <Heading fontSize="xl">No hay estaciones disponibles</Heading>
-                <Text color="whiteAlpha.700" fontSize="sm">Usá el botón Volver para explorar otra categoría.</Text>
+                <Text color="whiteAlpha.700" fontSize="sm">Use el botón Volver para explorar otra categoría.</Text>
               </Stack>
             )}
 
@@ -340,7 +340,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
   return (
     <Box bg={surface} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '18px', md: '26px' }} boxShadow="lg">
       <Stack spacing="20px">
-        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Elegí una categoría o escribí el nombre de un negocio. No necesitás usar el mapa.</Text></Box>
+        <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Seleccione una categoría o busque un negocio por nombre.</Text></Box>
         <Input aria-label="Buscar negocio" size="lg" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Buscar negocio o servicio" />
         {categories.length > 0 && <SearchableCategorySelect preserveOrder categories={categories} value={selectedCategory} onChange={onCategory} />}
         <Text fontWeight="700">{visible.length} {visible.length === 1 ? 'negocio encontrado' : 'negocios encontrados'}</Text>
@@ -377,7 +377,7 @@ function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChan
   const visibleCount = categories.slice(mobileSector * CATEGORIES_PER_SECTOR, (mobileSector + 1) * CATEGORIES_PER_SECTOR).length;
   return (
     <>
-      <Text display={onBack ? 'none' : { base: 'block', md: 'none' }} position="absolute" top="20px" left="20px" right="20px" color="cyan.100" textAlign="center" fontWeight="800">Elegí tu próximo destino</Text>
+      <Text display={onBack ? 'none' : { base: 'block', md: 'none' }} position="absolute" top="20px" left="20px" right="20px" color="cyan.100" textAlign="center" fontWeight="800">Elija su próximo destino</Text>
       <FlightControls dropTargets={reorder ? {
         previous: mobileSector > 0 ? categoryKey(categories[mobileSector * CATEGORIES_PER_SECTOR - 1]) : undefined,
         next: mobileSector + 1 < sectorCount ? categoryKey(categories[(mobileSector + 1) * CATEGORIES_PER_SECTOR]) : undefined,
@@ -495,7 +495,7 @@ function BusinessDossier({ business, isOpen, finalFocusRef, contactLinks, onClos
           {business.description.length > 180 && <Button variant="link" color="cyan.200" minH="44px" fontSize="sm" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded}>{expanded ? 'Ver menos' : 'Ver más'}</Button>}
         </Box>}
         {contactLinks.length > 0 && <Box>
-          <Text fontSize="xs" fontWeight="700" letterSpacing=".06em" color="cyan.100">CONTACTÁ AL NEGOCIO</Text>
+          <Text fontSize="xs" fontWeight="700" letterSpacing=".06em" color="cyan.100">CONTACTO DEL NEGOCIO</Text>
           <SocialLinksRow links={contactLinks} businessId={business.id} source="mall" label={`Redes sociales de ${business.name}`} size="regular" />
         </Box>}
         {hasLocation && <Box borderTop="1px solid" borderColor="whiteAlpha.200" pt="16px">
