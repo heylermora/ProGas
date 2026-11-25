@@ -50,7 +50,7 @@ export default function TableExport({ filename, columns, scope, matched, rows, c
         </Select></FormField>}
         <Text>{all && allRows ? 'Todas las categorías' : scope}. <strong>{all && allRows ? allRows.length : matched} coincidencias</strong> y {data.length} filas en el archivo. Se incluyen todas las coincidencias de los filtros.</Text>
         <FormField label="Formato"><Select value={format} onChange={event => setFormat(event.target.value as ExportFormat)}>{formats.map(value => <option key={value}>{value}</option>)}</Select></FormField>
-        {categoryOptions && <FormField label="Comercios con varias categorías"><Select value={split ? 'split' : 'single'} onChange={event => setSplit(event.target.value === 'split')}>
+        {categoryOptions && <FormField label="Comercios con varias categorías" help="Se incluyen todas las categorías de cada comercio que coincide con los filtros."><Select value={split ? 'split' : 'single'} onChange={event => setSplit(event.target.value === 'split')}>
           <option value="single">Una fila por comercio</option>
           <option value="split">Una fila por cada categoría del comercio</option>
         </Select></FormField>}

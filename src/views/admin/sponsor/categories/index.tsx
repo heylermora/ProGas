@@ -17,12 +17,13 @@ import SponsorService from 'services/SponsorService';
 import { categoryId, compareCategories, completeCatalog, findCategory, renameCategory, sortCategories } from 'utils/categories';
 import { BusinessCategoryGroup, BusinessCategorySettings, completeBusinessSettings } from 'utils/businessCategories';
 
-const exportColumns = ['Nombre', 'Nivel', 'Categoría general', 'Ícono'];
+const exportColumns = ['Nombre', 'Nivel', 'Categoría general', 'Comercios asociados'];
 
 type Editor = { level: 'general' | 'specific'; original?: string; name: string; icon: string; parent: string };
 export default function BusinessCategoriesPage() {
   const loadVersion = useRef(0);
   const [settings, setSettings] = useState<BusinessCategorySettings>({ groups: [], icons: {} });
+  const [businessCategories, setBusinessCategories] = useState<string[][]>([]);
   const [values, setValues] = useState<string[]>([]);
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -44,6 +45,7 @@ export default function BusinessCategoriesPage() {
       const all = sortCategories([...categories, ...businesses.flatMap(sponsorCategories)]);
       const config = await CategoryService.getBusinessSettings(all);
       if (version !== loadVersion.current) return;
+      setBusinessCategories(businesses.map(sponsorCategories));
       setValues(all); setSettings(completeBusinessSettings(all, config)); setTab(0); setDirty(false);
     } catch { if (version === loadVersion.current) setError('No se pudieron cargar las categorías. Intentá nuevamente.'); }
     finally { if (version === loadVersion.current) setLoading(false); }
@@ -119,9 +121,10 @@ export default function BusinessCategoriesPage() {
     finally { setSaving(false); }
   };
   const currentGroup = settings.groups[tab];
+  const countBusinesses = (categories: string[]) => String(businessCategories.filter(names => names.some(name => categories.includes(name))).length);
   const rowsFor = (groups: BusinessCategoryGroup[]) => groups.flatMap(group => [
-    [group.name, 'General', '', group.icon],
-    ...group.categories.map(category => [category, 'Específica', group.name, settings.icons[category] || '']),
+    [group.name, 'General', '', countBusinesses(group.categories)],
+    ...group.categories.map(category => [category, 'Específica', group.name, countBusinesses([category])]),
   ]).sort((a, b) => compareCategories(a[0], b[0]));
   const exportRows = rowsFor(currentGroup ? [currentGroup] : []);
   return <Box pt={{ base: '120px', md: '80px' }} pb="32px" minW={0}>
@@ -132,7 +135,7 @@ export default function BusinessCategoriesPage() {
         <Flex justify="space-between" align={{ base: 'stretch', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap={3}>
           <Box><Heading size="md">Categorías generales</Heading><Text fontSize="sm" color={muted} mt={1}>Seleccioná una pestaña para ver sus categorías específicas.</Text></Box>
           <Flex gap={2} wrap="wrap"><TableExport filename="Categorías" columns={exportColumns}
-            matched={exportRows.length} rows={() => exportRows} allRows={rowsFor(settings.groups)} scope={currentGroup ? 'Pestaña «' + currentGroup.name + '»' : 'Sin categoría seleccionada'} />
+            matched={exportRows.length} rows={() => exportRows} allRows={rowsFor(settings.groups)} disabled={dirty} scope={currentGroup ? 'Pestaña «' + currentGroup.name + '»' : 'Sin categoría seleccionada'} />
           <Button leftIcon={<MdAdd />} variant="outline" flexShrink={0} whiteSpace="nowrap" isDisabled={saving || checking || pendingDelete !== null} onClick={() => openEditor({ level: 'general', name: '', icon: '🏪', parent: '' })}>Nueva general</Button></Flex>
         </Flex>
         {settings.groups.length ? <Tabs index={tab} onChange={setTab} colorScheme="brand" isLazy minW={0}>
