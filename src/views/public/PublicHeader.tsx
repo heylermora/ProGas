@@ -37,7 +37,7 @@ export default function PublicHeader({ onBack, backLabel }: { onBack?: () => voi
               <Image src={`${process.env.PUBLIC_URL}/ula/isotipo.png`} alt="" h="24px" w="auto" objectFit="contain" />
             </Flex>
             <Text fontWeight="700">Ulà</Text>
-            <Box display={{ base: 'none', sm: 'block' }}><Text color={muted} fontSize="xs">Negocios de Acosta</Text></Box>
+            <Box display={{ base: 'none', sm: 'block' }}><Text color={muted} fontSize="xs">Negocios de Acosta y alrededores</Text></Box>
           </Flex>
         )}
       </Flex>

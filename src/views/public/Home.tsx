@@ -130,7 +130,7 @@ export default function Home() {
             <Image src={`${process.env.PUBLIC_URL}/ula/logo.png`} alt="" h={{ base: '58px', md: '78px' }} w="auto" alignSelf="flex-start" objectFit="contain" />
             <Heading as="h1" id="community-title" fontSize={{ base: '36px', sm: '44px', lg: '58px' }} fontWeight="700"
               lineHeight="1.02" letterSpacing="-.045em" sx={{ textWrap: 'balance' }}>Una mano que siempre da.</Heading>
-            <Text fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.55" maxW="330px">Encuentre productos y servicios de los comercios de Acosta.</Text>
+            <Text fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.55" maxW="330px">Encuentre productos y servicios de los comercios de Acosta y alrededores.</Text>
             <Button as={RLink} to="/mall"
               onClick={() => { void AnalyticsService.track({ type: 'browse_click', source: 'home' }); }}
               alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"

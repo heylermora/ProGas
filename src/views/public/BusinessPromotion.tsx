@@ -9,7 +9,7 @@ export default function BusinessPromotion() {
         justify="space-between" gap={3} maxW="940px" mx="auto">
         <Box minW="0">
           <Heading as="h2" fontSize="md" color="navy.900" lineHeight="1.4">Su negocio también puede estar aquí.</Heading>
-          <Text fontSize="sm" color="#475569" mt={1}>Envíe una solicitud para aparecer en el directorio de comercios de Acosta.</Text>
+          <Text fontSize="sm" color="#475569" mt={1}>Envíe una solicitud para aparecer en el directorio de comercios de Acosta y alrededores.</Text>
         </Box>
         <Button as={Link} to="/promocionar-negocio" colorScheme="brand">Quiero promocionar mi negocio</Button>
       </Flex>

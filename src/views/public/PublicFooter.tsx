@@ -16,7 +16,7 @@ export default function PublicFooter() {
         <Flex align="center" direction={{ base: 'column', md: 'row' }} gap={{ base: '10px', md: '16px' }} minW="0">
           <Image src={`${process.env.PUBLIC_URL}/ula/logo-blanco.png`} alt="Ulà" h="64px" w="auto" />
           <Box minW="0" textAlign={{ base: 'center', md: 'left' }}>
-            <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="700" lineHeight="1.3">Negocios de Acosta</Text>
+            <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="700" lineHeight="1.3">Negocios de Acosta y alrededores</Text>
             <Text color="whiteAlpha.900" mt="4px" fontSize="xs" lineHeight="1.5">Un espacio para el comercio local</Text>
           </Box>
         </Flex>

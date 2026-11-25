@@ -73,13 +73,13 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
   const toggleBusiness = (key: string) => setSelectedBusinessKey((current) => current === key ? '' : key);
 
   return (
-    <Box as={embedded ? 'div' : 'section'} aria-label={embedded ? 'Negocios de Acosta' : undefined} aria-labelledby={embedded ? undefined : 'mall-preview-title'} position="relative" overflow="hidden" borderRadius={embedded ? '0' : { base: '22px', md: '28px' }} bg={embedded ? 'linear-gradient(0deg, #F6F4FF, #E8E3FF)' : 'linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)'} color={embedded ? 'navy.900' : 'white'} p={{ base: '16px', md: compact ? '18px' : '24px' }} pt={embedded ? '0' : undefined} boxShadow={embedded ? 'none' : '0 16px 38px rgba(15, 23, 42, .16)'} border={embedded ? 'none' : '1px solid'} borderColor="whiteAlpha.200">
+    <Box as={embedded ? 'div' : 'section'} aria-label={embedded ? 'Negocios de Acosta y alrededores' : undefined} aria-labelledby={embedded ? undefined : 'mall-preview-title'} position="relative" overflow="hidden" borderRadius={embedded ? '0' : { base: '22px', md: '28px' }} bg={embedded ? 'linear-gradient(0deg, #F6F4FF, #E8E3FF)' : 'linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)'} color={embedded ? 'navy.900' : 'white'} p={{ base: '16px', md: compact ? '18px' : '24px' }} pt={embedded ? '0' : undefined} boxShadow={embedded ? 'none' : '0 16px 38px rgba(15, 23, 42, .16)'} border={embedded ? 'none' : '1px solid'} borderColor="whiteAlpha.200">
       <Box display={embedded ? 'none' : 'block'} position="absolute" inset="0" opacity=".18" pointerEvents="none" bgImage="radial-gradient(circle at 25% 25%, #fff 0 1px, transparent 1.5px)" bgSize="54px 54px" />
       {!embedded && <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="14px" direction={{ base: 'column', md: 'row' }} mb={{ base: '18px', md: '20px' }}>
         <Flex gap="12px" align="center">
           <Flex w={{ base: '42px', md: '48px' }} h={{ base: '42px', md: '48px' }} flex="0 0 auto" borderRadius="16px" align="center" justify="center" bg="whiteAlpha.100" border="1px solid" borderColor="whiteAlpha.300" fontSize={{ base: '23px', md: '27px' }}>🧑‍🚀</Flex>
           <Stack spacing="2px">
-            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de Acosta</Heading>
+            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de Acosta y alrededores</Heading>
             {!compact && <Text color="whiteAlpha.700" fontSize="sm">Seleccione un negocio y contáctelo directamente.</Text>}
           </Stack>
         </Flex>
