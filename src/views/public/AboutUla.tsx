@@ -1,5 +1,5 @@
 import { UlaHandGesture } from 'components/brand/UlaResources';
-import { Box, Button, Flex, Heading, Icon, Image, Link, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Button, Flex, Grid, Heading, Icon, Image, Link, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { useEffect } from 'react';
 import { MdArrowForward, MdExplore, MdStorefront } from 'react-icons/md';
 import { Link as RLink } from 'react-router-dom';
@@ -9,47 +9,35 @@ const heritageSource = 'https://revistacienciassociales.ucr.ac.cr/html/04-SYLVES
 
 const photos = [
   {
-    file: 'san-ignacio',
-    title: 'San Ignacio',
-    description: 'Vista de San Ignacio de Acosta, con la iglesia entre las montañas',
-    source: 'San_Ignacio_de_Acosta._Costa_Rica.jpg',
-    license: '4.0',
+    file: 'panorama-tablazo',
+    title: 'Acosta desde El Tablazo',
+    description: 'Panorámica de Acosta desde El Tablazo, con montañas y vegetación en primer plano',
+    source: 'Acosta._Costa_Rica._Panoramic_view.jpg',
   },
   {
-    file: 'palmichal',
-    title: 'Palmichal',
-    description: 'Plantación de café en una ladera verde de Palmichal de Acosta',
-    source: 'Plantaci%C3%B3n_de_caf%C3%A9_en_Palmichal_de_Acosta._Costa_Rica.JPG',
-    license: '3.0',
-  },
-  {
-    file: 'sabanillas',
-    title: 'Sabanillas',
-    description: 'Montañas de Sabanillas de Acosta bajo un cielo azul',
-    source: 'Monta%C3%B1as_de_Sabanillas_de_Acosta%2C_Costa_Rica.JPG',
-    license: '3.0',
+    file: 'rio-candelaria',
+    title: 'Río Grande de Candelaria',
+    description: 'Río entre rocas y bosque en Cangrejal de Acosta',
+    source: 'R%C3%ADo_Grande_de_Candelaria%2C_Cangrejal_de_Acosta%2C_Costa_Rica.JPG',
   },
 ];
 
-function AcostaPhoto({ photo, featured = false }: { photo: typeof photos[number]; featured?: boolean }) {
-  const captionBg = useColorModeValue('brand.100', 'navy.800');
+function AcostaPhoto({ photo }: { photo: typeof photos[number] }) {
+  const captionBg = useColorModeValue('white', 'navy.800');
+  const captionBorder = useColorModeValue('brand.100', 'whiteAlpha.200');
   return (
-    <Flex as="figure" direction="column" overflow="hidden" bg={captionBg} borderRadius={featured ? undefined : '20px'}>
-      <Box position="relative" isolation="isolate" flex="1"
-        minH={featured ? { base: '190px', md: '300px' } : { base: '190px', md: '220px' }}>
+    <Flex as="figure" direction="column" overflow="hidden" bg={captionBg} borderRadius="20px"
+      borderWidth="1px" borderColor={captionBorder}>
+      <Box position="relative" h={{ base: '190px', md: '250px' }}>
         <Image src={`${process.env.PUBLIC_URL}/ula/acosta/${photo.file}.webp`} alt={photo.description}
-          loading={featured ? 'eager' : 'lazy'} position="absolute" inset={0} w="100%" h="100%"
-          objectFit="cover" objectPosition={featured ? '55% 62%' : 'center'} />
-        <Box aria-hidden="true" pointerEvents="none" position="absolute" inset={0}
-          bg="brand.500" opacity={0.24} mixBlendMode="multiply" />
+          loading="lazy" position="absolute" inset={0} w="100%" h="100%" objectFit="cover" />
       </Box>
-      <Flex as="figcaption" align="center" justify="space-between" wrap="wrap" gap={2} px={4} py={3}>
+      <Flex as="figcaption" align="baseline" justify="space-between" wrap="wrap" columnGap={3} rowGap={1} px={4} py={3}>
         <Text fontSize="sm" fontWeight="700">{photo.title}</Text>
         <Text fontSize="xs">
           <Link href={`https://commons.wikimedia.org/wiki/File:${photo.source}`} isExternal textDecoration="underline">Rodtico21</Link>
           {' · '}
-          <Link href={`https://creativecommons.org/licenses/by-sa/${photo.license}/`} isExternal textDecoration="underline">CC BY-SA {photo.license}</Link>
-          {' · Recorte y tinte violeta'}
+          <Link href="https://creativecommons.org/licenses/by-sa/3.0/" isExternal textDecoration="underline">CC BY-SA 3.0</Link>
         </Text>
       </Flex>
     </Flex>
@@ -83,7 +71,10 @@ export default function AboutUla() {
           </Text>
           <Button as={RLink} to="/mall" alignSelf="flex-start" colorScheme="brand" minH="44px" rightIcon={<MdArrowForward />}>Explorar comercios</Button>
         </Stack>
-        <AcostaPhoto photo={photos[0]} featured />
+        <Box position="relative" minH={{ base: '190px', md: '340px' }}>
+          <Image src={`${process.env.PUBLIC_URL}/ula/acosta.webp`} alt="Ilustración de la iglesia y las montañas de Acosta"
+            position="absolute" inset={0} w="100%" h="100%" objectFit="cover" objectPosition="70% center" />
+        </Box>
       </SimpleGrid>
 
       <Box as="section" aria-labelledby="about-origin" px={{ base: 1, md: 3 }}>
@@ -97,9 +88,9 @@ export default function AboutUla() {
 
       <Box as="section" aria-labelledby="about-photos">
         <Heading as="h2" id="about-photos" fontSize={{ base: '26px', md: '34px' }} mb={4}>Paisajes de Acosta</Heading>
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-          {photos.slice(1).map(photo => <AcostaPhoto key={photo.file} photo={photo} />)}
-        </SimpleGrid>
+        <Grid templateColumns={{ base: 'minmax(0, 1fr)', md: 'minmax(0, 2fr) minmax(0, 1fr)' }} gap={4}>
+          {photos.map(photo => <AcostaPhoto key={photo.file} photo={photo} />)}
+        </Grid>
       </Box>
 
       <Box as="section" aria-labelledby="about-participate">
