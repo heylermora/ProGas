@@ -33,8 +33,8 @@ export default function PublicHeader({ onBack, backLabel }: { onBack?: () => voi
           </BackButton>
         ) : (
           <Flex as={location.pathname === '/' ? RLink : undefined} to={location.pathname === '/' ? '/' : undefined} align="center" gap="9px" color="inherit" _hover={{ textDecoration: 'none' }}>
-            <Flex w="38px" h="38px" flex="0 0 auto" borderRadius="13px" bg="brand.500" color="white" align="center" justify="center" fontWeight="900">GM</Flex>
-            <Box display={{ base: 'none', sm: 'block' }}><Text fontWeight="900" lineHeight="1">Gas Memo</Text><Text mt="3px" color={muted} fontSize="10px">Pedidos y comercios locales</Text></Box>
+            <Flex minW="48px" h="38px" px="8px" flex="0 0 auto" borderRadius="13px" bg="brand.500" color="white" align="center" justify="center" fontWeight="900">Ulà</Flex>
+            <Box display={{ base: 'none', sm: 'block' }}><Text color={muted} fontSize="xs">Negocios de Acosta</Text></Box>
           </Flex>
         )}
       </Flex>

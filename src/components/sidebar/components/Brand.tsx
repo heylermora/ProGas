@@ -7,7 +7,7 @@ import { HSeparator } from 'components/separator/Separator';
 export function SidebarBrand() {
 	return (
 		<Flex alignItems='center' flexDirection='column'>
-			<Text fontSize="5xl">PRO<b>GAS</b></Text> 
+			<Text fontSize="5xl" fontWeight="900">Ulà</Text>
 			<HSeparator mb='20px' />
 		</Flex>
 	);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PublicFooter from './PublicFooter';
 import packageInfo from '../../../package.json';
@@ -15,6 +15,8 @@ describe('PublicFooter', () => {
       </ChakraProvider>,
     );
 
+    expect(screen.getByText(/^© .* Ulà$/)).toBeTruthy();
+    expect(within(screen.getByRole('group', { name: 'Patrocinador' })).getByRole('img', { name: 'Gas Memo' })).toBeTruthy();
     expect(screen.getByText(`Versión ${packageInfo.version}`)).toBeTruthy();
     expect(screen.getByRole('link', { name: /^creado por johel mora calderón$/i }).getAttribute('href')).toBe('/portfolio');
     expect(screen.getByRole('link', { name: /acceso administrativo/i }).getAttribute('href')).toBe('/auth/sign-in');

@@ -14,11 +14,15 @@ export default function PublicFooter() {
     <Box as="footer" mt={{ base: '24px', md: '40px' }} overflow="hidden" bg="brand.500" color="white" borderRadius={{ base: '20px', md: '24px' }}>
       <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} gap={{ base: '16px', md: '24px' }} px={{ base: '20px', md: '28px' }} py={{ base: '24px', md: '20px' }}>
         <Flex align="center" direction={{ base: 'column', md: 'row' }} gap={{ base: '10px', md: '16px' }} minW="0">
-          <Image src={`${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`} alt="Gas Memo" w={{ base: '36px', md: '42px' }} h={{ base: '64px', md: '72px' }} objectFit="cover" flexShrink={0} />
+          <Text as="span" fontWeight="900" fontSize="2xl">Ulà</Text>
           <Box minW="0" textAlign={{ base: 'center', md: 'left' }}>
             <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="700" lineHeight="1.3">Negocios de Acosta</Text>
             <Text color="whiteAlpha.900" mt="4px" fontSize="xs" lineHeight="1.5">Un espacio para el comercio local</Text>
           </Box>
+        </Flex>
+        <Flex role="group" aria-label="Patrocinador" align="center" gap="10px" borderRadius="md" bg="white" color="navy.800" px="12px" py="6px">
+          <Text fontSize="xs" fontWeight="600">Patrocinado por</Text>
+          <Image src={`${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`} alt="Gas Memo" w="32px" h="48px" objectFit="contain" />
         </Flex>
         <Flex direction="column" align={{ base: 'center', md: 'flex-end' }} gap="4px" minW="0">
           {location.pathname !== '/' && <Flex wrap="wrap" align="center" justify="center" gap="4px">
@@ -32,7 +36,7 @@ export default function PublicFooter() {
       </Flex>
       <Flex px={{ base: '20px', md: '28px' }} py="8px" bg="brand.600" borderTop="1px solid" borderColor="whiteAlpha.200" align="center" justify="space-between" gap="12px">
         <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'flex-start', md: 'center' }} minW="0" flexWrap="wrap" columnGap="8px" rowGap="2px" color="whiteAlpha.900" fontSize="11px">
-          <Text>© {new Date().getFullYear()} Gas Memo</Text><Text aria-hidden="true" display={{ base: 'none', md: 'block' }}>•</Text><Text>Versión {packageInfo.version}</Text>
+          <Text>© {new Date().getFullYear()} Ulà</Text><Text aria-hidden="true" display={{ base: 'none', md: 'block' }}>•</Text><Text>Versión {packageInfo.version}</Text>
         </Flex>
         <Link as={RLink} to="/auth/sign-in" color="whiteAlpha.900" fontSize="11px" minH="44px" flexShrink={0} px="4px" display="inline-flex" alignItems="center" gap="4px" aria-label="Acceso administrativo" _hover={{ color: 'white', textDecoration: 'underline' }}><Icon as={MdLogin} boxSize="12px" /> Acceso</Link>
       </Flex>

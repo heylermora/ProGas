@@ -1,16 +1,9 @@
-import { SocialContact } from 'components/social/SocialLink';
+import { Link as RLink } from 'react-router-dom';
 import React from 'react';
-import { Badge, Box, Heading, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
+import { Badge, Box, Button, Heading, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import BackButton from 'components/button/BackButton';
 import { PublicCard, PublicPage } from './PublicPage';
 
-const gasMemoWhatsApp = 'https://api.whatsapp.com/send/?phone=50683978524&text=';
-
-const packageRequestUrl = (packageName: string) =>
-  `${gasMemoWhatsApp}${encodeURIComponent(
-    `Hola, quiero reservar un espacio publicitario en ProGas con el paquete ${packageName}. ¿Me pueden ayudar con la información?`
-  )}&type=phone_number&app_absent=0`;
-  
 const packages = [
   {
     name: 'VIP',
@@ -35,7 +28,7 @@ const packages = [
 export default function SponsorshipPackages() {
   const muted = useColorModeValue('gray.600', 'gray.300');
   return (
-    <PublicPage title="Paquetes de patrocinadores" description="Espacios publicitarios disponibles para negocios que quieran aparecer en el flujo público de Gas Memo." maxW="1100px">
+    <PublicPage title="Paquetes de patrocinadores" description="Espacios publicitarios disponibles para negocios que quieran aparecer en Ulà." maxW="1100px">
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing="18px">
         {packages.map((item) => {
           const isVip = item.name === 'VIP';
@@ -70,7 +63,7 @@ export default function SponsorshipPackages() {
                     ))}
                   </Stack>
 
-                  <Box mt="auto"><SocialContact href={packageRequestUrl(item.name)} caption="Solicitar paquete" /></Box>
+                  <Box mt="auto"><Button as={RLink} to="/promocionar-negocio" colorScheme="brand">Solicitar promoción</Button></Box>
                 </Stack>
               </PublicCard>
             </Box>

@@ -1,10 +1,10 @@
-# Guía de desarrollo de ProGas
+# Guía de desarrollo de Ulà
 
 Este archivo orienta a los asistentes y desarrolladores al crear o modificar funcionalidades en este repositorio. Leerlo antes de implementar. Las instrucciones explícitas del usuario tienen prioridad. Mantener esta guía actualizada cuando cambien la estructura, los componentes compartidos o los comandos.
 
 ## 1. Contexto y tecnologías
 
-ProGas es una aplicación de gestión de pedidos, productos, inventario, clientes, colaboradores, patrocinadores y finanzas. Incluye páginas públicas, compra y consulta de pedidos, centro comercial virtual y portafolio.
+Ulà es una aplicación de gestión de pedidos, productos, inventario, clientes, colaboradores, patrocinadores y finanzas. Incluye páginas públicas, compra y consulta de pedidos, centro comercial virtual y portafolio.
 
 - React 17 y TypeScript 4, con Create React App (`react-scripts` 5).
 - Chakra UI 1.8 y tema basado en Horizon UI.
@@ -213,6 +213,6 @@ La eliminación de categorías reutiliza `DeleteModal`. Las generales deben qued
 
 ## Versionamiento y entregas
 
-Seguir `VERSIONAMIENTO.md`. Versionar cada entrega agrupada con SemVer, mantener sincronizados `package.json`, las dos versiones raíz de `package-lock.json` y su entrada en `CHANGELOG.md`. El pie obtiene la versión de `package.json`. Mantener la versión del PR mientras no esté publicado; no generar una versión por cada corrección de revisión. Una versión preparada no es una publicación: registrar fecha y etiqueta `vX.Y.Z` sólo para una entrega verificada. El historial de la plantilla Horizon UI no es el historial de ProGas.
+Seguir `VERSIONAMIENTO.md`. Versionar cada entrega agrupada con SemVer, mantener sincronizados `package.json`, las dos versiones raíz de `package-lock.json` y su entrada en `CHANGELOG.md`. El pie obtiene la versión de `package.json`. Mantener la versión del PR mientras no esté publicado; no generar una versión por cada corrección de revisión. Una versión preparada no es una publicación: registrar fecha y etiqueta `vX.Y.Z` sólo para una entrega verificada. El historial de la plantilla Horizon UI no es el historial de Ulà.
 
 Las fichas de negocios comparten enlaces `#/mall?business=ID` mediante `ShareBusinessButton`: usar compartir nativo, copia al portapapeles y enlace seleccionable como alternativa. No trasladar parámetros de clientes ni pedidos al enlace. El mapa y la vista sencilla comparten el contexto de categoría y muestran navegación por niveles; un enlace directo debe recuperar la general desde las específicas del catálogo. Los logos son el elemento principal de las tarjetas del carrusel. La portada conserva la comunidad y la Banda Municipal; no reintroducir el bloque exclusivo de pedidos/redes de Gas Memo.
