@@ -1,10 +1,16 @@
 import { Box, Flex, FlexProps } from '@chakra-ui/react';
 
 export function UlaCurve() {
-  return <Box aria-hidden="true" pointerEvents="none" position="absolute" top={0}
-    right={{ base: '2px', md: '12px' }} w={{ base: '60px', md: '86px' }} h={{ base: '40px', md: '58px' }}
-    border={{ base: '10px solid', md: '14px solid' }} borderTopWidth={0} borderColor="brand.400"
-    borderBottomRadius="full" opacity={0.34} />;
+  return (
+    <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 125 113"
+      overflow="hidden" pointerEvents="none" position="absolute" top={0}
+      right={{ base: '12px', md: '20px' }} w={{ base: '62px', md: '94px' }} h="auto"
+      color="brand.400" opacity={0.38}>
+      {/* The path is the palm artwork from page 7, translated to the panel's top edge. */}
+      <Box as="path" d="M14 -49V49C14 115 111 115 111 49V-49"
+        fill="none" stroke="currentColor" strokeWidth={28} />
+    </Box>
+  );
 }
 
 export function AcostaHorizons() {
