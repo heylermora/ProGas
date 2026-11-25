@@ -8,7 +8,6 @@ import {
   Flex,
   Heading,
   Image,
-  Link,
   Stack,
   Text,
   useColorModeValue,
@@ -135,16 +134,22 @@ export default function Home() {
             <Heading as="h1" id="community-title" fontSize={{ base: '36px', sm: '44px', lg: '58px' }} fontWeight="700"
               lineHeight="1.02" letterSpacing="-.045em" sx={{ textWrap: 'balance' }}>Una mano que siempre da.</Heading>
             <Text fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.55" maxW="330px">Encuentre productos y servicios de los comercios de Acosta y alrededores.</Text>
-            <Button as={RLink} to="/mall"
-              onClick={() => { void AnalyticsService.track({ type: 'browse_click', source: 'home' }); }}
-              alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"
-              colorScheme="brand" bg="brand.500" color="white" px={{ base: 5, md: 7 }}
-              borderRadius="14px" fontWeight="700" _hover={{ bg: 'brand.600' }}
-              _focusVisible={{ outline: '3px solid', outlineColor: 'navy.900', outlineOffset: '4px' }}>
-              Explorar comercios
-            </Button>
-            <Link as={RLink} to="/que-es-ula" alignSelf="flex-start" color="navy.900" fontWeight="700"
-              display="inline-flex" alignItems="center" minH="44px" textDecoration="underline">Qué es Ulà</Link>
+            <Flex align="center" wrap="wrap" columnGap={{ base: 2, md: 3 }} rowGap={2}>
+              <Button as={RLink} to="/mall"
+                onClick={() => { void AnalyticsService.track({ type: 'browse_click', source: 'home' }); }}
+                rightIcon={<MdArrowForward aria-hidden="true" />} size="md" fontSize={{ base: "sm", md: "md" }} minH="44px" px={4}
+                colorScheme="brand" bg="brand.500" color="white" borderRadius="12px" fontWeight="700"
+                _hover={{ bg: 'brand.600' }}
+                _focusVisible={{ outline: '3px solid', outlineColor: 'navy.900', outlineOffset: '3px' }}>
+                Explorar comercios
+              </Button>
+              <Button as={RLink} to="/que-es-ula" variant="outline" size="md" fontSize={{ base: "sm", md: "md" }} minH="44px" px={3}
+                color="navy.900" borderColor="blackAlpha.300" bg="whiteAlpha.600" borderRadius="12px" fontWeight="600"
+                _hover={{ bg: 'brand.100' }}
+                _focusVisible={{ outline: '3px solid', outlineColor: 'navy.900', outlineOffset: '3px' }}>
+                Qué es Ulà
+              </Button>
+            </Flex>
           </Stack>
         </Box>
         <MallPreview embedded />
