@@ -6,6 +6,55 @@ import { PublicPage } from './PublicPage';
 
 const heritageSource = 'https://revistacienciassociales.ucr.ac.cr/html/04-SYLVESTER190/04-SYLVESTER190.html';
 
+const photos = [
+  {
+    file: 'san-ignacio',
+    title: 'San Ignacio',
+    description: 'Vista de San Ignacio de Acosta, con la iglesia entre las montañas',
+    source: 'San_Ignacio_de_Acosta._Costa_Rica.jpg',
+    license: '4.0',
+  },
+  {
+    file: 'palmichal',
+    title: 'Palmichal',
+    description: 'Plantación de café en una ladera verde de Palmichal de Acosta',
+    source: 'Plantaci%C3%B3n_de_caf%C3%A9_en_Palmichal_de_Acosta._Costa_Rica.JPG',
+    license: '3.0',
+  },
+  {
+    file: 'sabanillas',
+    title: 'Sabanillas',
+    description: 'Montañas de Sabanillas de Acosta bajo un cielo azul',
+    source: 'Monta%C3%B1as_de_Sabanillas_de_Acosta%2C_Costa_Rica.JPG',
+    license: '3.0',
+  },
+];
+
+function AcostaPhoto({ photo, featured = false }: { photo: typeof photos[number]; featured?: boolean }) {
+  const captionBg = useColorModeValue('brand.100', 'navy.800');
+  return (
+    <Flex as="figure" direction="column" overflow="hidden" bg={captionBg} borderRadius={featured ? undefined : '20px'}>
+      <Box position="relative" isolation="isolate" flex="1"
+        minH={featured ? { base: '190px', md: '300px' } : { base: '190px', md: '220px' }}>
+        <Image src={`${process.env.PUBLIC_URL}/ula/acosta/${photo.file}.webp`} alt={photo.description}
+          loading={featured ? 'eager' : 'lazy'} position="absolute" inset={0} w="100%" h="100%"
+          objectFit="cover" objectPosition={featured ? '55% 62%' : 'center'} />
+        <Box aria-hidden="true" pointerEvents="none" position="absolute" inset={0}
+          bg="brand.500" opacity={0.24} mixBlendMode="multiply" />
+      </Box>
+      <Flex as="figcaption" align="center" justify="space-between" wrap="wrap" gap={2} px={4} py={3}>
+        <Text fontSize="sm" fontWeight="700">{photo.title}</Text>
+        <Text fontSize="xs">
+          <Link href={`https://commons.wikimedia.org/wiki/File:${photo.source}`} isExternal textDecoration="underline">Rodtico21</Link>
+          {' · '}
+          <Link href={`https://creativecommons.org/licenses/by-sa/${photo.license}/`} isExternal textDecoration="underline">CC BY-SA {photo.license}</Link>
+          {' · Recorte y tinte violeta'}
+        </Text>
+      </Flex>
+    </Flex>
+  );
+}
+
 export default function AboutUla() {
   const surface = useColorModeValue('white', 'navy.800');
   const ink = useColorModeValue('navy.900', 'white');
@@ -33,10 +82,7 @@ export default function AboutUla() {
           </Text>
           <Button as={RLink} to="/mall" alignSelf="flex-start" colorScheme="brand" minH="44px" rightIcon={<MdArrowForward />}>Explorar comercios</Button>
         </Stack>
-        <Box position="relative" minH={{ base: '190px', md: '340px' }}>
-          <Image src={`${process.env.PUBLIC_URL}/ula/acosta.webp`} alt="Ilustración de la iglesia y las montañas de Acosta"
-            position="absolute" inset={0} w="100%" h="100%" objectFit="cover" objectPosition="70% center" />
-        </Box>
+        <AcostaPhoto photo={photos[0]} featured />
       </SimpleGrid>
 
       <Box as="section" aria-labelledby="about-origin" px={{ base: 1, md: 3 }}>
@@ -46,6 +92,13 @@ export default function AboutUla() {
           <Text>Ulà significa «mano» en bribri. El nombre se inspira en <Box as="i">ulàpeitök</Box>, una práctica bribri de ayuda mutua y trabajo colectivo.</Text>
           <Link href={heritageSource} isExternal alignSelf="flex-start" color={accent} textDecoration="underline" fontSize="sm">Leer sobre ulàpeitök en la Revista de Ciencias Sociales de la UCR</Link>
         </Stack>
+      </Box>
+
+      <Box as="section" aria-labelledby="about-photos">
+        <Heading as="h2" id="about-photos" fontSize={{ base: '26px', md: '34px' }} mb={4}>Paisajes de Acosta</Heading>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+          {photos.slice(1).map(photo => <AcostaPhoto key={photo.file} photo={photo} />)}
+        </SimpleGrid>
       </Box>
 
       <Box as="section" aria-labelledby="about-participate">
