@@ -1,4 +1,4 @@
-import { UlaHandGesture } from 'components/brand/UlaResources';
+import { AcostaHorizons, UlaCurve, UlaHandGesture } from 'components/brand/UlaResources';
 import { Box, Button, Flex, Grid, Heading, Icon, Image, Link, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { useEffect } from 'react';
 import { MdArrowForward, MdExplore, MdStorefront } from 'react-icons/md';
@@ -100,6 +100,8 @@ export default function AboutUla() {
         <Box position="relative" minH={{ base: '190px', md: '340px' }}>
           <Image src={`${process.env.PUBLIC_URL}/ula/acosta.webp`} alt="Ilustración de la iglesia y las montañas de Acosta"
             position="absolute" inset={0} w="100%" h="100%" objectFit="cover" objectPosition="70% center" />
+          <UlaCurve prominent />
+          <AcostaHorizons />
         </Box>
       </SimpleGrid>
 

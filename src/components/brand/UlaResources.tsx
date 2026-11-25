@@ -1,24 +1,25 @@
 import { Box, Flex, FlexProps } from '@chakra-ui/react';
 
-export function UlaCurve() {
+export function UlaCurve({ prominent = false }: { prominent?: boolean }) {
   return (
-    <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 125 113"
-      overflow="hidden" pointerEvents="none" position="absolute" top={0}
-      right={{ base: '12px', md: '20px' }} w={{ base: '62px', md: '94px' }} h="auto"
-      color="brand.400" opacity={0.38}>
-      {/* The path is the palm artwork from page 7, translated to the panel's top edge. */}
-      <Box as="path" d="M14 -49V49C14 115 111 115 111 49V-49"
-        fill="none" stroke="currentColor" strokeWidth={28} />
+    <Box aria-hidden="true" pointerEvents="none" position="absolute" top={0} zIndex={1}
+      right={{ base: '12px', md: '20px' }} w={{ base: '62px', md: prominent ? '125px' : '94px' }}
+      lineHeight={0} color="brand.400" opacity={prominent ? 1 : 0.55}>
+      <svg width="100%" viewBox="0 0 125 113" focusable="false">
+        <path d="M14 -49V49C14 115 111 115 111 49V-49" fill="none" stroke="currentColor" strokeWidth="28" />
+      </svg>
     </Box>
   );
 }
 
 export function AcostaHorizons() {
   return (
-    <Box as="svg" aria-hidden="true" focusable="false" viewBox="0 0 1200 55" preserveAspectRatio="none"
-      position="absolute" bottom="-1px" left={0} color="brand.100" w="100%" h={{ base: '36px', md: '54px' }} pointerEvents="none">
-      <Box as="path" fill="currentColor" opacity={0.65} d="M0 37C160 5 247 43 410 24S621 6 760 19 1049 36 1200 5V55H0Z" />
-      <Box as="path" fill="currentColor" d="M0 46C145 23 301 52 468 42S664 26 812 34 1069 47 1200 22V55H0Z" />
+    <Box aria-hidden="true" position="absolute" bottom="-1px" left={0} right={0} zIndex={1}
+      h={{ base: '48px', md: '72px' }} pointerEvents="none">
+      <svg width="100%" height="100%" viewBox="0 0 418 126" preserveAspectRatio="none" focusable="false">
+        <path fill="#E8E3FF" d="M0 76C71 42 108 72 156 53C236 20 284 48 326 25C371 6 398 27 418 16V126H0Z" />
+        <path fill="#8170FF" d="M0 107C66 78 120 114 194 81C276 46 326 100 418 54V126H0Z" />
+      </svg>
     </Box>
   );
 }
