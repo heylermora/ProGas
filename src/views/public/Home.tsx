@@ -1,4 +1,4 @@
-import { AcostaHorizons, UlaCurve } from 'components/brand/UlaResources';
+import { AcostaHorizons } from 'components/brand/UlaResources';
 import { SocialLinksRow, SocialContact } from 'components/social/SocialLink';
 import React, { useEffect } from 'react';
 import AnalyticsService from 'services/AnalyticsService';
@@ -122,12 +122,11 @@ export default function Home() {
         borderRadius={{ base: '24px', md: '32px' }} mb={{ base: 6, md: 8 }} bg="brand.100"
         border="1px solid" borderColor="brand.100" boxShadow="0 18px 44px rgba(11,20,55,.08)">
         <Box position="relative" px={{ base: 5, md: 12 }} pt={{ base: 6, md: 10 }}
-          pb={{ base: '116px', md: 12 }} minH={{ md: '420px' }} display="flex" alignItems="center">
+          pb={{ base: '88px', md: 14 }} minH={{ md: '420px' }} display="flex" alignItems="center">
           <Image src={acostaBackground} alt="" aria-hidden="true" position="absolute" inset="0"
             w="100%" h="100%" objectFit="cover" objectPosition={{ base: '76% center', md: 'center 54%' }} pointerEvents="none" />
           <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
-            bg={{ base: 'linear-gradient(180deg, rgba(250,250,255,.96) 3%, rgba(248,248,255,.86) 50%, transparent 78%), linear-gradient(0deg, #E8E3FF, transparent 25%)', md: 'linear-gradient(90deg, rgba(250,250,255,.97) 0%, rgba(248,248,255,.85) 30%, transparent 68%), linear-gradient(0deg, #E8E3FF, transparent 18%)' }} />
-          <UlaCurve prominent />
+            bg={{ base: 'linear-gradient(180deg, rgba(250,250,255,.96) 3%, rgba(248,248,255,.86) 50%, transparent 78%)', md: 'linear-gradient(90deg, rgba(250,250,255,.97) 0%, rgba(248,248,255,.85) 30%, transparent 68%)' }} />
           <AcostaHorizons />
           <Stack position="relative" zIndex={2} spacing={{ base: 3, md: 4 }} color="navy.900" maxW={{ base: '340px', md: '440px' }}>
             <Image src={`${process.env.PUBLIC_URL}/ula/logo.png`} alt="" h={{ base: '58px', md: '78px' }} w="auto" alignSelf="flex-start" objectFit="contain" />

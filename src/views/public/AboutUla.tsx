@@ -1,4 +1,4 @@
-import { AcostaHorizons, UlaCurve, UlaHandGesture } from 'components/brand/UlaResources';
+import { UlaCurve, UlaHandGesture } from 'components/brand/UlaResources';
 import { Box, Button, Flex, Grid, Heading, Icon, Image, Link, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { useEffect } from 'react';
 import { MdArrowForward, MdExplore, MdStorefront } from 'react-icons/md';
@@ -100,17 +100,21 @@ export default function AboutUla() {
         <Box position="relative" minH={{ base: '190px', md: '340px' }}>
           <Image src={`${process.env.PUBLIC_URL}/ula/acosta.webp`} alt="Ilustración de la iglesia y las montañas de Acosta"
             position="absolute" inset={0} w="100%" h="100%" objectFit="cover" objectPosition="70% center" />
-          <UlaCurve prominent />
-          <AcostaHorizons />
         </Box>
       </SimpleGrid>
 
-      <Box as="section" aria-labelledby="about-origin" px={{ base: 1, md: 3 }}>
-        <Flex align="center" gap={3} mb={3}><UlaHandGesture /><Heading as="h2" id="about-origin" fontSize={{ base: '26px', md: '34px' }}>Una mano que siempre da</Heading></Flex>
-        <Stack spacing={3} color={muted} maxW="74ch" lineHeight="1.65">
+      <Box as="section" aria-labelledby="about-origin" bg="navy.900" color="white"
+        borderRadius={{ base: '20px', md: '28px' }} overflow="hidden" px={{ base: 5, md: 9 }} pb={{ base: 6, md: 9 }}>
+        <Flex justify="space-between" align="center" gap={4} minH={{ base: '72px', md: '96px' }}>
+          <Heading as="h2" id="about-origin" fontSize={{ base: '25px', md: '34px' }} lineHeight="1.15">
+            Una mano que siempre da
+          </Heading>
+          <Box alignSelf="flex-start"><UlaCurve /></Box>
+        </Flex>
+        <Stack spacing={3} color="gray.200" maxW="74ch" lineHeight="1.65">
           <Text>Ulà nació en Acosta, donde dar una mano puede ser tan sencillo como recomendar un comercio vecino. El proyecto recoge esa costumbre para dar visibilidad a quienes emprenden y acercar sus servicios a la comunidad.</Text>
           <Text>Ulà significa «mano» en bribri. El nombre se inspira en <Box as="i">ulàpeitök</Box>, una práctica bribri de ayuda mutua y trabajo colectivo.</Text>
-          <Link href={heritageSource} isExternal alignSelf="flex-start" color={accent} textDecoration="underline" fontSize="sm">Leer sobre ulàpeitök en la Revista de Ciencias Sociales de la UCR</Link>
+          <Link href={heritageSource} isExternal alignSelf="flex-start" color="brand.100" textDecoration="underline" fontSize="sm">Leer sobre ulàpeitök en la Revista de Ciencias Sociales de la UCR</Link>
         </Stack>
       </Box>
 
@@ -122,7 +126,10 @@ export default function AboutUla() {
       </Box>
 
       <Box as="section" aria-labelledby="about-participate">
-        <Heading as="h2" id="about-participate" fontSize={{ base: '26px', md: '34px' }} mb={4}>Cómo participar</Heading>
+        <Flex align="center" gap={3} mb={4}>
+          <UlaHandGesture />
+          <Heading as="h2" id="about-participate" fontSize={{ base: '26px', md: '34px' }}>Cómo participar</Heading>
+        </Flex>
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
           <Stack as="article" spacing={3} bg={surface} borderWidth="1px" borderColor={border} borderRadius="20px" p={{ base: 5, md: 6 }}>
             <Icon as={MdExplore} color={accent} boxSize={6} aria-hidden="true" />

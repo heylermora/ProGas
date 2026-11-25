@@ -1,4 +1,3 @@
-import { UlaCurve } from 'components/brand/UlaResources';
 import { SocialContact } from 'components/social/SocialLink';
 import React from 'react';
 import { Badge, Box, Button, Flex, Heading, Icon, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
@@ -79,8 +78,7 @@ export default function Portfolio() {
           <SimpleGrid columns={{ base: 1, lg: 3 }} gap={{ base: '16px', md: '20px' }} mt="22px">
             {projects.map((project, index) => (
               <Stack key={project.name} position="relative" overflow="hidden" bg={index === 0 ? 'brand.700' : surface} color={index === 0 ? 'white' : undefined} border="1px solid" borderColor={index === 0 ? 'brand.500' : border} borderRadius="26px" p={{ base: '22px', md: '26px' }} spacing="14px" boxShadow={index === 0 ? '0 20px 45px rgba(66,42,251,.24)' : '0 12px 32px rgba(66,42,251,.08)'} transition="transform .2s ease, box-shadow .2s ease" _hover={{ transform: 'translateY(-4px)', boxShadow: '0 20px 45px rgba(66,42,251,.16)' }}>
-                {project.name === 'Ulà' && <UlaCurve />}
-                <Flex position="relative" align="center" justify="space-between">
+                <Flex align="center" justify="space-between">
                   <Flex w="48px" h="48px" borderRadius="16px" bg={index === 0 ? 'whiteAlpha.200' : 'brand.100'} color={index === 0 ? 'white' : 'brand.600'} align="center" justify="center"><Icon as={project.icon} boxSize="25px" /></Flex>
                   <Text color={index === 0 ? 'cyan.200' : 'brand.500'} fontSize="xs" fontWeight="900" letterSpacing=".08em" textAlign="right">{project.type}</Text>
                 </Flex>

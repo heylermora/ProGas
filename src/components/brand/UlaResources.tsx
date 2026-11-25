@@ -1,10 +1,9 @@
 import { Box, Flex, FlexProps } from '@chakra-ui/react';
 
-export function UlaCurve({ prominent = false }: { prominent?: boolean }) {
+export function UlaCurve() {
   return (
-    <Box aria-hidden="true" pointerEvents="none" position="absolute" top={0} zIndex={1}
-      right={{ base: '12px', md: '20px' }} w={{ base: '62px', md: prominent ? '125px' : '94px' }}
-      lineHeight={0} color="brand.400" opacity={prominent ? 1 : 0.55}>
+    <Box aria-hidden="true" pointerEvents="none" flexShrink={0}
+      w={{ base: '64px', md: '132px' }} lineHeight={0} color="brand.400">
       <svg width="100%" viewBox="0 0 125 113" focusable="false">
         <path d="M14 -49V49C14 115 111 115 111 49V-49" fill="none" stroke="currentColor" strokeWidth="28" />
       </svg>
@@ -15,10 +14,10 @@ export function UlaCurve({ prominent = false }: { prominent?: boolean }) {
 export function AcostaHorizons() {
   return (
     <Box aria-hidden="true" position="absolute" bottom="-1px" left={0} right={0} zIndex={1}
-      h={{ base: '48px', md: '72px' }} pointerEvents="none">
+      h={{ base: '38px', md: '60px' }} pointerEvents="none">
       <svg width="100%" height="100%" viewBox="0 0 418 126" preserveAspectRatio="none" focusable="false">
-        <path fill="#E8E3FF" d="M0 76C71 42 108 72 156 53C236 20 284 48 326 25C371 6 398 27 418 16V126H0Z" />
-        <path fill="#8170FF" d="M0 107C66 78 120 114 194 81C276 46 326 100 418 54V126H0Z" />
+        <path fill="#F5F2FF" d="M0 76C71 42 108 72 156 53C236 20 284 48 326 25C371 6 398 27 418 16V126H0Z" />
+        <path fill="#E8E3FF" d="M0 107C66 78 120 114 194 81C276 46 326 100 418 54V126H0Z" />
       </svg>
     </Box>
   );
