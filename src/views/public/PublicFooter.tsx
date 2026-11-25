@@ -46,6 +46,7 @@ export default function PublicFooter() {
         align={{ base: 'flex-start', md: 'center' }} direction={{ base: 'column', md: 'row' }} columnGap={6}>
         <Flex as="nav" aria-label="Enlaces del pie de página" align="center" wrap="wrap" columnGap={{ base: 4, md: 5 }}>
           {pathname !== '/' && <Link as={RLink} to="/" {...footerLink}>Inicio</Link>}
+          {pathname !== '/que-es-ula' && <Link as={RLink} to="/que-es-ula" {...footerLink}>Qué es Ulà</Link>}
           {canStartOrder && <Link as={RLink} to="/customer/data" {...footerLink}>Hacer pedido</Link>}
           {pathname === '/portfolio'
             ? <SocialContact href={portfolioContactUrl} caption="Contactar" />

@@ -15,6 +15,7 @@ import PublicProducts from './views/public/Products';
 import PromotionForm from './views/public/PromotionForm';
 import VirtualMall from './views/public/VirtualMall';
 import Portfolio from './views/public/Portfolio';
+import AboutUla from './views/public/AboutUla';
 import { AuthProvider } from './contexts/AuthContext';
 import AppErrorBoundary from './components/exceptions/AppErrorBoundary';
 
@@ -33,6 +34,7 @@ ReactDOM.render(
 							<Redirect from="/customer/view-order" to="/" />
 							<Route exact path="/promocionar-negocio" component={PromotionForm} />
 							<Route exact path={`/mall`} component={VirtualMall} />
+							<Route exact path="/que-es-ula" component={AboutUla} />
 							<Route exact path={`/portfolio`} component={Portfolio} />
 							<Redirect from={`/sponsors/packages`} to={`/mall`} />
 							<Route path={`/auth`} component={AuthLayout} />

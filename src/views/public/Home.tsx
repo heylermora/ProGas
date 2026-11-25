@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Image,
+  Link,
   Stack,
   Text,
   useColorModeValue,
@@ -139,6 +140,8 @@ export default function Home() {
               _focusVisible={{ outline: '3px solid', outlineColor: 'navy.900', outlineOffset: '4px' }}>
               Explorar comercios
             </Button>
+            <Link as={RLink} to="/que-es-ula" alignSelf="flex-start" color="navy.900" fontWeight="700"
+              display="inline-flex" alignItems="center" minH="44px" textDecoration="underline">Qué es Ulà</Link>
           </Stack>
         </Box>
         <MallPreview embedded />

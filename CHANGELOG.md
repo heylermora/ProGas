@@ -6,6 +6,8 @@ Reglas de versiones y publicación: [VERSIONAMIENTO.md](VERSIONAMIENTO.md).
 
 ### Agregado
 
+- Página pública «Qué es Ulà», con el origen del nombre y las formas de participar.
+
 - Exportación de comercios y categorías filtrados a CSV, PDF y Excel con columnas configurables.
 - Editor del orden del mapa público para categorías generales, específicas y comercios.
 - Formulario público de promoción y revisión administrativa de solicitudes. El flujo requiere las nuevas reglas de Firestore.

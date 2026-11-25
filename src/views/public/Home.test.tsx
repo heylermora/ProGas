@@ -30,6 +30,8 @@ describe('Home', () => {
   it('prioritizes local businesses without the exclusive Gas Memo ordering section', () => {
     renderHome();
     expect(screen.getByRole('heading', { name: /una mano que siempre da/i })).toBeTruthy();
+    const hero = within(screen.getByRole('region', { name: /una mano que siempre da/i }));
+    expect(hero.getByRole('link', { name: 'Qué es Ulà' }).getAttribute('href')).toBe('/que-es-ula');
     expect(screen.getByRole('link', { name: /^explorar comercios$/i }).getAttribute('href')).toBe('/mall');
     expect(screen.queryByText('PRÓXIMAMENTE')).toBeNull();
     expect(screen.queryByText(/este servicio aún no está disponible/i)).toBeNull();
