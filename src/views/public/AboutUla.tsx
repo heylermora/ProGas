@@ -7,38 +7,64 @@ import { PublicPage } from './PublicPage';
 
 const heritageSource = 'https://revistacienciassociales.ucr.ac.cr/html/04-SYLVESTER190/04-SYLVESTER190.html';
 
-const photos = [
+type Photo = {
+  file: string;
+  title: string;
+  description: string;
+  position?: string;
+  credit?: { label: string; url: string; license?: boolean };
+};
+
+const photos: Photo[] = [
   {
-    file: 'panorama-tablazo',
-    title: 'Acosta desde El Tablazo',
-    description: 'Panorámica de Acosta desde El Tablazo, con montañas y vegetación en primer plano',
-    source: 'Acosta._Costa_Rica._Panoramic_view.jpg',
+    file: 'montanas',
+    title: 'Entre montañas',
+    description: 'Montañas y laderas vistas desde un punto alto',
+    credit: { label: 'Flickr', url: 'https://www.flickr.com/photo.gne?id=6211680008' },
   },
   {
-    file: 'rio-candelaria',
-    title: 'Río Grande de Candelaria',
-    description: 'Río entre rocas y bosque en Cangrejal de Acosta',
-    source: 'R%C3%ADo_Grande_de_Candelaria%2C_Cangrejal_de_Acosta%2C_Costa_Rica.JPG',
+    file: 'rio-valle',
+    title: 'Río y valle de Acosta',
+    description: 'Río que serpentea entre las laderas verdes de Acosta',
+    position: '50% 62%',
+    credit: { label: 'UNCADA', url: 'https://acostacr.org/distritos' },
+  },
+  {
+    file: 'potrero',
+    title: 'Paisaje rural',
+    description: 'Ganado en un potrero verde rodeado de bosque y neblina',
+  },
+  {
+    file: 'san-ignacio',
+    title: 'San Ignacio de Acosta',
+    description: 'Vista de San Ignacio de Acosta y su iglesia entre montañas',
+    position: '50% 62%',
+    credit: {
+      label: 'Rodtico21',
+      url: 'https://commons.wikimedia.org/wiki/File:San_Ignacio_de_Acosta._Costa_Rica.jpg',
+      license: true,
+    },
   },
 ];
 
-function AcostaPhoto({ photo }: { photo: typeof photos[number] }) {
+function AcostaPhoto({ photo }: { photo: Photo }) {
   const captionBg = useColorModeValue('white', 'navy.800');
   const captionBorder = useColorModeValue('brand.100', 'whiteAlpha.200');
   return (
     <Flex as="figure" direction="column" overflow="hidden" bg={captionBg} borderRadius="20px"
       borderWidth="1px" borderColor={captionBorder}>
-      <Box position="relative" h={{ base: '190px', md: '250px' }}>
+      <Box position="relative" isolation="isolate" h={{ base: '190px', md: '250px' }}>
         <Image src={`${process.env.PUBLIC_URL}/ula/acosta/${photo.file}.webp`} alt={photo.description}
-          loading="lazy" position="absolute" inset={0} w="100%" h="100%" objectFit="cover" />
+          loading="lazy" position="absolute" inset={0} w="100%" h="100%" objectFit="cover" objectPosition={photo.position || 'center'} />
+        <Box aria-hidden="true" pointerEvents="none" position="absolute" inset={0}
+          bg="brand.500" opacity={0.23} mixBlendMode="multiply" />
       </Box>
       <Flex as="figcaption" align="baseline" justify="space-between" wrap="wrap" columnGap={3} rowGap={1} px={4} py={3}>
         <Text fontSize="sm" fontWeight="700">{photo.title}</Text>
-        <Text fontSize="xs">
-          <Link href={`https://commons.wikimedia.org/wiki/File:${photo.source}`} isExternal textDecoration="underline">Rodtico21</Link>
-          {' · '}
-          <Link href="https://creativecommons.org/licenses/by-sa/3.0/" isExternal textDecoration="underline">CC BY-SA 3.0</Link>
-        </Text>
+        {photo.credit && <Text fontSize="xs">
+          <Link href={photo.credit.url} isExternal textDecoration="underline">{photo.credit.label}</Link>
+          {photo.credit.license && <> · <Link href="https://creativecommons.org/licenses/by-sa/4.0/" isExternal textDecoration="underline">CC BY-SA 4.0</Link></>}
+        </Text>}
       </Flex>
     </Flex>
   );
@@ -88,7 +114,7 @@ export default function AboutUla() {
 
       <Box as="section" aria-labelledby="about-photos">
         <Heading as="h2" id="about-photos" fontSize={{ base: '26px', md: '34px' }} mb={4}>Paisajes de Acosta</Heading>
-        <Grid templateColumns={{ base: 'minmax(0, 1fr)', md: 'minmax(0, 2fr) minmax(0, 1fr)' }} gap={4}>
+        <Grid templateColumns={{ base: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }} gap={4}>
           {photos.map(photo => <AcostaPhoto key={photo.file} photo={photo} />)}
         </Grid>
       </Box>

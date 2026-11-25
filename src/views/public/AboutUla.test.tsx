@@ -1,5 +1,5 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import AboutUla from './AboutUla';
 
@@ -13,7 +13,8 @@ it('explains Ulà and links to the public directory, promotion form and source',
   expect(screen.getByRole('link', { name: 'Quiero promocionar mi negocio' }).getAttribute('href')).toBe('/promocionar-negocio');
   expect(screen.getByRole('link', { name: /leer sobre ulàpeitök/i }).getAttribute('href')).toContain('ucr.ac.cr');
   expect(screen.getByRole('img', { name: /ilustración de la iglesia/i }).getAttribute('src')).toMatch(/ula\/acosta\.webp$/);
-  expect(screen.getByRole('img', { name: /panorámica de acosta/i })).toBeTruthy();
-  expect(screen.getByRole('img', { name: /río entre rocas/i })).toBeTruthy();
-  expect(screen.getAllByRole('link', { name: 'Rodtico21' })).toHaveLength(2);
+  const gallery = within(screen.getByRole('region', { name: 'Paisajes de Acosta' }));
+  expect(gallery.getAllByRole('img')).toHaveLength(4);
+  expect(gallery.getByRole('img', { name: /san ignacio de acosta/i })).toBeTruthy();
+  expect(gallery.getByRole('link', { name: 'Rodtico21' })).toBeTruthy();
 });
