@@ -22,7 +22,7 @@ export default function PublicFooter() {
         </Flex>
         <Flex role="group" aria-label="Patrocinador" align="center" gap="10px" borderRadius="md" bg="white" color="navy.800" px="12px" py="6px">
           <Text fontSize="xs" fontWeight="600">Patrocinado por</Text>
-          <Image src={`${process.env.PUBLIC_URL}/Gas%20Memo/Positive.png`} alt="Gas Memo" w="32px" h="48px" objectFit="contain" />
+          <Image src={`${process.env.PUBLIC_URL}/Gas%20Memo/Negative.png`} alt="Gas Memo" w="40px" h="56px" flexShrink={0} objectFit="contain" />
         </Flex>
         <Flex direction="column" align={{ base: 'center', md: 'flex-end' }} gap="4px" minW="0">
           {location.pathname !== '/' && <Flex wrap="wrap" align="center" justify="center" gap="4px">
