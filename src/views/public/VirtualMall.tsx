@@ -1,3 +1,4 @@
+import { UlaContainer } from 'components/brand/UlaResources';
 import useMallReorder from 'hooks/useMallReorder';
 import { sponsorCategories, hasSponsorCategory } from 'utils/sponsorCategories';
 import { SocialLinksRow } from 'components/social/SocialLink';
@@ -268,7 +269,7 @@ function Mall({ editing = false }: { editing?: boolean }) {
         </Box>
 
         {simpleView && <Flex gap="8px" flexWrap="wrap">
-          {!group && settings.groups.map(item => <Button key={item.id} size="sm" onClick={() => openGeneral(item.name)}>{item.icon} {item.name}</Button>)}
+          {!group && settings.groups.map(item => <Button key={item.id} size="sm" onClick={() => openGeneral(item.name)}><UlaContainer boxSize="24px" bg="brand.100" color="navy.900" aria-hidden="true" mr={2}>{item.icon}</UlaContainer>{item.name}</Button>)}
         </Flex>}
         {simpleView ? <SimpleMall categories={group?.categories || []} businesses={group ? orderedBusinesses.filter(business => sponsorCategories(business).some(category => group.categories.includes(category))) : orderedBusinesses} selectedCategory={simpleCategory} onCategory={setSimpleCategory} search={simpleSearch} onSearch={setSimpleSearch} /> : <Box bg={panelBg} borderRadius={{ base: '22px', md: '30px' }} p={{ base: '8px', md: '16px' }} boxShadow="xl" overflow="hidden">
           {!selectedCategory && (
@@ -342,7 +343,7 @@ function SimpleMall({ categories, businesses, selectedCategory, onCategory, sear
       <Stack spacing="20px">
         <Box><Heading fontSize={{ base: '2xl', md: '3xl' }}>Directorio de negocios</Heading><Text color={muted} mt="5px">Seleccione una categoría o busque un negocio por nombre.</Text></Box>
         <Input aria-label="Buscar negocio" size="lg" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Buscar negocio o servicio" />
-        {categories.length > 0 && <SearchableCategorySelect preserveOrder categories={categories} value={selectedCategory} onChange={onCategory} />}
+        {categories.length > 0 && <Flex align="center" gap={3}><UlaContainer aria-hidden="true"><Icon as={MdViewList} boxSize={5} /></UlaContainer><Box flex="1"><SearchableCategorySelect preserveOrder categories={categories} value={selectedCategory} onChange={onCategory} /></Box></Flex>}
         <Text fontWeight="700">{visible.length} {visible.length === 1 ? 'negocio encontrado' : 'negocios encontrados'}</Text>
         {visible.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px">{visible.map((business) => {
           const links = sponsorLinks(business);
@@ -391,7 +392,7 @@ function CategoryMap({ icons, categories, businesses, mobileSector, onSectorChan
           return (
             <Button key={category} {...reorder?.(categoryKey(category))} cursor={reorder ? "grab" : undefined} style={reorder ? { touchAction: "none" } : undefined} aria-label={`Entrar a ${category}, ${total} negocios`} position={{ base: 'relative', md: 'absolute' }} left={{ base: 'auto', md: `${left}%` }} top={{ base: 'auto', md: `${onBack ? top * .8 + 12 : top}%` }} transform={{ base: 'none', md: 'translate(-50%, -50%)' }} gridColumn={visibleCount % 2 === 1 && mobileIndex === visibleCount - 1 ? '1 / -1' : undefined} justifySelf="center" w={{ base: visibleCount === 1 ? '170px' : 'min(100%, 152px)', md: '128px' }} h="auto" minH={{ base: '128px', md: '118px' }} minW="0" px="8px" py="12px" variant="unstyled" bg="whiteAlpha.900" color="navy.800" border="2px solid white" borderRadius="28px" boxShadow="0 0 0 5px rgba(167,139,250,.12), 0 0 22px rgba(167,139,250,.35)" onClick={() => onSelect(category)} display={categorySector === mobileSector ? 'flex' : 'none'} flexDirection="column" alignItems="center" justifyContent="center" zIndex={2} _hover={{ bg: 'cyan.50' }} _focusVisible={{ outline: '3px solid', outlineColor: 'cyan.200', outlineOffset: '4px' }}>
               {reorder && <Icon as={MdDragIndicator} position="absolute" top={1} left={1} boxSize={5} />}
-              <Text fontSize="32px" lineHeight="1" flexShrink={0}>{icons[category] || '🏪'}</Text>
+              <UlaContainer boxSize="48px" bg="brand.100" color="navy.900" fontSize="29px" aria-hidden="true">{icons[category] || '🏪'}</UlaContainer>
               <Text mt="8px" w="100%" flexShrink={0} whiteSpace="normal" overflowWrap="anywhere" lineHeight="1.3" fontSize="12px" fontWeight="800">{category}</Text>
               {total > 0 && <Badge position="absolute" right="5px" top="5px" minW="22px" fontSize="10px" borderRadius="full" colorScheme="purple">{total}</Badge>}
             </Button>

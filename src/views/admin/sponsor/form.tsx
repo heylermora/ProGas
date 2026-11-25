@@ -1,3 +1,4 @@
+import { UlaCurve } from 'components/brand/UlaResources';
 import { sponsorCategories } from 'utils/sponsorCategories';
 import { Alert, AlertIcon, Box, Button, Image, Checkbox, CheckboxGroup, Input, InputGroup, InputLeftAddon, SimpleGrid, Stack, Switch, Text, Textarea } from '@chakra-ui/react';
 import Card from 'components/card/Card';
@@ -119,7 +120,10 @@ export default function SponsorForm({ publicSubmission, request, onReviewed }: F
 
   if (submitted) return <Alert status="success" role="status"><AlertIcon />Recibimos su solicitud. Está en revisión para aprobación.</Alert>;
   const title = publicSubmission ? 'Quiero promocionar mi negocio' : request ? 'Revisar solicitud' : id ? 'Editar patrocinador' : 'Nuevo patrocinador';
-  return <Card maxW="1000px" mx="auto" mt="24px" mb="36px" p={{ base: 4, md: 6 }}><Form aria-label={title} title={title} description={publicSubmission ? 'Complete los datos de su comercio. Revisaremos la solicitud antes de publicarla.' : 'Prepará la información que verán los clientes en el directorio.'}
+  return <Card maxW="1000px" mx="auto" mt="24px" mb="36px" p={{ base: 4, md: 6 }}
+    position={publicSubmission ? 'relative' : undefined}>
+    {publicSubmission && <UlaCurve />}
+    <Form aria-label={title} title={title} description={publicSubmission ? 'Complete los datos de su comercio. Revisaremos la solicitud antes de publicarla.' : 'Prepará la información que verán los clientes en el directorio.'}
     onBack={publicSubmission || request ? undefined : () => history.push('/admin/sponsor/index')} submitLabel={publicSubmission ? 'Enviar solicitud' : request ? 'Guardar edición' : 'Guardar patrocinador'} isSubmitting={saving}
     isDisabled={loading || loadError || readingLogo} pt={0} pb={0}
     onFormSubmit={event => { event.preventDefault(); save(); }}>

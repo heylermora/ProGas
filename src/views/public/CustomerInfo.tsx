@@ -1,4 +1,6 @@
-import { Alert, AlertIcon, Box, Button, Input, Select, SimpleGrid, Stack, Text } from '@chakra-ui/react';
+import { UlaContainer } from 'components/brand/UlaResources';
+import { MdPlace } from 'react-icons/md';
+import { Alert, AlertIcon, Box, Button, Flex, Input, Select, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import DeviceLocationMap from 'components/form/DeviceLocationMap';
 import Form from 'components/form/Form';
 import FormField from 'components/form/FormField';
@@ -130,7 +132,7 @@ export default function CustomerInfo() {
           <FormField  label={<>Apodo</>}><Input value={form.nickname} onChange={e => set('nickname', e.target.value)} /></FormField>
         </SimpleGrid>
         <Box>
-          <Text fontWeight="900" mb="1">Dirección de entrega</Text>
+          <Flex align="center" gap={3} mb={2}><UlaContainer aria-hidden="true"><MdPlace size={21} /></UlaContainer><Text fontWeight="900">Dirección de entrega</Text></Flex>
           <Text fontSize="sm" color="gray.600" mb="4">Seleccioná cada nivel para evitar errores al ubicar el pedido.</Text>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">
             <FormField isRequired label={<>Provincia</>}><Select isDisabled={catalogLoading} value={form.province} onChange={e => setForm(prev => ({ ...prev, province: e.target.value, canton: '', district: '', locality: '', captureSource: 'manual' }))}>{provinces.map(item => <option key={item.code} value={item.name}>{item.name}</option>)}</Select></FormField>

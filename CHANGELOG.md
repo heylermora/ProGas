@@ -14,6 +14,8 @@ Reglas de versiones y publicación: [VERSIONAMIENTO.md](VERSIONAMIENTO.md).
 
 ### Cambiado
 
+- Los cuatro recursos visuales del manual de Ulà se integran en las rutas públicas.
+
 - Ulà adopta la identidad del manual de marca 8.0, con el logotipo de la mano y la ilustración de Acosta en la portada. Gas Memo figura como patrocinador.
 
 - La barra superior concentra el regreso por niveles del centro comercial. Se retiró el acceso público a «Ver pedido».

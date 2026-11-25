@@ -1,3 +1,4 @@
+import { UlaHandGesture } from 'components/brand/UlaResources';
 import { Box, Button, Flex, Heading, Icon, Image, Link, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { useEffect } from 'react';
 import { MdArrowForward, MdExplore, MdStorefront } from 'react-icons/md';
@@ -86,7 +87,7 @@ export default function AboutUla() {
       </SimpleGrid>
 
       <Box as="section" aria-labelledby="about-origin" px={{ base: 1, md: 3 }}>
-        <Heading as="h2" id="about-origin" fontSize={{ base: '26px', md: '34px' }} mb={3}>Una mano que siempre da</Heading>
+        <Flex align="center" gap={3} mb={3}><UlaHandGesture /><Heading as="h2" id="about-origin" fontSize={{ base: '26px', md: '34px' }}>Una mano que siempre da</Heading></Flex>
         <Stack spacing={3} color={muted} maxW="74ch" lineHeight="1.65">
           <Text>Ulà nació en Acosta, donde dar una mano puede ser tan sencillo como recomendar un comercio vecino. El proyecto recoge esa costumbre para dar visibilidad a quienes emprenden y acercar sus servicios a la comunidad.</Text>
           <Text>Ulà significa «mano» en bribri. El nombre se inspira en <Box as="i">ulàpeitök</Box>, una práctica bribri de ayuda mutua y trabajo colectivo.</Text>

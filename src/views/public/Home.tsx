@@ -1,3 +1,4 @@
+import { AcostaHorizons } from 'components/brand/UlaResources';
 import { SocialLinksRow, SocialContact } from 'components/social/SocialLink';
 import React, { useEffect } from 'react';
 import AnalyticsService from 'services/AnalyticsService';
@@ -127,6 +128,7 @@ export default function Home() {
             w="100%" h="100%" objectFit="cover" objectPosition={{ base: '76% center', md: 'center 54%' }} pointerEvents="none" />
           <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
             bg={{ base: 'linear-gradient(180deg, rgba(250,250,255,.96) 3%, rgba(248,248,255,.86) 50%, transparent 78%), linear-gradient(0deg, #E8E3FF, transparent 25%)', md: 'linear-gradient(90deg, rgba(250,250,255,.97) 0%, rgba(248,248,255,.85) 30%, transparent 68%), linear-gradient(0deg, #E8E3FF, transparent 18%)' }} />
+          <AcostaHorizons />
           <Stack position="relative" spacing={{ base: 3, md: 4 }} color="navy.900" maxW={{ base: '340px', md: '440px' }}>
             <Image src={`${process.env.PUBLIC_URL}/ula/logo.png`} alt="" h={{ base: '58px', md: '78px' }} w="auto" alignSelf="flex-start" objectFit="contain" />
             <Heading as="h1" id="community-title" fontSize={{ base: '36px', sm: '44px', lg: '58px' }} fontWeight="700"

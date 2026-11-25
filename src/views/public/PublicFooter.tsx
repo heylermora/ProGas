@@ -1,3 +1,4 @@
+import { UlaContainer } from 'components/brand/UlaResources';
 import { SocialContact } from 'components/social/SocialLink';
 import { Box, Flex, Image, Link, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink, useLocation } from 'react-router-dom';
@@ -28,9 +29,9 @@ export default function PublicFooter() {
       <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }}
         direction={{ base: 'column', md: 'row' }} gap={{ base: 4, md: 8 }} py={{ base: 5, md: 6 }}>
         <Flex align="center" gap={3}>
-          <Flex boxSize="44px" flexShrink={0} bg="white" borderRadius="12px" align="center" justify="center">
+          <UlaContainer boxSize="44px" bg="white">
             <Image src={`${process.env.PUBLIC_URL}/ula/isotipo.png`} alt="" h="27px" w="auto" />
-          </Flex>
+          </UlaContainer>
           <Box>
             <Text fontSize="lg" lineHeight="short" fontWeight="700">Ulà</Text>
             <Text fontSize="sm" color={muted}>Negocios de Acosta y alrededores</Text>
