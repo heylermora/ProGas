@@ -1,11 +1,11 @@
-import { addData, fetchAllData, fetchAllPages, fetchDataById, updateData, upsertData } from 'apiConfig';
+import { addData, fetchAllPages, fetchDataById, updateData, upsertData } from 'apiConfig';
 import CategoryService, { CategoryInUseError } from './CategoryService';
 import SponsorService from './SponsorService';
 import ProductService from './ProductService';
 import { completeBusinessSettings } from 'utils/businessCategories';
 import { categoryId, renameCategory } from 'utils/categories';
 
-jest.mock('apiConfig', () => ({ addData: jest.fn(), fetchAllData: jest.fn(), fetchAllPages: jest.fn(), fetchDataById: jest.fn(), updateData: jest.fn(), upsertData: jest.fn(), deleteData: jest.fn() }));
+jest.mock('apiConfig', () => ({ addData: jest.fn(), fetchAllPages: jest.fn(), fetchDataById: jest.fn(), updateData: jest.fn(), upsertData: jest.fn(), deleteData: jest.fn() }));
 let settings: Record<string, unknown>;
 beforeEach(() => {
   jest.clearAllMocks();
@@ -13,9 +13,9 @@ beforeEach(() => {
   settings = { sponsors: { values: ['Sodas'], businessSettings: { groups: [{ name: 'Comida', icon: '🍽️', categories: ['Sodas'] }], icons: { Sodas: '🍲' } } }, products: { values: ['Gas'] } };
   (fetchDataById as jest.Mock).mockImplementation((collection, id) => collection === 'CategorySettings' ? settings[id] : { id, category: 'Sodas', name: 'Local', order: 3 });
   (upsertData as jest.Mock).mockImplementation((_collection, id, data) => { settings[id] = data; });
-  (fetchAllData as jest.Mock).mockResolvedValue([{ id: 'local', name: 'Local', category: 'Sodas', order: 3 }]);
 });
 it('persists general and specific IDs, and reads a renamed category without losing historical businesses', async () => {
+  (fetchAllPages as jest.Mock).mockResolvedValue([{ id: 'local', name: 'Local', category: 'Sodas', order: 3 }]);
   const before = await CategoryService.getBusinessSettings(['Sodas']);
   const id = before.catalog[0].id;
   const generalId = before.groups[0].id;

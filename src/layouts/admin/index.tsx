@@ -1,13 +1,14 @@
-import { Portal, Box, useDisclosure } from '@chakra-ui/react';
+import { Portal, Box, Badge, useDisclosure } from '@chakra-ui/react';
 import type { ResponsiveValue } from '@chakra-ui/react';
 import Sidebar from 'components/sidebar/Sidebar';
 import { SidebarContext } from 'contexts/SidebarContext';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation, Link } from 'react-router-dom';
 import routes from 'routes/routes';
 import { useState } from 'react';
 import Navbar from 'components/navbar/Navbar';
 import { useAuth } from 'contexts/AuthContext';
 import Unauthorized from 'components/exceptions/Unauthorized';
+import usePromotionRequests from 'hooks/usePromotionRequests';
 import { PageSearchProvider } from 'contexts/PageSearchContext';
 
 export default function Dashboard(props: { [x: string]: any }) {
@@ -15,6 +16,7 @@ export default function Dashboard(props: { [x: string]: any }) {
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const { onOpen } = useDisclosure();
   const { hasRole } = useAuth();
+  const { requests } = usePromotionRequests(hasRole(['admin']));
 
   const { pathname: currentPath } = useLocation();
 
@@ -84,7 +86,10 @@ export default function Dashboard(props: { [x: string]: any }) {
 							/>
 						</Portal>
 						<Box mx='auto' p={adminPadding} minH='100vh' pt={{ base: '172px', md: '140px' }} maxW='1600px'>
-							<Switch>
+							{requests.length > 0 && <Badge as={Link} to="/admin/sponsor/index?solicitudes=1" colorScheme="purple" mb={2} px={3} py={1} aria-live="polite">
+                {requests.length} {requests.length === 1 ? 'solicitud de promoción pendiente' : 'solicitudes de promoción pendientes'}
+              </Badge>}
+              <Switch>
 								{getRoutes(routes)}
 								<Redirect from='/' to='/admin/order/index' />
 							</Switch>

@@ -29,32 +29,30 @@ const setViewportWidth = (width: number) => {
 describe('Home', () => {
   it('prioritizes local businesses without the exclusive Gas Memo ordering section', () => {
     renderHome();
-    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /^ver negocios$/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('heading', { name: /una mano que siempre da/i })).toBeTruthy();
+    const hero = within(screen.getByRole('region', { name: /una mano que siempre da/i }));
+    expect(hero.getByRole('link', { name: 'Qué es Ulà' }).getAttribute('href')).toBe('/que-es-ula');
+    expect(screen.getByRole('link', { name: /^explorar comercios$/i }).getAttribute('href')).toBe('/mall');
     expect(screen.queryByText('PRÓXIMAMENTE')).toBeNull();
     expect(screen.queryByText(/este servicio aún no está disponible/i)).toBeNull();
     expect(screen.queryByRole('heading', { name: /pedidos en línea con gas memo/i })).toBeNull();
     expect(screen.queryByRole('link', { name: /hacer pedido/i })).toBeNull();
     expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
-    const community = screen.getByRole('region', { name: /lo que busca, en acosta/i });
+    const community = screen.getByRole('region', { name: /una mano que siempre da/i });
     expect(within(community).getByTestId('mall-preview')).toBeTruthy();
     expect(screen.queryByText('Cerca de usted. Parte de Acosta.')).toBeNull();
   });
 
-  it('invites business owners in the main card footer with a prepared Gas Memo message', () => {
+  it('invites business owners in the main card footer with a link to the public application', () => {
     renderHome();
-    const community = screen.getByRole('region', { name: /lo que busca, en acosta/i });
+    const community = screen.getByRole('region', { name: /una mano que siempre da/i });
     const footer = within(community).getByRole('group', { name: 'Promocione su negocio' });
     const promotion = within(footer);
     expect(promotion.getByRole('heading', { name: /su negocio también puede estar aquí/i })).toBeTruthy();
     expect(screen.queryByText(/ejemplo ilustrativo/i)).toBeNull();
     expect(promotion.queryByRole('figure')).toBeNull();
     const cta = promotion.getByRole('link', { name: /quiero promocionar mi negocio/i });
-    const url = new URL(cta.getAttribute('href')!);
-    expect(url.origin).toBe('https://wa.me');
-    expect(url.pathname).toBe('/50683978524');
-    expect(url.searchParams.get('text')).toBe('Hola, Gas Memo. Tengo un negocio en Acosta y quiero promocionarlo en su directorio. ¿Me pueden compartir qué incluye la publicación, los costos y cómo participar?');
-    expect(cta.getAttribute('rel')).toContain('noopener');
+    expect(cta.getAttribute('href')).toBe('/promocionar-negocio');
     expect(promotion.queryByRole('link', { name: /su contacto directo/i })).toBeNull();
   });
 
@@ -84,22 +82,22 @@ describe('Home', () => {
     const { unmount } = renderHome();
 
     setViewportWidth(375);
-    expect(screen.getByRole('link', { name: /^ver negocios$/i }).getAttribute('href')).toBe('/mall');
+    expect(screen.getByRole('link', { name: /^explorar comercios$/i }).getAttribute('href')).toBe('/mall');
     expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
 
     unmount();
     setViewportWidth(1280);
     renderHome();
 
-    expect(screen.getByRole('heading', { name: /lo que busca, en acosta/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /una mano que siempre da/i })).toBeTruthy();
     expect(screen.getByTestId('mall-preview')).toBeTruthy();
     expect(screen.queryByRole('group', { name: 'Redes sociales de Gas Memo' })).toBeNull();
   });
-  it('records the landing visit and the Ver negocios click without changing its destination', () => {
+  it('records the landing visit and the Explorar comercios click without changing its destination', () => {
     (AnalyticsService.track as jest.Mock).mockClear();
     renderHome();
     expect(AnalyticsService.track).toHaveBeenCalledWith({ type: 'page_view', source: 'home' });
-    const link = screen.getByRole('link', { name: /^ver negocios$/i });
+    const link = screen.getByRole('link', { name: /^explorar comercios$/i });
     expect(link.getAttribute('href')).toBe('/mall');
     fireEvent.click(link);
     expect(AnalyticsService.track).toHaveBeenCalledWith({ type: 'browse_click', source: 'home' });

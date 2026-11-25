@@ -1,6 +1,24 @@
-# Historial de cambios de ProGas
+# Historial de cambios de Ulà
 
 Reglas de versiones y publicación: [VERSIONAMIENTO.md](VERSIONAMIENTO.md).
+
+## [1.4.0] — Pendiente de publicación
+
+### Agregado
+
+- Página pública «Qué es Ulà», con el origen del nombre y las formas de participar.
+
+- Exportación de comercios y categorías filtrados a CSV, PDF y Excel con columnas configurables.
+- Editor del orden del mapa público para categorías generales, específicas y comercios.
+- Formulario público de promoción y revisión administrativa de solicitudes. El flujo requiere las nuevas reglas de Firestore.
+
+### Cambiado
+
+- Los cuatro recursos visuales del manual de Ulà se integran en las rutas públicas.
+
+- Ulà adopta la identidad del manual de marca 8.0, con el logotipo de la mano y la ilustración de Acosta en la portada. Gas Memo figura como patrocinador.
+
+- La barra superior concentra el regreso por niveles del centro comercial. Se retiró el acceso público a «Ver pedido».
 
 ## [1.3.1] — Pendiente de publicación
 
@@ -33,7 +51,7 @@ Preparada el 2026-10-30. Esta entrada no confirma un despliegue en producción.
 - Categorías generales y específicas para explorar el centro comercial en dos niveles.
 - Página administrativa de categorías con pestañas, renombrado y selección de un emoji por ícono.
 - IDs estables para categorías de comercios y productos, con compatibilidad para nombres históricos.
-- Reglas de versionamiento semántico y registro de entregas de ProGas.
+- Reglas de versionamiento semántico y registro de entregas de Ulà.
 - Botón para compartir un negocio mediante el menú nativo, copiar su enlace directo o seleccionarlo manualmente cuando el navegador no permite copiarlo.
 
 ### Cambiado
@@ -56,12 +74,12 @@ Preparada el 2026-10-30. Esta entrada no confirma un despliegue en producción.
 ## [1.1.0] — Versión de partida
 
 Versión declarada en los archivos de npm antes de iniciar este registro.
-No se reconstruyeron fechas ni notas de despliegues anteriores de ProGas.
+No se reconstruyeron fechas ni notas de despliegues anteriores de Ulà.
 
 ## Historial de la plantilla Horizon UI
 
 Las entradas siguientes se conservan como documentación original de la plantilla.
-Sus versiones y fechas no corresponden a entregas de ProGas.
+Sus versiones y fechas no corresponden a entregas de Ulà.
 
 ### [1.1.1] 2022-11-01
 

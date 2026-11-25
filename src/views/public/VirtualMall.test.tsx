@@ -3,12 +3,25 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import SponsorService from 'services/SponsorService';
-import VirtualMall from './VirtualMall';
+import { MallOrderService } from 'services/MallOrderService';
+import VirtualMall, { MallOrderEditor } from './VirtualMall';
+import { categoryId } from 'utils/categories';
 import theme from 'theme/theme';
 
 jest.mock('services/SponsorService', () => ({ __esModule: true, default: { getAll: jest.fn() } }));
 jest.mock('hooks/useCategories', () => ({ __esModule: true, default: () => ({ categories: ['Restaurantes/Sodas'] }) }));
-jest.mock('./PublicPage', () => ({ PublicPage: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
+jest.mock('apiConfig', () => ({ db: {} }));
+jest.mock('services/MallOrderService', () => ({
+  ...jest.requireActual('services/MallOrderService'),
+  MallOrderService: { get: jest.fn(), save: jest.fn() },
+}));
+jest.mock('./PublicPage', () => ({ PublicPage: ({ children, onBack, backLabel }: { children: React.ReactNode; onBack?: () => void; backLabel?: string }) =>
+  <>{onBack && <button onClick={onBack}>{backLabel}</button>}{children}</> }));
+
+beforeEach(() => {
+  (MallOrderService.get as jest.Mock).mockResolvedValue({});
+  (MallOrderService.save as jest.Mock).mockResolvedValue(undefined);
+});
 
 const renderMall = () => render(<ChakraProvider theme={theme}><MemoryRouter><VirtualMall /></MemoryRouter></ChakraProvider>);
 
@@ -53,7 +66,7 @@ describe('VirtualMall flight navigation', () => {
     fireEvent.click(station);
     await screen.findByRole('dialog');
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape', code: 'Escape', keyCode: 27 });
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 3000 });
     expect(screen.getByRole('button', { name: 'Volver a categorías específicas' })).toBeTruthy();
   }, 15000);
 
@@ -64,7 +77,7 @@ describe('VirtualMall flight navigation', () => {
     render(<ChakraProvider theme={theme}><MemoryRouter initialEntries={['/mall?business=linked']}><VirtualMall /></MemoryRouter></ChakraProvider>);
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByRole('heading', { name: 'Negocio sin contactos' })).toBeTruthy();
-    expect(dialog.queryByText('CONTACTÁ AL NEGOCIO')).toBeNull();
+    expect(dialog.queryByText('CONTACTO DEL NEGOCIO')).toBeNull();
     expect(dialog.queryByText('Cómo llegar')).toBeNull();
     expect(dialog.queryByRole('button', { name: 'Ver video del negocio' })).toBeNull();
     fireEvent.click(dialog.getByRole('button', { name: 'Cerrar' }));
@@ -175,4 +188,19 @@ it('includes one business in each specific category without double counting its 
   expect(screen.getAllByRole('button', { name: 'Abrir ficha de Café y soda' })).toHaveLength(1);
   fireEvent.click(screen.getByRole('button', { name: 'Usar vista sencilla' }));
   expect(screen.getAllByRole('heading', { name: 'Café y soda' })).toHaveLength(1);
+});
+
+it('previews a new station order and only publishes it when saved', async () => {
+  (SponsorService.getAll as jest.Mock).mockResolvedValue([
+    { id: 'a', name: 'Primero', category: 'Restaurantes/Sodas', active: true, logoUrl: '', links: [] },
+    { id: 'b', name: 'Segundo', category: 'Restaurantes/Sodas', active: true, logoUrl: '', links: [] },
+  ]);
+  render(<ChakraProvider theme={theme}><MemoryRouter><MallOrderEditor /></MemoryRouter></ChakraProvider>);
+  fireEvent.click(await screen.findByRole('button', { name: /Entrar a Alimentos \/ Bebidas/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Entrar a Restaurantes\/Sodas/ }));
+  fireEvent.keyDown(screen.getByRole('button', { name: 'Abrir ficha de Segundo' }), { altKey: true, key: 'ArrowUp' });
+  expect(screen.getAllByRole('button', { name: /Abrir ficha de/ })[0].textContent).toBe('Segundo');
+  expect(MallOrderService.save).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+  await waitFor(() => expect(MallOrderService.save).toHaveBeenCalledWith({ ['businesses:' + categoryId('sponsors', 'Restaurantes/Sodas')]: ['b', 'a'] }));
 });

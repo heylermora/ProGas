@@ -1,10 +1,10 @@
-import { addData, fetchAllData, updateData } from 'apiConfig';
+import { addData, fetchAllPages, updateData } from 'apiConfig';
 import SponsorService from './SponsorService';
 
-jest.mock('apiConfig', () => ({ addData: jest.fn(), fetchAllData: jest.fn(), fetchDataById: jest.fn(), updateData: jest.fn(), deleteData: jest.fn() }));
+jest.mock('apiConfig', () => ({ addData: jest.fn(), fetchAllPages: jest.fn(), fetchDataById: jest.fn(), updateData: jest.fn(), deleteData: jest.fn() }));
 
 it('appends new sponsors after the last position in their category', async () => {
-  (fetchAllData as jest.Mock).mockResolvedValue([
+  (fetchAllPages as jest.Mock).mockResolvedValue([
     { id: 'a', name: 'A', category: 'Tiendas', order: 2 },
     { id: 'b', name: 'B', category: 'Tiendas', order: 8 },
     { id: 'c', name: 'C', category: 'Otros', order: 90 },
@@ -22,11 +22,11 @@ it.each(['', '   ', '\t\n', '\u00a0', undefined, null, 42])('rejects invalid nam
   await expect(SponsorService.edit('one', { ...item, id: 'one' })).rejects.toThrow('Ingrese el nombre del negocio.');
   expect(addData).not.toHaveBeenCalled();
   expect(updateData).not.toHaveBeenCalled();
-  expect(fetchAllData).not.toHaveBeenCalled();
+  expect(fetchAllPages).not.toHaveBeenCalled();
 });
 
 it('trims the business name on creation and update', async () => {
-  (fetchAllData as jest.Mock).mockResolvedValue([]);
+  (fetchAllPages as jest.Mock).mockResolvedValue([]);
   const item: Parameters<typeof SponsorService.create>[0] = { name: '  Comercio Central  ', category: 'Otros', order: 1, active: true, logoUrl: '', links: [] };
   await SponsorService.create(item);
   await SponsorService.edit('one', { ...item, id: 'one' });
@@ -35,7 +35,7 @@ it('trims the business name on creation and update', async () => {
 });
 
 it('persists multiple memberships and returns a business once for either category', async () => {
-  (fetchAllData as jest.Mock).mockResolvedValue([]);
+  (fetchAllPages as jest.Mock).mockResolvedValue([]);
   const item = { name: 'Mixto', category: 'Tiendas', categories: ['Tiendas', 'Cafeterías'], order: 1, active: true, logoUrl: '', links: [] as string[] };
   await SponsorService.create(item);
   const saved = (addData as jest.Mock).mock.calls[0][1];
@@ -43,7 +43,7 @@ it('persists multiple memberships and returns a business once for either categor
   expect(saved.categoryIds).toHaveLength(2);
   await SponsorService.edit('one', { ...saved, id: 'one', name: 'Nuevo nombre' });
   expect(updateData).toHaveBeenCalledWith('Sponsors', 'one', expect.objectContaining({ categories: saved.categories, categoryIds: saved.categoryIds }));
-  (fetchAllData as jest.Mock).mockResolvedValue([{ ...saved, id: 'one' }, { ...saved, id: 'hidden', active: false }]);
+  (fetchAllPages as jest.Mock).mockResolvedValue([{ ...saved, id: 'one' }, { ...saved, id: 'hidden', active: false }]);
   expect((await SponsorService.getPublicByCategory('Tiendas')).map(item => item.id)).toEqual(['one']);
   expect((await SponsorService.getPublicByCategory('Cafeterías')).map(item => item.id)).toEqual(['one']);
 });

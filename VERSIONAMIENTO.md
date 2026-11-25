@@ -1,10 +1,10 @@
-# Versionamiento de ProGas
+# Versionamiento de Ulà
 
-ProGas usa versionamiento semántico: `MAYOR.MENOR.PARCHE`.
+Ulà usa versionamiento semántico: `MAYOR.MENOR.PARCHE`.
 
-La versión de esta entrega es **1.3.1**, pendiente de publicación. La versión de
+La versión de esta entrega es **1.4.0**, pendiente de publicación. La versión de
 partida del proyecto era `1.1.0`. Los números del historial de Horizon UI pertenecen
-a la plantilla y no representan entregas de ProGas.
+a la plantilla y no representan entregas de Ulà.
 
 ## Cuándo cambiar la versión
 
@@ -23,11 +23,11 @@ agrupan en `1.3.0`; sus ajustes durante la revisión no generan nuevas versiones
 
 - `package.json`: fuente de verdad para la versión de la aplicación.
 - `package-lock.json`: deben coincidir tanto `version` como `packages[""].version`.
-- `CHANGELOG.md`: una entrada de ProGas para la versión, con sus cambios y estado.
+- `CHANGELOG.md`: una entrada de Ulà para la versión, con sus cambios y estado.
 
 El pie de página ya lee `package.json`; no escribir otra versión fija en los
 componentes. Las versiones de las dependencias y los comentarios históricos de
-Horizon UI son independientes de la versión de ProGas.
+Horizon UI son independientes de la versión de Ulà.
 
 ## Preparar una entrega
 
@@ -69,7 +69,7 @@ Una versión en el código o un PR aprobado no confirma que esté desplegada.
    `COMMIT_PUBLICADO` por su SHA verificado:
 
    ```bash
-   git tag -a v1.3.0 COMMIT_PUBLICADO -m "ProGas 1.3.0"
+   git tag -a v1.3.0 COMMIT_PUBLICADO -m "Ulà 1.3.0"
    git push origin v1.3.0
    ```
 

@@ -1,6 +1,6 @@
 import { sponsorCategories, resolveSponsorCategories, hasSponsorCategory } from 'utils/sponsorCategories';
 import { normalizeBusinessName, requireBusinessName } from 'utils/businessName';
-import { fetchAllData, fetchDataById, addData, updateData, deleteData } from 'apiConfig';
+import { fetchAllPages, fetchDataById, addData, updateData, deleteData } from 'apiConfig';
 import CategoryService from './CategoryService';
 import { findCategory } from 'utils/categories';
 import SponsorItem, { BusinessCategory, DEFAULT_BUSINESS_CATEGORY, SponsorType } from 'interfaces/SponsorItem';
@@ -29,9 +29,7 @@ const normalize = (item: SponsorItem): SponsorItem => ({
 
 const SponsorService = {
   getAll: async () => {
-    // El mapa pagina visualmente por sectores; usamos un límite amplio para no ocultar
-    // negocios activos por el límite genérico de 50 documentos de la utilidad compartida.
-    const data = await fetchAllData<SponsorItem>(COLLECTION, undefined, 500);
+    const data = await fetchAllPages<SponsorItem>(COLLECTION);
     const normalized = data.map(normalize);
     const catalog = await CategoryService.getCatalog('sponsors', normalized.flatMap(sponsorCategories));
     return normalized.map(item => resolveSponsorCategories(item, catalog)).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));

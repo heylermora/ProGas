@@ -1,4 +1,5 @@
-import { Alert, AlertIcon, Box, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
+import { UlaHandGesture } from 'components/brand/UlaResources';
+import { Alert, AlertIcon, Box, Flex, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import Form from 'components/form/Form';
 import FormField from 'components/form/FormField';
 import { useState } from 'react';
@@ -97,7 +98,7 @@ export default function CustomerData() {
         <Stack spacing="18px">
           {message && <Alert status="warning" borderRadius="12px"><AlertIcon />{message}</Alert>}
           <Stack spacing="4px">
-            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="900">Datos de verificación</Text>
+            <Flex align="center" gap={3}><UlaHandGesture /><Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="900">Datos de verificación</Text></Flex>
             <Text color="gray.500" fontSize="sm">Usamos estos datos para validar el cliente antes de armar el pedido.</Text>
           </Stack>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing="16px">

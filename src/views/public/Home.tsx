@@ -1,3 +1,4 @@
+import { AcostaHorizons } from 'components/brand/UlaResources';
 import { SocialLinksRow, SocialContact } from 'components/social/SocialLink';
 import React, { useEffect } from 'react';
 import AnalyticsService from 'services/AnalyticsService';
@@ -17,7 +18,7 @@ import MallPreview from './MallPreview';
 import BusinessPromotion from './BusinessPromotion';
 import { PublicPage } from './PublicPage';
 
-const acostaBackground = `${process.env.PUBLIC_URL}/acosta-fondo.png`;
+const acostaBackground = `${process.env.PUBLIC_URL}/ula/acosta.webp`;
 const bmaLogo = `${process.env.PUBLIC_URL}/Banda%20Municipal%20de%20Acosta/logo.png`;
 const bmaDonationUrl =
   'https://api.whatsapp.com/send/?phone=50662787984&text=' +
@@ -118,26 +119,36 @@ export default function Home() {
   return (
     <PublicPage maxW="1200px">
       <Box as="section" aria-labelledby="community-title" position="relative" overflow="hidden"
-        borderRadius={{ base: '24px', md: '32px' }} mb={{ base: 6, md: 8 }} bg="#EEF3FF"
-        border="1px solid" borderColor="#DDE5F5" boxShadow="0 18px 44px rgba(38,51,105,.08)">
-        <Box position="relative" px={{ base: 5, md: 10 }} pt={{ base: 7, md: 12 }} pb={{ base: 4, md: 5 }}>
+        borderRadius={{ base: '24px', md: '32px' }} mb={{ base: 6, md: 8 }} bg="brand.100"
+        border="1px solid" borderColor="brand.100" boxShadow="0 18px 44px rgba(11,20,55,.08)">
+        <Box position="relative" px={{ base: 5, md: 12 }} pt={{ base: 6, md: 10 }}
+          pb={{ base: '88px', md: 14 }} minH={{ md: '420px' }} display="flex" alignItems="center">
           <Image src={acostaBackground} alt="" aria-hidden="true" position="absolute" inset="0"
-            w="100%" h="100%" objectFit="cover" objectPosition={{ base: '72% center', md: 'center 58%' }} pointerEvents="none" />
+            w="100%" h="100%" objectFit="cover" objectPosition={{ base: '76% center', md: 'center 54%' }} pointerEvents="none" />
           <Box aria-hidden="true" position="absolute" inset="0" pointerEvents="none"
-            bg={{ base: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.72) 45%, rgba(244,246,255,.08) 90%), linear-gradient(0deg, #EEF3FF, transparent 38%)', md: 'linear-gradient(90deg, rgba(244,246,255,.94), rgba(244,246,255,.6) 40%, transparent 72%), linear-gradient(0deg, #EEF3FF, transparent 30%)' }} />
-          <Stack position="relative" spacing={{ base: 3, md: 4 }} color="#172554" maxW={{ base: '76%', md: '52%' }}>
-            <Text fontSize={{ base: '10px', md: 'xs' }} fontWeight="800" letterSpacing=".12em" textTransform="uppercase">Comercio local</Text>
-            <Heading id="community-title" fontSize={{ base: '32px', sm: '40px', md: '48px', lg: '56px' }} lineHeight="1.1" letterSpacing="-.04em">Lo que busca, en Acosta.</Heading>
-            <Text fontSize={{ base: 'sm', md: 'lg' }} lineHeight="1.65" maxW="440px" color="#334155">Productos y servicios de nuestra comunidad, reunidos en un solo lugar.</Text>
-            <Button as={RLink} to={{ pathname: '/mall', state: { from: '/', fromLabel: 'Volver al inicio' } }}
-              onClick={() => { void AnalyticsService.track({ type: 'browse_click', source: 'home' }); }}
-              alignSelf="flex-start" rightIcon={<MdArrowForward />} size="lg" minH="50px" mt="2px"
-              bg="linear-gradient(115deg, #5930E8, #3520AD)" color="white" px={{ base: 5, md: 7 }}
-              borderRadius="full" fontWeight="800" boxShadow="0 8px 22px rgba(70,39,191,.28)"
-              _hover={{ bg: '#3520AD', boxShadow: '0 10px 26px rgba(70,39,191,.36)' }}
-              _focusVisible={{ outline: '3px solid', outlineColor: 'brand.600', outlineOffset: '4px' }}>
-              Ver negocios
-            </Button>
+            bg={{ base: 'linear-gradient(180deg, rgba(250,250,255,.96) 3%, rgba(248,248,255,.86) 50%, transparent 78%)', md: 'linear-gradient(90deg, rgba(250,250,255,.97) 0%, rgba(248,248,255,.85) 30%, transparent 68%)' }} />
+          <AcostaHorizons />
+          <Stack position="relative" zIndex={2} spacing={{ base: 3, md: 4 }} color="navy.900" maxW={{ base: '340px', md: '440px' }}>
+            <Image src={`${process.env.PUBLIC_URL}/ula/logo.png`} alt="" h={{ base: '58px', md: '78px' }} w="auto" alignSelf="flex-start" objectFit="contain" />
+            <Heading as="h1" id="community-title" fontSize={{ base: '36px', sm: '44px', lg: '58px' }} fontWeight="700"
+              lineHeight="1.02" letterSpacing="-.045em" sx={{ textWrap: 'balance' }}>Una mano que siempre da.</Heading>
+            <Text fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.55" maxW="330px">Encuentre productos y servicios de los comercios de Acosta y alrededores.</Text>
+            <Flex align="center" wrap="wrap" columnGap={{ base: 2, md: 3 }} rowGap={2}>
+              <Button as={RLink} to="/mall"
+                onClick={() => { void AnalyticsService.track({ type: 'browse_click', source: 'home' }); }}
+                rightIcon={<MdArrowForward aria-hidden="true" />} size="md" fontSize={{ base: "sm", md: "md" }} minH="44px" px={4}
+                colorScheme="brand" bg="brand.500" color="white" borderRadius="12px" fontWeight="700"
+                _hover={{ bg: 'brand.600' }}
+                _focusVisible={{ outline: '3px solid', outlineColor: 'navy.900', outlineOffset: '3px' }}>
+                Explorar comercios
+              </Button>
+              <Button as={RLink} to="/que-es-ula" variant="outline" size="md" fontSize={{ base: "sm", md: "md" }} minH="44px" px={3}
+                color="navy.900" borderColor="blackAlpha.300" bg="whiteAlpha.600" borderRadius="12px" fontWeight="600"
+                _hover={{ bg: 'brand.100' }}
+                _focusVisible={{ outline: '3px solid', outlineColor: 'navy.900', outlineOffset: '3px' }}>
+                Qué es Ulà
+              </Button>
+            </Flex>
           </Stack>
         </Box>
         <MallPreview embedded />

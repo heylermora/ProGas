@@ -2,11 +2,11 @@ import { SocialContact } from 'components/social/SocialLink';
 import React from 'react';
 import { Badge, Box, Button, Flex, Heading, Icon, SimpleGrid, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Link as RLink } from 'react-router-dom';
-import { MdArrowForward, MdCheckCircle, MdDevices, MdInsights, MdLocalShipping, MdMap, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
+import { MdArrowForward, MdCheckCircle, MdDevices, MdInsights, MdPublic, MdMap, MdRocketLaunch, MdStorefront, MdSupportAgent } from 'react-icons/md';
 import { PublicPage } from './PublicPage';
 import BackButton from 'components/button/BackButton';
 
-const whatsappUrl = 'https://wa.me/50683508585?text=' + encodeURIComponent('Hola Johel, vi su portafolio en Gas Memo y me gustaría conversar sobre una solución digital para mi emprendimiento.');
+const whatsappUrl = 'https://wa.me/50683508585?text=' + encodeURIComponent('Hola Johel, vi su portafolio en Ulà y me gustaría conversar sobre una solución digital para mi emprendimiento.');
 
 const services = [
   { icon: MdDevices, title: 'Sitios y aplicaciones web', text: 'Experiencias rápidas, claras y adaptadas a celulares, tabletas y computadoras.' },
@@ -16,20 +16,20 @@ const services = [
 
 const projects = [
   {
-    name: 'Gas Memo',
-    type: 'Pedidos y logística local',
-    icon: MdLocalShipping,
-    description: 'Una experiencia de compra sencilla que permite pedir gas desde cualquier dispositivo, compartir la ubicación de entrega y consultar el avance sin llamadas.',
-    highlights: ['Pedido guiado', 'Seguimiento claro', 'Diseño móvil'],
-    result: 'Menos pasos para pedir y más claridad durante la entrega.',
-    action: 'Probar la experiencia',
+    name: 'Ulà',
+    type: 'Plataforma de comercio local',
+    icon: MdPublic,
+    description: 'Una plataforma para descubrir comercios de Acosta y alrededores y dar visibilidad a los negocios de la comunidad.',
+    highlights: ['Negocios locales', 'Solicitudes de promoción', 'Diseño móvil'],
+    result: 'Un punto de encuentro para comercios y clientes de Acosta y alrededores.',
+    action: 'Conocer Ulà',
     to: '/',
   },
   {
     name: 'Centro Comercial Virtual',
     type: 'Comercio local',
     icon: MdMap,
-    description: 'Una vitrina digital que reúne negocios de Acosta por categoría y facilita descubrir sus servicios, promociones y medios de contacto.',
+    description: 'Una vitrina digital que reúne negocios de Acosta y alrededores por categoría y facilita descubrir sus servicios, promociones y medios de contacto.',
     highlights: ['Directorio visual', 'Comercios por categoría', 'Contacto directo'],
     result: 'Mayor visibilidad para emprendimientos y una búsqueda más fácil para la comunidad.',
     action: 'Explorar comercios',
@@ -64,7 +64,7 @@ export default function Portfolio() {
             <Text color="whiteAlpha.800" fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.7" maxW="650px">Soy Johel, desarrollador de Acosta. Combino tecnología, diseño y conocimiento del entorno local para convertir procesos complejos en herramientas sencillas para negocios y organizaciones.</Text>
             <Flex direction={{ base: 'column', md: 'row' }} wrap="wrap" gap="10px" pt="8px" w="100%">
               <SocialContact href={whatsappUrl} caption="Conversemos por WhatsApp" />
-              <BackButton to="/" color="white" borderRadius="full" size="lg" w={{ base: '100%', md: 'auto' }} maxW="100%" h="auto" py="12px" _hover={{ bg: 'whiteAlpha.200' }}>Volver a Gas Memo</BackButton>
+              <BackButton to="/" color="white" borderRadius="full" size="lg" w={{ base: '100%', md: 'auto' }} maxW="100%" h="auto" py="12px" _hover={{ bg: 'whiteAlpha.200' }}>Volver a Ulà</BackButton>
             </Flex>
           </Stack>
         </Box>

@@ -34,8 +34,7 @@ import Home from 'views/public/Home';
 import CustomerData from 'views/public/CustomerData';
 import CustomerInfo from 'views/public/CustomerInfo';
 import PublicProducts from 'views/public/Products';
-import ViewOrder from 'views/public/ViewOrder';
-import VirtualMall from 'views/public/VirtualMall';
+import VirtualMall, { MallOrderEditor } from 'views/public/VirtualMall';
 
 const routes: RoutesType[] = [
   {
@@ -80,13 +79,6 @@ const routes: RoutesType[] = [
     layout: '/customer',
     path: '/products',
     component: PublicProducts,
-    secondary: true,
-  },
-  {
-    name: 'Ver pedido',
-    layout: '/customer',
-    path: '/view-order',
-    component: ViewOrder,
     secondary: true,
   },
 
@@ -171,6 +163,7 @@ const routes: RoutesType[] = [
     secondary: true,
     roles: ['admin'],
   },
+  { name: 'Orden de la vista pública', layout: '/admin', path: '/sponsor/order', component: MallOrderEditor, secondary: true, fullLayout: true, roles: ['admin'] },
   { name: 'Categorías de comercios', layout: '/admin', path: '/sponsor/categories', component: BusinessCategoriesPage, secondary: true, fullLayout: true, roles: ['admin'] },
   // PRODUCTS
   {

@@ -1,3 +1,5 @@
+import { UlaContainer } from 'components/brand/UlaResources';
+import { MdShoppingCart } from 'react-icons/md';
 import { Alert, AlertIcon, Badge, Box, Button, Checkbox, Divider, Flex, IconButton, Input, Select, SimpleGrid, Stack, Text, Textarea } from '@chakra-ui/react';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import DeliveryAddressField, { DeliveryLocationValue } from 'components/form/DeliveryAddressField';
@@ -182,10 +184,13 @@ export default function Products() {
           <Box p={{ base: '12px', md: '16px' }} border="1px solid" borderColor="gray.200" borderRadius="18px" bg="gray.50">
             <Stack spacing="14px">
               <Flex justify="space-between" align={{ base: 'flex-start', md: 'center' }} gap="10px" direction={{ base: 'column', md: 'row' }}>
-                <Box>
-                  <Text fontWeight="900" fontSize={{ base: 'lg', md: 'xl' }}>Productos del pedido</Text>
-                  <Text color="gray.500" fontSize="sm">Agregá uno o varios productos antes de confirmar.</Text>
-                </Box>
+                <Flex align="center" gap={3}>
+                  <UlaContainer aria-hidden="true"><MdShoppingCart size={21} /></UlaContainer>
+                  <Box>
+                    <Text fontWeight="900" fontSize={{ base: 'lg', md: 'xl' }}>Productos del pedido</Text>
+                    <Text color="gray.500" fontSize="sm">Agregá uno o varios productos antes de confirmar.</Text>
+                  </Box>
+                </Flex>
                 <Badge colorScheme={items.length ? 'green' : 'gray'} px="10px" py="6px" borderRadius="full">{items.length} producto(s)</Badge>
               </Flex>
               <SimpleGrid columns={{ base: 1, lg: 3 }} spacing="12px">
@@ -249,7 +254,7 @@ export default function Products() {
       }
       <MallPreview compact />
       <Box h={{ base: '8px', md: '12px' }} />
-      {showModal && <OkModal message="Pedido creado correctamente. Guardá el código para consultar su estado." code={createdOrderCode} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/customer/view-order'); }} />}
+      {showModal && <OkModal message="Pedido creado correctamente. Guardá el código como referencia." code={createdOrderCode} isOpen={showModal} onClose={() => { setShowModal(false); history.push('/'); }} />}
     </PublicPage>
   );
 }

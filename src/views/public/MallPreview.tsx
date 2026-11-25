@@ -7,6 +7,7 @@ import { Link as RLink, useLocation } from 'react-router-dom';
 import { MdExplore, MdStorefront } from 'react-icons/md';
 import SponsorItem from 'interfaces/SponsorItem';
 import SponsorService from 'services/SponsorService';
+import useInteractiveCarousel from 'hooks/useInteractiveCarousel';
 
 let cachedBusinesses: SponsorItem[] | undefined;
 let businessesRequest: Promise<SponsorItem[]> | undefined;
@@ -38,10 +39,6 @@ const ctaPulse = keyframes`
   0%, 100% { box-shadow: 0 12px 28px rgba(250, 204, 21, .28), 0 0 0 0 rgba(253, 224, 71, .35); }
   50% { box-shadow: 0 16px 34px rgba(250, 204, 21, .42), 0 0 0 8px rgba(253, 224, 71, 0); }
 `;
-const marquee = keyframes`
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-`;
 type MallPreviewProps = { compact?: boolean; embedded?: boolean };
 
 export default function MallPreview({ compact = false, embedded = false }: MallPreviewProps) {
@@ -50,8 +47,6 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
   const [businesses, setBusinesses] = useState<SponsorItem[]>(cachedBusinesses || []);
   const [loading, setLoading] = useState(!cachedBusinesses);
   const [selectedBusinessKey, setSelectedBusinessKey] = useState('');
-  const [hovering, setHovering] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const retry = useCallback(() => { setError(false); setLoading(true); setAttempt(value => value + 1); }, []);
@@ -68,25 +63,23 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
 
   const previewBusinesses = businesses;
   const moving = businesses.length > 3 && !prefersReducedMotion;
+  const carousel = useInteractiveCarousel(Boolean(selectedBusinessKey), moving, moving);
   const cycleBusinesses = moving && businesses.length < 12
     ? Array.from({ length: Math.ceil(12 / businesses.length) }, () => businesses).flat()
     : businesses;
-  const originLabels: Record<string, string> = {
-    '/': 'Volver al inicio', '/customer/data': 'Volver a verificación', '/customer/info': 'Volver al cliente',
-    '/customer/products': 'Volver al pedido', '/customer/view-order': 'Volver a consultar pedido',
-  };
-  const mallDestination = { pathname: '/mall', state: { from: location.pathname, fromLabel: originLabels[location.pathname] || 'Volver' } };
+  const origin = ['/portfolio', '/customer/data', '/customer/info', '/customer/products'].includes(location.pathname) ? location.pathname : '';
+  const mallDestination = origin ? '/mall?desde=' + encodeURIComponent(origin) : '/mall';
   const secondaryWindow = compact ? { target: '_blank', rel: 'noopener noreferrer' } : {};
   const toggleBusiness = (key: string) => setSelectedBusinessKey((current) => current === key ? '' : key);
 
   return (
-    <Box as={embedded ? 'div' : 'section'} aria-label={embedded ? 'Negocios de Acosta' : undefined} aria-labelledby={embedded ? undefined : 'mall-preview-title'} position="relative" overflow="hidden" borderRadius={embedded ? '0' : { base: '22px', md: '28px' }} bg={embedded ? 'linear-gradient(0deg, #EEF3FF, rgba(238,243,255,.7))' : 'linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)'} color={embedded ? '#172554' : 'white'} p={{ base: '16px', md: compact ? '18px' : '24px' }} pt={embedded ? '0' : undefined} boxShadow={embedded ? 'none' : '0 16px 38px rgba(15, 23, 42, .16)'} border={embedded ? 'none' : '1px solid'} borderColor="whiteAlpha.200">
+    <Box as={embedded ? 'div' : 'section'} aria-label={embedded ? 'Negocios de Acosta y alrededores' : undefined} aria-labelledby={embedded ? undefined : 'mall-preview-title'} position="relative" overflow="hidden" borderRadius={embedded ? '0' : { base: '22px', md: '28px' }} bg={embedded ? 'linear-gradient(0deg, #F6F4FF, #E8E3FF)' : 'linear-gradient(128deg, #111936 0%, #222B64 58%, #3730A3 100%)'} color={embedded ? 'navy.900' : 'white'} p={{ base: '16px', md: compact ? '18px' : '24px' }} pt={embedded ? '0' : undefined} boxShadow={embedded ? 'none' : '0 16px 38px rgba(15, 23, 42, .16)'} border={embedded ? 'none' : '1px solid'} borderColor="whiteAlpha.200">
       <Box display={embedded ? 'none' : 'block'} position="absolute" inset="0" opacity=".18" pointerEvents="none" bgImage="radial-gradient(circle at 25% 25%, #fff 0 1px, transparent 1.5px)" bgSize="54px 54px" />
       {!embedded && <Flex position="relative" align={{ base: 'flex-start', md: 'center' }} justify="space-between" gap="14px" direction={{ base: 'column', md: 'row' }} mb={{ base: '18px', md: '20px' }}>
         <Flex gap="12px" align="center">
           <Flex w={{ base: '42px', md: '48px' }} h={{ base: '42px', md: '48px' }} flex="0 0 auto" borderRadius="16px" align="center" justify="center" bg="whiteAlpha.100" border="1px solid" borderColor="whiteAlpha.300" fontSize={{ base: '23px', md: '27px' }}>🧑‍🚀</Flex>
           <Stack spacing="2px">
-            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de Acosta</Heading>
+            <Heading id="mall-preview-title" fontSize={{ base: 'lg', md: compact ? 'xl' : '2xl' }}>Negocios de Acosta y alrededores</Heading>
             {!compact && <Text color="whiteAlpha.700" fontSize="sm">Seleccione un negocio y contáctelo directamente.</Text>}
           </Stack>
         </Flex>
@@ -105,8 +98,9 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
         <Icon as={MdStorefront} boxSize="28px" /><Text fontSize="sm">Aún no hay negocios publicados.</Text>
       </Flex>}
       {!loading && !error && previewBusinesses.length > 0 && <Box position="relative" mx={{ base: '-16px', md: compact ? '-18px' : '-24px' }}>
-        <Box role="region" aria-label="Carrusel de negocios" aria-roledescription="carrusel" overflowX={prefersReducedMotion ? "auto" : "hidden"} sx={{ containerType: "inline-size", scrollbarWidth: "none", '&::-webkit-scrollbar': { display: 'none' } }} onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setFocused(false); }}>
-          <Flex w="max-content" py="6px" animation={moving ? `${marquee} ${cycleBusinesses.length * 6}s linear infinite` : undefined} sx={{ animationPlayState: selectedBusinessKey || hovering || focused ? 'paused' : 'running' }}>
+        <Box {...carousel} role="region" aria-label="Carrusel de negocios" aria-roledescription="carrusel"
+          overflowX="auto" sx={{ touchAction: 'pan-y', userSelect: 'none', containerType: 'inline-size', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+          <Flex w="max-content" py="6px">
             {(moving ? [0, 1] : [0]).map(copy => <Flex key={copy} gap={{ base: '8px', md: '14px' }} pr={{ base: '8px', md: '14px' }} flexShrink={0}>
             {cycleBusinesses.map((business, index) => {
               const selected = selectedBusinessKey === business.id;
@@ -116,7 +110,7 @@ export default function MallPreview({ compact = false, embedded = false }: MallP
                 bg="white" color="navy.900" border="2px solid" borderColor={selected ? 'brand.500' : 'transparent'} borderRadius="14px" boxShadow="0 3px 10px rgba(15,23,42,.06)"
                 _hover={{ borderColor: 'brand.200' }} _focusVisible={{ outline: '3px solid', outlineColor: 'brand.400', outlineOffset: '2px' }}>
                 <Flex w="100%" h={{ base: '56px', md: '76px' }} flexShrink={0} align="center" justify="center">
-                  {business.logoUrl ? <Image src={business.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="36px" color="brand.500" />}
+                  {business.logoUrl ? <Image src={business.logoUrl} alt="" draggable={false} w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} boxSize="36px" color="brand.500" />}
                 </Flex>
                 <Text w="100%" minH="32px" fontWeight="700" fontSize={{ base: '12px', md: 'sm' }} noOfLines={2} lineHeight="1.35" overflowWrap="normal" wordBreak="normal">{business.name || 'Negocio local'}</Text>
               </Flex>;
