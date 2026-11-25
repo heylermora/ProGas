@@ -40,7 +40,10 @@ export default function useInteractiveCarousel(paused: boolean, enabled: boolean
   return {
     ref: viewport,
     onPointerEnter: (event: React.PointerEvent<HTMLDivElement>) => { if (event.pointerType === 'mouse') setHovering(true); },
-    onPointerLeave: () => setHovering(false),
+    onPointerLeave: () => {
+      setHovering(false);
+      if (!drag.current?.moved) release();
+    },
     onFocusCapture: (event: React.FocusEvent<HTMLDivElement>) => setFocused((event.target as HTMLElement).matches(':focus-visible')),
     onBlurCapture: (event: React.FocusEvent<HTMLDivElement>) => {
       if (!event.currentTarget.contains(event.relatedTarget as Node)) setFocused(false);

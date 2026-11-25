@@ -2,6 +2,18 @@
 
 Reglas de versiones y publicación: [VERSIONAMIENTO.md](VERSIONAMIENTO.md).
 
+## [1.4.0] — Pendiente de publicación
+
+### Agregado
+
+- Exportación de comercios y categorías filtrados a CSV, PDF y Excel con columnas configurables.
+- Editor del orden del mapa público para categorías generales, específicas y comercios.
+- Formulario público de promoción y revisión administrativa de solicitudes. El flujo requiere las nuevas reglas de Firestore.
+
+### Cambiado
+
+- La barra superior concentra el regreso por niveles del centro comercial. Se retiró el acceso público a «Ver pedido».
+
 ## [1.3.1] — Pendiente de publicación
 
 ### Corregido

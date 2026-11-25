@@ -38,6 +38,42 @@ service cloud.firestore {
         && request.resource.data.name.trim().size() > 0;
       allow delete: if hasRole('admin');
     }
+    match /PromotionRequests/{documentId} {
+      function isSponsorDraft(sponsor) {
+        let social = sponsor.socialLinks;
+        return sponsor.keys().hasOnly(['name', 'category', 'categories', 'categoryId', 'categoryIds',
+          'active', 'order', 'logoUrl', 'videoUrl', 'links', 'socialLinks', 'description', 'coordinates', 'mapsUrl',
+          'wazeUrl', 'directions'])
+          && sponsor.name is string && sponsor.name.trim().size() > 0 && sponsor.name.size() <= 200
+          && sponsor.category is string && sponsor.category.size() <= 200
+          && sponsor.get('categories', []) is list && sponsor.get('categories', []).size() <= 100
+          && sponsor.get('categoryId', '') == '' && sponsor.get('categoryIds', []) == []
+          && sponsor.active == true && sponsor.order == 1 && sponsor.links == []
+          && sponsor.logoUrl is string && sponsor.logoUrl.size() <= 415000
+          && (sponsor.logoUrl == '' || sponsor.logoUrl.matches('^data:image/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$'))
+          && sponsor.videoUrl is string && sponsor.videoUrl.size() <= 2048
+          && sponsor.description is string && sponsor.description.size() <= 4000
+          && sponsor.coordinates is string && sponsor.coordinates.size() <= 128
+          && sponsor.mapsUrl is string && sponsor.mapsUrl.size() <= 2048
+          && sponsor.wazeUrl is string && sponsor.wazeUrl.size() <= 2048
+          && sponsor.directions is string && sponsor.directions.size() <= 4000
+          && social is map && social.keys().hasOnly(['whatsapp', 'facebook', 'instagram', 'tiktok', 'website', 'email'])
+          && social.get('whatsapp', '') is string && social.get('whatsapp', '').size() <= 2048
+          && social.get('facebook', '') is string && social.get('facebook', '').size() <= 2048
+          && social.get('instagram', '') is string && social.get('instagram', '').size() <= 2048
+          && social.get('tiktok', '') is string && social.get('tiktok', '').size() <= 2048
+          && social.get('website', '') is string && social.get('website', '').size() <= 2048
+          && social.get('email', '') is string && social.get('email', '').size() <= 254;
+      }
+      allow create: if request.resource.data.keys().hasOnly(['sponsor', 'contactPhone', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.contactPhone is string
+        && request.resource.data.contactPhone.matches('^[0-9]{8}$')
+        && request.resource.data.sponsor is map
+        && isSponsorDraft(request.resource.data.sponsor);
+      allow read, update: if hasRole('admin');
+    }
     match /CategorySettings/{documentId} {
       allow read: if true;
       allow write: if hasRole('admin');

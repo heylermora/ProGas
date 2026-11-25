@@ -14,20 +14,24 @@ import PageHeader from 'components/layout/PageHeader';
 import DeleteModal from 'components/modal/DeleteModal';
 import { usePageSearch } from 'contexts/PageSearchContext';
 import useCategories from 'hooks/useCategories';
-import SponsorItem, { DEFAULT_BUSINESS_CATEGORY } from 'interfaces/SponsorItem';
+import SponsorItem from 'interfaces/SponsorItem';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { MdAdd, MdDelete, MdDragIndicator, MdEdit, MdSettings, MdStorefront, MdTune, MdVisibility } from 'react-icons/md';
+import { MdAdd, MdDelete, MdEdit, MdSettings, MdStorefront, MdTune, MdVisibility } from 'react-icons/md';
 import { Link as RLink } from 'react-router-dom';
 import SponsorService from 'services/SponsorService';
+import TableExport from 'components/dataDisplay/TableExport';
+import PromotionRequests from './PromotionRequests';
+import { sponsorLinks } from 'utils/sponsor';
+
+const columns = ['Negocio', 'Categorías', 'Estado', 'Descripción', 'Contacto y redes', 'Ubicación', 'Google Maps', 'Waze', 'Indicaciones', 'Video'];
+
 
 export default function SponsorsAdmin() {
   const { query } = usePageSearch();
   const { categories } = useCategories('sponsors');
   const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
-  const [draggedSponsorId, setDraggedSponsorId] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
-  const [savingOrder, setSavingOrder] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<SponsorItem | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [deleting, setDeleting] = useState(false);
@@ -52,13 +56,19 @@ export default function SponsorsAdmin() {
   }), {}), [availableCategories, sponsors]);
 
   const searchTerm = query.trim().toLocaleLowerCase('es');
-  const currentBusinesses = [...(sponsorsByCategory[selectedCategory] || [])]
-    .sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-  const matchesSearch = (sponsor: SponsorItem) => [sponsor.name, sponsor.description, ...sponsorCategories(sponsor)]
-    .some((value) => String(value || '').toLocaleLowerCase('es').includes(searchTerm));
-  const visibleBusinesses = searchTerm
-    ? sponsors.filter(matchesSearch).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.order - b.order)
-    : currentBusinesses;
+  const visibleBusinesses = (selectedCategory ? sponsorsByCategory[selectedCategory] || [] : sponsors)
+    .filter(sponsor => !searchTerm || [sponsor.name, sponsor.description, ...sponsorCategories(sponsor)]
+      .some(value => String(value || '').toLocaleLowerCase('es').includes(searchTerm)));
+  const exportRows = (split: boolean) => visibleBusinesses.flatMap(sponsor => {
+    const categories = sponsorCategories(sponsor);
+    const cells = [
+      sponsor.active ? 'Visible' : 'Oculto', sponsor.description || '', sponsorLinks(sponsor).join(' | '),
+      sponsor.coordinates || '', sponsor.mapsUrl || '', sponsor.wazeUrl || '', sponsor.directions || '',
+      sponsor.videoUrl?.startsWith('data:') ? 'Video adjunto' : sponsor.videoUrl || '',
+    ];
+    const categoryCells = split && categories.length ? categories : [categories.join(' | ')];
+    return categoryCells.map(category => [sponsor.name, category, ...cells]);
+  });
   const activeCount = sponsors.filter((sponsor) => sponsor.active !== false).length;
   const categoriesInUse = availableCategories.filter((category) => sponsorsByCategory[category]?.length).length;
 
@@ -90,37 +100,17 @@ export default function SponsorsAdmin() {
     finally { setDeleting(false); }
   };
 
-  const reorderSponsors = async (targetIndex: number, sponsorId = draggedSponsorId) => {
-    if (!sponsorId || savingOrder || searchTerm) return;
-    const fromIndex = currentBusinesses.findIndex((sponsor) => sponsor.id === sponsorId);
-    if (fromIndex < 0 || fromIndex === targetIndex) return;
-    const nextSponsors = [...currentBusinesses];
-    const [moved] = nextSponsors.splice(fromIndex, 1);
-    nextSponsors.splice(Math.max(0, Math.min(targetIndex, nextSponsors.length)), 0, moved);
-    const ordered = nextSponsors.map((sponsor, index) => ({ ...sponsor, order: index + 1 }));
-    if (ordered.some(sponsor => !normalizeBusinessName(sponsor.name))) {
-      toast({ status: 'error', title: 'Hay negocios sin nombre', description: 'Complete sus nombres en Editar antes de guardar el orden de esta categoría.' });
-      return;
-    }
-    setSavingOrder(true);
-    setSponsors(items => items.map(item => ordered.find(updated => updated.id === item.id) || item));
-    try {
-      await Promise.all(ordered.map((sponsor) => SponsorService.edit(sponsor.id, sponsor)));
-    } catch {
-      toast({ status: 'error', title: 'No se pudo guardar el nuevo orden' });
-      await load();
-    } finally {
-      setDraggedSponsorId('');
-      setSavingOrder(false);
-    }
-  };
-
   return (
     <Box pt={{ base: '120px', md: '80px' }} pb="32px">
       <PageHeader
         title="Patrocinadores"
         description="Administrá la visibilidad y el orden de los comercios publicados."
-        action={<Button as={RLink} to="/admin/sponsor/new" leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full">Nuevo patrocinador</Button>}
+        action={<Flex gap={2} wrap="wrap">
+          <Button as={RLink} to="/admin/sponsor/new" leftIcon={<MdAdd />} colorScheme="brand" borderRadius="full">Nuevo patrocinador</Button>
+          <PromotionRequests />
+          <TableExport filename="Comercios" columns={columns} matched={visibleBusinesses.length} rows={exportRows} categoryOptions disabled={loading}
+            scope={`${selectedCategory ? 'Categoría ' + selectedCategory : 'Todas las categorías'}${searchTerm ? ' · Búsqueda «' + query.trim() + '»' : ''}`} />
+        </Flex>}
       />
 
       <SimpleGrid columns={{ base: 1, sm: 3 }} spacing="12px" mb="18px">
@@ -133,8 +123,8 @@ export default function SponsorsAdmin() {
 
       <Card p={{ base: '16px', md: '20px' }} mb="18px">
         <Flex align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" direction={{ base: 'column', md: 'row' }} gap="14px">
-          <Box flex="1" maxW={{ md: '520px' }}><Text fontWeight="900" color={textColor}>Filtrar por categoría</Text><Text color={muted} fontSize="sm" mb="9px">Seleccioná una categoría; el buscador superior filtra por nombre y descripción.</Text><Select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} size="lg" borderRadius="xl">{availableCategories.map((category) => <option key={category} value={category}>{category} · {sponsorsByCategory[category]?.length || 0}</option>)}</Select></Box>
-          <HStack wrap="wrap"><Button variant="outline" leftIcon={<MdSettings />} as={RLink} to="/admin/sponsor/categories">Administrar categorías</Button>{savingOrder && <Badge colorScheme="brand">Guardando orden…</Badge>}{searchTerm && <Badge colorScheme="orange">Reordenamiento pausado</Badge>}</HStack>
+          <Box flex="1" maxW={{ md: '520px' }}><Text fontWeight="900" color={textColor}>Filtrar por categoría</Text><Text color={muted} fontSize="sm" mb="9px">La categoría y la búsqueda superior se aplican juntas.</Text><Select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} size="lg" borderRadius="xl"><option value="">Todas las categorías</option>{availableCategories.map((category) => <option key={category} value={category}>{category} · {sponsorsByCategory[category]?.length || 0}</option>)}</Select></Box>
+          <HStack wrap="wrap"><Button variant="outline" leftIcon={<MdSettings />} as={RLink} to="/admin/sponsor/categories">Administrar categorías</Button><Button variant="outline" as={RLink} to="/admin/sponsor/order">Orden de la vista pública</Button></HStack>
         </Flex>
       </Card>
 
@@ -142,15 +132,12 @@ export default function SponsorsAdmin() {
         <EmptyState icon={MdStorefront} title={searchTerm ? 'No hay coincidencias' : 'Esta categoría está vacía'} description={searchTerm ? 'Probá con otro nombre o limpiá la búsqueda superior.' : 'Usá “Nuevo patrocinador” para agregar el primero a esta categoría.'} />
       ) : (
         <Stack spacing="10px" mb="18px">
-          {visibleBusinesses.map((sponsor) => {
-            const categoryBusinesses = [...(sponsorsByCategory[searchTerm ? sponsor.category : selectedCategory] || [])].sort((a, b) => a.order - b.order || (a.name || '').localeCompare(b.name || ''));
-            const position = categoryBusinesses.findIndex((item) => item.id === sponsor.id);
-            return <Card key={sponsor.id} p={{ base: '14px', md: '16px' }} draggable={!searchTerm} cursor={!searchTerm ? 'grab' : 'default'} onDragStart={(event) => { event.dataTransfer.setData('text/plain', sponsor.id); setDraggedSponsorId(sponsor.id); }} onDragOver={(event) => { if (!searchTerm) event.preventDefault(); }} onDrop={(event) => { if (!searchTerm) { event.preventDefault(); reorderSponsors(position, event.dataTransfer.getData('text/plain') || draggedSponsorId); } }}>
+          {visibleBusinesses.map(sponsor => (
+            <Card key={sponsor.id} p={{ base: '14px', md: '16px' }}>
               <Flex align={{ base: 'flex-start', md: 'center' }} gap="14px" direction={{ base: 'column', md: 'row' }}>
                 <HStack flex="1" minW="0" align="center" spacing="12px">
-                  <Center color={muted} flexShrink={0}><MdDragIndicator size="22px" /></Center>
                   <Center boxSize="58px" borderRadius="14px" bg={subtleBg} overflow="hidden" flexShrink={0}>{sponsor.logoUrl ? <Image src={sponsor.logoUrl} alt="" w="100%" h="100%" objectFit="contain" /> : <Icon as={MdStorefront} color="gray.300" boxSize="26px" />}</Center>
-                  <Box minW="0"><HStack flexWrap="wrap"><Text fontWeight="800" color={textColor} noOfLines={1}>{sponsor.name || 'Sin nombre'}</Text><Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Visible' : 'Oculto'}</Badge>{sponsorCategories(sponsor).map(category => <Badge key={category} colorScheme="purple">{category}</Badge>)}</HStack><Text color={muted} fontSize="sm" noOfLines={1}>{sponsor.description || 'Sin descripción'}</Text><Text color={muted} fontSize="xs" mt="2px">Posición {position + 1}</Text></Box>
+                  <Box minW="0"><HStack flexWrap="wrap"><Text fontWeight="800" color={textColor} noOfLines={1}>{sponsor.name || 'Sin nombre'}</Text><Badge colorScheme={sponsor.active ? 'green' : 'gray'}>{sponsor.active ? 'Visible' : 'Oculto'}</Badge>{sponsorCategories(sponsor).map(category => <Badge key={category} colorScheme="purple">{category}</Badge>)}</HStack><Text color={muted} fontSize="sm" noOfLines={1}>{sponsor.description || 'Sin descripción'}</Text></Box>
                 </HStack>
                 <HStack alignSelf={{ base: 'stretch', md: 'center' }} justify={{ base: 'space-between', md: 'flex-end' }}>
                   <FormField display="flex" alignItems="center" w="auto" label={<>Visible</>}><Switch aria-label={`Visibilidad de ${sponsor.name || 'patrocinador'}`} isChecked={sponsor.active} onChange={() => toggleActive(sponsor)} /></FormField>
@@ -158,8 +145,8 @@ export default function SponsorsAdmin() {
                   <Button size="sm" variant="ghost" colorScheme="red" leftIcon={<MdDelete />} onClick={() => requestDelete(sponsor)}>Eliminar</Button>
                 </HStack>
               </Flex>
-            </Card>;
-          })}
+            </Card>
+          ))}
         </Stack>
       )}
 

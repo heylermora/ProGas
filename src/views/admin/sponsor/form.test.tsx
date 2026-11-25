@@ -138,3 +138,20 @@ it('preserves every saved category when editing only the name', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Guardar patrocinador' }));
   await waitFor(() => expect(SponsorService.edit).toHaveBeenCalledWith('one', expect.objectContaining({ name: 'Nuevo nombre', categories: ['Otros', 'Tiendas'], categoryIds: ['other-id', 'shop-id'] })));
 });
+
+it('requires a contact phone and sends the public form to the review queue', async () => {
+  const service = (await import('services/PromotionService')).default;
+  jest.spyOn(service, 'newId').mockReturnValue('request-1');
+  const submit = jest.spyOn(service, 'submit').mockResolvedValue(undefined);
+  render(<ChakraProvider><MemoryRouter><SponsorForm publicSubmission /></MemoryRouter></ChakraProvider>);
+  fireEvent.change(screen.getByLabelText(/Nombre del negocio/), { target: { value: 'Comercio nuevo' } });
+  fireEvent.submit(screen.getByRole('form', { name: 'Quiero promocionar mi negocio' }));
+  expect(await screen.findByText('Ingrese un teléfono de Costa Rica de 8 dígitos.')).toBeTruthy();
+  expect(submit).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText(/Teléfono de contacto/), { target: { value: '8888-7777' } });
+  fireEvent.submit(screen.getByRole('form', { name: 'Quiero promocionar mi negocio' }));
+  expect(await screen.findByText(/Está en revisión para aprobación/)).toBeTruthy();
+  expect(submit).toHaveBeenCalledWith('request-1', expect.objectContaining({ name: 'Comercio nuevo', links: [] }), '88887777');
+  expect(SponsorService.create).not.toHaveBeenCalled();
+  jest.restoreAllMocks();
+});

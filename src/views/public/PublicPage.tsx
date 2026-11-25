@@ -8,16 +8,19 @@ type PublicPageProps = {
   title?: string;
   description?: string;
   maxW?: string;
+  onBack?: () => void;
+  backLabel?: string;
+  embedded?: boolean;
   children: React.ReactNode;
 };
 
-export function PublicPage({ title, description, maxW = '1200px', children }: PublicPageProps) {
+export function PublicPage({ title, description, maxW = '1200px', onBack, backLabel, embedded, children }: PublicPageProps) {
   const bg = useColorModeValue('gray.50', 'navy.900');
 
   return (
-    <Box bg={bg} minH="100vh" py={{ base: '20px', md: '32px' }}>
+    <Box bg={bg} minH={embedded ? undefined : "100vh"} py={{ base: '20px', md: '32px' }}>
       <Container maxW={maxW} px={{ base: '16px', sm: '20px', lg: '24px' }}>
-        <PublicHeader />
+        {(!embedded || onBack) && <PublicHeader onBack={onBack} backLabel={backLabel} />}
         {(title || description) && (
           <Stack spacing={{ base: '8px', md: '10px' }} mb={{ base: '20px', md: '28px' }}>
             {title && <Heading fontSize={{ base: '28px', md: '36px' }}>{title}</Heading>}
@@ -25,7 +28,7 @@ export function PublicPage({ title, description, maxW = '1200px', children }: Pu
           </Stack>
         )}
         {children}
-        <PublicFooter />
+        {!embedded && <PublicFooter />}
       </Container>
     </Box>
   );

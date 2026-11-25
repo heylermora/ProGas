@@ -1,8 +1,6 @@
-import { SocialContact } from 'components/social/SocialLink';
-import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 
-const promotionMessage = 'Hola, Gas Memo. Tengo un negocio en Acosta y quiero promocionarlo en su directorio. ¿Me pueden compartir qué incluye la publicación, los costos y cómo participar?';
-const promotionUrl = `https://wa.me/50683978524?text=${encodeURIComponent(promotionMessage)}`;
+import { Link } from 'react-router-dom';
 
 export default function BusinessPromotion() {
   return (
@@ -11,9 +9,9 @@ export default function BusinessPromotion() {
         justify="space-between" gap={3} maxW="940px" mx="auto">
         <Box minW="0">
           <Heading as="h2" fontSize="md" color="#172554" lineHeight="1.4">Su negocio también puede estar aquí.</Heading>
-          <Text fontSize="sm" color="#475569" mt={1}>Consulte con Gas Memo cómo promocionarlo en Acosta.</Text>
+          <Text fontSize="sm" color="#475569" mt={1}>Enviá una solicitud para aparecer en el directorio de comercios de Acosta.</Text>
         </Box>
-        <SocialContact href={promotionUrl} caption="Quiero promocionar mi negocio" />
+        <Button as={Link} to="/promocionar-negocio" colorScheme="brand">Quiero promocionar mi negocio</Button>
       </Flex>
     </Box>
   );

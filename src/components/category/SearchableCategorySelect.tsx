@@ -9,9 +9,10 @@ type Props = {
   value: string;
   onChange: (category: string) => void;
   id?: string;
+  preserveOrder?: boolean;
 };
 
-export default function SearchableCategorySelect({ categories, value, onChange, id = 'business-category' }: Props) {
+export default function SearchableCategorySelect({ categories, value, onChange, id = 'business-category', preserveOrder }: Props) {
   const [query, setQuery] = useState('');
   const background = useColorModeValue('#FFFFFF', '#111C44');
   const text = useColorModeValue('#1B2559', '#FFFFFF');
@@ -20,8 +21,8 @@ export default function SearchableCategorySelect({ categories, value, onChange, 
   const muted = useColorModeValue('#64748B', '#A0AEC0');
   const options = useMemo(() => [
     { value: '', label: 'Todas las categorías' },
-    ...sortCategories(categories).map((category) => ({ value: category, label: category })),
-  ], [categories]);
+    ...(preserveOrder ? categories : sortCategories(categories)).map((category) => ({ value: category, label: category })),
+  ], [categories, preserveOrder]);
   const styles: StylesConfig<CategoryOption, false> = {
     control: (base, state) => ({ ...base, backgroundColor: background, borderColor: state.isFocused ? '#5930E8' : border,
       minHeight: 48, borderRadius: 14, boxShadow: state.isFocused ? '0 0 0 2px rgba(89,48,232,.2)' : 'none',

@@ -19,6 +19,13 @@ describe('PublicHeader', () => {
     expect(view.length).toBe(1);
   });
 
+  it('shows only Home at the mall entry and removes the public order shortcut', () => {
+    renderHeader('/mall');
+    expect(screen.queryByRole('button', { name: /volver/i })).toBeNull();
+    expect(screen.queryByRole('link', { name: /ver pedido/i })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Ir al inicio' }).getAttribute('href')).toBe('/');
+  });
+
   it('uses the origin supplied by the mall preview', () => {
     const view = renderHeader('/mall', { from: '/customer/products', fromLabel: 'Volver al pedido' });
     fireEvent.click(screen.getByRole('button', { name: 'Volver' }));

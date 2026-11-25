@@ -1,6 +1,7 @@
 import { sponsorCategories } from 'utils/sponsorCategories';
 import { Badge, Box, Button, Flex, Heading, HStack, Input, Select, SimpleGrid, Stack, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useColorModeValue, useToast } from '@chakra-ui/react';
 import Card from 'components/card/Card';
+import TableExport from 'components/dataDisplay/TableExport';
 import AsyncContent from 'components/dataDisplay/AsyncContent';
 import EmptyState from 'components/dataDisplay/EmptyState';
 import FormField from 'components/form/FormField';
@@ -14,7 +15,9 @@ import { Prompt } from 'react-router-dom';
 import CategoryService, { CategoryInUseError } from 'services/CategoryService';
 import SponsorService from 'services/SponsorService';
 import { categoryId, compareCategories, completeCatalog, findCategory, renameCategory, sortCategories } from 'utils/categories';
-import { BusinessCategorySettings, completeBusinessSettings } from 'utils/businessCategories';
+import { BusinessCategoryGroup, BusinessCategorySettings, completeBusinessSettings } from 'utils/businessCategories';
+
+const exportColumns = ['Nombre', 'Nivel', 'Categoría general', 'Ícono'];
 
 type Editor = { level: 'general' | 'specific'; original?: string; name: string; icon: string; parent: string };
 export default function BusinessCategoriesPage() {
@@ -115,6 +118,12 @@ export default function BusinessCategoriesPage() {
     catch (error) { toast({ status: error instanceof CategoryInUseError ? 'warning' : 'error', title: error instanceof CategoryInUseError ? error.message : 'No se pudieron guardar las categorías', description: 'Tus cambios siguen disponibles. Volvé a intentar.' }); }
     finally { setSaving(false); }
   };
+  const currentGroup = settings.groups[tab];
+  const rowsFor = (groups: BusinessCategoryGroup[]) => groups.flatMap(group => [
+    [group.name, 'General', '', group.icon],
+    ...group.categories.map(category => [category, 'Específica', group.name, settings.icons[category] || '']),
+  ]).sort((a, b) => compareCategories(a[0], b[0]));
+  const exportRows = rowsFor(currentGroup ? [currentGroup] : []);
   return <Box pt={{ base: '120px', md: '80px' }} pb="32px" minW={0}>
     <Prompt when={dirty} message="Tenés cambios sin guardar. ¿Querés salir de esta página?" />
     <FormPageHeader title="Categorías de comercios" description="Organizá las categorías específicas dentro de cada general y elegí sus íconos." back="/admin/sponsor/index" status={dirty ? <Badge colorScheme="orange">Cambios sin guardar</Badge> : undefined} />
@@ -122,7 +131,9 @@ export default function BusinessCategoriesPage() {
       <Stack spacing={5}>
         <Flex justify="space-between" align={{ base: 'stretch', md: 'center' }} direction={{ base: 'column', md: 'row' }} gap={3}>
           <Box><Heading size="md">Categorías generales</Heading><Text fontSize="sm" color={muted} mt={1}>Seleccioná una pestaña para ver sus categorías específicas.</Text></Box>
-          <Button leftIcon={<MdAdd />} variant="outline" flexShrink={0} whiteSpace="nowrap" isDisabled={saving || checking || pendingDelete !== null} onClick={() => openEditor({ level: 'general', name: '', icon: '🏪', parent: '' })}>Nueva general</Button>
+          <Flex gap={2} wrap="wrap"><TableExport filename="Categorías" columns={exportColumns}
+            matched={exportRows.length} rows={() => exportRows} allRows={rowsFor(settings.groups)} scope={currentGroup ? 'Pestaña «' + currentGroup.name + '»' : 'Sin categoría seleccionada'} />
+          <Button leftIcon={<MdAdd />} variant="outline" flexShrink={0} whiteSpace="nowrap" isDisabled={saving || checking || pendingDelete !== null} onClick={() => openEditor({ level: 'general', name: '', icon: '🏪', parent: '' })}>Nueva general</Button></Flex>
         </Flex>
         {settings.groups.length ? <Tabs index={tab} onChange={setTab} colorScheme="brand" isLazy minW={0}>
           <TabList overflowX="auto" overflowY="hidden" maxW="100%" pb={1}>
